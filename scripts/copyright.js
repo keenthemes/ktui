@@ -1,20 +1,21 @@
+#!/usr/bin/env node
 /**
  * Script to add copyright headers to JS, TS, and CSS files
- * Usage: node add-copyright-headers.js
+ * Usage: node copyright.js
  */
 const fs = require('fs');
 const path = require('path');
 
 // Read package.json to get the version
-const packageJsonPath = path.join(__dirname, 'package.json');
+const packageJsonPath = path.join(__dirname, '..', 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 const version = packageJson.version;
 
 // Configuration
-const SRC_DIR = path.join(__dirname, 'src');
+const SRC_DIR = path.join(__dirname, '..', 'src');
 const COPYRIGHT_HEADER = `/**
  * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
- * Copyright by Keenthemes Inc
+ * Copyright 2025 by Keenthemes Inc
  * @version: ${version}
  */
 `;
