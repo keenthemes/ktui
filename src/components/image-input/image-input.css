@@ -1,0 +1,51 @@
+@layer components {
+	.kt-image-input {
+		@apply relative inline-flex items-center justify-center size-20 cursor-pointer;
+
+		input[type=file] {
+			@apply appearance-none absolute size-0 opacity-0;
+		}
+	}
+
+	.kt-image-input-remove {
+		@apply cursor-pointer absolute z-[1] size-5 top-0.25 end-0.25 rounded-full bg-background flex items-center justify-center border border-border shadow-sm;
+
+		i {
+			@apply text-muted-foreground text-[11px];
+		}
+
+		svg {
+			@apply text-muted-foreground size-3.25;
+		}
+
+		&:hover {
+			i {
+				@apply text-foreground;
+			}
+
+			svg {
+				@apply text-foreground;
+			}
+		}
+	}
+
+	.kt-image-input-placeholder {
+		@apply relative overflow-hidden size-full bg-cover bg-no-repeat rounded-full border border-border kt-image-input-empty:border-border;
+	}
+
+	.kt-image-input-preview {
+		@apply relative overflow-hidden size-full bg-cover bg-no-repeat rounded-full;
+	}
+}
+
+@custom-variant kt-image-input-empty {
+	[data-kt-image-input-initialized].empty & {
+		@slot;
+	}
+}
+
+@custom-variant image-input-changed {
+	[data-kt-image-input-initialized].changed & {
+		@slot;
+	}
+}

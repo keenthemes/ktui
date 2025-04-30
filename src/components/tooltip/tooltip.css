@@ -1,0 +1,13 @@
+@layer components {
+  .kt-tooltip {
+    @apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] dark:border dark:border-border bg-mono text-mono-foreground text-xs p-1.5;
+
+		&:not(.show) {
+      @apply hidden;
+    }
+  }
+
+  .kt-tooltip-light {
+    @apply bg-popover text-popover-foreground border border-border;
+  }
+}

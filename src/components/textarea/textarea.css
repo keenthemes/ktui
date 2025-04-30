@@ -1,0 +1,30 @@
+/* Base Styles */
+@layer components {
+  /* Base */
+  .kt-textarea {
+    @apply w-full bg-background border border-input text-foreground shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] placeholder:text-muted-foreground/80;
+    @apply focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30;
+    @apply disabled:cursor-not-allowed disabled:opacity-50 [&[readonly]]:opacity-70 aria-invalid:border-destructive/60;
+    @apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
+  }
+
+  /* Size */
+  .kt-textarea {
+    @apply p-3 text-[0.8125rem] leading-(--text-sm--line-height) rounded-md;
+  }
+
+  .kt-textarea-lg {
+    @apply p-4 text-sm rounded-md;
+  }
+
+  .kt-textarea-sm {
+    @apply p-2.5 text-xs rounded-md;
+  }
+}
+
+/* Dark Mode Styles */
+@layer components {
+	.dark .kt-textarea {
+		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
+	}
+}

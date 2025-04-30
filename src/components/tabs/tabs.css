@@ -1,0 +1,33 @@
+@layer components {
+	.kt-tabs.kt-tabs-line {
+		@apply flex items-center gap-7 border-b border-border;
+	}
+	
+	.kt-tabs.kt-tabs-line .kt-tab-toggle {
+		@apply inline-flex items-center gap-2 py-2 font-medium border-b-2 border-b-transparent text-secondary-foreground hover:text-primary kt-tab-active:text-primary kt-tab-active:border-primary text-sm cursor-pointer;
+
+		svg {
+			@apply shrink-0 size-3.5 text-muted-foreground kt-tab-active:text-primary;
+		}
+
+		&:hover {
+			svg {
+				@apply text-primary;
+			}
+		}
+	}
+}
+
+@custom-variant kt-tab-active {
+	&[data-kt-tab-toggle].active {
+		@slot;
+	}
+	
+	[data-kt-tab-toggle].active & {
+		@slot;
+	}
+
+	[data-kt-tabs-initialized] [data-kt-dropdown-initialized]:has([data-kt-tab-toggle].active) & {
+		@slot;
+	}
+}

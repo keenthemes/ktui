@@ -1,0 +1,5 @@
+@custom-variant kt-dismiss {
+	&[data-kt-dismiss-initialized] {
+		@slot;
+	}
+}

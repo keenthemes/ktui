@@ -1,0 +1,46 @@
+/* Base Styles */
+@layer components {
+	/* Base */
+	.kt-radio {
+		@apply cursor-pointer appearance-none bg-no-repeat bg-center;
+		@apply rounded-full bg-background shrink-0 border border-input ring-offset-background focus-visible:outline-none;
+    @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10 dark:aria-invalid:border-destructive dark:aria-invalid:ring-destructive/20;
+	}
+
+	.kt-radio {
+		@apply [&:checked]:bg-primary [&:checked]:border-primary [&:checked]:text-primary-foreground [&:indeterminate]:bg-primary [&:indeterminate]:border-primary [&:indeterminate]:text-primary-foreground;
+	}
+
+	.kt-radio {
+		&:checked,
+		&[aria-checked="true"] {
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22' fill='none'%3E%3Ccircle cx='10.9995' cy='11' r='5.86667' fill='white'/%3E%3C/svg%3E");
+  	}
+	}
+	
+	/* Size */
+	.kt-radio {
+		@apply size-5;
+	}
+
+	.kt-radio-sm {
+		@apply size-4.5;
+	}
+
+	.kt-radio-lg {
+		@apply size-5.5;
+	}
+
+	/* Mono */
+	.kt-radio-mono {
+		@apply [&:checked]:bg-mono [&:checked]:border-mono [&:checked]:text-mono-foreground [&:indeterminate]:bg-mono [&:indeterminate]:border-mono [&:indeterminate]:text-mono-foreground;
+	}
+}
+
+/* Dark Mode Styles */
+@layer components {
+	.dark .kt-radio {
+		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
+	}
+}

@@ -1,0 +1,21 @@
+@layer components {
+	.kt-pagination {
+		@apply flex items-center gap-1;
+	}
+
+	.kt-pagination-item {
+		@apply flex flex-row items-center gap-1 shrink-0;
+
+		svg {
+			@apply text-muted-foreground size-4;
+		}
+	}
+
+	.kt-pagination-ellipsis {
+		@apply flex h-9 w-9 items-center justify-center;
+
+		svg {
+			@apply text-muted-foreground size-4;
+		}
+	}
+}

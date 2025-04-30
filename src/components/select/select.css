@@ -1,0 +1,100 @@
+/* Base Styles */
+@layer components {
+  .kt-select {
+    @apply py-0 appearance-none flex items-center gap-2 w-full bg-background border border-input shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground/80;
+    @apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px]; 
+    @apply disabled:cursor-not-allowed disabled:opacity-50 [&[readonly]]:opacity-70 file:h-full [&[type=file]]:py-0;
+    @apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
+
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 14px 11px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%239f9fa9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+
+    .dark & {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%239f9fa9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+    }
+
+    &[multiple],
+    &[size]:not([size="1"]) {
+      padding-inline-end: var(--btn-default-px);
+      background-image: none;
+    }
+
+    &:-moz-focusring {
+      color: transparent;
+      text-shadow: none;
+    }
+		
+		[dir=rtl] & {
+			background-position: left 0.5rem center;
+		}
+
+    &.active {
+      @apply ring-ring/30 border-ring outline-none ring-[3px];
+    }
+
+    &.disabled {
+      @apply cursor-not-allowed opacity-50;
+    }
+	}
+
+  .kt-select-arrow {
+    @apply ms-auto;
+
+    svg {
+      @apply size-4 text-muted-foreground;
+    }
+  }
+
+  .kt-select-dropdown {
+    @apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
+  }
+
+  .kt-select-option {
+    @apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md font-medium text-sm text-start cursor-pointer disabled:opacity-50 disabled:pointer-events-none;
+    @apply hover:bg-accent hover:text-accent-foreground;
+
+    &.disabled {
+      @apply opacity-50 pointer-events-none;
+    }
+
+    &.selected {
+      @apply bg-accent text-accent-foreground;
+    }
+    
+    &.highlighted {
+      @apply bg-accent text-accent-foreground;
+    }
+  }
+
+  .kt-select-group {
+    @apply py-1;
+  }
+
+  .kt-select-group-header {
+    @apply px-3 py-1 text-xs font-semibold text-muted-foreground uppercase;
+  }
+}
+
+/* Sizes */
+@layer components {
+  .kt-select {
+    @apply h-8.5 gap-1 px-3 text-[0.8125rem] leading-(--text-sm--line-height) rounded-md;
+  }
+
+  .kt-select-lg {
+    @apply h-10 gap-1.5 px-4 text-sm rounded-md;
+  }  
+
+  .kt-select-sm {
+    @apply h-7 gap-1 px-2.5 text-xs rounded-md;
+  }
+}
+
+/* Dark Mode Styles */
+@layer components {
+	.dark .kt-input {
+		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
+	}
+}

@@ -1,0 +1,49 @@
+@layer components {
+	.kt-form {
+		@apply space-y-6;
+	}
+
+	.kt-form-item {
+		@apply flex flex-col gap-2.5;
+	}
+
+	.kt-form-control {
+		@apply space-y-2.5;
+	}
+
+	.kt-form-control-inline {
+		@apply flex items-center space-y-0 gap-2.5;
+	}
+
+	.kt-form-label {
+		@apply flex items-center gap-2 w-full text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-50;
+
+		.kt-switch:disabled + &,
+		.kt-checkbox:disabled + &,
+		.kt-radio:disabled + & {
+			@apply cursor-not-allowed opacity-50;
+		}
+	}	
+
+	.kt-form-description {
+		@apply text-xs text-secondary-foreground font-normal -mt-1;
+	}
+
+	.kt-form-message {
+		@apply hidden text-xs text-destructive font-normal -mt-1;
+	}
+
+	.kt-form-actions {
+		@apply flex items-center justify-end gap-2.5;
+	}
+
+	.kt-form-item:has([aria-invalid=true]) {
+		.kt-form-message {
+			@apply block;	
+		}
+
+		.kt-form-description {
+			@apply hidden;	
+		}
+	}
+}

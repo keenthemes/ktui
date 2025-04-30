@@ -1,0 +1,17 @@
+@custom-variant kt-sticky-active {
+	&[data-kt-sticky-initialized].active {
+		@slot;
+	}
+	[data-kt-sticky-initialized].active & {
+		@slot;
+	}
+}
+
+@custom-variant kt-sticky-release {
+	&[data-kt-sticky-initialized].release {
+		@slot;
+	}
+	[data-kt-sticky-initialized].release & {
+		@slot;
+	}
+}

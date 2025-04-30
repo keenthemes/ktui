@@ -1,0 +1,46 @@
+@layer components {
+	.kt-progress {
+		@apply relative h-1 w-full overflow-hidden rounded-full bg-secondary;
+	}
+
+	.kt-progress-indicator {
+		@apply h-full w-full flex-1 bg-primary rounded-full transition-all transform-[translateX:(calc(100-var(--progress-value)))];
+	}
+
+	/* Variants */
+	.kt-progress-primary {
+		.kt-progress-indicator {
+			@apply bg-primary;
+		}		
+	}
+	
+	.kt-progress-success {
+		.kt-progress-indicator {
+			@apply bg-green-500;
+		}
+	}
+
+	.kt-progress-warning {
+		.kt-progress-indicator {
+			@apply bg-yellow-500;
+		}
+	}
+
+	.kt-progress-info {
+		.kt-progress-indicator {
+			@apply bg-violet-500;
+		}
+	}
+
+	.kt-progress-destructive {
+		.kt-progress-indicator {
+			@apply bg-destructive;
+		}
+	}
+
+	.kt-progress-mono {
+		.kt-progress-indicator {
+			@apply bg-mono;
+		}
+	}
+}

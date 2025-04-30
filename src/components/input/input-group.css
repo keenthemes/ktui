@@ -1,0 +1,37 @@
+@layer components {
+  /* Base input group styles */
+  .kt-input-group {
+    display: flex;
+    align-items: stretch;
+
+    .kt-input {
+      flex-grow: 1;
+    }
+
+    .kt-input-addon:has(+.kt-input) {
+      @apply rounded-e-none! border-e-0!;
+    }
+
+    .kt-input + .kt-input-addon {
+      @apply rounded-s-none! border-s-0!;
+    }
+
+    .kt-input-addon:has(+.kt-btn) {
+      @apply rounded-e-none!;
+    }
+
+    .kt-input + .kt-btn {
+      @apply rounded-s-none!;
+    }
+
+    .kt-btn + .kt-input,
+    .kt-input-addon + .kt-input {
+      @apply rounded-s-none!;
+    }
+
+    .kt-input:has(+.kt-btn),
+    .kt-input:has(+.kt-input-addon) {
+      @apply rounded-e-none!;
+    } 
+  }
+}

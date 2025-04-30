@@ -1,0 +1,33 @@
+@layer components {
+	.kt-breadcrumb {
+		@apply flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground;
+	}
+
+	.kt-breadcrumb-item {
+		@apply inline-flex items-center gap-1.5;
+	}
+
+	.kt-breadcrumb-link {
+		@apply transition-colors hover:text-foreground;
+
+		svg {
+			@apply size-4;
+		}
+	}
+
+	.kt-breadcrumb-page {
+		@apply font-normal text-foreground;
+	}
+	
+	.kt-breadcrumb-separator {
+		svg {
+			@apply size-3.5;
+		}
+	}
+
+	.kt-breadcrumb-ellipsis {
+		svg {
+			@apply size-4;
+		}
+	}
+}

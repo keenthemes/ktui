@@ -1,0 +1,105 @@
+@layer components {
+  .kt-datatable-toolbar {
+    @apply py-3 px-4 flex justify-center sm:justify-between flex-col sm:flex-row gap-3 text-muted-foreground text-sm font-medium border-t border-border;
+  }
+
+  .kt-datatable-pagination {
+    @apply flex items-center gap-1;
+
+    .kt-datatable-pagination-button {
+      @apply cursor-pointer bg-transparent inline-flex h-7 min-w-7 px-0.5 rounded-md items-center justify-center text-muted-foreground;
+
+      &.active, &:hover:not(:disabled) {
+        @apply bg-accent text-accent-foreground;
+      }
+
+      &.kt-datatable-pagination-prev {
+        @apply text-foreground;
+      }
+
+      &.kt-datatable-pagination-next {
+        @apply text-foreground;
+      }
+
+      &.kt-datatable-pagination-more {
+
+      }
+
+      &:disabled {
+        @apply text-muted-foreground cursor-default;
+      }
+    }
+  }
+
+  .kt-datatable-length {
+    @apply flex items-center gap-2 whitespace-nowrap;
+  }
+
+  .kt-datatable-info {
+    @apply flex items-center gap-4;
+  }
+
+  .kt-datatable-loading {
+    @apply flex items-center gap-2 px-4 py-2 font-medium leading-none text-sm border border-border rounded-md bg-card text-card-foreground shadow-xs shadow-[rgba(0,0,0,0.05)];
+  }
+
+  /* Overlay styles */
+  .kt-datatable-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  /* Ensure proper positioning for the table container */
+  [data-kt-datatable] {
+    position: relative;
+  }
+
+  /* Style when table is loading */
+  [data-kt-datatable].loading table {
+    opacity: 0.6;
+  }
+}
+
+@custom-variant kt-datatable-loading {
+  &.[data-kt-datatable].loading {
+    @slot;
+  }
+  [data-kt-datatable].loading & {
+    @slot;
+  }
+}
+
+@custom-variant kt-datatable-initialized {
+  &.[data-kt-datatable].initialized {
+    @slot;
+  }
+  [data-kt-datatable].initialized & {
+    @slot;
+  }
+}
+
+@custom-variant kt-datatable-sort-asc {
+  &.[data-kt-datatable-column-sort=asc]:where([data-kt-datatable] *) {
+    @slot;
+  }
+  [data-kt-datatable] [data-kt-datatable-column-sort=asc] & {
+    @slot;
+  }
+}
+
+@custom-variant kt-datatable-sort-desc {
+  &.[data-kt-datatable-column-sort=desc]:where([data-kt-datatable] *) {
+    @slot;
+  }
+  [data-kt-datatable] [data-kt-datatable-column-sort=desc] & {
+    @slot;
+  }
+}

@@ -1,0 +1,17 @@
+@custom-variant kt-theme-switch-light {
+  [data-kt-theme-switch-mode=light] & {
+    @slot;
+  }
+}
+
+@custom-variant kt-theme-switch-dark {
+  [data-kt-theme-switch-mode=dark] & {
+    @slot;
+  }
+}
+
+@custom-variant kt-theme-switch-system {
+  [data-kt-theme-switch-mode=system] &{
+    @slot;
+  }
+}

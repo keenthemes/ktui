@@ -1,0 +1,131 @@
+/* Base Styles */
+@layer components {
+  /* Base */
+  .kt-input {
+    @apply outline-0 block w-full bg-background border border-input shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground;
+    @apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
+    @apply disabled:cursor-not-allowed disabled:opacity-50 [&[readonly]]:opacity-70 file:h-full [&[type=file]]:py-0;
+    @apply file:border-solid file:border-input file:bg-transparent file:font-medium file:not-italic file:text-foreground file:p-0 file:border-0 file:border-e;
+    @apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
+  }
+
+  /* Size */
+  .kt-input {
+    @apply h-8.5 px-3 text-[0.8125rem] leading-(--text-sm--line-height) rounded-md file:pe-3 file:me-3;
+  }
+
+  .kt-input-lg {
+    @apply h-10 px-4 text-sm rounded-md file:pe-4 file:me-4;
+  }
+
+  .kt-input-sm {
+    @apply h-7 px-2.5 text-xs rounded-md file:pe-2.5 file:me-2.5;
+  }  
+}
+
+/* Stacked */
+@layer components {
+	.kt-input:not(input) {
+    @apply flex items-center gap-1.5;
+
+    &:has(input:focus-visible) {
+      @apply ring-ring/30 border-ring outline-none ring-[3px];
+    }
+
+    input {
+      @apply flex w-full outline-none transition-[color] text-foreground placeholder:text-muted-foreground border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 h-auto disabled:cursor-not-allowed disabled:opacity-50;
+      font-size: inherit;
+      list-style: inherit;
+    }
+
+    i {
+      @apply text-base text-muted-foreground;
+    }
+
+    svg {
+      @apply text-muted-foreground size-4;
+    }
+
+    &.kt-input-sm {
+      @apply gap-1.25;
+
+      i {
+        @apply text-sm;
+      }
+
+      svg {
+        @apply text-muted-foreground size-3.5;
+      }
+    }
+
+    &.kt-input-lg {
+      @apply gap-1.5;
+
+      i {
+        @apply text-lg;
+      }
+
+      svg {
+        @apply text-muted-foreground size-4;
+      }
+    }
+  }
+}
+
+/* Addon  */ 
+@layer components {
+  .kt-input-addon {
+    @apply flex items-center shrink-0 justify-center bg-muted border border-input text-secondary-foreground shadow-xs shadow-[rgba(0,0,0,0.05)];
+    @apply rounded-md h-8.5 min-w-8.5 px-3 text-[0.8125rem] leading-(--text-sm--line-height);
+
+    i {
+      @apply text-lg;
+    }
+
+    svg {
+      @apply size-4.5;
+    }
+
+    &.kt-input-addon-sm {
+      @apply rounded-md h-7 min-w-7 text-xs px-2.5;
+
+      i {
+        @apply text-base;
+      }
+    
+      svg {
+        @apply size-3.5;
+      }
+    }
+
+    &.kt-input-addon-lg {
+      @apply rounded-md h-10 min-w-10 px-4 text-sm;
+
+      i {
+        @apply text-lg;
+      }
+    
+      svg {
+        @apply size-4.5;
+      }
+    }
+
+    &.kt-input-addon-icon {
+      @apply px-0;
+    }
+  }
+}
+
+/* Utilities */
+@layer components {
+	.kt-input-ghost {
+		@apply p-0 border-0 shadow-none bg-background focus-visible:ring-0 focus-visible:border-0;
+	}
+}
+
+/* Dark Mode Styles */
+@layer components {
+	.dark .kt-input {
+		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
+	}
+}

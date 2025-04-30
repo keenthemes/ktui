@@ -1,0 +1,20 @@
+export interface KTDrawerConfigInterface {
+	enable?: boolean;
+	class: string;
+	zindex?: string;
+	shownClass: string;
+	hiddenClass: string;
+	backdrop: boolean;
+	backdropClass: string;
+	backdropStatic: boolean;
+	keyboard: boolean;
+	disableScroll: boolean;
+	persistent: boolean;
+	focus: boolean;
+	container: string;
+}
+export interface KTDrawerInterface {
+	show(): void;
+	hide(): void;
+	toggle(): void;
+}

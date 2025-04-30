@@ -1,0 +1,9 @@
+@custom-variant kt-collapse-active {
+	[data-kt-collapse-initialized].active & {
+    @slot;
+  }
+
+	[data-kt-collapse-initialized].active {
+    @slot;
+  }
+}

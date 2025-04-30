@@ -1,0 +1,10 @@
+@layer components {
+	.kt-separator {
+		@apply shrink-0 bg-border h-px w-full;
+	}
+
+	.kt-separator-vertical {
+		@apply h-full w-px;
+	}
+}
+

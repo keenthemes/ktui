@@ -1,0 +1,41 @@
+@layer components {
+	.kt-avatar {
+		@apply relative flex shrink-0 size-10;
+	}
+
+	.kt-avatar-image {
+		@apply overflow-hidden rounded-full;
+
+		img {
+			@apply aspect-square h-full w-full;
+		}
+	}	
+
+	.kt-avatar-fallback {
+		@apply flex h-full w-full items-center justify-center rounded-full border border-border bg-accent text-sm;
+	}
+
+	.kt-avatar-indicator {
+		@apply absolute flex size-6 items-center justify-center;
+	}
+
+	.kt-avatar-status {
+		@apply flex items-center rounded-full size-2 border-2 border-background;
+
+		&.kt-avatar-status-online {
+			@apply bg-green-600;
+		}
+
+		&.kt-avatar-status-offline {
+			@apply bg-mono/50;
+		}
+
+		&.kt-avatar-status-busy {
+			@apply bg-yellow-600;
+		}
+
+		&.kt-avatar-status-away {
+			@apply bg-blue-600;
+		}
+	}
+}

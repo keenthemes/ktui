@@ -1,0 +1,6 @@
+@layer components {
+	.kt-skeleton {
+		@apply animate-pulse rounded-md bg-accent;
+	}
+}
+

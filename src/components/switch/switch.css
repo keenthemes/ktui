@@ -1,0 +1,105 @@
+/* Base Styles */
+@layer components {
+	.kt-switch {
+		@apply cursor-pointer inline-flex appearance-none bg-input relative shrink-0;
+		@apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+		@apply disabled:cursor-not-allowed disabled:opacity-50;
+		@apply aria-invalid:border aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
+
+		&:before {
+			@apply block shadow-xs pointer-events-none ring-0 absolute rounded-full bg-white top-1/2 start-0 -translate-y-1/2 transition-transform content-[""] translate-x-1;
+		}
+
+		&:checked,
+		&[aria-checked="true"] {
+			@apply bg-primary;
+		}
+	}	
+
+	/* Sizes */
+	.kt-switch {
+		@apply h-5 w-7.5 rounded-full;
+
+		&:before {
+			@apply size-3;
+		}
+
+		&:checked,
+		&[aria-checked="true"] {			
+			&:before {
+				@apply translate-x-3.5;
+			}
+		}
+	}
+
+	.kt-switch-sm {
+		@apply h-4.5 w-6.5 rounded-full;
+
+		&:before {
+			@apply size-2.5;
+		}
+
+		&:checked,
+		&[aria-checked="true"] {			
+			&:before {
+				@apply translate-x-3;
+			}
+		}
+	}
+
+	.kt-switch-lg {
+		@apply h-5.5 w-8.5 rounded-full;
+
+		&:before {
+			@apply size-3.5;
+		}
+
+		&:checked,
+		&[aria-checked="true"] {			
+			&:before {
+				@apply translate-x-4;
+			}
+		}
+	}
+}
+
+/* RTL Styles */
+@layer components {
+	[dir="rtl"] .kt-switch {
+		&:before {
+			@apply -translate-x-1;
+		}
+
+		&:checked,
+		&[aria-checked="true"] {
+			&:before {
+				@apply -translate-x-3.5;
+			}
+		}
+
+		&.kt-switch-sm {
+			&:checked,
+			&[aria-checked="true"] {
+				&:before {
+					@apply -translate-x-3;
+				}
+			}
+		}
+
+		&.kt-switch-lg {
+			&:checked,
+			&[aria-checked="true"] {
+				&:before {
+					@apply -translate-x-4;
+				}
+			}
+		}
+	}
+}
+
+/* Dark Mode Styles */
+@layer components {
+	.dark .kt-switch {
+		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
+	}
+}

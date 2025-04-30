@@ -1,0 +1,69 @@
+/* Base Styles */
+@layer components {
+	.kt-checkbox {
+		@apply cursor-pointer appearance-none bg-no-repeat bg-center;
+		@apply bg-background shrink-0 rounded-sm border border-input ring-offset-background focus-visible:outline-none;
+    @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
+	}
+
+	.kt-checkbox {
+		@apply [&:checked]:bg-primary [&:checked]:border-primary [&:checked]:text-primary-foreground [&:indeterminate]:bg-primary [&:indeterminate]:border-primary [&:indeterminate]:text-primary-foreground;
+	}
+
+	.kt-checkbox-mono {
+		@apply [&:checked]:bg-mono [&:checked]:border-mono [&:checked]:text-mono-foreground [&:indeterminate]:bg-mono [&:indeterminate]:border-mono [&:indeterminate]:text-mono-foreground;
+	}
+
+	/* Sizes */
+	.kt-checkbox {
+		@apply size-4.5;
+
+		&:checked,
+		&[aria-checked="true"] {
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='9' viewBox='0 0 12 9' fill='none'%3E%3Cpath d='M10.3667 0.541643L4.80007 6.10831L1.56674 2.87498C1.41061 2.71977 1.1994 2.63265 0.979241 2.63265C0.759086 2.63265 0.547876 2.71977 0.391741 2.87498C0.236532 3.03111 0.149414 3.24232 0.149414 3.46248C0.149414 3.68263 0.236532 3.89384 0.391741 4.04998L4.21674 7.87498C4.37288 8.03019 4.58409 8.1173 4.80424 8.1173C5.0244 8.1173 5.23561 8.03019 5.39174 7.87498L11.5417 1.72498C11.6198 1.64751 11.6818 1.55534 11.7241 1.45379C11.7665 1.35224 11.7882 1.24332 11.7882 1.13331C11.7882 1.0233 11.7665 0.914379 11.7241 0.81283C11.6818 0.711281 11.6198 0.619113 11.5417 0.541643C11.3856 0.386434 11.1744 0.299316 10.9542 0.299316C10.7341 0.299316 10.5229 0.386434 10.3667 0.541643Z' fill='white'/%3E%3C/svg%3E");
+		}
+
+		&:indeterminate {
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10h8'/%3E%3C/svg%3E");
+		}
+	}	
+
+	/* Sizes */
+	.kt-checkbox {
+		@apply size-5;
+	}
+
+	.kt-checkbox-sm {
+		@apply size-4.5;
+
+		&:checked,
+    &[aria-checked="true"] {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7' fill='none'%3E%3Cpath d='M8.4932 0.233321L4.03986 4.68665L1.4532 2.09999C1.32829 1.97582 1.15932 1.90613 0.983198 1.90613C0.807074 1.90613 0.638106 1.97582 0.513198 2.09999C0.38903 2.2249 0.319336 2.39386 0.319336 2.56999C0.319336 2.74611 0.38903 2.91508 0.513198 3.03999L3.5732 6.09999C3.69811 6.22415 3.86707 6.29385 4.0432 6.29385C4.21932 6.29385 4.38829 6.22415 4.5132 6.09999L9.4332 1.17999C9.49568 1.11801 9.54528 1.04428 9.57912 0.963038C9.61297 0.881799 9.6304 0.794662 9.6304 0.706655C9.6304 0.618647 9.61297 0.53151 9.57912 0.45027C9.54528 0.369031 9.49568 0.295296 9.4332 0.233321C9.30829 0.109154 9.13932 0.0394592 8.9632 0.0394592C8.78707 0.0394592 8.61811 0.109154 8.4932 0.233321Z' fill='white'/%3E%3C/svg%3E");
+    }
+
+    &:indeterminate {
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10h8'/%3E%3C/svg%3E");
+    }
+	}
+
+	.kt-checkbox-lg {
+		@apply size-5.5;
+
+		&:checked,
+    &[aria-checked="true"] {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='10' viewBox='0 0 14 10' fill='none'%3E%3Cpath d='M11.8035 1.19582L5.68018 7.31915L2.12351 3.76249C1.95176 3.59176 1.71943 3.49593 1.47726 3.49593C1.23509 3.49593 1.00276 3.59176 0.831013 3.76249C0.660283 3.93424 0.564453 4.16657 0.564453 4.40874C0.564453 4.65091 0.660283 4.88324 0.831013 5.05499L5.03851 9.26249C5.21026 9.43322 5.44259 9.52905 5.68476 9.52905C5.92693 9.52905 6.15926 9.43322 6.33101 9.26249L13.096 2.49749C13.1819 2.41227 13.2501 2.31089 13.2967 2.19918C13.3432 2.08748 13.3672 1.96766 13.3672 1.84665C13.3672 1.72564 13.3432 1.60583 13.2967 1.49413C13.2501 1.38242 13.1819 1.28104 13.096 1.19582C12.9243 1.02509 12.6919 0.92926 12.4498 0.92926C12.2076 0.92926 11.9753 1.02509 11.8035 1.19582Z' fill='white'/%3E%3C/svg%3E");
+    }
+
+    &:indeterminate {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 10h8'/%3E%3C/svg%3E");
+    }
+	}
+}
+
+/* Dark Mode Styles */
+@layer components {
+	.dark .kt-checkbox {
+		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
+	}
+}

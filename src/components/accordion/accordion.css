@@ -1,0 +1,81 @@
+@layer components {
+  .kt-accordion-item {
+    @apply border-b last:border-b-0 border-border;
+  }  
+
+  .kt-accordion-toggle {
+    @apply flex items-center justify-between text-start gap-2.5 w-full py-4 cursor-pointer;
+  }
+
+  .kt-accordion-title {
+    @apply text-base text-mono font-medium;
+  }
+
+  .kt-accordion-content {
+    @apply transition-[height] overflow-hidden;
+  }
+
+  .kt-accordion-wrapper {
+    @apply text-base text-foreground pb-4;
+  }
+
+  .kt-accordion-indicator {
+    @apply inline-flex items-center size-3 text-muted-foreground;
+  }
+
+  .kt-accordion-indicator-on {
+    @apply size-3.5 shrink-0 kt-accordion-active:hidden block;
+  }
+
+  .kt-accordion-indicator-off {
+    @apply size-3.5 shrink-0 kt-accordion-active:block hidden;
+  }
+
+  .kt-accordion.kt-accordion-outline {
+    @apply flex flex-col gap-3.5;
+    
+    .kt-accordion-item {
+      @apply rounded-lg border border-border;
+    }
+
+    .kt-accordion-content {
+      @apply border-t border-border;
+    }
+
+    .kt-accordion-toggle {
+      @apply p-4;
+    }
+
+    .kt-accordion-wrapper {
+      @apply p-4;
+    }
+  }
+}
+
+@custom-variant kt-accordion-active {
+  &[data-kt-accordion-item].active {
+    @slot;
+  }
+
+	[data-kt-accordion-item].active > [data-kt-accordion-toggle] & {
+    @slot;
+  }
+
+	[data-kt-accordion-item].active > [data-kt-accordion-toggle]& {
+    @slot;
+  }
+}
+
+@custom-variant kt-accordion-selected {
+  [data-kt-accordion-initialized] .selected {
+    @slot;
+  }
+
+	[data-kt-accordion-initialized] .selected & {
+    @slot;
+  }
+
+  [data-kt-accordion-initialized] &.selected {
+    @slot;
+  }
+}

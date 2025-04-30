@@ -1,0 +1,15 @@
+@layer components {
+	.kt-label {
+		@apply text-sm font-medium leading-none text-foreground inline-flex items-center gap-2;
+
+		.kt-switch:disabled + &,
+		.kt-checkbox:disabled + &,
+		.kt-radio:disabled + & {
+			@apply cursor-not-allowed opacity-50;
+		}
+	}
+
+	.kt-label-secondary {
+		@apply font-normal;
+	}
+}

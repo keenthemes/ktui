@@ -1,0 +1,152 @@
+@layer components {
+  /* Base Card Styles */
+  .kt-card {
+    @apply flex flex-col items-stretch text-card-foreground rounded-xl;
+  }
+
+  /* Card Variants */
+  .kt-card {
+    @apply bg-card border border-border shadow-xs shadow-[rgba(0,0,0,0.05)];
+  }
+
+  /* Card Header */
+  .kt-card-header {
+    @apply flex items-center justify-between flex-wrap px-5 min-h-14 gap-2.5 border-b border-border;
+  }  
+
+  /* Card Footer */
+  .kt-card-footer {
+    @apply flex items-center px-5 py-4 border-t border-border;
+  }
+
+  /* Card Content */
+  .kt-card-content {
+    @apply grow py-5 px-5;
+  }
+
+  /* Card Table */
+  .kt-card-table {
+    @apply grid grow;
+
+    .kt-table-border {
+      @apply border-0;
+    }
+
+    .kt-table {
+      th, td {
+        &:first-child {
+          @apply ps-5;
+        }
+
+        &:last-child {
+          @apply pe-5;
+        }
+      }
+    }
+  }
+
+  /* Card Grid */
+  .kt-card-grid {
+    & .kt-card-header,
+    & .kt-card-footer {
+      @apply px-5;
+    }
+
+    .kt-card-content {
+      padding: 0;
+
+      .kt-table {
+        border: 0;
+
+        th:first-child,
+        td:first-child {
+          @apply ps-5;
+
+          &.kt-table-cell-center {
+            @apply pe-5;
+          }
+        }
+
+        th:last-child,
+        td:last-child {
+          @apply pe-5;
+
+          &.table-cell-center {
+            @apply ps-5;
+          }
+        }
+      }
+    }
+  }
+
+  /* Additional Card Components */
+  .kt-card-heading {
+    @apply space-y-1;
+  }
+
+  .kt-card-toolbar {
+    @apply flex items-center gap-2.5;
+  }
+
+  .kt-card-title {
+    @apply text-base font-semibold leading-none tracking-tight;
+  }
+
+  .kt-card-description {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .kt-card-group {
+    @apply grow py-5 px-5 border-b border-border;
+
+    &:last-child {
+      @apply border-b-0;
+    }
+
+    & + .kt-card-footer {
+      @apply border-t-0;
+    }
+  }
+
+  /* Accent */
+  .kt-card-accent {
+    @apply bg-muted shadow-xs shadow-[rgba(0,0,0,0.05)] p-1;
+
+    .kt-card-header {
+      @apply border-b-0;
+    }
+
+    .kt-card-content {
+      @apply bg-card rounded-t-xl;
+
+      &:last-child {
+        @apply rounded-b-xl
+      }
+    }
+
+    .kt-card-table {
+      @apply bg-card rounded-xl;
+
+      &:last-child {
+        @apply rounded-b-xl
+      }
+    }
+
+    .kt-card-footer {
+      @apply bg-card rounded-b-xl border-t-0 mt-[2px];
+    }
+  }
+
+  /* Utilities */
+  .kt-card-border {
+    @apply border border-border;
+  }
+
+  .kt-card-rounded-t {
+    @apply rounded-t-xl;
+  }
+
+  .kt-card-rounded-b {
+    @apply rounded-b-xl;
+  }
+}

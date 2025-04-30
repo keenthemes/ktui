@@ -1,0 +1,25 @@
+@layer components {
+	.kt-kbd {
+		@apply inline-flex items-center justify-center font-mono rounded-md;
+	}
+
+	.kt-kbd {
+		@apply bg-accent border border-border text-accent-foreground;
+	}
+
+	.kt-kbd-outline {
+		@apply bg-transparent text-accent-foreground border border-input;
+	}
+
+	.kt-kbd {
+		@apply h-7 min-w-7 px-1.5 text-xs [&_svg]:size-3.5;
+	}
+
+	.kt-kbd-xs {
+		@apply h-5 min-w-5 px-1 text-[0.6875rem] leading-[0.75rem] [&_svg]:size-3;
+	}
+
+	.kt-kbd-sm {
+		@apply h-6 min-w-6 px-1 text-[0.75rem] leading-[0.75rem] [&_svg]:size-3;
+	}
+}

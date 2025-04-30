@@ -1,0 +1,48 @@
+/** Components **/
+@import './src/components/avatar/avatar.css';
+@import './src/components/accordion/accordion.css';
+@import './src/components/accordion/accordion-menu.css';
+@import './src/components/alert/alert.css';
+@import './src/components/form/form.css';
+@import './src/components/badge/badge.css';
+@import './src/components/link/link.css';
+@import './src/components/btn/btn.css';
+@import './src/components/label/label.css';
+@import './src/components/card/card.css';
+@import './src/components/checkbox/checkbox.css';
+@import './src/components/collapse/collapse.css';
+@import './src/components/datatable/datatable.css';
+@import './src/components/datepicker/datepicker.css';
+@import './src/components/dismiss/dismiss.css';
+@import './src/components/drawer/drawer.css';
+@import './src/components/dropdown/dropdown.css';
+@import './src/components/dropdown/dropdown-menu.css';
+@import './src/components/image-input/image-input.css';
+@import './src/components/input/input.css';
+@import './src/components/input/input-group.css';
+@import './src/components/modal/modal.css';
+@import './src/components/radio/radio.css';
+@import './src/components/scrollable/scrollable.css';
+@import './src/components/scrollspy/scrollspy.css';
+@import './src/components/select/select.css';
+@import './src/components/stepper/stepper.css';
+@import './src/components/sticky/sticky.css';
+@import './src/components/switch/switch.css';
+@import './src/components/tabs/tabs.css';
+@import './src/components/textarea/textarea.css';
+@import './src/components/theme-switch/theme-switch.css';
+@import './src/components/toggle/toggle.css';
+@import './src/components/toggle-password/toggle-password.css';
+@import './src/components/tooltip/tooltip.css';
+@import './src/components/popover/popover.css';
+@import './src/components/table/table.css';
+@import './src/components/toggle-group/toggle-group.css';
+@import './src/components/separator/separator.css';
+@import './src/components/progress/progress.css';
+@import './src/components/pagination/pagination.css';
+@import './src/components/skeleton/skeleton.css';
+@import './src/components/kbd/kbd.css';
+@import './src/components/breadcrumb/breadcrumb.css';
+
+/** Dark Mode Variant **/
+@custom-variant dark (&:is(.dark *));
