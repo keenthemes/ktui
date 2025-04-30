@@ -17,8 +17,7 @@ const COPYRIGHT_HEADER = `/**
  * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
  * Copyright 2025 by Keenthemes Inc
  * @version: ${version}
- */
-`;
+ */\n\n`;
 
 // Extensions to process
 const FILE_EXTENSIONS = ['.js', '.ts', '.css'];
@@ -43,31 +42,15 @@ function hasAnyHeader(content) {
 // Function to add or update header in a file
 function addHeaderToFile(filePath) {
 	try {
-		const content = fs.readFileSync(filePath, 'utf8');
+		let content = fs.readFileSync(filePath, 'utf8');
 
-		// Skip if correct header already exists
-		if (hasHeaderWithVersion(content)) {
-			console.log(`Header with version already exists in ${filePath}`);
-			return;
-		}
+		// Regex to match any KTUI copyright header block at the very top
+		const headerRegex = /^(\/\*\*[^]*?Copyright[^]*?@version:[^]*?\*\/\s*)+/;
+		content = content.replace(headerRegex, '');
 
-		let newContent;
-
-		// If file has any copyright header, replace it
-		if (hasAnyHeader(content)) {
-			// Find the end of the existing header
-			const headerEndIndex = content.indexOf('*/') + 2;
-			// Replace existing header with new one
-			newContent =
-				COPYRIGHT_HEADER + content.substring(headerEndIndex).trimStart();
-			console.log(`Updated header in ${filePath}`);
-		} else {
-			// Add header to file without existing header
-			newContent = COPYRIGHT_HEADER + content;
-			console.log(`Added header to ${filePath}`);
-		}
-
+		const newContent = COPYRIGHT_HEADER + content.replace(/^\s*/, '');
 		fs.writeFileSync(filePath, newContent, 'utf8');
+		console.log(`Cleaned and updated header in ${filePath}`);
 	} catch (error) {
 		console.error(`Error processing ${filePath}:`, error);
 	}
