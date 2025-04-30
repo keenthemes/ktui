@@ -1,5 +1,5 @@
 {
-	"name": "ktui",
+	"name": "@keenthemes/ktui",
 	"version": "1.0.0",
 	"description": "Free & Open-Source Tailwind UI Components by Keenthemes",
 	"homepage": "https://ktui.io",
@@ -78,5 +78,8 @@
 	},
 	"dependencies": {
 		"@popperjs/core": "^2.11.8"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }
