@@ -54,7 +54,8 @@
 		"build": "npx webpack --mode=development",
 		"build:prod": "npx webpack --env production",
 		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
-		"lint": "npx eslint src --ext .ts"
+		"lint": "npx eslint src --ext .ts",
+		"format": "prettier --write src"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.26.10",
@@ -66,6 +67,7 @@
 		"clean-webpack-plugin": "^4.0.0",
 		"eslint": "^9.25.1",
 		"mini-svg-data-uri": "^1.4.4",
+		"prettier": "^3.5.3",
 		"source-map-loader": "^5.0.0",
 		"terser-webpack-plugin": "^5.3.14",
 		"ts-loader": "^9.5.2",
