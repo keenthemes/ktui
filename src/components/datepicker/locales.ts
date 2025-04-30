@@ -1,4 +1,9 @@
-import { LocaleConfigInterface } from "./types";
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
+import { LocaleConfigInterface } from './types';
 
 /**
  * Generates a locale configuration object based on the given locale and first day of the week.
@@ -7,19 +12,32 @@ import { LocaleConfigInterface } from "./types";
  * @param {number} firstDayOfWeek - The first day of the week, where 0 represents Sunday.
  * @return {LocaleConfigInterface} The generated locale configuration object.
  */
-export const generateLocaleConfig = (locale: string, firstDayOfWeek: number): LocaleConfigInterface => ({
+export const generateLocaleConfig = (
+	locale: string,
+	firstDayOfWeek: number,
+): LocaleConfigInterface => ({
 	// Names of months (e.g., January, February, ...)
-	monthNames: Array.from({ length: 12 }, (_, month) => new Date(0, month).toLocaleString(locale, { month: 'long' })),
+	monthNames: Array.from({ length: 12 }, (_, month) =>
+		new Date(0, month).toLocaleString(locale, { month: 'long' }),
+	),
 	// Shortened names of months (e.g., Jan, Feb, ...)
-	monthNamesShort: Array.from({ length: 12 }, (_, month) => new Date(0, month).toLocaleString(locale, { month: 'short' })),
+	monthNamesShort: Array.from({ length: 12 }, (_, month) =>
+		new Date(0, month).toLocaleString(locale, { month: 'short' }),
+	),
 	// Names of days of the week (e.g., Sunday, Monday, ...)
-	dayNames: Array.from({ length: 7 }, (_, day) => new Date(0, 0, day + 1).toLocaleString(locale, { weekday: 'long' })),
+	dayNames: Array.from({ length: 7 }, (_, day) =>
+		new Date(0, 0, day + 1).toLocaleString(locale, { weekday: 'long' }),
+	),
 	// Shortened names of days of the week (e.g., Sun, Mon, ...)
-	dayNamesShort: Array.from({ length: 7 }, (_, day) => new Date(0, 0, day + 1).toLocaleString(locale, { weekday: 'short' })),
+	dayNamesShort: Array.from({ length: 7 }, (_, day) =>
+		new Date(0, 0, day + 1).toLocaleString(locale, { weekday: 'short' }),
+	),
 	// The first day of the week is the first day of the week in the selected locale
 	firstDayOfWeek,
 	// Names of days of the week, abbreviated (e.g., S, M, ...)
-	dayNamesMin: Array.from({ length: 7 }, (_, day) => new Date(0, 0, day + 1).toLocaleString(locale, { weekday: 'narrow' })),
+	dayNamesMin: Array.from({ length: 7 }, (_, day) =>
+		new Date(0, 0, day + 1).toLocaleString(locale, { weekday: 'narrow' }),
+	),
 });
 
 export const DefaultLocales: { [key: string]: LocaleConfigInterface } = {

@@ -1,45 +1,51 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
+ 
 /* Base Styles (LTR, Light Mode) */
 @layer components {
-  .kt-accordion-menu {
-    @apply flex flex-col gap-y-1 w-full;
-  }
+	.kt-accordion-menu {
+		@apply flex flex-col gap-y-1 w-full;
+	}
 
-  .kt-accordion-menu-content {
-    @apply transition-[height] overflow-hidden ps-6;
-  }
+	.kt-accordion-menu-content {
+		@apply transition-[height] overflow-hidden ps-6;
+	}
 
-  .kt-accordion-menu-sub {
-    @apply gap-y-1 w-full;
-  }
+	.kt-accordion-menu-sub {
+		@apply gap-y-1 w-full;
+	}
 
-  .kt-accordion-menu-item {
-    @apply space-y-1 w-full;
-  }  
+	.kt-accordion-menu-item {
+		@apply space-y-1 w-full;
+	}
 
-  .kt-accordion-menu-toggle {
-    @apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md font-medium text-sm text-foreground hover:bg-accent kt-accordion-active:bg-accent disabled:opacity-50 disabled:pointer-events-none;
+	.kt-accordion-menu-toggle {
+		@apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md font-medium text-sm text-foreground hover:bg-accent kt-accordion-active:bg-accent disabled:opacity-50 disabled:pointer-events-none;
 
-    svg {
-      @apply shrink-0 size-4 text-muted-foreground;
-    }
-  }
+		svg {
+			@apply shrink-0 size-4 text-muted-foreground;
+		}
+	}
 
-  .kt-accordion-menu-link {
-    @apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md font-medium text-sm text-foreground hover:bg-accent kt-accordion-selected:bg-accent disabled:opacity-50 disabled:pointer-events-none;
+	.kt-accordion-menu-link {
+		@apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md font-medium text-sm text-foreground hover:bg-accent kt-accordion-selected:bg-accent disabled:opacity-50 disabled:pointer-events-none;
 
-    svg {
-      @apply shrink-0 size-4 text-muted-foreground;
-    }
-  }
+		svg {
+			@apply shrink-0 size-4 text-muted-foreground;
+		}
+	}
 
-  .kt-accordion-menu-indicator {
-    @apply text-muted-foreground ms-auto size-3.5 shrink-0 kt-accordion-active:rotate-180;
-  }
+	.kt-accordion-menu-indicator {
+		@apply text-muted-foreground ms-auto size-3.5 shrink-0 kt-accordion-active:rotate-180;
+	}
 }
 
 /* RTL Styles */
 @layer components {
-  [dir="rtl"] .kt-accordion-menu-indicator {
-    @apply kt-accordion-active:-rotate-180;
-  }
+	[dir='rtl'] .kt-accordion-menu-indicator {
+		@apply kt-accordion-active:-rotate-180;
+	}
 }

@@ -1,145 +1,176 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
-  /* Base */
-  .kt-badge {
-    @apply whitespace-nowrap bg-secondary text-accent-foreground inline-flex items-center justify-center font-medium focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 [&_svg]:-ms-px [&_svg]:shrink-0;
-  }
-	
-  /* Variants */
-  .kt-badge-primary       { @apply bg-primary text-primary-foreground; }
-  .kt-badge-secondary     { @apply bg-secondary text-accent-foreground; }
-  .kt-badge-success       { @apply bg-green-500 text-white; }
-  .kt-badge-warning       { @apply bg-yellow-400 text-white; }
-  .kt-badge-info          { @apply bg-violet-500 text-white; }
-  .kt-badge-mono          { @apply bg-mono text-mono-foreground; }
-  .kt-badge-destructive   { @apply bg-destructive text-destructive-foreground; }
-  
-  /* Appearance */
-  .kt-badge-stroke  { @apply bg-background border border-border text-secondary-foreground; }
-  
-  /* Disabled */
-  .kt-badge-disabled { @apply opacity-50 pointer-events-none; }
-  
-  /* Size */
-  .kt-badge-lg { @apply rounded-md px-[0.5rem] h-7 min-w-7 gap-1.5 text-xs [&_svg]:size-3.5; }
-  .kt-badge { @apply rounded-md px-[0.45rem] h-6 min-w-6 gap-1.5 text-xs [&_svg]:size-3.5; }
-  .kt-badge-sm { @apply rounded-sm px-[0.325rem] h-5 min-w-5 gap-1 text-[0.6875rem] leading-[0.75rem] [&_svg]:size-3; }
-  .kt-badge-xs { @apply rounded-sm px-[0.25rem] h-4 min-w-4 gap-1 text-[0.625rem] leading-[0.5rem] [&_svg]:size-3; }
-    
-  /* Outline */
-  .kt-badge-outline {
-    @apply border border-border bg-muted text-secondary-foreground;
+	/* Base */
+	.kt-badge {
+		@apply whitespace-nowrap bg-secondary text-accent-foreground inline-flex items-center justify-center font-medium focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 [&_svg]:-ms-px [&_svg]:shrink-0;
+	}
 
-    &.kt-badge-primary {
-      @apply border bg-blue-50 text-blue-700 border-blue-100 dark:text-blue-600 dark:bg-blue-950/50 dark:border-blue-950;
-    }
+	/* Variants */
+	.kt-badge-primary {
+		@apply bg-primary text-primary-foreground;
+	}
+	.kt-badge-secondary {
+		@apply bg-secondary text-accent-foreground;
+	}
+	.kt-badge-success {
+		@apply bg-green-500 text-white;
+	}
+	.kt-badge-warning {
+		@apply bg-yellow-400 text-white;
+	}
+	.kt-badge-info {
+		@apply bg-violet-500 text-white;
+	}
+	.kt-badge-mono {
+		@apply bg-mono text-mono-foreground;
+	}
+	.kt-badge-destructive {
+		@apply bg-destructive text-destructive-foreground;
+	}
 
-    &.kt-badge-secondary {
-      @apply bg-secondary dark:bg-secondary/50 border-border text-foreground;
-    }
-    
-    &.kt-badge-success {
-      @apply border bg-green-50 text-green-700 border-green-200 dark:text-green-600 dark:bg-green-950/50 dark:border-green-950;
-    }
-    
-    &.kt-badge-warning.kt-badge-outline {
-      @apply border bg-yellow-50 text-yellow-700 border-yellow-100 dark:text-yellow-600 dark:bg-yellow-950/50 dark:border-yellow-950;
-    }
-    
-    &.kt-badge-info.kt-badge-outline {
-      @apply border bg-violet-50 text-violet-700 border-violet-100 dark:text-violet-600 dark:bg-violet-950/50 dark:border-violet-950;
-    }
-    
-    &.kt-badge-mono.kt-badge-outline {
-      @apply bg-mono/10 border-mono/10 text-mono;
-    }
-    
-    &.kt-badge-destructive.kt-badge-outline {
-      @apply border bg-red-50 text-red-700 border-red-100 dark:text-red-600 dark:bg-red-950/50 dark:border-red-950;
-    }
-  }
-  
-  /* Light */
-  .kt-badge-light {
-    &.kt-badge-primary {
-      @apply bg-blue-100 text-blue-800 dark:text-blue-600 dark:bg-blue-950/50
-    }
+	/* Appearance */
+	.kt-badge-stroke {
+		@apply bg-background border border-border text-secondary-foreground;
+	}
 
-    &.kt-badge-secondary {
-      @apply bg-secondary dark:bg-secondary/50 text-secondary-foreground;
-    }
-    
-    &.kt-badge-success {
-      @apply bg-green-100 text-green-800 dark:text-green-600 dark:bg-green-950/50;
-    }
-    
-    &.kt-badge-warning {
-      @apply bg-yellow-100 text-yellow-800 dark:text-yellow-600 dark:bg-yellow-950/50;
-    }
-    
-    &.kt-badge-info {
-      @apply bg-violet-100 text-violet-800 dark:text-violet-600 dark:bg-violet-950/50;
-    }
-    
-    &.kt-badge-mono {
-      @apply bg-mono/10 text-mono;
-    }
-    
-    &.kt-badge-destructive {
-      @apply bg-red-100 text-red-800 dark:text-red-600 dark:bg-red-950/50;
-    }
-  }
+	/* Disabled */
+	.kt-badge-disabled {
+		@apply opacity-50 pointer-events-none;
+	}
 
-  /* Ghost */
-  .kt-badge-ghost {
-    @apply bg-transparent px-0;
+	/* Size */
+	.kt-badge-lg {
+		@apply rounded-md px-[0.5rem] h-7 min-w-7 gap-1.5 text-xs [&_svg]:size-3.5;
+	}
+	.kt-badge {
+		@apply rounded-md px-[0.45rem] h-6 min-w-6 gap-1.5 text-xs [&_svg]:size-3.5;
+	}
+	.kt-badge-sm {
+		@apply rounded-sm px-[0.325rem] h-5 min-w-5 gap-1 text-[0.6875rem] leading-[0.75rem] [&_svg]:size-3;
+	}
+	.kt-badge-xs {
+		@apply rounded-sm px-[0.25rem] h-4 min-w-4 gap-1 text-[0.625rem] leading-[0.5rem] [&_svg]:size-3;
+	}
 
-    &.kt-badge-primary {
-      @apply text-primary;
-    }
+	/* Outline */
+	.kt-badge-outline {
+		@apply border border-border bg-muted text-secondary-foreground;
 
-    &.kt-badge-secondary {
-      @apply text-secondary-foreground;
-    }
+		&.kt-badge-primary {
+			@apply border bg-blue-50 text-blue-700 border-blue-100 dark:text-blue-600 dark:bg-blue-950/50 dark:border-blue-950;
+		}
 
-    &.kt-badge-destructive {
-      @apply text-destructive;
-    }
+		&.kt-badge-secondary {
+			@apply bg-secondary dark:bg-secondary/50 border-border text-foreground;
+		}
 
-    &.kt-badge-success {
-      @apply text-green-500;
-    }
+		&.kt-badge-success {
+			@apply border bg-green-50 text-green-700 border-green-200 dark:text-green-600 dark:bg-green-950/50 dark:border-green-950;
+		}
 
-    &.kt-badge-warning {
-      @apply text-yellow-500;
-    }
+		&.kt-badge-warning.kt-badge-outline {
+			@apply border bg-yellow-50 text-yellow-700 border-yellow-100 dark:text-yellow-600 dark:bg-yellow-950/50 dark:border-yellow-950;
+		}
 
-    &.kt-badge-info {
-      @apply text-violet-500;
-    }
+		&.kt-badge-info.kt-badge-outline {
+			@apply border bg-violet-50 text-violet-700 border-violet-100 dark:text-violet-600 dark:bg-violet-950/50 dark:border-violet-950;
+		}
 
-    &.kt-badge-mono {
-      @apply text-mono;
-    }
-  }
-  
-  /* Badge Button */
-  .kt-badge-btn {
-    @apply cursor-pointer inline-flex items-center justify-center leading-none size-3.5 p-0 rounded-md -me-0.5;
+		&.kt-badge-mono.kt-badge-outline {
+			@apply bg-mono/10 border-mono/10 text-mono;
+		}
 
-    > svg {
+		&.kt-badge-destructive.kt-badge-outline {
+			@apply border bg-red-50 text-red-700 border-red-100 dark:text-red-600 dark:bg-red-950/50 dark:border-red-950;
+		}
+	}
+
+	/* Light */
+	.kt-badge-light {
+		&.kt-badge-primary {
+			@apply bg-blue-100 text-blue-800 dark:text-blue-600 dark:bg-blue-950/50;
+		}
+
+		&.kt-badge-secondary {
+			@apply bg-secondary dark:bg-secondary/50 text-secondary-foreground;
+		}
+
+		&.kt-badge-success {
+			@apply bg-green-100 text-green-800 dark:text-green-600 dark:bg-green-950/50;
+		}
+
+		&.kt-badge-warning {
+			@apply bg-yellow-100 text-yellow-800 dark:text-yellow-600 dark:bg-yellow-950/50;
+		}
+
+		&.kt-badge-info {
+			@apply bg-violet-100 text-violet-800 dark:text-violet-600 dark:bg-violet-950/50;
+		}
+
+		&.kt-badge-mono {
+			@apply bg-mono/10 text-mono;
+		}
+
+		&.kt-badge-destructive {
+			@apply bg-red-100 text-red-800 dark:text-red-600 dark:bg-red-950/50;
+		}
+	}
+
+	/* Ghost */
+	.kt-badge-ghost {
+		@apply bg-transparent px-0;
+
+		&.kt-badge-primary {
+			@apply text-primary;
+		}
+
+		&.kt-badge-secondary {
+			@apply text-secondary-foreground;
+		}
+
+		&.kt-badge-destructive {
+			@apply text-destructive;
+		}
+
+		&.kt-badge-success {
+			@apply text-green-500;
+		}
+
+		&.kt-badge-warning {
+			@apply text-yellow-500;
+		}
+
+		&.kt-badge-info {
+			@apply text-violet-500;
+		}
+
+		&.kt-badge-mono {
+			@apply text-mono;
+		}
+	}
+
+	/* Badge Button */
+	.kt-badge-btn {
+		@apply cursor-pointer inline-flex items-center justify-center leading-none size-3.5 p-0 rounded-md -me-0.5;
+
+		> svg {
 			@apply transition-[opacity] size-3.5 opacity-70;
 		}
-		
+
 		&:focus,
 		&:hover {
 			> svg {
 				@apply opacity-100;
 			}
 		}
-  }
-  
-  /* Badge Dot */
-  .kt-badge-dot {
-    @apply size-1.5 rounded-full bg-current opacity-75;
-  }
+	}
+
+	/* Badge Dot */
+	.kt-badge-dot {
+		@apply size-1.5 rounded-full bg-current opacity-75;
+	}
 }

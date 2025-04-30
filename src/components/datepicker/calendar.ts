@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import { KTDatepickerStateManager } from './config';
 import {
 	calendarGridTemplate,
@@ -173,10 +178,10 @@ export class KTDatepickerCalendar {
 
 		// Use the display element rather than the input element
 		const displayElement = this._element.querySelector(
-			'[data-kt-datepicker-display]'
+			'[data-kt-datepicker-display]',
 		) as HTMLElement;
 		const inputElement = this._element.querySelector(
-			'[data-kt-datepicker-input]'
+			'[data-kt-datepicker-input]',
 		) as HTMLElement;
 		const triggerElement = displayElement || inputElement;
 
@@ -185,7 +190,7 @@ export class KTDatepickerCalendar {
 				this._element,
 				triggerElement,
 				this._dropdownElement,
-				config
+				config,
 			);
 
 			// Add keyboard event listener to the trigger element
@@ -209,10 +214,10 @@ export class KTDatepickerCalendar {
 
 		// Get elements
 		const prevMonthBtn = this._dropdownElement.querySelector(
-			'button[aria-label="Previous Month"]'
+			'button[aria-label="Previous Month"]',
 		);
 		const nextMonthBtn = this._dropdownElement.querySelector(
-			'button[aria-label="Next Month"]'
+			'button[aria-label="Next Month"]',
 		);
 
 		// Find buttons by text content instead of using jQuery-style selectors
@@ -229,7 +234,7 @@ export class KTDatepickerCalendar {
 		});
 
 		const monthYearText = this._dropdownElement.querySelector(
-			'.kt-datepicker-calendar-monthyear-text'
+			'.kt-datepicker-calendar-monthyear-text',
 		);
 
 		// Month navigation
@@ -244,7 +249,7 @@ export class KTDatepickerCalendar {
 		// Month/year view toggle
 		if (monthYearText) {
 			monthYearText.addEventListener('click', () =>
-				this._toggleMonthYearView()
+				this._toggleMonthYearView(),
 			);
 		}
 
@@ -329,7 +334,7 @@ export class KTDatepickerCalendar {
 						// Apply hover effect between start date and current hover date
 						this._applyRangeHoverEffect(
 							state.selectedDateRange.startDate,
-							hoverDate
+							hoverDate,
 						);
 					} else {
 						// Fallback to old method if data-date-id is not present
@@ -342,7 +347,7 @@ export class KTDatepickerCalendar {
 							// Apply hover effect between start date and current hover date
 							this._applyRangeHoverEffect(
 								state.selectedDateRange.startDate,
-								hoverDate
+								hoverDate,
 							);
 						}
 					}
@@ -376,42 +381,42 @@ export class KTDatepickerCalendar {
 
 				// Update calendar view
 				this._updateCalendarView();
-			}
+			},
 		);
 
 		// Listen for other state changes
 		this._eventManager.addEventListener(KTDatepickerEventName.VIEW_CHANGE, () =>
-			this._updateViewMode()
+			this._updateViewMode(),
 		);
 		this._eventManager.addEventListener(KTDatepickerEventName.OPEN, () =>
-			this.show()
+			this.show(),
 		);
 		this._eventManager.addEventListener(KTDatepickerEventName.CLOSE, () =>
-			this.hide()
+			this.hide(),
 		);
 		this._eventManager.addEventListener(KTDatepickerEventName.UPDATE, () =>
-			this._updateCalendarView()
+			this._updateCalendarView(),
 		);
 
 		// Time inputs
 		const timeContainer = this._dropdownElement.querySelector(
-			'.kt-datepicker-calendar-time-container'
+			'.kt-datepicker-calendar-time-container',
 		);
 		if (timeContainer) {
 			const hourInput = timeContainer.querySelector(
-				'input[aria-label="Hour"]'
+				'input[aria-label="Hour"]',
 			) as HTMLInputElement;
 			const minuteInput = timeContainer.querySelector(
-				'input[aria-label="Minute"]'
+				'input[aria-label="Minute"]',
 			) as HTMLInputElement;
 			const secondInput = timeContainer.querySelector(
-				'input[aria-label="Second"]'
+				'input[aria-label="Second"]',
 			) as HTMLInputElement;
 			const amButton = timeContainer.querySelector(
-				'button[aria-label="AM"]'
+				'button[aria-label="AM"]',
 			) as HTMLButtonElement;
 			const pmButton = timeContainer.querySelector(
-				'button[aria-label="PM"]'
+				'button[aria-label="PM"]',
 			) as HTMLButtonElement;
 
 			// Update AM/PM button texts
@@ -497,7 +502,7 @@ export class KTDatepickerCalendar {
 					// Generate calendar grid
 					monthContainer.innerHTML += calendarGridTemplate(
 						locale,
-						config.weekDays
+						config.weekDays,
 					);
 
 					// Get days for the month
@@ -522,7 +527,7 @@ export class KTDatepickerCalendar {
 				const currentMonth = state.currentDate.getMonth();
 				this._calendarContainer.innerHTML = monthSelectionTemplate(
 					locale,
-					currentMonth
+					currentMonth,
 				);
 
 				// Add click events to month buttons
@@ -549,7 +554,7 @@ export class KTDatepickerCalendar {
 				this._calendarContainer.innerHTML = yearSelectionTemplate(
 					startYear,
 					endYear,
-					currentYear
+					currentYear,
 				);
 
 				// Add click events to year buttons
@@ -567,7 +572,7 @@ export class KTDatepickerCalendar {
 
 				// Add navigation for year ranges
 				const prevYearsBtn = this._calendarContainer.querySelector(
-					'button[data-year-nav="prev"]'
+					'button[data-year-nav="prev"]',
 				);
 				if (prevYearsBtn) {
 					prevYearsBtn.addEventListener('click', () => {
@@ -580,7 +585,7 @@ export class KTDatepickerCalendar {
 				}
 
 				const nextYearsBtn = this._calendarContainer.querySelector(
-					'button[data-year-nav="next"]'
+					'button[data-year-nav="next"]',
 				);
 				if (nextYearsBtn) {
 					nextYearsBtn.addEventListener('click', () => {
@@ -606,7 +611,7 @@ export class KTDatepickerCalendar {
 	private _renderDays(
 		calendarMatrix: Date[][],
 		currentMonth: number,
-		currentYear: number
+		currentYear: number,
 	): string {
 		const state = this._stateManager.getState();
 		const config = this._stateManager.getConfig();
@@ -680,7 +685,7 @@ export class KTDatepickerCalendar {
 					isRangeStart,
 					isRangeEnd,
 					isInRange,
-					isWeekendDay
+					isWeekendDay,
 				);
 			}
 
@@ -702,7 +707,7 @@ export class KTDatepickerCalendar {
 
 		// Find the calendar header
 		const calendarHeader = this._dropdownElement.querySelector(
-			'.kt-datepicker-calendar-header'
+			'.kt-datepicker-calendar-header',
 		);
 		if (!calendarHeader) return;
 
@@ -713,15 +718,15 @@ export class KTDatepickerCalendar {
 		calendarHeader.innerHTML = monthYearSelectTemplate(
 			locale,
 			currentMonth,
-			currentYear
+			currentYear,
 		);
 
 		// Add event listeners to the month and year selectors
 		const monthSelector = calendarHeader.querySelector(
-			'.kt-datepicker-calendar-month-selector'
+			'.kt-datepicker-calendar-month-selector',
 		);
 		const yearSelector = calendarHeader.querySelector(
-			'.kt-datepicker-calendar-year-selector'
+			'.kt-datepicker-calendar-year-selector',
 		);
 
 		if (monthSelector) {
@@ -763,7 +768,7 @@ export class KTDatepickerCalendar {
 	 */
 	private _handleDateSelection(
 		selectedDate: Date,
-		clickedButton: HTMLElement
+		clickedButton: HTMLElement,
 	): void {
 		const state = this._stateManager.getState();
 		const config = this._stateManager.getConfig();
@@ -772,7 +777,7 @@ export class KTDatepickerCalendar {
 		if (isDateDisabled(selectedDate, config)) {
 			console.log(
 				'Date is disabled, ignoring selection:',
-				selectedDate.toISOString()
+				selectedDate.toISOString(),
 			);
 			return;
 		}
@@ -788,7 +793,7 @@ export class KTDatepickerCalendar {
 				state.selectedTime.hours,
 				state.selectedTime.minutes,
 				state.selectedTime.seconds,
-				0
+				0,
 			);
 		}
 
@@ -812,7 +817,7 @@ export class KTDatepickerCalendar {
 			'Current view month:',
 			currentViewMonth,
 			'Day of month:',
-			localSelectedDate.getDate()
+			localSelectedDate.getDate(),
 		);
 
 		// Call the state manager's setSelectedDate method
@@ -826,7 +831,7 @@ export class KTDatepickerCalendar {
 			if (isStartingNewRange) {
 				console.log(
 					'Starting new range selection with date:',
-					localSelectedDate.toISOString()
+					localSelectedDate.toISOString(),
 				);
 
 				// If starting a range with a date in a different month, update the view
@@ -840,7 +845,7 @@ export class KTDatepickerCalendar {
 				// This is the second click to complete a range
 				console.log(
 					'Completing range selection with date:',
-					localSelectedDate.toISOString()
+					localSelectedDate.toISOString(),
 				);
 
 				// If the selected range spans different months and we have multiple visible months
@@ -890,7 +895,7 @@ export class KTDatepickerCalendar {
 
 		// Find the clicked button element using data-date attribute
 		const dayButtons = this._calendarContainer?.querySelectorAll(
-			`button[data-date="${day}"]`
+			`button[data-date="${day}"]`,
 		);
 		if (!dayButtons || dayButtons.length === 0) return;
 
@@ -937,7 +942,7 @@ export class KTDatepickerCalendar {
 		if (isDateDisabled(selectedDate, config)) {
 			console.log(
 				'Date is disabled, ignoring selection:',
-				selectedDate.toISOString()
+				selectedDate.toISOString(),
 			);
 			return;
 		}
@@ -1005,7 +1010,7 @@ export class KTDatepickerCalendar {
 		// For range selection, check if range selection is in progress
 		if (config.range && state.isRangeSelectionInProgress) {
 			console.log(
-				'Apply button clicked, but range selection in progress - keeping dropdown open'
+				'Apply button clicked, but range selection in progress - keeping dropdown open',
 			);
 			// Don't close when range selection is in progress
 			return;
@@ -1022,24 +1027,24 @@ export class KTDatepickerCalendar {
 		if (!this._dropdownElement) return;
 
 		const timeContainer = this._dropdownElement.querySelector(
-			'.kt-datepicker-calendar-time-container'
+			'.kt-datepicker-calendar-time-container',
 		);
 		if (!timeContainer) return;
 
 		const hourInput = timeContainer.querySelector(
-			'input[aria-label="Hour"]'
+			'input[aria-label="Hour"]',
 		) as HTMLInputElement;
 		const minuteInput = timeContainer.querySelector(
-			'input[aria-label="Minute"]'
+			'input[aria-label="Minute"]',
 		) as HTMLInputElement;
 		const secondInput = timeContainer.querySelector(
-			'input[aria-label="Second"]'
+			'input[aria-label="Second"]',
 		) as HTMLInputElement;
 		const amButton = timeContainer.querySelector(
-			'button[aria-label="AM"]'
+			'button[aria-label="AM"]',
 		) as HTMLButtonElement;
 		const pmButton = timeContainer.querySelector(
-			'button[aria-label="PM"]'
+			'button[aria-label="PM"]',
 		) as HTMLButtonElement;
 
 		if (!hourInput || !minuteInput || !secondInput) return;
@@ -1093,10 +1098,10 @@ export class KTDatepickerCalendar {
 		if (!timeContainer) return;
 
 		const amButton = timeContainer.querySelector(
-			'button[aria-label="AM"]'
+			'button[aria-label="AM"]',
 		) as HTMLButtonElement;
 		const pmButton = timeContainer.querySelector(
-			'button[aria-label="PM"]'
+			'button[aria-label="PM"]',
 		) as HTMLButtonElement;
 
 		if (!amButton || !pmButton) return;
@@ -1184,19 +1189,19 @@ export class KTDatepickerCalendar {
 		if (!timeContainer) return;
 
 		const hourInput = timeContainer.querySelector(
-			'input[aria-label="Hour"]'
+			'input[aria-label="Hour"]',
 		) as HTMLInputElement;
 		const minuteInput = timeContainer.querySelector(
-			'input[aria-label="Minute"]'
+			'input[aria-label="Minute"]',
 		) as HTMLInputElement;
 		const secondInput = timeContainer.querySelector(
-			'input[aria-label="Second"]'
+			'input[aria-label="Second"]',
 		) as HTMLInputElement;
 		const amButton = timeContainer.querySelector(
-			'button[aria-label="AM"]'
+			'button[aria-label="AM"]',
 		) as HTMLButtonElement;
 		const pmButton = timeContainer.querySelector(
-			'button[aria-label="PM"]'
+			'button[aria-label="PM"]',
 		) as HTMLButtonElement;
 
 		// Get time from selected date or default to current time
@@ -1251,14 +1256,14 @@ export class KTDatepickerCalendar {
 				pmButton.classList.remove(
 					'bg-blue-500',
 					'text-white',
-					'border-blue-500'
+					'border-blue-500',
 				);
 				pmButton.classList.add('bg-gray-50', 'hover:bg-gray-100');
 			} else {
 				amButton.classList.remove(
 					'bg-blue-500',
 					'text-white',
-					'border-blue-500'
+					'border-blue-500',
 				);
 				amButton.classList.add('bg-gray-50', 'hover:bg-gray-100');
 				pmButton.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
@@ -1320,7 +1325,7 @@ export class KTDatepickerCalendar {
 
 		// Find all day cells with hover classes across all month containers
 		const hoverCells = this._calendarContainer.querySelectorAll(
-			'.bg-blue-50, .text-blue-600, button[data-hover-date="true"]'
+			'.bg-blue-50, .text-blue-600, button[data-hover-date="true"]',
 		);
 
 		hoverCells.forEach((cell) => {
@@ -1377,7 +1382,7 @@ export class KTDatepickerCalendar {
 		dateRangeISOStrings.forEach((dateStr) => {
 			// Find the day cell with matching date-id
 			const dayCells = this._calendarContainer.querySelectorAll(
-				`button[data-date-id="${dateStr}"]`
+				`button[data-date-id="${dateStr}"]`,
 			);
 
 			dayCells.forEach((cell) => {

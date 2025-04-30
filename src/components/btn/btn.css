@@ -1,222 +1,227 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
-  /* Base btn Styles */
-  .kt-btn {
-    @apply cursor-pointer whitespace-nowrap focus-visible:outline-hidden inline-flex items-center justify-center font-medium ring-offset-background transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50;
+	/* Base btn Styles */
+	.kt-btn {
+		@apply cursor-pointer whitespace-nowrap focus-visible:outline-hidden inline-flex items-center justify-center font-medium ring-offset-background transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50;
 		@apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 		@apply shrink-0 shadow-xs shadow-[rgba(0,0,0,0.05)];
 
 		svg {
 			@apply shrink-0;
-		}    
-  }
+		}
+	}
 
-  /* Variants */
-  .kt-btn { 
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 [&.active]:bg-primary/90; 
-  }
+	/* Variants */
+	.kt-btn {
+		@apply bg-primary text-primary-foreground hover:bg-primary/90 [&.active]:bg-primary/90;
+	}
 
-  .kt-btn-mono { 
-    @apply bg-mono text-mono-foreground hover:bg-mono/90 [&.active]:bg-mono/90; 
-  }
-  
-	.kt-btn-destructive { 
-    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 [&.active]:bg-destructive/90; 
-  }
-  
-	.kt-btn-secondary { 
-    @apply bg-secondary text-secondary-foreground hover:text-foreground hover:bg-secondary [&.active]:bg-secondary [&.active]:text-foreground; 
+	.kt-btn-mono {
+		@apply bg-mono text-mono-foreground hover:bg-mono/90 [&.active]:bg-mono/90;
+	}
 
-    i {
-      @apply text-muted-foreground;
-    }
+	.kt-btn-destructive {
+		@apply bg-destructive text-destructive-foreground hover:bg-destructive/90 [&.active]:bg-destructive/90;
+	}
 
-    svg {
-      @apply text-muted-foreground;
-    }
+	.kt-btn-secondary {
+		@apply bg-secondary text-secondary-foreground hover:text-foreground hover:bg-secondary [&.active]:bg-secondary [&.active]:text-foreground;
 
-    &:hover,
-    &.active {
-      i {
-        @apply text-muted-foreground;
-      }
-  
-      svg {
-        @apply text-muted-foreground;
-      }
-    }
-  }
-  
-	.kt-btn-outline { 
-    @apply bg-background text-secondary-foreground border border-input hover:bg-accent [&.active]:bg-accent hover:text-accent-foreground [&.active]:text-accent-foreground; 
+		i {
+			@apply text-muted-foreground;
+		}
 
-    i {
-      @apply text-muted-foreground;
-    }
+		svg {
+			@apply text-muted-foreground;
+		}
 
-    svg {
-      @apply text-muted-foreground;
-    }
+		&:hover,
+		&.active {
+			i {
+				@apply text-muted-foreground;
+			}
 
-    &:hover,
-    &.active {
-      i {
-        @apply text-secondary-foreground;
-      }
-  
-      svg {
-        @apply text-secondary-foreground;
-      }
-    }
+			svg {
+				@apply text-muted-foreground;
+			}
+		}
+	}
 
-    &.kt-btn-primary {
-      @apply border-primary/10 bg-primary/10 text-primary hover:text-primary-foreground hover:bg-primary [&.active]:text-primary-foreground [&.active]:bg-primary [&.active]:border-primary;
+	.kt-btn-outline {
+		@apply bg-background text-secondary-foreground border border-input hover:bg-accent [&.active]:bg-accent hover:text-accent-foreground [&.active]:text-accent-foreground;
 
-      i {
-        @apply text-primary;
-      }
-  
-      svg {
-        @apply text-primary;
-      }
-  
-      &:hover,
-      &.active {
-        i {
-          @apply text-primary-foreground;
-        }
-    
-        svg {
-          @apply text-primary-foreground;
-        }
-      }
-    }
+		i {
+			@apply text-muted-foreground;
+		}
 
-    &.kt-btn-destructive {
-      @apply border-destructive/10 bg-destructive/10 text-destructive hover:text-destructive-foreground hover:bg-destructive [&.active]:text-destructive-foreground [&.active]:bg-destructive [&.active]:border-destructive;
+		svg {
+			@apply text-muted-foreground;
+		}
 
-      i {
-        @apply text-destructive;
-      }
-  
-      svg {
-        @apply text-destructive;
-      }
-  
-      &:hover,
-      &.active {
-        i {
-          @apply text-destructive-foreground;
-        }
-    
-        svg {
-          @apply text-destructive-foreground;
-        }
-      }
-    }
-  }
-  
-	.kt-btn-ghost { 
-    @apply bg-transparent shadow-none text-accent-foreground hover:bg-accent hover:text-accent-foreground [&.active]:bg-accent [&.active]:text-accent-foreground; 
-    
-    &:not(.kt-btn-primary):not(.kt-btn-destructive) {
-      i {
-        @apply text-muted-foreground;
-      }
-  
-      svg {
-        @apply text-muted-foreground;
-      }
-  
-      &:hover,
-      &.active {
-        i {
-          @apply text-secondary-foreground;
-        }
-    
-        svg {
-          @apply text-secondary-foreground;
-        }
-      }
-    }
+		&:hover,
+		&.active {
+			i {
+				@apply text-secondary-foreground;
+			}
 
-    &.kt-btn-primary {
-      @apply text-primary hover:text-primary-foreground hover:bg-primary [&.active]:text-primary-foreground [&.active]:bg-primary;
-    }
+			svg {
+				@apply text-secondary-foreground;
+			}
+		}
 
-    &.kt-btn-destructive {
-      @apply text-destructive hover:text-destructive-foreground hover:bg-destructive [&.active]:text-destructive-foreground [&.active]:bg-destructive;
-    }
-  }
-  
-	.kt-btn-dim { 
-    @apply bg-transparent shadow-none text-muted-foreground hover:text-foreground hover:bg-transparent [&.active]:text-foreground [&.active]:bg-transparent; 
+		&.kt-btn-primary {
+			@apply border-primary/10 bg-primary/10 text-primary hover:text-primary-foreground hover:bg-primary [&.active]:text-primary-foreground [&.active]:bg-primary [&.active]:border-primary;
 
-    i {
-      @apply text-muted-foreground;
-    }
+			i {
+				@apply text-primary;
+			}
 
-    svg {
-      @apply text-muted-foreground;
-    }
+			svg {
+				@apply text-primary;
+			}
 
-    &:hover,
-    &.active {
-      i {
-        @apply text-secondary-foreground;
-      }
-  
-      svg {
-        @apply text-secondary-foreground;
-      }
-    }
-  }
+			&:hover,
+			&.active {
+				i {
+					@apply text-primary-foreground;
+				}
 
-  /* Size */
-  .kt-btn { 
-    @apply h-8.5 rounded-md px-3 gap-1 text-[0.8125rem] leading-(--text-sm--line-height); 
+				svg {
+					@apply text-primary-foreground;
+				}
+			}
+		}
 
-    svg {
-      @apply size-4;
-    }
+		&.kt-btn-destructive {
+			@apply border-destructive/10 bg-destructive/10 text-destructive hover:text-destructive-foreground hover:bg-destructive [&.active]:text-destructive-foreground [&.active]:bg-destructive [&.active]:border-destructive;
 
-    i {
-      @apply text-base; 
-    }
+			i {
+				@apply text-destructive;
+			}
 
-    &.kt-btn-icon {
-      @apply size-8.5 p-0;
-    }
-  }
+			svg {
+				@apply text-destructive;
+			}
 
-  .kt-btn-lg { 
-    @apply h-10 rounded-md px-4 gap-1.5 text-sm; 
+			&:hover,
+			&.active {
+				i {
+					@apply text-destructive-foreground;
+				}
 
-    svg {
-      @apply size-4;
-    }
+				svg {
+					@apply text-destructive-foreground;
+				}
+			}
+		}
+	}
 
-    i {
-      @apply text-base; 
-    }
+	.kt-btn-ghost {
+		@apply bg-transparent shadow-none text-accent-foreground hover:bg-accent hover:text-accent-foreground [&.active]:bg-accent [&.active]:text-accent-foreground;
 
-    &.kt-btn-icon {
-      @apply size-10 p-0;
-    }
-  }
+		&:not(.kt-btn-primary):not(.kt-btn-destructive) {
+			i {
+				@apply text-muted-foreground;
+			}
 
-  .kt-btn-sm { 
-    @apply h-7 rounded-md px-2.5 gap-1 text-xs; 
+			svg {
+				@apply text-muted-foreground;
+			}
 
-    svg {
-      @apply size-3.5;
-    }
+			&:hover,
+			&.active {
+				i {
+					@apply text-secondary-foreground;
+				}
 
-    i {
-      @apply text-sm; 
-    }
+				svg {
+					@apply text-secondary-foreground;
+				}
+			}
+		}
 
-    &.kt-btn-icon {
-      @apply size-7 p-0;
-    }
-  }
+		&.kt-btn-primary {
+			@apply text-primary hover:text-primary-foreground hover:bg-primary [&.active]:text-primary-foreground [&.active]:bg-primary;
+		}
+
+		&.kt-btn-destructive {
+			@apply text-destructive hover:text-destructive-foreground hover:bg-destructive [&.active]:text-destructive-foreground [&.active]:bg-destructive;
+		}
+	}
+
+	.kt-btn-dim {
+		@apply bg-transparent shadow-none text-muted-foreground hover:text-foreground hover:bg-transparent [&.active]:text-foreground [&.active]:bg-transparent;
+
+		i {
+			@apply text-muted-foreground;
+		}
+
+		svg {
+			@apply text-muted-foreground;
+		}
+
+		&:hover,
+		&.active {
+			i {
+				@apply text-secondary-foreground;
+			}
+
+			svg {
+				@apply text-secondary-foreground;
+			}
+		}
+	}
+
+	/* Size */
+	.kt-btn {
+		@apply h-8.5 rounded-md px-3 gap-1 text-[0.8125rem] leading-(--text-sm--line-height);
+
+		svg {
+			@apply size-4;
+		}
+
+		i {
+			@apply text-base;
+		}
+
+		&.kt-btn-icon {
+			@apply size-8.5 p-0;
+		}
+	}
+
+	.kt-btn-lg {
+		@apply h-10 rounded-md px-4 gap-1.5 text-sm;
+
+		svg {
+			@apply size-4;
+		}
+
+		i {
+			@apply text-base;
+		}
+
+		&.kt-btn-icon {
+			@apply size-10 p-0;
+		}
+	}
+
+	.kt-btn-sm {
+		@apply h-7 rounded-md px-2.5 gap-1 text-xs;
+
+		svg {
+			@apply size-3.5;
+		}
+
+		i {
+			@apply text-sm;
+		}
+
+		&.kt-btn-icon {
+			@apply size-7 p-0;
+		}
+	}
 }

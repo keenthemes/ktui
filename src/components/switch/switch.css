@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 /* Base Styles */
 @layer components {
 	.kt-switch {
@@ -11,10 +16,10 @@
 		}
 
 		&:checked,
-		&[aria-checked="true"] {
+		&[aria-checked='true'] {
 			@apply bg-primary;
 		}
-	}	
+	}
 
 	/* Sizes */
 	.kt-switch {
@@ -25,7 +30,7 @@
 		}
 
 		&:checked,
-		&[aria-checked="true"] {			
+		&[aria-checked='true'] {
 			&:before {
 				@apply translate-x-3.5;
 			}
@@ -40,7 +45,7 @@
 		}
 
 		&:checked,
-		&[aria-checked="true"] {			
+		&[aria-checked='true'] {
 			&:before {
 				@apply translate-x-3;
 			}
@@ -55,7 +60,7 @@
 		}
 
 		&:checked,
-		&[aria-checked="true"] {			
+		&[aria-checked='true'] {
 			&:before {
 				@apply translate-x-4;
 			}
@@ -65,13 +70,13 @@
 
 /* RTL Styles */
 @layer components {
-	[dir="rtl"] .kt-switch {
+	[dir='rtl'] .kt-switch {
 		&:before {
 			@apply -translate-x-1;
 		}
 
 		&:checked,
-		&[aria-checked="true"] {
+		&[aria-checked='true'] {
 			&:before {
 				@apply -translate-x-3.5;
 			}
@@ -79,7 +84,7 @@
 
 		&.kt-switch-sm {
 			&:checked,
-			&[aria-checked="true"] {
+			&[aria-checked='true'] {
 				&:before {
 					@apply -translate-x-3;
 				}
@@ -88,7 +93,7 @@
 
 		&.kt-switch-lg {
 			&:checked,
-			&[aria-checked="true"] {
+			&[aria-checked='true'] {
 				&:before {
 					@apply -translate-x-4;
 				}

@@ -1,17 +1,22 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
-  .kt-popover {
-    @apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] bg-popover text-popover-foreground border border-border text-sm;
+	.kt-popover {
+		@apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] bg-popover text-popover-foreground border border-border text-sm;
 
 		&:not(.show) {
-      @apply hidden;
-    }
-  }
+			@apply hidden;
+		}
+	}
 
-  .kt-popover-header {
-    @apply text-mono font-semibold px-2.5 py-2 border-b border-border;
-  }
+	.kt-popover-header {
+		@apply text-mono font-semibold px-2.5 py-2 border-b border-border;
+	}
 
-  .kt-popover-content {
-    @apply px-2.5 py-2;
-  }
+	.kt-popover-content {
+		@apply px-2.5 py-2;
+	}
 }

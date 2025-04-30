@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 
@@ -27,7 +32,7 @@ export class KTThemeSwitch
 
 	constructor(
 		element: HTMLElement | HTMLHtmlElement,
-		config: KTThemeSwitchConfigInterface | null = null
+		config: KTThemeSwitchConfigInterface | null = null,
 	) {
 		super();
 
@@ -38,7 +43,7 @@ export class KTThemeSwitch
 		this._buildConfig(config);
 		this._setMode(
 			(localStorage.getItem('kt-theme') ||
-				this._getOption('mode')) as KTThemeSwitchModeType
+				this._getOption('mode')) as KTThemeSwitchModeType,
 		);
 		this._handlers();
 	}
@@ -52,7 +57,7 @@ export class KTThemeSwitch
 			'click',
 			() => {
 				this._toggle();
-			}
+			},
 		);
 
 		KTEventHandler.on(
@@ -62,10 +67,10 @@ export class KTThemeSwitch
 			(event: Event, target: HTMLElement) => {
 				event.preventDefault();
 				const mode = target.getAttribute(
-					'data-kt-theme-switch-set'
+					'data-kt-theme-switch-set',
 				) as KTThemeSwitchModeType;
 				this._setMode(mode);
-			}
+			},
 		);
 	}
 
@@ -125,7 +130,7 @@ export class KTThemeSwitch
 
 	protected _updateState() {
 		const elements = document.querySelectorAll<HTMLInputElement>(
-			'input[type="checkbox"][data-kt-theme-switch-state]'
+			'input[type="checkbox"][data-kt-theme-switch-state]',
 		);
 		elements.forEach((element) => {
 			if (element.getAttribute('data-kt-theme-switch-state') === this._mode) {

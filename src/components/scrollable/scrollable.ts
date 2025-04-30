@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import KTData from '../../helpers/data';
 import KTDom from '../../helpers/dom';
 import KTUtils from '../../helpers/utils';
@@ -42,7 +47,7 @@ export class KTScrollable extends KTComponent implements KTScrollableInterface {
 			if (!this._element) return;
 			localStorage.setItem(
 				`${this._elementId}st`,
-				this._element.scrollTop.toString()
+				this._element.scrollTop.toString(),
 			);
 		});
 	}
@@ -243,7 +248,7 @@ export class KTScrollable extends KTComponent implements KTScrollableInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTScrollableConfigInterface
+		config?: KTScrollableConfigInterface,
 	): KTScrollable {
 		return this.getInstance(element) || new KTScrollable(element, config);
 	}
@@ -265,13 +270,13 @@ export class KTScrollable extends KTComponent implements KTScrollableInterface {
 				function () {
 					// Locate and update scrollable instances on window resize
 					const elements = document.querySelectorAll(
-						'[data-kt-scrollable-initialized]'
+						'[data-kt-scrollable-initialized]',
 					);
 					elements.forEach((element) => {
 						KTScrollable.getInstance(element as HTMLElement)?.update();
 					});
 				},
-				200
+				200,
 			);
 		});
 	}

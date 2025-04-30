@@ -1,9 +1,14 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
 	:root {
 		--kt-scrollable-scrollbar-size: 5px;
 		--kt-scrollable-thumb-color: var(--color-accent);
 	}
-	
+
 	.kt-scrollable::-webkit-scrollbar {
 		width: var(--kt-scrollable-scrollbar-size);
 	}
@@ -13,7 +18,7 @@
 	}
 
 	.kt-scrollable::-webkit-scrollbar-thumb {
-		background: var(--kt-scrollable-thumb-color); 
+		background: var(--kt-scrollable-thumb-color);
 		border-radius: var(--kt-scrollable-scrollbar-size);
 	}
 

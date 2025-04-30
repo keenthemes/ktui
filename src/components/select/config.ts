@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import { SelectMode } from './types';
 
 export const DefaultConfig: KTSelectConfigInterface = {
@@ -174,9 +179,12 @@ export class KTSelectState {
 		this._config = this._initDefaultConfig(config);
 	}
 
-	private _initDefaultConfig(config: KTSelectConfigInterface): KTSelectConfigInterface {
+	private _initDefaultConfig(
+		config: KTSelectConfigInterface,
+	): KTSelectConfigInterface {
 		return {
-			...DefaultConfig, ...config,
+			...DefaultConfig,
+			...config,
 		};
 	}
 
@@ -191,13 +199,14 @@ export class KTSelectState {
 					.catch(reject);
 			} else if (this._config.onFetch) {
 				this._config.isLoading = true;
-				this._config.onFetch(query)
-					.then(items => {
+				this._config
+					.onFetch(query)
+					.then((items) => {
 						this._config.items = items;
 						resolve(); // Resolve after onFetch completes
 					})
-					.catch(error => {
-						console.error("Error fetching data:", error);
+					.catch((error) => {
+						console.error('Error fetching data:', error);
 						reject(error); // Reject on error
 					})
 					.finally(() => {
@@ -218,21 +227,24 @@ export class KTSelectState {
 		}
 
 		return fetch(url)
-			.then(response => response.json())
-			.then(data => {
+			.then((response) => response.json())
+			.then((data) => {
 				if (this._config.apiDataProperty) {
 					// Extract the data property from the response
 					if (this._config.apiDataProperty in data) {
 						data = data[this._config.apiDataProperty];
 					} else {
-						console.error("Error fetching data:", `Property '${this._config.apiDataProperty}' not found in response`);
+						console.error(
+							'Error fetching data:',
+							`Property '${this._config.apiDataProperty}' not found in response`,
+						);
 						return;
 					}
 				}
 				this._config.items = data;
 			})
-			.catch(error => {
-				console.error("Error fetching data:", error);
+			.catch((error) => {
+				console.error('Error fetching data:', error);
 				// Handle error (e.g., display an error message)
 			})
 			.finally(() => {
@@ -245,7 +257,7 @@ export class KTSelectState {
 	}
 
 	public setItemsFromOptions(options: HTMLOptionElement[]): void {
-		this._config.items = options.map(option => ({
+		this._config.items = options.map((option) => ({
 			id: option.value,
 			title: option.textContent || '',
 			// Add other properties from option element if needed
@@ -257,7 +269,11 @@ export class KTSelectState {
 	}
 
 	public setSelectedOptions(value: string | string[]): void {
-		if (this._config.multiple && typeof value === 'string' && !this._selectedOptions.includes(value)) {
+		if (
+			this._config.multiple &&
+			typeof value === 'string' &&
+			!this._selectedOptions.includes(value)
+		) {
 			this._selectedOptions.push(value);
 		} else if (!this._config.multiple) {
 			// For single select, replace the previous selection with the new one
@@ -295,13 +311,12 @@ export class KTSelectState {
 	public modifyConfig(config: Partial<KTSelectConfigInterface>): void {
 		this._config = { ...this._config, ...config };
 	}
-
 }
 
 export const SelectOptionDefaultConfig: KTSelectOptionConfigInterface = {
 	description: '',
 	icon: null,
-}
+};
 
 export interface KTSelectOptionConfigInterface {
 	description: string;

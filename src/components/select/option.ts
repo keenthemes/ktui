@@ -1,10 +1,18 @@
-import KTComponent from "../component";
-import { KTSelectOptionConfigInterface, KTSelectConfigInterface } from "./config";
-import { defaultTemplates } from "./templates";
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
+import KTComponent from '../component';
+import {
+	KTSelectOptionConfigInterface,
+	KTSelectConfigInterface,
+} from './config';
+import { defaultTemplates } from './templates';
 
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
-	protected override readonly _dataOptionPrefix: string = 'kt-';  // Use 'kt-' prefix to support data-kt-select-option attributes
+	protected override readonly _dataOptionPrefix: string = 'kt-'; // Use 'kt-' prefix to support data-kt-select-option attributes
 	protected override readonly _config: KTSelectOptionConfigInterface;
 	private _globalConfig: KTSelectConfigInterface;
 

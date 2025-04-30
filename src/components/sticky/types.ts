@@ -1,18 +1,23 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 export interface KTStickyConfigInterface {
-	target: string,
-	name: string,
-	class: string,
-	zindex: string,
-	top: string,
-	start: string,
-	end: string,
-	width: string | number | object,
-	offset: number,
-	reverse: boolean,
-	release: string,
-	activate: string
+	target: string;
+	name: string;
+	class: string;
+	zindex: string;
+	top: string;
+	start: string;
+	end: string;
+	width: string | number | object;
+	offset: number;
+	reverse: boolean;
+	release: string;
+	activate: string;
 }
 
-export interface KTStickyInterface {		
+export interface KTStickyInterface {
 	update(): void;
 }

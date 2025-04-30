@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
@@ -54,7 +59,7 @@ export class KTSelectTags {
 		const mockOption = {
 			id: optionValue,
 			title: optionLabel,
-			selected: true
+			selected: true,
 		};
 
 		// Use the tag template
@@ -62,18 +67,14 @@ export class KTSelectTags {
 
 		// Add event listener to the close button
 		const closeButton = tag.querySelector(
-			`[data-kt-select-remove-button]`
+			`[data-kt-select-remove-button]`,
 		) as HTMLElement;
 
 		if (closeButton) {
-			this._eventManager.addListener(
-				closeButton,
-				'click',
-				(event: Event) => {
-					event.stopPropagation();
-					this._removeTag(optionValue);
-				}
-			);
+			this._eventManager.addListener(closeButton, 'click', (event: Event) => {
+				event.stopPropagation();
+				this._removeTag(optionValue);
+			});
 		}
 
 		return tag;
@@ -92,7 +93,9 @@ export class KTSelectTags {
 		}
 
 		// If not found in dropdown, look in original select element
-		const originalOptions = this._select.getElement().querySelectorAll('option');
+		const originalOptions = this._select
+			.getElement()
+			.querySelectorAll('option');
 		for (const option of Array.from(originalOptions)) {
 			if ((option as HTMLOptionElement).value === optionValue) {
 				return (option as HTMLOptionElement).textContent?.trim() || optionValue;

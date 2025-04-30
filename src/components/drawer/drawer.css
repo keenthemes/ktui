@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
 	.kt-drawer {
 		@apply flex-col shadow-lg bg-popover text-popover-foreground outline-none fixed z-10 transition duration-300 ease-in-out inset-0;
@@ -16,17 +21,17 @@
 	}
 
 	/* Alert Close */
-  .kt-drawer-close {
-    @apply shrink-0 size-6 cursor-pointer -me-2.5;
+	.kt-drawer-close {
+		@apply shrink-0 size-6 cursor-pointer -me-2.5;
 
 		i {
 			@apply opacity-70 text-xs;
 		}
 
-    > svg {
+		> svg {
 			@apply size-3.5 opacity-70;
 		}
-		
+
 		&:focus,
 		&:hover {
 			i {
@@ -37,7 +42,7 @@
 				@apply opacity-100;
 			}
 		}
-  }
+	}
 
 	.kt-drawer-content {
 		@apply overflow-y-auto grow p-5;

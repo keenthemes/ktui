@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import { KTOptionType } from '../types';
 
 const KTUtils = {
@@ -7,7 +12,7 @@ const KTUtils = {
 
 	getCssVar(variable: string): string {
 		let hex = getComputedStyle(document.documentElement).getPropertyValue(
-			variable
+			variable,
 		);
 
 		if (hex && hex.length > 0) {
@@ -56,7 +61,7 @@ const KTUtils = {
 			// Escape any IDs in the selector using CSS.escape
 			selector = selector.replace(
 				/#([^\s"#']+)/g,
-				(match, id) => `#${window.CSS.escape(id)}`
+				(match, id) => `#${window.CSS.escape(id)}`,
 			);
 		}
 
@@ -84,14 +89,14 @@ const KTUtils = {
 	isRTL(): boolean {
 		const htmlElement = document.querySelector('html');
 		return Boolean(
-			htmlElement && htmlElement.getAttribute('direction') === 'rtl'
+			htmlElement && htmlElement.getAttribute('direction') === 'rtl',
 		);
 	},
 
 	throttle(
 		timer: undefined | ReturnType<typeof setTimeout>,
 		func: CallableFunction,
-		delay: number
+		delay: number,
 	): void {
 		// If setTimeout is already scheduled, no need to do anything
 		if (timer) {

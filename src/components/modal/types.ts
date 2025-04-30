@@ -1,16 +1,21 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 export interface KTModalConfigInterface {
-	zindex?: string,
-	backdrop: boolean,
-  backdropClass: string,
-	backdropStatic: boolean,
-  keyboard: boolean,
-	disableScroll: boolean,
+	zindex?: string;
+	backdrop: boolean;
+	backdropClass: string;
+	backdropStatic: boolean;
+	keyboard: boolean;
+	disableScroll: boolean;
 	persistent: boolean;
 	focus: boolean;
 	hiddenClass: string;
 }
-export interface KTModalInterface {	
-	show(): void;	
+export interface KTModalInterface {
+	show(): void;
 	hide(): void;
 	toggle(): void;
 }

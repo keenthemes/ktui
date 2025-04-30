@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 // Define the sort order and filter criteria types
 export type KTDataTableSortOrderInterface = 'asc' | 'desc' | '';
 
@@ -20,7 +25,7 @@ export interface KTDataTableStateInterface {
 	filters: KTDataTableColumnFilterInterface[];
 	search: string | object;
 	originalData: KTDataTableDataInterface[];
-	originalDataAttributes: KTDataTableAttributeInterface[]
+	originalDataAttributes: KTDataTableAttributeInterface[];
 	_contentChecksum?: string;
 	_configChecksum?: string;
 }
@@ -67,7 +72,9 @@ export interface KTDataTableConfigInterface {
 	requestMethod?: string;
 	requestHeaders?: { [key: string]: string };
 	apiEndpoint?: string;
-	mapResponse?: (data: KTDataTableResponseDataInterface) => KTDataTableResponseDataInterface;
+	mapResponse?: (
+		data: KTDataTableResponseDataInterface,
+	) => KTDataTableResponseDataInterface;
 	mapRequest?: (query: URLSearchParams) => URLSearchParams;
 
 	pageSize?: number;
@@ -78,11 +85,22 @@ export interface KTDataTableConfigInterface {
 	pageSizes?: number[];
 	columns?: {
 		[key: keyof KTDataTableDataInterface | string]: {
-			title?: string,
-			render?: (item: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string, data: KTDataTableDataInterface, context: KTDataTableInterface) => string,
-			checkbox?: boolean,
-			createdCell?: (cell: HTMLTableCellElement, cellData: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string, rowData: KTDataTableDataInterface, row: HTMLTableRowElement) => void,
-		}
+			title?: string;
+			render?: (
+				item: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string,
+				data: KTDataTableDataInterface,
+				context: KTDataTableInterface,
+			) => string;
+			checkbox?: boolean;
+			createdCell?: (
+				cell: HTMLTableCellElement,
+				cellData:
+					| KTDataTableDataInterface[keyof KTDataTableDataInterface]
+					| string,
+				rowData: KTDataTableDataInterface,
+				row: HTMLTableRowElement,
+			) => void;
+		};
 	};
 
 	infoEmpty?: string;
@@ -90,58 +108,65 @@ export interface KTDataTableConfigInterface {
 	info?: string;
 
 	loading?: {
-		template: string,
-		content: string,
+		template: string;
+		content: string;
 	};
 
 	sort?: {
 		classes?: {
-			base?: string,
-			asc?: string,
-			desc?: string,
+			base?: string;
+			asc?: string;
+			desc?: string;
 		};
 		// local data sort callback
-		callback?: (data: KTDataTableDataInterface[], sortField: keyof KTDataTableDataInterface | number, sortOrder: KTDataTableSortOrderInterface) => KTDataTableDataInterface[];
-	},
+		callback?: (
+			data: KTDataTableDataInterface[],
+			sortField: keyof KTDataTableDataInterface | number,
+			sortOrder: KTDataTableSortOrderInterface,
+		) => KTDataTableDataInterface[];
+	};
 
 	search?: {
-		delay?: number, // delay in milliseconds
-		callback?: (data: KTDataTableDataInterface[], search: string) => KTDataTableDataInterface[]; // search callback
-	},
+		delay?: number; // delay in milliseconds
+		callback?: (
+			data: KTDataTableDataInterface[],
+			search: string,
+		) => KTDataTableDataInterface[]; // search callback
+	};
 
 	pagination?: {
 		number: {
-			class: string,
-			text: string,
-		},
+			class: string;
+			text: string;
+		};
 		previous: {
-			class: string,
-			text: string,
-		},
+			class: string;
+			text: string;
+		};
 		next: {
-			class: string,
-			text: string,
-		},
+			class: string;
+			text: string;
+		};
 		more: {
-			class: string,
-			text: string,
-		}
-	},
+			class: string;
+			text: string;
+		};
+	};
 
 	attributes?: {
-		table?: string,
-		info?: string,
-		size?: string,
-		pagination?: string,
-		spinner?: string,
-		check?: string,
-		checkbox?: string,
-	},
+		table?: string;
+		info?: string;
+		size?: string;
+		pagination?: string;
+		spinner?: string;
+		check?: string;
+		checkbox?: string;
+	};
 
 	checkbox?: {
-		checkedClass?: string,
-		preserveSelection?: boolean,
-	}
+		checkedClass?: string;
+		preserveSelection?: boolean;
+	};
 
 	_state?: KTDataTableStateInterface;
 	_data?: KTDataTableDataInterface[];
@@ -149,7 +174,10 @@ export interface KTDataTableConfigInterface {
 	loadingClass?: string;
 }
 
-export type KTDataTableColumnFilterTypeInterface = 'text' | 'numeric' | 'dateRange';
+export type KTDataTableColumnFilterTypeInterface =
+	| 'text'
+	| 'numeric'
+	| 'dateRange';
 
 export type KTDataTableColumnFilterInterface = {
 	column: keyof KTDataTableDataInterface;

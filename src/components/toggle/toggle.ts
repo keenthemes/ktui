@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import KTData from '../../helpers/data';
 import KTDom from '../../helpers/dom';
 import KTComponent from '../component';
@@ -23,7 +28,7 @@ export class KTToggle extends KTComponent implements KTToggleInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTToggleConfigInterface | null = null
+		config: KTToggleConfigInterface | null = null,
 	) {
 		super();
 
@@ -51,7 +56,7 @@ export class KTToggle extends KTComponent implements KTToggleInterface {
 	private _getTargetElement(): HTMLElement | null {
 		return (
 			KTDom.getElement(
-				this._element.getAttribute('data-kt-toggle') as string
+				this._element.getAttribute('data-kt-toggle') as string,
 			) || KTDom.getElement(this._getOption('target') as string)
 		);
 	}
@@ -78,7 +83,7 @@ export class KTToggle extends KTComponent implements KTToggleInterface {
 		if (this._getOption('removeClass')) {
 			KTDom.removeClass(
 				this._targetElement,
-				this._getOption('removeClass') as string
+				this._getOption('removeClass') as string,
 			);
 		}
 
@@ -90,20 +95,20 @@ export class KTToggle extends KTComponent implements KTToggleInterface {
 			if (this._getOption('attribute')) {
 				this._targetElement.setAttribute(
 					this._getOption('attribute') as string,
-					'true'
+					'true',
 				);
 			}
 		} else {
 			if (this._getOption('class')) {
 				KTDom.removeClass(
 					this._targetElement,
-					this._getOption('class') as string
+					this._getOption('class') as string,
 				);
 			}
 
 			if (this._getOption('attribute')) {
 				this._targetElement.removeAttribute(
-					this._getOption('attribute') as string
+					this._getOption('attribute') as string,
 				);
 			}
 		}
@@ -146,7 +151,7 @@ export class KTToggle extends KTComponent implements KTToggleInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTToggleConfigInterface
+		config?: KTToggleConfigInterface,
 	): KTToggle {
 		return this.getInstance(element) || new KTToggle(element, config);
 	}

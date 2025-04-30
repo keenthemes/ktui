@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 // utils.ts
 
 import { KTSelect } from './select';
@@ -10,7 +15,7 @@ import { KTSelectConfigInterface } from './config';
 export function formatCurrency(value: number): string {
 	return new Intl.NumberFormat('en-US', {
 		style: 'currency',
-		currency: 'USD'
+		currency: 'USD',
 	}).format(value);
 }
 
@@ -22,12 +27,14 @@ export function filterOptions(
 	query: string,
 	config: KTSelectConfigInterface,
 	dropdownElement: HTMLElement,
-	onVisibleCount?: (count: number) => void
+	onVisibleCount?: (count: number) => void,
 ): number {
 	let visibleOptionsCount = 0;
 
 	// Clear existing "no results" messages
-	const noResultsElement = dropdownElement.querySelector('[data-kt-select-no-results]');
+	const noResultsElement = dropdownElement.querySelector(
+		'[data-kt-select-no-results]',
+	);
 	if (noResultsElement) {
 		noResultsElement.remove();
 	}
@@ -40,13 +47,21 @@ export function filterOptions(
 			option.classList.remove('hidden');
 
 			// Clean up any inline display styles from legacy code
-			if (option.hasAttribute('style') && option.getAttribute('style').includes('display:')) {
+			if (
+				option.hasAttribute('style') &&
+				option.getAttribute('style').includes('display:')
+			) {
 				const styleAttr = option.getAttribute('style');
-				if (styleAttr.trim() === 'display: none;' || styleAttr.trim() === 'display: block;') {
+				if (
+					styleAttr.trim() === 'display: none;' ||
+					styleAttr.trim() === 'display: block;'
+				) {
 					option.removeAttribute('style');
 				} else {
-					option.setAttribute('style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim());
+					option.setAttribute(
+						'style',
+						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
+					);
 				}
 			}
 			visibleOptionsCount++;
@@ -70,13 +85,21 @@ export function filterOptions(
 			option.classList.remove('hidden');
 
 			// Remove any inline display styles that might be present
-			if (option.hasAttribute('style') && option.getAttribute('style').includes('display:')) {
+			if (
+				option.hasAttribute('style') &&
+				option.getAttribute('style').includes('display:')
+			) {
 				const styleAttr = option.getAttribute('style');
-				if (styleAttr.trim() === 'display: none;' || styleAttr.trim() === 'display: block;') {
+				if (
+					styleAttr.trim() === 'display: none;' ||
+					styleAttr.trim() === 'display: block;'
+				) {
 					option.removeAttribute('style');
 				} else {
-					option.setAttribute('style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim());
+					option.setAttribute(
+						'style',
+						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
+					);
 				}
 			}
 
@@ -85,12 +108,16 @@ export function filterOptions(
 			// Apply highlighting if needed - but preserve the option structure
 			if (isMatch && config.searchHighlight && query.trim() !== '') {
 				// Clone option elements that contain icons or descriptions
-				const hasIcon = option.querySelector('[data-kt-select-option-icon]') !== null;
-				const hasDescription = option.querySelector('[data-kt-select-option-description]') !== null;
+				const hasIcon =
+					option.querySelector('[data-kt-select-option-icon]') !== null;
+				const hasDescription =
+					option.querySelector('[data-kt-select-option-description]') !== null;
 
 				if (hasIcon || hasDescription) {
 					// Only highlight the text part without changing structure
-					const titleElement = option.querySelector('[data-kt-option-title]') as HTMLElement;
+					const titleElement = option.querySelector(
+						'[data-kt-option-title]',
+					) as HTMLElement;
 					if (titleElement) {
 						highlightTextInElement(titleElement, query, config);
 					}
@@ -104,13 +131,21 @@ export function filterOptions(
 			option.classList.add('hidden');
 
 			// Remove any inline display styles
-			if (option.hasAttribute('style') && option.getAttribute('style').includes('display:')) {
+			if (
+				option.hasAttribute('style') &&
+				option.getAttribute('style').includes('display:')
+			) {
 				const styleAttr = option.getAttribute('style');
-				if (styleAttr.trim() === 'display: none;' || styleAttr.trim() === 'display: block;') {
+				if (
+					styleAttr.trim() === 'display: none;' ||
+					styleAttr.trim() === 'display: block;'
+				) {
 					option.removeAttribute('style');
 				} else {
-					option.setAttribute('style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim());
+					option.setAttribute(
+						'style',
+						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
+					);
 				}
 			}
 		}
@@ -120,8 +155,6 @@ export function filterOptions(
 			break;
 		}
 	}
-
-
 
 	// Call the callback with the visible count if provided
 	if (onVisibleCount) {
@@ -134,41 +167,45 @@ export function filterOptions(
 /**
  * Highlight text only within a specific element, preserving other elements
  */
-export function highlightTextInElement(element: HTMLElement, query: string, config: KTSelectConfigInterface): void {
-    if (!element || !query || query.trim() === '') return;
+export function highlightTextInElement(
+	element: HTMLElement,
+	query: string,
+	config: KTSelectConfigInterface,
+): void {
+	if (!element || !query || query.trim() === '') return;
 
-    const queryLower = query.toLowerCase();
+	const queryLower = query.toLowerCase();
 
-    function walk(node: Node) {
-        if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.nodeValue || '';
-            const textLower = text.toLowerCase();
-            const matchIndex = textLower.indexOf(queryLower);
+	function walk(node: Node) {
+		if (node.nodeType === Node.TEXT_NODE) {
+			const text = node.nodeValue || '';
+			const textLower = text.toLowerCase();
+			const matchIndex = textLower.indexOf(queryLower);
 
-            if (matchIndex !== -1) {
-                const before = text.slice(0, matchIndex);
-                const match = text.slice(matchIndex, matchIndex + query.length);
-                const after = text.slice(matchIndex + query.length);
+			if (matchIndex !== -1) {
+				const before = text.slice(0, matchIndex);
+				const match = text.slice(matchIndex, matchIndex + query.length);
+				const after = text.slice(matchIndex + query.length);
 
-                const frag = document.createDocumentFragment();
-                if (before) frag.appendChild(document.createTextNode(before));
+				const frag = document.createDocumentFragment();
+				if (before) frag.appendChild(document.createTextNode(before));
 
-                // Use the highlight template, which returns an HTMLElement
-                const highlightSpan = defaultTemplates.highlight(config, match);
-                frag.appendChild(highlightSpan);
+				// Use the highlight template, which returns an HTMLElement
+				const highlightSpan = defaultTemplates.highlight(config, match);
+				frag.appendChild(highlightSpan);
 
-                if (after) frag.appendChild(document.createTextNode(after));
+				if (after) frag.appendChild(document.createTextNode(after));
 
-                node.parentNode?.replaceChild(frag, node);
-                // Only highlight the first occurrence in this node
-            }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-            // Don't re-highlight already highlighted nodes
-            if ((node as HTMLElement).classList.contains('highlight')) return;
-            Array.from(node.childNodes).forEach(walk);
-        }
-    }
-    walk(element);
+				node.parentNode?.replaceChild(frag, node);
+				// Only highlight the first occurrence in this node
+			}
+		} else if (node.nodeType === Node.ELEMENT_NODE) {
+			// Don't re-highlight already highlighted nodes
+			if ((node as HTMLElement).classList.contains('highlight')) return;
+			Array.from(node.childNodes).forEach(walk);
+		}
+	}
+	walk(element);
 }
 
 /**
@@ -188,7 +225,7 @@ export class FocusManager {
 	constructor(
 		element: HTMLElement,
 		optionsSelector: string = '[data-kt-select-option]',
-		config?: KTSelectConfigInterface
+		config?: KTSelectConfigInterface,
 	) {
 		this._element = element;
 		this._optionsSelector = optionsSelector;
@@ -234,8 +271,8 @@ export class FocusManager {
 	 */
 	public getVisibleOptions(): HTMLElement[] {
 		return Array.from(
-			this._element.querySelectorAll(this._optionsSelector)
-		).filter(option => {
+			this._element.querySelectorAll(this._optionsSelector),
+		).filter((option) => {
 			const element = option as HTMLElement;
 			// Check only for hidden class
 			if (element.classList.contains('hidden')) {
@@ -261,7 +298,8 @@ export class FocusManager {
 		if (this._focusedOptionIndex === null) {
 			this._focusedOptionIndex = 0;
 		} else {
-			this._focusedOptionIndex = (this._focusedOptionIndex + 1) % options.length;
+			this._focusedOptionIndex =
+				(this._focusedOptionIndex + 1) % options.length;
 		}
 
 		const option = options[this._focusedOptionIndex];
@@ -283,7 +321,8 @@ export class FocusManager {
 		if (this._focusedOptionIndex === null) {
 			this._focusedOptionIndex = options.length - 1;
 		} else {
-			this._focusedOptionIndex = (this._focusedOptionIndex - 1 + options.length) % options.length;
+			this._focusedOptionIndex =
+				(this._focusedOptionIndex - 1 + options.length) % options.length;
 		}
 
 		const option = options[this._focusedOptionIndex];
@@ -315,11 +354,11 @@ export class FocusManager {
 	public resetFocus(): void {
 		// Find all elements with the focus classes
 		const focusedElements = this._element.querySelectorAll(
-			`.${this._focusClass}, .${this._hoverClass}, .${this._bgClass}, .${this._fontClass}`
+			`.${this._focusClass}, .${this._hoverClass}, .${this._bgClass}, .${this._fontClass}`,
 		);
 
 		// Remove classes from all elements
-		focusedElements.forEach(element => {
+		focusedElements.forEach((element) => {
 			element.classList.remove(this._focusClass);
 			element.classList.remove(this._hoverClass);
 			element.classList.remove(this._bgClass);
@@ -328,7 +367,10 @@ export class FocusManager {
 
 		// Reset index if visible options have changed
 		const visibleOptions = this.getVisibleOptions();
-		if (this._focusedOptionIndex !== null && this._focusedOptionIndex >= visibleOptions.length) {
+		if (
+			this._focusedOptionIndex !== null &&
+			this._focusedOptionIndex >= visibleOptions.length
+		) {
 			this._focusedOptionIndex = null;
 		}
 	}
@@ -339,7 +381,9 @@ export class FocusManager {
 	public scrollIntoView(option: HTMLElement): void {
 		if (!option) return;
 
-		const container = this._element.querySelector('[data-kt-select-options-container]');
+		const container = this._element.querySelector(
+			'[data-kt-select-options-container]',
+		);
 		if (!container) return;
 
 		const optionRect = option.getBoundingClientRect();
@@ -360,7 +404,7 @@ export class FocusManager {
 	 */
 	public focusOptionByValue(value: string): boolean {
 		const options = this.getVisibleOptions();
-		const index = options.findIndex(option => option.dataset.value === value);
+		const index = options.findIndex((option) => option.dataset.value === value);
 
 		if (index >= 0) {
 			this._focusedOptionIndex = index;
@@ -378,7 +422,10 @@ export class FocusManager {
 	public getFocusedOption(): HTMLElement | null {
 		const options = this.getVisibleOptions();
 
-		if (this._focusedOptionIndex !== null && this._focusedOptionIndex < options.length) {
+		if (
+			this._focusedOptionIndex !== null &&
+			this._focusedOptionIndex < options.length
+		) {
 			return options[this._focusedOptionIndex];
 		}
 
@@ -417,15 +464,15 @@ export function handleDropdownKeyNavigation(
 	event: KeyboardEvent,
 	select: KTSelect,
 	config: {
-		multiple?: boolean,
-		closeOnSelect?: boolean
+		multiple?: boolean;
+		closeOnSelect?: boolean;
 	},
 	callbacks?: {
-		onArrowUp?: () => void,
-		onArrowDown?: () => void,
-		onEnter?: () => void,
-		onClose?: () => void
-	}
+		onArrowUp?: () => void;
+		onArrowDown?: () => void;
+		onEnter?: () => void;
+		onClose?: () => void;
+	},
 ): void {
 	try {
 		// Get the dropdown state
@@ -433,13 +480,17 @@ export function handleDropdownKeyNavigation(
 
 		// Log the event to help debug
 		const origin = 'handleDropdownKeyNavigation';
-		if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Key: ${event.key}, Dropdown open: ${isDropdownOpen}`);
+		if (select.getConfig && select.getConfig().debug)
+			console.log(
+				`[${origin}] Key: ${event.key}, Dropdown open: ${isDropdownOpen}`,
+			);
 
 		// Handle basic keyboard navigation
 		switch (event.key) {
 			case 'ArrowDown':
 				if (!isDropdownOpen) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Opening dropdown on ArrowDown`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Opening dropdown on ArrowDown`);
 					select.openDropdown();
 
 					// Focus the first option after opening
@@ -447,15 +498,18 @@ export function handleDropdownKeyNavigation(
 						(select as any)._focusNextOption();
 					}, 50);
 				} else if (callbacks?.onArrowDown) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Using custom onArrowDown callback`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Using custom onArrowDown callback`);
 					callbacks.onArrowDown();
 				} else {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Using default _focusNextOption`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Using default _focusNextOption`);
 					const focusedOption = (select as any)._focusNextOption();
 
 					// Ensure we have a focused option
 					if (focusedOption) {
-						if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Focused next option:`, focusedOption);
+						if (select.getConfig && select.getConfig().debug)
+							console.log(`[${origin}] Focused next option:`, focusedOption);
 					}
 				}
 				event.preventDefault();
@@ -463,7 +517,8 @@ export function handleDropdownKeyNavigation(
 
 			case 'ArrowUp':
 				if (!isDropdownOpen) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Opening dropdown on ArrowUp`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Opening dropdown on ArrowUp`);
 					select.openDropdown();
 
 					// Focus the last option after opening
@@ -471,15 +526,21 @@ export function handleDropdownKeyNavigation(
 						(select as any)._focusPreviousOption();
 					}, 50);
 				} else if (callbacks?.onArrowUp) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Using custom onArrowUp callback`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Using custom onArrowUp callback`);
 					callbacks.onArrowUp();
 				} else {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Using default _focusPreviousOption`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Using default _focusPreviousOption`);
 					const focusedOption = (select as any)._focusPreviousOption();
 
 					// Ensure we have a focused option
 					if (focusedOption) {
-						if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Focused previous option:`, focusedOption);
+						if (select.getConfig && select.getConfig().debug)
+							console.log(
+								`[${origin}] Focused previous option:`,
+								focusedOption,
+							);
 					}
 				}
 				event.preventDefault();
@@ -490,19 +551,25 @@ export function handleDropdownKeyNavigation(
 				event.preventDefault();
 
 				if (isDropdownOpen) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Enter pressed with dropdown open`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Enter pressed with dropdown open`);
 
 					// For combobox mode, ensure we update the input value directly
 					const isCombobox = select.getConfig().mode === 'combobox';
 					const comboboxModule = (select as any)._comboboxModule;
 
 					if (callbacks?.onEnter) {
-						if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Using custom onEnter callback`);
+						if (select.getConfig && select.getConfig().debug)
+							console.log(`[${origin}] Using custom onEnter callback`);
 						callbacks.onEnter();
 					} else {
-						if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Using default selectFocusedOption`);
+						if (select.getConfig && select.getConfig().debug)
+							console.log(`[${origin}] Using default selectFocusedOption`);
 						// Make sure there is a focused option before trying to select it
-						if ((select as any)._focusManager && (select as any)._focusManager.getFocusedOption()) {
+						if (
+							(select as any)._focusManager &&
+							(select as any)._focusManager.getFocusedOption()
+						) {
 							select.selectFocusedOption();
 						} else {
 							// If no option is focused, try to focus the first one
@@ -516,12 +583,14 @@ export function handleDropdownKeyNavigation(
 
 					// Close dropdown after selection if not multiple and closeOnSelect is true
 					if (!config.multiple && config.closeOnSelect !== false) {
-						if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Closing dropdown after selection`);
+						if (select.getConfig && select.getConfig().debug)
+							console.log(`[${origin}] Closing dropdown after selection`);
 						select.closeDropdown();
 					}
 				} else {
 					// If dropdown is closed, open it on Enter
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Opening dropdown on Enter`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Opening dropdown on Enter`);
 					select.openDropdown();
 
 					// Focus the first option after opening
@@ -534,7 +603,8 @@ export function handleDropdownKeyNavigation(
 			case 'Tab':
 				// Only handle tab if dropdown is open
 				if (isDropdownOpen) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Closing dropdown on Tab`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Closing dropdown on Tab`);
 					select.closeDropdown();
 					if (callbacks?.onClose) {
 						callbacks.onClose();
@@ -546,7 +616,8 @@ export function handleDropdownKeyNavigation(
 			case 'Escape':
 				// Only handle escape if dropdown is open
 				if (isDropdownOpen) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Closing dropdown on Escape`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Closing dropdown on Escape`);
 					select.closeDropdown();
 					if (callbacks?.onClose) {
 						callbacks.onClose();
@@ -558,7 +629,8 @@ export function handleDropdownKeyNavigation(
 			case ' ': // Space key
 				// If dropdown is closed, space should open it (but not if in combobox mode)
 				if (!isDropdownOpen && !(select.getConfig().mode === 'combobox')) {
-					if (select.getConfig && select.getConfig().debug) console.log(`[${origin}] Opening dropdown on Space`);
+					if (select.getConfig && select.getConfig().debug)
+						console.log(`[${origin}] Opening dropdown on Space`);
 					select.openDropdown();
 
 					// Focus the first option after opening
@@ -579,7 +651,10 @@ export function handleDropdownKeyNavigation(
  * Centralized event listener management
  */
 export class EventManager {
-	private _boundHandlers: Map<string, Map<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>> = new Map();
+	private _boundHandlers: Map<
+		string,
+		Map<EventListenerOrEventListenerObject, EventListenerOrEventListenerObject>
+	> = new Map();
 
 	/**
 	 * Add an event listener with a bound context
@@ -588,14 +663,15 @@ export class EventManager {
 		element: HTMLElement,
 		event: string,
 		handler: EventListenerOrEventListenerObject,
-		context?: any
+		context?: any,
 	): void {
 		if (!element) return;
 
 		// Create a bound version of the handler if context provided
-		const boundHandler: EventListenerOrEventListenerObject = context && typeof handler === 'function'
-			? handler.bind(context)
-			: handler;
+		const boundHandler: EventListenerOrEventListenerObject =
+			context && typeof handler === 'function'
+				? handler.bind(context)
+				: handler;
 
 		// Store the relationship between original and bound handler
 		if (!this._boundHandlers.has(event)) {
@@ -615,7 +691,7 @@ export class EventManager {
 	public removeListener(
 		element: HTMLElement,
 		event: string,
-		handler: EventListenerOrEventListenerObject
+		handler: EventListenerOrEventListenerObject,
 	): void {
 		if (!element) return;
 
@@ -658,7 +734,10 @@ export class EventManager {
 /**
  * Debounce function to limit how often a function can be called
  */
-export function debounce(func: (...args: any[]) => void, delay: number): (...args: any[]) => void {
+export function debounce(
+	func: (...args: any[]) => void,
+	delay: number,
+): (...args: any[]) => void {
 	let timeout: ReturnType<typeof setTimeout>;
 
 	return function (...args: any[]) {

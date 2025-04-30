@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
 	.kt-breadcrumb {
 		@apply flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground;
@@ -18,7 +23,7 @@
 	.kt-breadcrumb-page {
 		@apply font-normal text-foreground;
 	}
-	
+
 	.kt-breadcrumb-separator {
 		svg {
 			@apply size-3.5;

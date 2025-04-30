@@ -1,42 +1,46 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
-  .kt-dropdown {
-    @apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
+	.kt-dropdown {
+		@apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
 
-    &:not(.open) {
-      @apply hidden;
-    }
-  }
+		&:not(.open) {
+			@apply hidden;
+		}
+	}
 
-  .kt-dropdown-header {
-    @apply px-4 py-3 font-semibold border-b border-border;
-  }
+	.kt-dropdown-header {
+		@apply px-4 py-3 font-semibold border-b border-border;
+	}
 
-  .kt-dropdown-body {
-    @apply px-4 py-3;
-  }
+	.kt-dropdown-body {
+		@apply px-4 py-3;
+	}
 }
-
 
 @custom-variant kt-dropdown-open {
 	[data-kt-dropdown-initialized].open > [data-kt-dropdown-toggle]& {
 		@slot;
 	}
 
-  [data-kt-dropdown-initialized].open > [data-kt-dropdown-toggle] & {
+	[data-kt-dropdown-initialized].open > [data-kt-dropdown-toggle] & {
 		@slot;
 	}
 }
 
 @custom-variant kt-dropdown-selected {
-  [data-kt-dropdown-initialized] .selected {
-    @slot;
-  }
+	[data-kt-dropdown-initialized] .selected {
+		@slot;
+	}
 
 	[data-kt-dropdown-initialized] .selected & {
-    @slot;
-  }
+		@slot;
+	}
 
-  [data-kt-dropdown-initialized] &.selected {
-    @slot;
-  }
+	[data-kt-dropdown-initialized] &.selected {
+		@slot;
+	}
 }

@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
 	.kt-form {
 		@apply space-y-6;
@@ -23,7 +28,7 @@
 		.kt-radio:disabled + & {
 			@apply cursor-not-allowed opacity-50;
 		}
-	}	
+	}
 
 	.kt-form-description {
 		@apply text-xs text-secondary-foreground font-normal -mt-1;
@@ -37,13 +42,13 @@
 		@apply flex items-center justify-end gap-2.5;
 	}
 
-	.kt-form-item:has([aria-invalid=true]) {
+	.kt-form-item:has([aria-invalid='true']) {
 		.kt-form-message {
-			@apply block;	
+			@apply block;
 		}
 
 		.kt-form-description {
-			@apply hidden;	
+			@apply hidden;
 		}
 	}
 }

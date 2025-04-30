@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import KTComponent from '../component';
 import {
 	KTDataTableDataInterface,
@@ -11,7 +16,10 @@ import {
 import KTUtils from '../../helpers/utils';
 import KTComponents from '../../index';
 import KTData from '../../helpers/data';
-import { createCheckboxHandler, KTDataTableCheckboxAPI } from './datatable-checkbox';
+import {
+	createCheckboxHandler,
+	KTDataTableCheckboxAPI,
+} from './datatable-checkbox';
 import { createSortHandler, KTDataTableSortAPI } from './datatable-sort';
 
 /**
@@ -71,7 +79,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			(eventName: string, eventData?: any) => {
 				this._fireEvent(eventName, eventData);
 				this._dispatchEvent(eventName, eventData);
-			}
+			},
 		);
 
 		// Initialize sort handler
@@ -88,7 +96,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			},
 			this._fireEvent.bind(this),
 			this._dispatchEvent.bind(this),
-			this._updateData.bind(this)
+			this._updateData.bind(this),
 		);
 
 		this._sortHandler.initSort();
@@ -113,7 +121,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns Default configuration merged with user-provided options
 	 */
 	private _initDefaultConfig(
-		config?: KTDataTableConfigInterface
+		config?: KTDataTableConfigInterface,
 	): KTDataTableConfigInterface {
 		return {
 			/**
@@ -223,8 +231,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				 * @param sortOrder Sorting order (ascending or descending)
 				 * @returns Sorted data array
 				 */
-				callback: (data: T[], sortField: keyof T | number, sortOrder: KTDataTableSortOrderInterface): T[] => {
-					return this._sortHandler ? this._sortHandler.sortData(data, sortField, sortOrder) : data;
+				callback: (
+					data: T[],
+					sortField: keyof T | number,
+					sortOrder: KTDataTableSortOrderInterface,
+				): T[] => {
+					return this._sortHandler
+						? this._sortHandler.sortData(data, sortField, sortOrder)
+						: data;
 				},
 			},
 			search: {
@@ -264,7 +278,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 									.replace(/<[^>]*>|&nbsp;/g, '')
 									.toLowerCase();
 								return valueText.includes(search.toLowerCase());
-							}
+							},
 						);
 					});
 				},
@@ -347,7 +361,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		 * Data table element
 		 */
 		this._tableElement = this._element.querySelector<HTMLTableElement>(
-			this._config.attributes.table
+			this._config.attributes.table,
 		)!;
 		/**
 		 * Table body element
@@ -366,19 +380,19 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		 * Pagination info element
 		 */
 		this._infoElement = this._element.querySelector<HTMLElement>(
-			this._config.attributes.info
+			this._config.attributes.info,
 		)!;
 		/**
 		 * Page size dropdown element
 		 */
 		this._sizeElement = this._element.querySelector<HTMLSelectElement>(
-			this._config.attributes.size
+			this._config.attributes.size,
 		)!;
 		/**
 		 * Pagination element
 		 */
 		this._paginationElement = this._element.querySelector<HTMLElement>(
-			this._config.attributes.pagination
+			this._config.attributes.pagination,
 		)!;
 	}
 
@@ -397,8 +411,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._originalTheadClass = this._theadElement.className || '';
 
 			// Store th classes
-			const thElements = this._theadElement.querySelectorAll<HTMLTableCellElement>('th');
-			this._originalThClasses = Array.from(thElements).map((th) => th.className || '');
+			const thElements =
+				this._theadElement.querySelectorAll<HTMLTableCellElement>('th');
+			this._originalThClasses = Array.from(thElements).map(
+				(th) => th.className || '',
+			);
 		}
 
 		// Store tr and td classes
@@ -406,7 +423,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			const originalRows =
 				this._tbodyElement.querySelectorAll<HTMLTableRowElement>('tr');
 			this._originalTrClasses = Array.from(originalRows).map(
-				(row) => row.className || ''
+				(row) => row.className || '',
 			);
 
 			// Store td classes as a 2D array
@@ -414,7 +431,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			Array.from(originalRows).forEach((row, rowIndex) => {
 				const tdElements = row.querySelectorAll<HTMLTableCellElement>('td');
 				this._originalTdClasses[rowIndex] = Array.from(tdElements).map(
-					(td) => td.className || ''
+					(td) => td.className || '',
 				);
 			});
 		}
@@ -430,11 +447,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		// Fetch data from the DOM and initialize the checkbox plugin
 		return typeof this._config.apiEndpoint === 'undefined'
 			? this._fetchDataFromLocal().then(
-					this._finalize.bind(this) as () => Promise<void>
-			  )
+					this._finalize.bind(this) as () => Promise<void>,
+				)
 			: this._fetchDataFromServer().then(
-					this._finalize.bind(this) as () => Promise<void>
-			  );
+					this._finalize.bind(this) as () => Promise<void>,
+				);
 	}
 
 	/**
@@ -467,7 +484,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const tableId: string = this._tableId();
 		const searchElement: HTMLInputElement | null =
 			document.querySelector<HTMLInputElement>(
-				`[data-kt-datatable-search="#${tableId}"]`
+				`[data-kt-datatable-search="#${tableId}"]`,
 			);
 
 		// Get search state
@@ -484,7 +501,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				// Remove the existing debounced event listener
 				searchElement.removeEventListener(
 					'keyup',
-					(searchElement as any)._debouncedSearch
+					(searchElement as any)._debouncedSearch,
 				);
 			}
 
@@ -523,7 +540,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		) {
 			this._deleteState();
 
-			const { originalData, originalDataAttributes } = this._localExtractTableContent();
+			const { originalData, originalDataAttributes } =
+				this._localExtractTableContent();
 
 			this._config._state.originalData = originalData;
 			this._config._state.originalDataAttributes = originalDataAttributes;
@@ -539,7 +557,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			_temp = this._data = this._config.search.callback.call(
 				this,
 				this._data,
-				search
+				search,
 			) as T[];
 		}
 
@@ -554,7 +572,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					this,
 					this._data,
 					sortField as string,
-					sortOrder
+					sortOrder,
 				) as T[];
 			}
 		}
@@ -586,7 +604,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	private _localTableContentInvalidate(): boolean {
 		const checksum: string = KTUtils.checksum(
-			JSON.stringify(this._tbodyElement.innerHTML)
+			JSON.stringify(this._tbodyElement.innerHTML),
 		);
 		if (this.getState()._contentChecksum !== checksum) {
 			this._config._state._contentChecksum = checksum;
@@ -621,11 +639,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._storeOriginalClasses();
 
 		const rows = this._tbodyElement.querySelectorAll<HTMLTableRowElement>('tr');
-		const ths: NodeListOf<HTMLTableCellElement> = this._theadElement ? this._theadElement.querySelectorAll('th') : ([] as unknown as NodeListOf<HTMLTableCellElement>);
+		const ths: NodeListOf<HTMLTableCellElement> = this._theadElement
+			? this._theadElement.querySelectorAll('th')
+			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
 
 		rows.forEach((row: HTMLTableRowElement) => {
 			const dataRow: T = {} as T;
-			const dataRowAttribute: KTDataTableAttributeInterface = {} as KTDataTableAttributeInterface;
+			const dataRowAttribute: KTDataTableAttributeInterface =
+				{} as KTDataTableAttributeInterface;
 
 			row.querySelectorAll<HTMLTableCellElement>('td').forEach((td, index) => {
 				const colName = ths[index]?.getAttribute('data-kt-datatable-column');
@@ -652,7 +673,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	private _localTableHeaderInvalidate(): boolean {
 		const { originalData } = this.getState();
-		const currentTableHeaders = this._theadElement ? this._theadElement.querySelectorAll('th').length : 0;
+		const currentTableHeaders = this._theadElement
+			? this._theadElement.querySelectorAll('th').length
+			: 0;
 		const totalColumns = originalData.length
 			? Object.keys(originalData[0]).length
 			: 0;
@@ -676,7 +699,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			responseData = await response.json();
 		} catch (error) {
 			this._noticeOnTable(
-				'Error parsing API response as JSON: ' + String(error)
+				'Error parsing API response as JSON: ' + String(error),
 			);
 			return;
 		}
@@ -733,15 +756,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 						column: filter.column,
 						type: filter.type,
 						value: filter.value,
-					}))
-				)
+					})),
+				),
 			);
 		}
 
 		if (search) {
 			queryParams.set(
 				'search',
-				typeof search === 'object' ? JSON.stringify(search) : search
+				typeof search === 'object' ? JSON.stringify(search) : search,
 			);
 		}
 
@@ -755,7 +778,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	private async _performFetchRequest(
-		queryParams: URLSearchParams
+		queryParams: URLSearchParams,
 	): Promise<Response> {
 		let requestMethod: RequestInit['method'] = this._config.requestMethod;
 		let requestBody: RequestInit['body'] | undefined = undefined;
@@ -846,7 +869,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {HTMLTableSectionElement} The updated table body element
 	 */
 	private _updateTableContent(
-		tbodyElement: HTMLTableSectionElement
+		tbodyElement: HTMLTableSectionElement,
 	): HTMLTableSectionElement {
 		const fragment = document.createDocumentFragment();
 
@@ -857,7 +880,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			return tbodyElement;
 		}
 
-		const ths: NodeListOf<HTMLTableCellElement> = this._theadElement ? this._theadElement.querySelectorAll('th') : ([] as unknown as NodeListOf<HTMLTableCellElement>);
+		const ths: NodeListOf<HTMLTableCellElement> = this._theadElement
+			? this._theadElement.querySelectorAll('th')
+			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
 
 		this._data.forEach((item: T, rowIndex: number) => {
 			const row = document.createElement('tr');
@@ -923,7 +948,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 								this,
 								item[key] as string,
 								item,
-								this
+								this,
 							) as string;
 						} else {
 							td.textContent = item[key] as string;
@@ -934,7 +959,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 						}
 
 						row.appendChild(td);
-					}
+					},
 				);
 			}
 
@@ -953,7 +978,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _noticeOnTable(message: string = ''): void {
 		const row = this._tableElement.tBodies[0].insertRow();
 		const cell = row.insertCell();
-		cell.colSpan = this._theadElement ? this._theadElement.querySelectorAll('th').length : 0;
+		cell.colSpan = this._theadElement
+			? this._theadElement.querySelectorAll('th').length
+			: 0;
 		cell.innerHTML = message;
 	}
 
@@ -987,7 +1014,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns The container element.
 	 */
 	private _createPageSizeControls(
-		_sizeElement: HTMLSelectElement
+		_sizeElement: HTMLSelectElement,
 	): HTMLSelectElement {
 		// If no element is provided, return early
 		if (!_sizeElement) {
@@ -1011,7 +1038,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			// When the element changes, reload the page with the new page size and page number 1
 			this._reloadPageSize(
 				Number((event.target as HTMLSelectElement).value),
-				1
+				1,
 			);
 		};
 
@@ -1044,7 +1071,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	private _createPaginationControls(
 		_infoElement: HTMLElement,
-		_paginationElement: HTMLElement
+		_paginationElement: HTMLElement,
 	): HTMLElement {
 		if (!_infoElement || !_paginationElement || this._data.length === 0) {
 			return null;
@@ -1069,14 +1096,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		_infoElement.textContent = this._config.info
 			.replace(
 				'{start}',
-				(this.getState().page - 1) * this.getState().pageSize + 1 + ''
+				(this.getState().page - 1) * this.getState().pageSize + 1 + '',
 			)
 			.replace(
 				'{end}',
 				Math.min(
 					this.getState().page * this.getState().pageSize,
-					this.getState().totalItems
-				) + ''
+					this.getState().totalItems,
+				) + '',
 			)
 			.replace('{total}', this.getState().totalItems + '');
 	}
@@ -1087,7 +1114,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @return {HTMLElement} The container element.
 	 */
 	private _createPaginationContainer(
-		_paginationElement: HTMLElement
+		_paginationElement: HTMLElement,
 	): HTMLElement {
 		// No longer create a wrapping div. Just return the pagination element itself.
 		return _paginationElement;
@@ -1106,7 +1133,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			text: string,
 			className: string,
 			disabled: boolean,
-			handleClick: () => void
+			handleClick: () => void,
 		): HTMLButtonElement => {
 			const button = document.createElement('button') as HTMLButtonElement;
 			button.className = className;
@@ -1122,8 +1149,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				previous.text,
 				`${previous.class}${currentPage === 1 ? ' disabled' : ''}`,
 				currentPage === 1,
-				() => this._paginateData(currentPage - 1)
-			)
+				() => this._paginateData(currentPage - 1),
+			),
 		);
 
 		// Calculate range of pages
@@ -1134,15 +1161,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			const range = this._calculatePageRange(
 				currentPage,
 				totalPages,
-				maxButtons
+				maxButtons,
 			);
 
 			// Add start ellipsis
 			if (range.start > 1) {
 				paginationContainer.appendChild(
 					createButton(more.text, more.class, false, () =>
-						this._paginateData(Math.max(1, range.start - 1))
-					)
+						this._paginateData(Math.max(1, range.start - 1)),
+					),
 				);
 			}
 
@@ -1153,8 +1180,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 						number.text.replace('{page}', i.toString()),
 						`${number.class}${currentPage === i ? ' active disabled' : ''}`,
 						currentPage === i,
-						() => this._paginateData(i)
-					)
+						() => this._paginateData(i),
+					),
 				);
 			}
 
@@ -1162,8 +1189,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			if (pageMoreEnabled && range.end < totalPages) {
 				paginationContainer.appendChild(
 					createButton(more.text, more.class, false, () =>
-						this._paginateData(Math.min(totalPages, range.end + 1))
-					)
+						this._paginateData(Math.min(totalPages, range.end + 1)),
+					),
 				);
 			}
 		} else {
@@ -1174,8 +1201,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 						number.text.replace('{page}', i.toString()),
 						`${number.class}${currentPage === i ? ' active disabled' : ''}`,
 						currentPage === i,
-						() => this._paginateData(i)
-					)
+						() => this._paginateData(i),
+					),
 				);
 			}
 		}
@@ -1186,8 +1213,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				next.text,
 				`${next.class}${currentPage === totalPages ? ' disabled' : ''}`,
 				currentPage === totalPages,
-				() => this._paginateData(currentPage + 1)
-			)
+				() => this._paginateData(currentPage + 1),
+			),
 		);
 	}
 
@@ -1195,7 +1222,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _calculatePageRange(
 		currentPage: number,
 		totalPages: number,
-		maxButtons: number
+		maxButtons: number,
 	): { start: number; end: number } {
 		let startPage: number, endPage: number;
 		const halfMaxButtons = Math.floor(maxButtons / 2);
@@ -1236,7 +1263,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _showSpinner(): void {
 		const spinner =
 			this._element.querySelector<HTMLElement>(
-				this._config.attributes.spinner
+				this._config.attributes.spinner,
 			) || this._createSpinner();
 		if (spinner) {
 			spinner.style.display = 'block';
@@ -1247,7 +1274,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	// Method to hide the loading spinner
 	private _hideSpinner(): void {
 		const spinner = this._element.querySelector<HTMLElement>(
-			this._config.attributes.spinner
+			this._config.attributes.spinner,
 		);
 		if (spinner) {
 			spinner.style.display = 'none';
@@ -1286,7 +1313,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (ns) {
 			localStorage.setItem(
 				ns,
-				JSON.stringify(this.getState() as KTDataTableStateInterface)
+				JSON.stringify(this.getState() as KTDataTableStateInterface),
 			);
 		}
 	}
@@ -1404,7 +1431,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	public sort(field: keyof T | number): void {
 		// Use the sort handler to update state and trigger sorting
 		const state = this.getState();
-		const sortOrder = this._sortHandler.toggleSortOrder(state.sortField, state.sortOrder, field);
+		const sortOrder = this._sortHandler.toggleSortOrder(
+			state.sortField,
+			state.sortOrder,
+			field,
+		);
 		this._sortHandler.setSortIcon(field as keyof T, sortOrder);
 		this._config._state.sortField = field as never;
 		this._config._state.sortOrder = sortOrder;
@@ -1491,7 +1522,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	public setFilter(filter: KTDataTableColumnFilterInterface): KTDataTable<T> {
 		this._config._state.filters = [
 			...(this.getState().filters || []).filter(
-				(f) => f.column !== filter.column
+				(f) => f.column !== filter.column,
 			),
 			filter,
 		];
@@ -1524,7 +1555,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	public static createInstances(): void {
 		const elements = document.querySelectorAll<HTMLElement>(
-			'[data-kt-datatable="true"]'
+			'[data-kt-datatable="true"]',
 		);
 
 		elements.forEach((element) => {
@@ -1549,7 +1580,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns The KTDataTable instance or undefined if not found
 	 */
 	public static getInstance(
-		element: HTMLElement
+		element: HTMLElement,
 	): KTDataTable<KTDataTableDataInterface> | undefined {
 		return this._instances.get(element);
 	}

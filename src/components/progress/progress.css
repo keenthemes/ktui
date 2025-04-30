@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
 	.kt-progress {
 		@apply relative h-1 w-full overflow-hidden rounded-full bg-secondary;
@@ -11,9 +16,9 @@
 	.kt-progress-primary {
 		.kt-progress-indicator {
 			@apply bg-primary;
-		}		
+		}
 	}
-	
+
 	.kt-progress-success {
 		.kt-progress-indicator {
 			@apply bg-green-500;

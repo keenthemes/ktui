@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import KTData from '../../helpers/data';
 import KTDom from '../../helpers/dom';
 import KTUtils from '../../helpers/utils';
@@ -187,7 +192,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	protected _autoFocus(): void {
 		if (!this._element) return;
 		const input: HTMLInputElement | null = this._element.querySelector(
-			'[data-kt-drawer-focus]'
+			'[data-kt-drawer-focus]',
 		);
 		if (!input) return;
 		else input.focus();
@@ -205,7 +210,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		KTDom.reflow(this._backdropElement);
 		KTDom.addClass(
 			this._backdropElement,
-			this._getOption('backdropClass') as string
+			this._getOption('backdropClass') as string,
 		);
 
 		this._backdropElement.addEventListener('click', (event: Event) => {
@@ -276,7 +281,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTDrawerConfigInterface
+		config?: KTDrawerConfigInterface,
 	): KTDrawer {
 		return this.getInstance(element) || new KTDrawer(element, config);
 	}
@@ -311,7 +316,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 							}
 						});
 				},
-				200
+				200,
 			);
 		});
 	}
@@ -332,7 +337,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 				if (drawer) {
 					drawer.toggle();
 				}
-			}
+			},
 		);
 	}
 
@@ -345,7 +350,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 				event.stopPropagation();
 
 				const modalElement = target.closest(
-					'[data-kt-drawer="true"]'
+					'[data-kt-drawer="true"]',
 				) as HTMLElement;
 				if (modalElement) {
 					const modal = KTDrawer.getInstance(modalElement);
@@ -353,14 +358,14 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 						modal.hide();
 					}
 				}
-			}
+			},
 		);
 	}
 
 	public static handleClickAway() {
 		document.addEventListener('click', (event: Event) => {
 			const drawerEl = document.querySelector(
-				'.open[data-kt-drawer-initialized]'
+				'.open[data-kt-drawer-initialized]',
 			);
 			if (!drawerEl) return;
 
@@ -384,7 +389,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	public static handleKeyword() {
 		document.addEventListener('keydown', (event: KeyboardEvent) => {
 			const drawerEl = document.querySelector(
-				'.open[data-kt-drawer-initialized]'
+				'.open[data-kt-drawer-initialized]',
 			);
 			const drawer = KTDrawer.getInstance(drawerEl as HTMLElement);
 			if (!drawer) {

@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import KTData from '../../helpers/data';
 import KTEventHandler from '../../helpers/event-handler';
 import KTComponent from '../component';
@@ -24,7 +29,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTImageInputConfigInterface = null
+		config: KTImageInputConfigInterface = null,
 	) {
 		super();
 
@@ -36,10 +41,10 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		this._inputElement = this._element.querySelector('input[type="file"]');
 		this._hiddenElement = this._element.querySelector('input[type="hidden"]');
 		this._removeElement = this._element.querySelector(
-			'[data-kt-image-input-remove]'
+			'[data-kt-image-input-remove]',
 		);
 		this._previewElement = this._element.querySelector(
-			'[data-kt-image-input-preview]'
+			'[data-kt-image-input-preview]',
 		);
 
 		this._update();
@@ -55,7 +60,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 				event.preventDefault();
 
 				this._inputElement.click();
-			}
+			},
 		);
 
 		this._inputElement.addEventListener('change', () => {
@@ -108,7 +113,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		if (this._lastMode == 'new') {
 			if (this._previewUrl == '')
 				this._removeElement.classList.add(
-					this._getOption('hiddenClass') as string
+					this._getOption('hiddenClass') as string,
 				);
 
 			if (this._previewUrl) {
@@ -125,7 +130,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		} else if (this._lastMode == 'saved') {
 			if (this._previewUrl == '')
 				this._removeElement.classList.add(
-					this._getOption('hiddenClass') as string
+					this._getOption('hiddenClass') as string,
 				);
 
 			this._previewElement.style.backgroundImage = 'none';
@@ -138,7 +143,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		} else if (this._lastMode == 'placeholder') {
 			if (this._previewUrl == '')
 				this._removeElement.classList.add(
-					this._getOption('hiddenClass') as string
+					this._getOption('hiddenClass') as string,
 				);
 
 			if (this._previewUrl) {
@@ -161,12 +166,12 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		if (this._previewElement.style.backgroundImage) {
 			this._setPreviewUrl(this._previewElement.style.backgroundImage);
 			this._removeElement.classList.remove(
-				this._getOption('hiddenClass') as string
+				this._getOption('hiddenClass') as string,
 			);
 			this._lastMode = 'saved';
 		} else {
 			this._removeElement.classList.add(
-				this._getOption('hiddenClass') as string
+				this._getOption('hiddenClass') as string,
 			);
 			this._element.classList.add('empty');
 			this._lastMode = 'placeholder';
@@ -221,7 +226,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTImageInputConfigInterface
+		config?: KTImageInputConfigInterface,
 	): KTImageInput {
 		return this.getInstance(element) || new KTImageInput(element, config);
 	}

@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import KTData from '../../helpers/data';
 import KTDom from '../../helpers/dom';
 import KTEventHandler from '../../helpers/event-handler';
@@ -39,11 +44,11 @@ export class KTAccordion extends KTComponent implements KTAccordionInterface {
 			(event: Event, target: HTMLElement) => {
 				event.preventDefault();
 				const accordionElement = target.closest(
-					'[data-kt-accordion-item]'
+					'[data-kt-accordion-item]',
 				) as HTMLElement;
 
 				if (accordionElement) this._toggle(accordionElement);
-			}
+			},
 		);
 	}
 
@@ -66,19 +71,19 @@ export class KTAccordion extends KTComponent implements KTAccordionInterface {
 		if (
 			accordionElement.hasAttribute('animating') ||
 			accordionElement.classList.contains(
-				this._getOption('activeClass') as string
+				this._getOption('activeClass') as string,
 			)
 		)
 			return;
 
 		const toggleElement = KTDom.child(
 			accordionElement,
-			'[data-kt-accordion-toggle]'
+			'[data-kt-accordion-toggle]',
 		);
 		if (!toggleElement) return;
 
 		const contentElement = KTDom.getElement(
-			`#${toggleElement.getAttribute('aria-controls')}`
+			`#${toggleElement.getAttribute('aria-controls')}`,
 		);
 		if (!contentElement) return;
 
@@ -115,19 +120,19 @@ export class KTAccordion extends KTComponent implements KTAccordionInterface {
 		if (
 			accordionElement.hasAttribute('animating') ||
 			!accordionElement.classList.contains(
-				this._getOption('activeClass') as string
+				this._getOption('activeClass') as string,
 			)
 		)
 			return;
 
 		const toggleElement = KTDom.child(
 			accordionElement,
-			'[data-kt-accordion-toggle]'
+			'[data-kt-accordion-toggle]',
 		);
 		if (!toggleElement) return;
 
 		const contentElement = KTDom.getElement(
-			`#${toggleElement.getAttribute('aria-controls')}`
+			`#${toggleElement.getAttribute('aria-controls')}`,
 		);
 		if (!contentElement) return;
 
@@ -148,7 +153,7 @@ export class KTAccordion extends KTComponent implements KTAccordionInterface {
 		KTDom.transitionEnd(contentElement, () => {
 			accordionElement.removeAttribute('animating');
 			accordionElement.classList.remove(
-				this._getOption('activeClass') as string
+				this._getOption('activeClass') as string,
 			);
 			contentElement.classList.add(this._getOption('hiddenClass') as string);
 
@@ -193,7 +198,7 @@ export class KTAccordion extends KTComponent implements KTAccordionInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTAccordionConfigInterface
+		config?: KTAccordionConfigInterface,
 	): KTAccordion {
 		return this.getInstance(element) || new KTAccordion(element, config);
 	}

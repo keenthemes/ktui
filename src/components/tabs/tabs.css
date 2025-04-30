@@ -1,8 +1,13 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
 	.kt-tabs.kt-tabs-line {
 		@apply flex items-center gap-7 border-b border-border;
 	}
-	
+
 	.kt-tabs.kt-tabs-line .kt-tab-toggle {
 		@apply inline-flex items-center gap-2 py-2 font-medium border-b-2 border-b-transparent text-secondary-foreground hover:text-primary kt-tab-active:text-primary kt-tab-active:border-primary text-sm cursor-pointer;
 
@@ -22,12 +27,14 @@
 	&[data-kt-tab-toggle].active {
 		@slot;
 	}
-	
+
 	[data-kt-tab-toggle].active & {
 		@slot;
 	}
 
-	[data-kt-tabs-initialized] [data-kt-dropdown-initialized]:has([data-kt-tab-toggle].active) & {
+	[data-kt-tabs-initialized]
+		[data-kt-dropdown-initialized]:has([data-kt-tab-toggle].active)
+		& {
 		@slot;
 	}
 }

@@ -1,50 +1,55 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
-  .kt-toggle-group {
-    @apply inline-flex items-center leading-none bg-background;
+	.kt-toggle-group {
+		@apply inline-flex items-center leading-none bg-background;
 	}
 
 	.kt-toggle-group {
-    .kt-btn {
+		.kt-btn {
 			@apply grow border border-border border-e-0 text-accent-foreground bg-transparent;
 
-      &:last-child {
+			&:last-child {
 				@apply border-e border-border;
-      }
+			}
 
-      &:not(:first-child) {
+			&:not(:first-child) {
 				@apply rounded-ss-none rounded-es-none;
-      }
+			}
 
-      &:not(:last-child) {
+			&:not(:last-child) {
 				@apply rounded-ee-none rounded-se-none;
-      }
+			}
 
-      &:not(:first-child):not(:last-child) {
-        @apply rounded-none;
-      }
+			&:not(:first-child):not(:last-child) {
+				@apply rounded-none;
+			}
 
 			svg,
 			i {
-        @apply text-muted-foreground;
-      }
+				@apply text-muted-foreground;
+			}
 
-      input[type=checkbox], 
-      input[type=radio] {
-        display: none;
-      }
+			input[type='checkbox'],
+			input[type='radio'] {
+				display: none;
+			}
 
-      &:hover,
-      &:focus,
-      &:active,
-      &:has(input:checked),
-      &.active {
-				@apply bg-accent text-accent-foreground;			
+			&:hover,
+			&:focus,
+			&:active,
+			&:has(input:checked),
+			&.active {
+				@apply bg-accent text-accent-foreground;
 
-        svg,
+				svg,
 				i {
 					@apply text-accent-foreground;
 				}
-      }
-    }
-  }
+			}
+		}
+	}
 }

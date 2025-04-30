@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import { LocaleConfigInterface } from './types';
 
 /**
@@ -104,36 +109,36 @@ export function segmentedDateInputTemplate(format: string): string {
     <div class="flex items-center bg-transparent text-sm">
       <div
         class="${getSegmentWidthClass(
-					segments[0].type
+					segments[0].type,
 				)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
         data-segment="${getSegmentName(segments[0].type)}"
         tabindex="0"
         role="button"
         aria-label="${getSegmentLabel(segments[0].type)}">${
-		segments[0].placeholder
-	}</div>
+					segments[0].placeholder
+				}</div>
       <span class="text-gray-500 mx-0.5">${separators[0]}</span>
       <div
         class="${getSegmentWidthClass(
-					segments[1].type
+					segments[1].type,
 				)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
         data-segment="${getSegmentName(segments[1].type)}"
         tabindex="0"
         role="button"
         aria-label="${getSegmentLabel(segments[1].type)}">${
-		segments[1].placeholder
-	}</div>
+					segments[1].placeholder
+				}</div>
       <span class="text-gray-500 mx-0.5">${separators[1]}</span>
       <div
         class="${getSegmentWidthClass(
-					segments[2].type
+					segments[2].type,
 				)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
         data-segment="${getSegmentName(segments[2].type)}"
         tabindex="0"
         role="button"
         aria-label="${getSegmentLabel(segments[2].type)}">${
-		segments[2].placeholder
-	}</div>
+					segments[2].placeholder
+				}</div>
     </div>
   `;
 }
@@ -147,7 +152,7 @@ export function segmentedDateInputTemplate(format: string): string {
  */
 export function segmentedDateRangeInputTemplate(
 	format: string,
-	rangeSeparator: string = ' - '
+	rangeSeparator: string = ' - ',
 ): string {
 	// Parse the format to determine the order of segments and separators
 	const formatSegments = parseFormatString(format);
@@ -177,71 +182,71 @@ export function segmentedDateRangeInputTemplate(
       <div class="flex items-center bg-transparent text-sm">
         <div
           class="${getSegmentWidthClass(
-						segments[0].type
+						segments[0].type,
 					)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
           data-segment="start-${getSegmentName(segments[0].type)}"
           tabindex="0"
           role="button"
           aria-label="Start ${getSegmentLabel(segments[0].type)}">${
-		segments[0].placeholder
-	}</div>
+						segments[0].placeholder
+					}</div>
         <span class="text-gray-500 mx-0.5">${separators[0]}</span>
         <div
           class="${getSegmentWidthClass(
-						segments[1].type
+						segments[1].type,
 					)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
           data-segment="start-${getSegmentName(segments[1].type)}"
           tabindex="0"
           role="button"
           aria-label="Start ${getSegmentLabel(segments[1].type)}">${
-		segments[1].placeholder
-	}</div>
+						segments[1].placeholder
+					}</div>
         <span class="text-gray-500 mx-0.5">${separators[1]}</span>
         <div
           class="${getSegmentWidthClass(
-						segments[2].type
+						segments[2].type,
 					)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
           data-segment="start-${getSegmentName(segments[2].type)}"
           tabindex="0"
           role="button"
           aria-label="Start ${getSegmentLabel(segments[2].type)}">${
-		segments[2].placeholder
-	}</div>
+						segments[2].placeholder
+					}</div>
       </div>
       <span class="mx-1 text-gray-500">${rangeSeparator}</span>
       <div class="flex items-center bg-transparent text-sm">
         <div
           class="${getSegmentWidthClass(
-						segments[0].type
+						segments[0].type,
 					)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
           data-segment="end-${getSegmentName(segments[0].type)}"
           tabindex="0"
           role="button"
           aria-label="End ${getSegmentLabel(segments[0].type)}">${
-		segments[0].placeholder
-	}</div>
+						segments[0].placeholder
+					}</div>
         <span class="text-gray-500 mx-0.5">${separators[0]}</span>
         <div
           class="${getSegmentWidthClass(
-						segments[1].type
+						segments[1].type,
 					)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
           data-segment="end-${getSegmentName(segments[1].type)}"
           tabindex="0"
           role="button"
           aria-label="End ${getSegmentLabel(segments[1].type)}">${
-		segments[1].placeholder
-	}</div>
+						segments[1].placeholder
+					}</div>
         <span class="text-gray-500 mx-0.5">${separators[1]}</span>
         <div
           class="${getSegmentWidthClass(
-						segments[2].type
+						segments[2].type,
 					)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
           data-segment="end-${getSegmentName(segments[2].type)}"
           tabindex="0"
           role="button"
           aria-label="End ${getSegmentLabel(segments[2].type)}">${
-		segments[2].placeholder
-	}</div>
+						segments[2].placeholder
+					}</div>
       </div>
     </div>
   `;
@@ -254,7 +259,7 @@ export function segmentedDateRangeInputTemplate(
  * @returns Array of parsed segments with type, placeholder and value
  */
 function parseFormatString(
-	format: string
+	format: string,
 ): Array<{ type: string; value?: string; placeholder?: string }> {
 	const result: Array<{ type: string; value?: string; placeholder?: string }> =
 		[];
@@ -404,7 +409,7 @@ function getDefaultSegmentedTemplate(): string {
  * @returns Default range template HTML
  */
 function getDefaultSegmentedRangeTemplate(
-	rangeSeparator: string = ' - '
+	rangeSeparator: string = ' - ',
 ): string {
 	return `
     <div class="flex items-center w-full">
@@ -466,7 +471,7 @@ function getDefaultSegmentedRangeTemplate(
  */
 function getDayNames(
 	locale: LocaleConfigInterface,
-	format: 'long' | 'short' | 'min'
+	format: 'long' | 'short' | 'min',
 ): string[] {
 	if (format === 'long') {
 		return locale.dayNames;
@@ -486,7 +491,7 @@ function getDayNames(
  */
 export function calendarGridTemplate(
 	locale: LocaleConfigInterface,
-	weekDayFormat: 'long' | 'short' | 'min'
+	weekDayFormat: 'long' | 'short' | 'min',
 ): string {
 	// Get the day names based on the locale and format
 	const dayNames = getDayNames(locale, weekDayFormat);
@@ -502,7 +507,7 @@ export function calendarGridTemplate(
 	const headerCells = orderedDayNames
 		.map(
 			(day) =>
-				`<th class="py-2 text-center text-xs font-medium text-gray-500 uppercase w-10">${day}</th>`
+				`<th class="py-2 text-center text-xs font-medium text-gray-500 uppercase w-10">${day}</th>`,
 		)
 		.join('');
 
@@ -547,7 +552,7 @@ export function dayTemplate(
 	isRangeStart: boolean = false,
 	isRangeEnd: boolean = false,
 	isInRange: boolean = false,
-	isWeekend: boolean = false
+	isWeekend: boolean = false,
 ): string {
 	// Base classes for day button
 	let classes =
@@ -618,7 +623,7 @@ export function dayTemplate(
 export function monthYearSelectTemplate(
 	locale: LocaleConfigInterface,
 	currentMonth: number,
-	currentYear: number
+	currentYear: number,
 ): string {
 	return `
     <div class="flex items-center justify-center space-x-2">
@@ -645,7 +650,7 @@ export function monthYearSelectTemplate(
  */
 export function monthSelectionTemplate(
 	locale: LocaleConfigInterface,
-	currentMonth: number
+	currentMonth: number,
 ): string {
 	const months = locale.monthNamesShort.map((month, idx) => {
 		const isCurrentMonth = idx === currentMonth;
@@ -684,7 +689,7 @@ export function monthSelectionTemplate(
 export function yearSelectionTemplate(
 	startYear: number,
 	endYear: number,
-	currentYear: number
+	currentYear: number,
 ): string {
 	const years = [];
 
@@ -772,7 +777,7 @@ export function displayWrapperTemplate(classes: string = ''): string {
  */
 export function displayElementTemplate(
 	placeholder: string,
-	classes: string = ''
+	classes: string = '',
 ): string {
 	return `
     <div class="kt-datepicker-display-element py-2 px-3 border rounded cursor-pointer ${classes}"

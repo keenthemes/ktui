@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import KTData from '../../helpers/data';
 import KTDom from '../../helpers/dom';
 import KTComponent from '../component';
@@ -43,7 +48,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTTooltipConfigInterface | null = null
+		config: KTTooltipConfigInterface | null = null,
 	) {
 		super();
 
@@ -63,7 +68,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	private _getTargetElement(): HTMLElement | null {
 		return (
 			KTDom.getElement(
-				this._element.getAttribute('data-kt-tooltip') as string
+				this._element.getAttribute('data-kt-tooltip') as string,
 			) ||
 			this._element.querySelector('[data-kt-tooltip-content]') ||
 			KTDom.getElement(this._getOption('target') as string)
@@ -95,40 +100,43 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 
 		if (this._isOpen) return;
 
-		this._timeout = setTimeout(() => {
-			const payload = { cancel: false };
-			this._fireEvent('show', payload);
-			this._dispatchEvent('show', payload);
-			if (payload.cancel === true) {
-				return;
-			}
+		this._timeout = setTimeout(
+			() => {
+				const payload = { cancel: false };
+				this._fireEvent('show', payload);
+				this._dispatchEvent('show', payload);
+				if (payload.cancel === true) {
+					return;
+				}
 
-			if (!this._targetElement) {
-				return;
-			}
-			if (!this._element) return;
+				if (!this._targetElement) {
+					return;
+				}
+				if (!this._element) return;
 
-			this._createPopper();
-			this._handleContainer();
-			this._setZindex();
+				this._createPopper();
+				this._handleContainer();
+				this._setZindex();
 
-			this._targetElement.classList.add('show');
-			this._targetElement.classList.remove(
-				this._getOption('hiddenClass') as string
-			);
-			this._targetElement.style.opacity = '0';
-			KTDom.reflow(this._targetElement);
-			this._targetElement.style.opacity = '1';
-			this._transitioning = true;
-			this._isOpen = true;
+				this._targetElement.classList.add('show');
+				this._targetElement.classList.remove(
+					this._getOption('hiddenClass') as string,
+				);
+				this._targetElement.style.opacity = '0';
+				KTDom.reflow(this._targetElement);
+				this._targetElement.style.opacity = '1';
+				this._transitioning = true;
+				this._isOpen = true;
 
-			KTDom.transitionEnd(this._targetElement, () => {
-				this._targetElement.style.opacity = '';
-				this._transitioning = false;
-				this._fireEvent('shown');
-				this._dispatchEvent('shown');
-			});
-		}, this._getOption('delayShow') as number);
+				KTDom.transitionEnd(this._targetElement, () => {
+					this._targetElement.style.opacity = '';
+					this._transitioning = false;
+					this._fireEvent('shown');
+					this._dispatchEvent('shown');
+				});
+			},
+			this._getOption('delayShow') as number,
+		);
 	}
 
 	protected _hide(): void {
@@ -138,36 +146,39 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 
 		if (!this._isOpen) return;
 
-		this._timeout = setTimeout(() => {
-			const payload = { cancel: false };
-			this._fireEvent('hide', payload);
-			this._dispatchEvent('hide', payload);
-			if (payload.cancel === true) {
-				return;
-			}
+		this._timeout = setTimeout(
+			() => {
+				const payload = { cancel: false };
+				this._fireEvent('hide', payload);
+				this._dispatchEvent('hide', payload);
+				if (payload.cancel === true) {
+					return;
+				}
 
-			if (!this._targetElement) {
-				return;
-			}
+				if (!this._targetElement) {
+					return;
+				}
 
-			this._targetElement.style.opacity = '1';
-			KTDom.reflow(this._targetElement);
-			this._targetElement.style.opacity = '0';
-			this._transitioning = true;
-			this._isOpen = false;
+				this._targetElement.style.opacity = '1';
+				KTDom.reflow(this._targetElement);
+				this._targetElement.style.opacity = '0';
+				this._transitioning = true;
+				this._isOpen = false;
 
-			KTDom.transitionEnd(this._targetElement, () => {
-				this._popper.destroy();
-				this._targetElement.classList.remove('show');
-				this._targetElement.classList.add(
-					this._getOption('hiddenClass') as string
-				);
-				this._targetElement.style.opacity = '';
-				this._transitioning = false;
-				this._fireEvent('hidden');
-				this._dispatchEvent('hidden');
-			});
-		}, this._getOption('delayHide') as number);
+				KTDom.transitionEnd(this._targetElement, () => {
+					this._popper.destroy();
+					this._targetElement.classList.remove('show');
+					this._targetElement.classList.add(
+						this._getOption('hiddenClass') as string,
+					);
+					this._targetElement.style.opacity = '';
+					this._transitioning = false;
+					this._fireEvent('hidden');
+					this._dispatchEvent('hidden');
+				});
+			},
+			this._getOption('delayHide') as number,
+		);
 	}
 
 	protected _toggle(): void {
@@ -324,7 +335,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTTooltipConfigInterface
+		config?: KTTooltipConfigInterface,
 	): KTTooltip {
 		return this.getInstance(element) || new KTTooltip(element, config);
 	}

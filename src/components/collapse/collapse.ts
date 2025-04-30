@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 
@@ -36,14 +41,14 @@ export class KTCollapse extends KTComponent implements KTCollapseInterface {
 	private _getTargetElement(): HTMLElement | null {
 		return (
 			KTDom.getElement(
-				this._element.getAttribute('data-kt-collapse') as string
+				this._element.getAttribute('data-kt-collapse') as string,
 			) || KTDom.getElement(this._getOption('target') as string)
 		);
 	}
 
 	protected _isOpen(): boolean {
 		return this._targetElement.classList.contains(
-			this._getOption('activeClass') as string
+			this._getOption('activeClass') as string,
 		);
 	}
 
@@ -72,7 +77,7 @@ export class KTCollapse extends KTComponent implements KTCollapseInterface {
 			this._element.classList.add(this._getOption('activeClass') as string);
 		}
 		this._targetElement.classList.remove(
-			this._getOption('hiddenClass') as string
+			this._getOption('hiddenClass') as string,
 		);
 		this._targetElement.classList.add(this._getOption('activeClass') as string);
 
@@ -108,7 +113,7 @@ export class KTCollapse extends KTComponent implements KTCollapseInterface {
 		this._element.setAttribute('aria-expanded', 'false');
 		this._element.classList.remove(this._getOption('activeClass') as string);
 		this._targetElement.classList.remove(
-			this._getOption('activeClass') as string
+			this._getOption('activeClass') as string,
 		);
 
 		this._targetElement.style.height = `${this._targetElement.scrollHeight}px`;
@@ -120,7 +125,7 @@ export class KTCollapse extends KTComponent implements KTCollapseInterface {
 		KTDom.transitionEnd(this._targetElement, () => {
 			this._isAnimating = false;
 			this._targetElement.classList.add(
-				this._getOption('hiddenClass') as string
+				this._getOption('hiddenClass') as string,
 			);
 			this._targetElement.style.overflow = '';
 
@@ -172,7 +177,7 @@ export class KTCollapse extends KTComponent implements KTCollapseInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTCollapseConfigInterface
+		config?: KTCollapseConfigInterface,
 	): KTCollapse {
 		return this.getInstance(element) || new KTCollapse(element, config);
 	}

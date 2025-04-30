@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
 
@@ -46,7 +51,7 @@ export class KTScrollto extends KTComponent implements KTScrolltoInterface {
 	private _getTargetElement(): HTMLElement | null {
 		return (
 			KTDom.getElement(
-				this._element.getAttribute('data-kt-scrollto') as string
+				this._element.getAttribute('data-kt-scrollto') as string,
 			) || KTDom.getElement(this._getOption('target') as string)
 		);
 	}
@@ -66,7 +71,7 @@ export class KTScrollto extends KTComponent implements KTScrolltoInterface {
 			parseInt(this._getOption('offset') as string);
 
 		let parent: HTMLElement | Window = KTDom.getElement(
-			this._getOption('parent') as string
+			this._getOption('parent') as string,
 		);
 
 		if (!parent || parent === document.body) {
@@ -99,7 +104,7 @@ export class KTScrollto extends KTComponent implements KTScrolltoInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTScrolltoConfigInterface
+		config?: KTScrolltoConfigInterface,
 	): KTScrollto {
 		return this.getInstance(element) || new KTScrollto(element, config);
 	}

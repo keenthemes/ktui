@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
 	.kt-avatar {
 		@apply relative flex shrink-0 size-10;
@@ -9,7 +14,7 @@
 		img {
 			@apply aspect-square h-full w-full;
 		}
-	}	
+	}
 
 	.kt-avatar-fallback {
 		@apply flex h-full w-full items-center justify-center rounded-full border border-border bg-accent text-sm;

@@ -1,11 +1,16 @@
-import { KTSelect } from "./select";
-import { defaultTemplates } from "./templates";
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
+import { KTSelect } from './select';
+import { defaultTemplates } from './templates';
 import {
 	handleDropdownKeyNavigation,
 	filterOptions,
 	FocusManager,
-	EventManager
-} from "./utils";
+	EventManager,
+} from './utils';
 
 export class KTSelectSearch {
 	private _select: KTSelect;
@@ -15,7 +20,7 @@ export class KTSelectSearch {
 	private _boundKeyNavHandler: (event: KeyboardEvent) => void;
 	private _eventManager: EventManager;
 	private _focusManager: FocusManager;
-	private _config: import("./config").KTSelectConfigInterface;
+	private _config: import('./config').KTSelectConfigInterface;
 
 	// Public handler for search input (made public for event binding)
 	public handleSearchInput: (...args: any[]) => void;
@@ -24,7 +29,11 @@ export class KTSelectSearch {
 		this._select = select;
 		this._searchInput = select.getSearchInput();
 		this._eventManager = new EventManager();
-		this._focusManager = new FocusManager(this._select.getDropdownElement(), '[data-kt-select-option]', select.getConfig());
+		this._focusManager = new FocusManager(
+			this._select.getDropdownElement(),
+			'[data-kt-select-option]',
+			select.getConfig(),
+		);
 		this._boundKeyNavHandler = this._handleKeyboardNavigation.bind(this);
 		this.handleSearchInput = this._handleSearchInput.bind(this);
 		this._config = select.getConfig();
@@ -36,7 +45,11 @@ export class KTSelectSearch {
 			this._searchInput = this._select.getSearchInput();
 
 			if (this._searchInput) {
-				if (this._config.debug) console.log('Initializing search module with input:', this._searchInput);
+				if (this._config.debug)
+					console.log(
+						'Initializing search module with input:',
+						this._searchInput,
+					);
 
 				// First remove any existing listeners to prevent duplicates
 				this._removeEventListeners();
@@ -45,30 +58,31 @@ export class KTSelectSearch {
 				this._eventManager.addListener(
 					this._searchInput,
 					'input',
-					this.handleSearchInput
+					this.handleSearchInput,
 				);
 
 				// Add blur event listener to ensure highlights are cleared when focus is lost
-				this._eventManager.addListener(
-					this._searchInput,
-					'blur',
-					() => {
-						// Small delay to prevent race conditions with selection
-						setTimeout(() => {
-							if (!this._searchInput.value) {
-								this._resetAllOptions();
-								this.clearSearchHighlights();
-							}
-						}, 100);
-					}
-				);
+				this._eventManager.addListener(this._searchInput, 'blur', () => {
+					// Small delay to prevent race conditions with selection
+					setTimeout(() => {
+						if (!this._searchInput.value) {
+							this._resetAllOptions();
+							this.clearSearchHighlights();
+						}
+					}, 100);
+				});
 
 				// Listen for remote search events to coordinate with remote search functionality
-				if (this._select.getConfig().remote && this._select.getConfig().searchParam) {
-					this._select.getElement().addEventListener('remoteSearchStart', () => {
-						// Reset focused option when remote search starts
-						this._focusManager.resetFocus();
-					});
+				if (
+					this._select.getConfig().remote &&
+					this._select.getConfig().searchParam
+				) {
+					this._select
+						.getElement()
+						.addEventListener('remoteSearchStart', () => {
+							// Reset focused option when remote search starts
+							this._focusManager.resetFocus();
+						});
 
 					this._select.getElement().addEventListener('remoteSearchEnd', () => {
 						// After remote search completes, refresh our option cache
@@ -81,7 +95,7 @@ export class KTSelectSearch {
 				this._eventManager.addListener(
 					this._searchInput,
 					'keydown',
-					this._boundKeyNavHandler
+					this._boundKeyNavHandler,
 				);
 
 				// Listen for dropdown close to reset options if search is empty
@@ -103,7 +117,10 @@ export class KTSelectSearch {
 					this.clearSearchHighlights();
 
 					// Close dropdown if configured to do so
-					if (this._select.getConfig().closeOnSelect && !this._select.getConfig().multiple) {
+					if (
+						this._select.getConfig().closeOnSelect &&
+						!this._select.getConfig().multiple
+					) {
 						this._select.closeDropdown();
 					}
 				});
@@ -156,7 +173,7 @@ export class KTSelectSearch {
 			this._select,
 			{
 				multiple: this._select.getConfig().multiple,
-				closeOnSelect: this._select.getConfig().closeOnSelect
+				closeOnSelect: this._select.getConfig().closeOnSelect,
 			},
 			{
 				onArrowDown: () => this._focusManager.focusNext(),
@@ -166,8 +183,8 @@ export class KTSelectSearch {
 					if (event.key === 'Escape') {
 						this.clearSearchHighlights();
 					}
-				}
-			}
+				},
+			},
 		);
 	}
 
@@ -198,7 +215,7 @@ export class KTSelectSearch {
 		// Wait for options to be initialized
 		setTimeout(() => {
 			const options = Array.from(this._select.getOptionsElement());
-			options.forEach(option => {
+			options.forEach((option) => {
 				const value = option.getAttribute('data-value');
 				if (value) {
 					this._originalOptionContents.set(value, option.innerHTML);
@@ -241,7 +258,9 @@ export class KTSelectSearch {
 	}
 
 	private _filterOptions(query: string) {
-		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		const options = Array.from(
+			this._select.getOptionsElement(),
+		) as HTMLElement[];
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
 
@@ -251,12 +270,8 @@ export class KTSelectSearch {
 		}
 
 		// Use the shared filterOptions utility
-		filterOptions(
-			options,
-			query,
-			config,
-			dropdownElement,
-			(visibleCount) => this._handleNoResults(visibleCount)
+		filterOptions(options, query, config, dropdownElement, (visibleCount) =>
+			this._handleNoResults(visibleCount),
 		);
 
 		// Apply specialized text highlighting if needed
@@ -277,14 +292,16 @@ export class KTSelectSearch {
 	 */
 	private _resetAllOptions() {
 		// Show all options
-		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		const options = Array.from(
+			this._select.getOptionsElement(),
+		) as HTMLElement[];
 
 		// Cache original option HTML if not already cached
 		if (this._originalOptionContents.size === 0) {
 			this._cacheOriginalOptionContents();
 		}
 
-		options.forEach(option => {
+		options.forEach((option) => {
 			// Remove the hidden class
 			option.classList.remove('hidden');
 
@@ -295,13 +312,21 @@ export class KTSelectSearch {
 			}
 
 			// Remove any display styling
-			if (option.hasAttribute('style') && option.getAttribute('style').includes('display:')) {
+			if (
+				option.hasAttribute('style') &&
+				option.getAttribute('style').includes('display:')
+			) {
 				const styleAttr = option.getAttribute('style');
-				if (styleAttr.trim() === 'display: none;' || styleAttr.trim() === 'display: block;') {
+				if (
+					styleAttr.trim() === 'display: none;' ||
+					styleAttr.trim() === 'display: block;'
+				) {
 					option.removeAttribute('style');
 				} else {
-					option.setAttribute('style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim());
+					option.setAttribute(
+						'style',
+						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
+					);
 				}
 			}
 		});
@@ -322,7 +347,9 @@ export class KTSelectSearch {
 		this._noResultsElement = defaultTemplates.noResults(config);
 
 		const dropdownElement = this._select.getDropdownElement();
-		const optionsContainer = dropdownElement.querySelector('[data-kt-select-options-container]');
+		const optionsContainer = dropdownElement.querySelector(
+			'[data-kt-select-options-container]',
+		);
 		if (optionsContainer) {
 			optionsContainer.appendChild(this._noResultsElement);
 		} else {
@@ -343,9 +370,11 @@ export class KTSelectSearch {
 	 */
 	public clearSearchHighlights() {
 		// Restore original option content (removes highlighting)
-		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		const options = Array.from(
+			this._select.getOptionsElement(),
+		) as HTMLElement[];
 
-		options.forEach(option => {
+		options.forEach((option) => {
 			const value = option.getAttribute('data-value');
 			if (value && this._originalOptionContents.has(value)) {
 				option.innerHTML = this._originalOptionContents.get(value);
@@ -369,9 +398,11 @@ export class KTSelectSearch {
 	public refreshOptionCache(): void {
 		// Re-cache all option contents
 		this._originalOptionContents.clear();
-		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		const options = Array.from(
+			this._select.getOptionsElement(),
+		) as HTMLElement[];
 
-		options.forEach(option => {
+		options.forEach((option) => {
 			const value = option.getAttribute('data-value');
 			if (value) {
 				this._originalOptionContents.set(value, option.innerHTML);

@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 import { DefaultLocales } from './locales';
 import {
 	KTDatepickerConfigInterface,
@@ -80,7 +85,7 @@ export class KTDatepickerStateManager {
 	 */
 	constructor(
 		element: HTMLElement,
-		config?: Partial<KTDatepickerConfigInterface>
+		config?: Partial<KTDatepickerConfigInterface>,
 	) {
 		this._element = element;
 		this._config = this._mergeConfig(config || {});
@@ -95,7 +100,7 @@ export class KTDatepickerStateManager {
 	 * @returns Merged configuration
 	 */
 	private _mergeConfig(
-		config: Partial<KTDatepickerConfigInterface>
+		config: Partial<KTDatepickerConfigInterface>,
 	): KTDatepickerConfigInterface {
 		return { ...DefaultConfig, ...config };
 	}
@@ -163,7 +168,7 @@ export class KTDatepickerStateManager {
 		if (isDateDisabled(date, config)) {
 			console.log(
 				'Date is disabled in setSelectedDate, ignoring selection:',
-				date.toISOString()
+				date.toISOString(),
 			);
 			return;
 		}
@@ -189,7 +194,7 @@ export class KTDatepickerStateManager {
 				// Set the flag to keep dropdown open during range selection
 				state.isRangeSelectionInProgress = true;
 				console.log(
-					'Range start selected - setting isRangeSelectionInProgress to true'
+					'Range start selected - setting isRangeSelectionInProgress to true',
 				);
 			} else {
 				// Set the end date if the start date is already set
@@ -206,7 +211,7 @@ export class KTDatepickerStateManager {
 				// Clear the flag as range selection is complete
 				state.isRangeSelectionInProgress = false;
 				console.log(
-					'Range end selected - setting isRangeSelectionInProgress to false'
+					'Range end selected - setting isRangeSelectionInProgress to false',
 				);
 			}
 
@@ -223,7 +228,7 @@ export class KTDatepickerStateManager {
 			if (config.multiDateSelection) {
 				// Add or remove the date from the array
 				const existingIndex = state.selectedDates.findIndex((d) =>
-					isSameDay(d, date)
+					isSameDay(d, date),
 				);
 				if (existingIndex !== -1) {
 					// Remove if already selected

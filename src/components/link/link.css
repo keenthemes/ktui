@@ -1,76 +1,81 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 @layer components {
-  /* Base Link Styles */
-  .kt-link {
-    @apply cursor-pointer inline-flex items-center rounded-md font-medium focus:outline-none transition focus-visible:ring-2 focus-visible:ring-neutral-200 dark:focus-visible:ring-neutral-700 focus-visible:ring-offset-2;
-  }
+	/* Base Link Styles */
+	.kt-link {
+		@apply cursor-pointer inline-flex items-center rounded-md font-medium focus:outline-none transition focus-visible:ring-2 focus-visible:ring-neutral-200 dark:focus-visible:ring-neutral-700 focus-visible:ring-offset-2;
+	}
 
-  /* Variants */
-  .kt-link {
-    @apply text-primary;
-  }
+	/* Variants */
+	.kt-link {
+		@apply text-primary;
+	}
 
-  .kt-link-inverse {
-    @apply text-background;
-  }
+	.kt-link-inverse {
+		@apply text-background;
+	}
 
-  .kt-link-mono {
-    @apply text-mono;
-  }
+	.kt-link-mono {
+		@apply text-mono;
+	}
 
-  /* Sizes */
-  .kt-link {
-    @apply text-[0.8125rem] leading-(--text-sm--line-height) gap-1;
+	/* Sizes */
+	.kt-link {
+		@apply text-[0.8125rem] leading-(--text-sm--line-height) gap-1;
 
-    svg {
-      @apply size-4;
-    }
+		svg {
+			@apply size-4;
+		}
 
-    i {
-      @apply text-base; 
-    }
-  }
+		i {
+			@apply text-base;
+		}
+	}
 
-  .kt-link-sm {
-    @apply text-xs gap-1;
+	.kt-link-sm {
+		@apply text-xs gap-1;
 
-    svg {
-      @apply size-3.5;
-    }
+		svg {
+			@apply size-3.5;
+		}
 
-    i {
-      @apply text-sm; 
-    }
-  }
+		i {
+			@apply text-sm;
+		}
+	}
 
-  .kt-link-lg {
-    @apply text-sm gap-1.5;
+	.kt-link-lg {
+		@apply text-sm gap-1.5;
 
-    svg {
-      @apply size-4;
-    }
+		svg {
+			@apply size-4;
+		}
 
-    i {
-      @apply text-base; 
-    }
-  }
+		i {
+			@apply text-base;
+		}
+	}
 
-  /* Styles */
-  /* When you want a hover underline (non-permanent) */
-  .kt-link-underline {
-    @apply hover:underline hover:underline-offset-4 decoration-solid;
-  }
+	/* Styles */
+	/* When you want a hover underline (non-permanent) */
+	.kt-link-underline {
+		@apply hover:underline hover:underline-offset-4 decoration-solid;
+	}
 
-  /* When the text should always be underlined */
-  .kt-link-underlined {
-    @apply underline underline-offset-4 decoration-solid;
-  }
+	/* When the text should always be underlined */
+	.kt-link-underlined {
+		@apply underline underline-offset-4 decoration-solid;
+	}
 
-  .kt-link-dashed {
-    @apply decoration-1 decoration-dashed;
-  }
+	.kt-link-dashed {
+		@apply decoration-1 decoration-dashed;
+	}
 
-  /* Disabled State */
-  .kt-link-disabled {
-    @apply opacity-50 pointer-events-none;
-  }
+	/* Disabled State */
+	.kt-link-disabled {
+		@apply opacity-50 pointer-events-none;
+	}
 }

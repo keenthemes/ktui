@@ -1,3 +1,8 @@
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ * @version: 1.0.0
+ */
 /* eslint-disable guard-for-in */
 /* eslint-disable max-len */
 /* eslint-disable require-jsdoc */
@@ -60,7 +65,7 @@ export default class KTComponent {
 		const value = this._config[name as keyof object];
 		const reponsiveValue = KTDom.getCssProp(
 			this._element,
-			`--kt-${this._name}-${KTUtils.camelReverseCase(name)}`
+			`--kt-${this._name}-${KTUtils.camelReverseCase(name)}`,
 		);
 
 		return reponsiveValue || value;
@@ -87,7 +92,7 @@ export default class KTComponent {
 			...this._getGlobalConfig(),
 			...KTDom.getDataAttributes(
 				this._element,
-				this._dataOptionPrefix + this._name
+				this._dataOptionPrefix + this._name,
 			),
 			...config,
 		};
