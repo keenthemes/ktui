@@ -1,6 +1,6 @@
 {
 	"name": "@keenthemes/ktui",
-	"version": "1.0.3",
+	"version": "1.0.5",
 	"description": "Free & Open-Source Tailwind UI Components by Keenthemes",
 	"homepage": "https://ktui.io",
 	"keywords": [
@@ -49,6 +49,7 @@
 	],
 	"author": "@keenthemes",
 	"types": "lib/esm/index.d.ts",
+	"license": "MIT",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "npx webpack --mode=development",
@@ -78,8 +79,5 @@
 	},
 	"dependencies": {
 		"@popperjs/core": "^2.11.8"
-	},
-	"publishConfig": {
-		"access": "public"
 	}
 }
