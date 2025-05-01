@@ -37,7 +37,7 @@
 	}
 
 	.kt-modal-content {
-		@apply relative flex flex-col mx-auto rounded-lg shadow-md bg-popover text-popover-foreground;
+		@apply relative flex flex-col mx-auto rounded-lg shadow-md bg-popover text-popover-foreground border border-border;
 	}
 
 	.kt-modal-header {
