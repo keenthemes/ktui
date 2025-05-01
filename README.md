@@ -6,119 +6,130 @@
 
 ---
 
-## 🚀 Quick Start
+## Installation
+
+Before you begin, ensure you have installed [Node.js](https://nodejs.org) and [Tailwind CSS](https://tailwindcss.com/), and have a working Tailwind based project.
+
+### Install via NPM
 
 ```bash
-# Install dependencies
-yarn install
-# or
-npm install
-
-# Build the library (development mode)
-yarn build
-# or
-npm run build
+npm i @keenthemes/ktui
 ```
 
 ---
 
-## 📦 Installation
+## Variables
 
-Add KTUI to your project:
+Include KTUI variables in your Tailwind entry file `style.css`:
 
-```bash
-yarn add ktui
-# or
-npm install ktui
+---
+
+## Dark Mode
+
+To enable automated dark mode support add below Tailwind variant in your Tailwind entry file `style.css`:
+
+```css
+@custom-variant dark (&:is(.dark *));
 ```
 
 ---
 
-## ✨ Usage
+## Styles
 
-### 1. Using as a Script in HTML
+Include KTUI styles in your Tailwind entry file `style.css`:
+
+```css
+@import "./node_modules/ktui/styles.css";
+```
+
+---
+
+## Font
+
+Specify a font family of your choice in your Tailwind entry file `style.css`:
+
+```css
+@theme  {
+	--default-font-family: Inter;
+}
+```
+
+Include the font file:
 
 ```html
-<link rel="stylesheet" href="/path/to/ktui/styles.css" />
-<script src="/path/to/ktui/dist/ktui.js"></script>
-<script>
-  // Initialize all KTUI components after DOM is ready
-  window.KTComponents.init();
-</script>
-```
-
-### 2. Using as a Module in TypeScript/JavaScript
-
-```ts
-import KTComponents from 'ktui';
-KTComponents.init();
+<html>
+	<head>
+		...
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+		...
+	</head>
+	<body className="antialiased">
+		....
+	</body>
+</html>
 ```
 
 ---
 
-## 🧩 Available Components
+## Assets
 
-KTUI provides a wide range of UI components, including:
+Include KTUI JavaScript, Tailwind CSS, and fonts:
 
-- **Dropdown** (`KTDropdown`)
-- **Modal** (`KTModal`)
-- **Drawer** (`KTDrawer`)
-- **Collapse** (`KTCollapse`)
-- **Dismiss** (`KTDismiss`)
-- **Tabs** (`KTTabs`)
-- **Accordion** (`KTAccordion`)
-- **Scrollspy** (`KTScrollspy`)
-- **Scrollable** (`KTScrollable`)
-- **Scrollto** (`KTScrollto`)
-- **Sticky** (`KTSticky`)
-- **Reparent** (`KTReparent`)
-- **Toggle** (`KTToggle`)
-- **Tooltip** (`KTTooltip`)
-- **Stepper** (`KTStepper`)
-- **Theme Switch** (`KTThemeSwitch`)
-- **Image Input** (`KTImageInput`)
-- **Toggle Password** (`KTTogglePassword`)
-- **DataTable** (`KTDataTable`)
-- **Datepicker** (`KTDatepicker`)
-- **Select** (`KTSelect`)
+```html
+<html>
+	<head>
+		...
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+		<link href="my_project_root/css/styles.css" rel="stylesheet"/>
+		...
+	</head>
+	<body className="antialiased">
+		....
+	</body>
+	<script src="./node_modules/@keenthemes/ktui/dist/ktui.min.js">
+	</script>
+</html>
+```
 
 ---
 
-## 🌟 Features
+## RTL Support
 
-- Modular and customizable DOM-based components
-- Built with accessibility in mind
-- Theming and dark mode support
-- Responsive design
-- Easy integration with any web framework or static site
-- TypeScript support for type safety and autocompletion
+To globally setup the RTL direction add a `dir="rtl"` attribute on the html as shown below:
 
----
+```html
+<!-- Setup rtl mode -->
+<html dir="rtl">
+	<!-- HTML markup -->
+</html>
+```
 
-## 🛠 Scripts
+KTUI utilizes the logical CSS properties as the default method for handling RTL support. This approach simplifies RTL support by using context-aware properties that adjust based on the document's text direction.
 
-- `npm run build` – Build the library using webpack in development mode
-- `npm run build:prod` – Build the library using webpack in production mode
-- `npm run build:lib` – Build the library outputs for CommonJS and ES Modules using TypeScript
-- `npm run lint` – Lint the source files with ESLint
-- `npm run format` – Format the source files with Prettier
+```html
+<!-- Using logical properties -->
+<div class="text-start ps-5">
+	Example text
+</div>
+```
 
----
+For specific cases, you can use the `rtl:*` Tailwind modifier to easily control alignments for both LTR and RTL directions.
 
-## 🤝 Contributing
-
-We welcome contributions! To get started:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -m 'Add some feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Open a pull request
-
-For guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+```html
+<!-- Using rtl modifier -->
+<div class="text-left pl-5 rtl:text-right rtl:pr-5">
+	Example text
+</div>
+```
 
 ---
 
-## 📄 License
+## License
 
-KTUI is licensed under the MIT License. See the [LICENSE.md](LICENSE.md) file for details.
+KTUI is distributed under the MIT license. See [LICENSE.md](https://github.com/keenthemes/reui/blob/main/LICENSE.md) for full details.
+
+---
+
+## Contributing
+
+Please see our [CONTRIBUTING.md](https://github.com/keenthemes/reui/blob/main/CONTRIBUTING.md) for guidelines if you wish to contribute to KTUI.
