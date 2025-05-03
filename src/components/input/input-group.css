@@ -6,11 +6,10 @@
 @layer components {
 	/* Base input group styles */
 	.kt-input-group {
-		display: flex;
-		align-items: stretch;
-
+		@apply flex items-stretch relative;
+		
 		.kt-input {
-			flex-grow: 1;
+			@apply grow z-1;
 		}
 
 		.kt-input-addon:has(+ .kt-input) {
@@ -27,6 +26,10 @@
 
 		.kt-input + .kt-btn {
 			@apply rounded-s-none!;
+		}
+
+		.kt-input + .kt-btn.kt-btn-outline {
+			@apply border-s-0!;
 		}
 
 		.kt-btn + .kt-input,
