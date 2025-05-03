@@ -178,7 +178,7 @@
 
 	/* Size */
 	.kt-btn {
-		@apply h-8.5 rounded-md px-3 gap-1 text-[0.8125rem] leading-(--text-sm--line-height);
+		@apply h-8.5 rounded-md px-3 gap-1.5 text-[0.8125rem] leading-(--text-sm--line-height);
 
 		svg {
 			@apply size-4;
@@ -210,7 +210,7 @@
 	}
 
 	.kt-btn-sm {
-		@apply h-7 rounded-md px-2.5 gap-1 text-xs;
+		@apply h-7 rounded-md px-2.5 gap-1.25 text-xs;
 
 		svg {
 			@apply size-3.5;
