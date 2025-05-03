@@ -1,1 +1,7 @@
 scripts
+.github
+.gitignore
+.DS_Store
+.idea
+.vscode
+.env
