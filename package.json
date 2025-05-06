@@ -53,6 +53,14 @@
 	],
 	"author": "@keenthemes",
 	"types": "lib/esm/index.d.ts",
+	"main": "lib/cjs/index.js",
+	"module": "lib/esm/index.js",
+	"exports": {
+		".": {
+			"import": "./lib/esm/index.js",
+			"require": "./lib/cjs/index.js"
+		}
+	},
 	"license": "MIT",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
