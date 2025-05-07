@@ -9,7 +9,7 @@
 	}
 
 	.kt-progress-indicator {
-		@apply h-full w-full flex-1 bg-primary rounded-full transition-all transform-[translateX:(calc(100-var(--progress-value)))];
+		@apply h-full w-full flex-1 bg-primary rounded-full transition-all transform-[translateX(calc(100-var(--progress-value)))];
 	}
 
 	/* Variants */
