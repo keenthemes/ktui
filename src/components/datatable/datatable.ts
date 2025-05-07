@@ -788,7 +788,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			requestBody = queryParams;
 		} else if (requestMethod === 'GET') {
 			// If the request method is GET, append the query params to the API endpoint
-			const apiEndpointWithQueryParams = new URL(this._config.apiEndpoint);
+			const apiEndpointWithQueryParams = this._createUrl(
+				this._config.apiEndpoint,
+			);
 			apiEndpointWithQueryParams.search = queryParams.toString();
 			this._config.apiEndpoint = apiEndpointWithQueryParams.toString();
 		}
@@ -805,6 +807,40 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._noticeOnTable('Error performing fetch request: ' + String(error));
 			throw error;
 		});
+	}
+
+	/**
+	 * Creates a complete URL from a relative path or a full URL.
+	 *
+	 * This method accepts a string that can be either a relative path or a full URL.
+	 * If the string is a complete URL (i.e., it contains a valid protocol), a URL
+	 * object based on that string is returned. Otherwise, it ensures the path starts
+	 * with a "/" and combines it with the provided base URL (or the current window's origin)
+	 * to form a complete URL.
+	 *
+	 * @param {string} pathOrUrl - The path or URL to process.
+	 * @param {string | null} [baseUrl=window.location.origin] - The base URL for resolving the relative path.
+	 *                                                           Defaults to the current window's origin.
+	 * @returns {URL} The resulting URL object.
+	 */
+
+	private _createUrl(
+		pathOrUrl: string,
+		baseUrl: string | null = window.location.origin,
+	) : URL {
+		// Regular expression to check if the input is a full URL
+		const isFullUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(pathOrUrl);
+
+		if (isFullUrl) {
+			return new URL(pathOrUrl); // Return full URL as URL object
+		}
+
+		// Ensure path starts with a slash to avoid incorrect concatenation
+		const normalizedPath = pathOrUrl.startsWith('/')
+			? pathOrUrl
+			: `/${pathOrUrl}`;
+
+		return new URL(normalizedPath, baseUrl);
 	}
 
 	/**
