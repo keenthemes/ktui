@@ -138,7 +138,7 @@ To enable automated dark mode support add below Tailwind variant in your Tailwin
 Include KTUI styles in your Tailwind entry file `style.css`:
 
 ```css
-@import "./node_modules/ktui/styles.css";
+@import "@keenthemes/ktui/styles.css";
 ```
 
 ---
