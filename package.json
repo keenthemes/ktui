@@ -59,7 +59,8 @@
 		".": {
 			"import": "./lib/esm/index.js",
 			"require": "./lib/cjs/index.js"
-		}
+		},
+		"./styles.css": "./styles.css"
 	},
 	"license": "MIT",
 	"scripts": {
