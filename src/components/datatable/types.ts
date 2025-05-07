@@ -1,8 +1,8 @@
 /**
  * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
  * Copyright 2025 by Keenthemes Inc
- * @version: 1.0.0
  */
+
 // Define the sort order and filter criteria types
 export type KTDataTableSortOrderInterface = 'asc' | 'desc' | '';
 

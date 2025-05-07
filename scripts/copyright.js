@@ -6,38 +6,15 @@
 const fs = require('fs');
 const path = require('path');
 
-// Read package.json to get the version
-const packageJsonPath = path.join(__dirname, '..', 'package.json');
-const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-const version = packageJson.version;
-
 // Configuration
 const SRC_DIR = path.join(__dirname, '..', 'src');
 const COPYRIGHT_HEADER = `/**
  * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
  * Copyright 2025 by Keenthemes Inc
- * @version: ${version}
  */\n\n`;
 
 // Extensions to process
 const FILE_EXTENSIONS = ['.js', '.ts', '.css'];
-
-// Function to check if a file already has the copyright header with version
-function hasHeaderWithVersion(content) {
-	return (
-		content.trim().startsWith('/**') &&
-		content.includes('Copyright by Keenthemes Inc') &&
-		content.includes(`@version: ${version}`)
-	);
-}
-
-// Function to check if a file has any copyright header
-function hasAnyHeader(content) {
-	return (
-		content.trim().startsWith('/**') &&
-		content.includes('Copyright by Keenthemes Inc')
-	);
-}
 
 // Function to add or update header in a file
 function addHeaderToFile(filePath) {

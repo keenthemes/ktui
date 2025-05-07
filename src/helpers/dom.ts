@@ -1,8 +1,8 @@
 /**
  * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
  * Copyright 2025 by Keenthemes Inc
- * @version: 1.0.0
  */
+
 /* eslint-disable max-len */
 import KTUtils from './utils';
 import { KTOffsetType, KTOptionType, KTViewPortType } from '../types';
