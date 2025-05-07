@@ -24,7 +24,7 @@ jobs:
         run: npm run build:lib
 
       - name: Build package
-        run: npm run build
+        run: npm run build:prod
 
       - name: Publish to npm
         run: npm publish --access public
