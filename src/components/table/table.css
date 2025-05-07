@@ -46,7 +46,7 @@
 
 		td,
 		th {
-			input[type='checkbox'] {
+			input[type=checkbox] {
 				vertical-align: inherit;
 			}
 		}
