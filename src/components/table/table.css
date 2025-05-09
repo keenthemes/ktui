@@ -13,7 +13,7 @@
 		caption-side: bottom;
 
 		tr {
-			@apply border-b border-border transition-colors;
+			@apply border-b border-border;
 		}
 
 		caption {
