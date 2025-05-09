@@ -12,45 +12,49 @@ import { SelectMode } from './types';
  */
 const defaultTemplateStrings = {
 	dropdownContent: `<div data-kt-select-dropdown-content class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
-	optionsContainer: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container" data-kt-select-options-container="true" ]>{{content}}</ul>`,
-	emptyOption: `<option value="">{{content}}</option>`,
-	errorOption: `<option value="" disabled selected>{{content}}</option>`,
+	optionsContainer: `<ul role="listbox" aria-label="{{label}}" data-kt-select-options-container style="max-height: {{height}}px; overflow-y: auto;">{{options}}</ul>`,
+	emptyOption: `<option value="">{{placeholder}}</option>`,
+	errorOption: `<option value="" disabled selected>{{errorMessage}}</option>`, // Template for error <option>
 
-	loadMore: `<li class="kt-select-load-more" data-kt-select-load-more="true">{{content}}</li>`,
-	dropdown: `
-		<div data-kt-select-dropdown-content="true" class="kt-select-dropdown">
-			{{search}}
-			<ul role="listbox" aria-label="{{label}}" data-kt-select-options-container="true" class="kt-select-options-container" style="max-height: {{height}}px;">
-				{{content}}
-			</ul>
-		</div>
-	`,
-	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
+	loadMore: `<li class="py-2 px-4 text-center text-gray-600 cursor-pointer hover:bg-gray-100" data-kt-select-load-more>{{loadMoreText}}</li>`,
+	dropdown: `<div data-kt-select-dropdown-content class="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-md shadow-md">
+		{{search}}
+		<ul role="listbox" aria-label="{{label}}" data-kt-select-options-container style="max-height: {{height}}px; overflow-y: auto;">
+			{{options}}
+		</ul>
+	</div>`,
+	error: `<li class="px-3 py-2 text-red-500" role="alert">{{errorMessage}}</li>`,
 
-	highlight: `<span class="kt-select-highlight">{{text}}</span>`,
-	main: `<div data-kt-select-wrapper="true" class="kt-select-main" data-kt-select-mode="{{mode}}"></div>`,
-	displayCombobox: `
-		<div class="kt-select-combobox">
-			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-display="true" data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
-			<button type="button" data-kt-select-clear-button="true" class="kt-select-combobox-clear-btn" aria-label="Clear selection">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="18" y1="6" x2="6" y2="18"></line>
-					<line x1="6" y1="6" x2="18" y2="18"></line>
-				</svg>
-			</button>
-		</div>
-	`,
-	display: `
-		<div data-kt-select-display="true" class="kt-select-display" tabindex="{{tabindex}}" role="button" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
-			<div data-kt-select-value="true" class="kt-select-label">{{content}}</div>
-		</div>
-	`,
-	option: `<li data-kt-select-option="true" data-value="{{value}}" class="kt-select-option {{selectedClass}} {{disabledClass}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
-	optionGroup: `<li role="group" aria-label="{{label}}" class="py-1"><div class="kt-select-option-group-label">{{label}}</div><ul class="kt-select-option-group-content">{{content}}</ul></li>`,
-	search: `<div class="kt-select-search"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
-	noResults: `<li class="kt-select-no-result" role="status">{{content}}</li>`,
-	loading: `<li class="kt-select-loading" role="status" aria-live="polite">{{content}}</li>`,
-	tag: `<div data-kt-select-tag="true" class="kt-select-tag">{{content}}</div>`,
+	highlight: `<span class="highlight">{{text}}</span>`,
+	main: `<div data-kt-select-wrapper class="relative" data-kt-select-mode="{{mode}}"></div>`,
+	displayCombobox: `<div class="relative flex items-center w-full">
+		<input data-kt-select-search data-kt-select-display data-kt-select-value type="text" class="flex-1 w-full items-center justify-between px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
+		<button type="button" data-kt-select-clear-button class="absolute right-3 hidden text-gray-400 hover:text-gray-600" aria-label="Clear selection">
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<line x1="18" y1="6" x2="6" y2="18"></line>
+			<line x1="6" y1="6" x2="18" y2="18"></line>
+		</svg>
+		</button>
+	</div>`,
+
+	icon: `<span class="option-icon mr-2"><img src="{{icon}}" class="rounded-full w-6 h-6" /></span>`,
+	description: `<div class="option-description text-sm text-gray-500">{{description}}</div>`,
+
+	display: `<div data-kt-select-display class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" tabindex="{{tabindex}}" role="button" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
+		<span data-kt-select-value>{{placeholder}}</span>
+		<span data-kt-select-arrow class="ml-2">
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polyline points="6 9 12 15 18 9"></polyline>
+			</svg>
+		</span>
+	</div>`,
+	option: `<li data-kt-select-option data-value="{{value}}" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center{{selectedClass}}{{disabledClass}}" role="option" {{selected}} {{disabled}}>{{icon}}<div class="option-content"><div class="option-title" data-kt-option-title>{{text}}</div>{{description}}</div></li>`,
+
+	optionGroup: `<li role="group" aria-label="{{label}}" class="py-1"><div class="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{{label}}</div><ul>{{optionsHtml}}</ul></li>`,
+	search: `<div class="px-3 py-2 border-b border-gray-200"><input type="text" data-kt-select-search placeholder="{{searchPlaceholder}}" class="w-full border-none focus:outline-none text-sm" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
+	noResults: `<li class="px-3 py-2 text-gray-500" role="status">{{searchNotFoundText}}</li>`,
+	loading: `<li class="px-3 py-2 text-gray-500 italic" role="status" aria-live="polite">{{loadingMessage}}</li>`,
+	tag: `<div data-kt-select-tag class="inline-flex items-center bg-blue-50 border border-blue-100 rounded px-2 py-1 text-sm mr-1 mb-1"><span>{{title}}</span><span data-kt-select-remove-button data-value="{{id}}" class="ml-1 text-blue-400 hover:text-blue-600 cursor-pointer" role="button" aria-label="Remove {{safeTitle}}" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span></div>`,
 };
 
 /**
