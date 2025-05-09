@@ -7,6 +7,8 @@ import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
 import { EventManager } from './utils';
+import { renderTemplateString } from './utils';
+import { defaultTemplateStrings } from './templates';
 
 /**
  * KTSelectTags - Handles tags-specific functionality for KTSelect
@@ -55,15 +57,44 @@ export class KTSelectTags {
 	 */
 	private _createTagElement(optionValue: string): HTMLElement {
 		const optionLabel = this._getOptionLabel(optionValue);
-		// Create a mock option object to pass to the tag template
-		const mockOption = {
-			id: optionValue,
-			title: optionLabel,
-			selected: true,
-		};
+		// Find the original option element (in dropdown or select)
+		let optionElement: HTMLElement | null = null;
+		const optionElements = this._select.getOptionsElement();
+		for (const opt of Array.from(optionElements)) {
+			if ((opt as HTMLElement).dataset.value === optionValue) {
+				optionElement = opt as HTMLElement;
+				break;
+			}
+		}
+		if (!optionElement) {
+			const originalOptions = this._select.getElement().querySelectorAll('option');
+			for (const opt of Array.from(originalOptions)) {
+				if ((opt as HTMLOptionElement).value === optionValue) {
+					optionElement = opt as HTMLElement;
+					break;
+				}
+			}
+		}
 
-		// Use the tag template
-		const tag = defaultTemplates.tag(mockOption, this._config);
+		let content = '';
+		if (optionElement && optionElement.hasAttribute('data-kt-select-template-tag')) {
+			const customTemplate = optionElement.getAttribute('data-kt-select-template-tag');
+			const data: Record<string, any> = {};
+			for (const [key, value] of Object.entries(optionElement.dataset)) {
+				data[key] = value;
+			}
+			data.value = optionValue;
+			data.text = optionLabel;
+			content = renderTemplateString(customTemplate, data);
+		} else {
+			content = optionLabel;
+		}
+
+		// Render the tag using the default template, injecting the content
+		let html = defaultTemplateStrings.tag.replace('{{content}}', content);
+		const template = document.createElement('template');
+		template.innerHTML = html.trim();
+		const tag = template.content.firstElementChild as HTMLElement;
 
 		// Add event listener to the close button
 		const closeButton = tag.querySelector(

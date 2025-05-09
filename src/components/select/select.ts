@@ -25,6 +25,8 @@ import {
 } from './utils';
 import { KTSelectTags } from './tags';
 import { SelectMode } from './types';
+import { renderTemplateString } from './utils';
+import { defaultTemplateStrings } from './templates';
 
 export class KTSelect extends KTComponent {
 	// Core properties
@@ -1038,15 +1040,38 @@ export class KTSelect extends KTComponent {
 			} else {
 				const selectedOption = selectedOptions[0];
 				if (selectedOption) {
-					const selectedText = this._getOptionInnerHtml(selectedOption);
-					this._updateValueDisplay(selectedText);
-
-					// Update combobox input value if in combobox mode
-					if (
-						this._config.mode === SelectMode.COMBOBOX &&
-						this._comboboxModule
-					) {
-						this._comboboxModule.updateSelectedValue(selectedText);
+					// Check for user-provided display template
+					const customTemplate = this._element.getAttribute('data-kt-select-template-display');
+					if (customTemplate) {
+						// Find the option element for the selected value
+						const optionElement = Array.from(this._element.querySelectorAll('option')).find(
+							(opt) => opt.value === selectedOption
+						) as HTMLOptionElement;
+						const data: Record<string, any> = {};
+						if (optionElement) {
+							for (const [key, value] of Object.entries(optionElement.dataset)) {
+								data[key] = value;
+							}
+							data.value = optionElement.value;
+							data.text = optionElement.textContent;
+						}
+						const content = renderTemplateString(customTemplate, data);
+						let html = defaultTemplateStrings.display
+							.replace('{{tabindex}}', this._config.disabled ? '-1' : '0')
+							.replace('{{label}}', this._config.label || this._config.placeholder || 'Select...')
+							.replace('{{disabled}}', this._config.disabled ? 'aria-disabled="true"' : '')
+							.replace('{{content}}', content);
+						this._valueDisplayElement.innerHTML = html;
+					} else {
+						const selectedText = this._getOptionInnerHtml(selectedOption);
+						this._updateValueDisplay(selectedText);
+						// Update combobox input value if in combobox mode
+						if (
+							this._config.mode === SelectMode.COMBOBOX &&
+							this._comboboxModule
+						) {
+							this._comboboxModule.updateSelectedValue(selectedText);
+						}
 					}
 				} else {
 					this._updateValueDisplay(this._config.placeholder);
