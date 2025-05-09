@@ -225,10 +225,10 @@ For specific cases, you can use the `rtl:*` Tailwind modifier to easily control 
 
 ## License
 
-KTUI is distributed under the MIT license. See [LICENSE.md](https://github.com/keenthemes/reui/blob/main/LICENSE.md) for full details.
+KTUI is distributed under the MIT license. See [LICENSE.md](https://github.com/keenthemes/ktui/blob/main/LICENSE.md) for full details.
 
 ---
 
 ## Contributing
 
-Please see our [CONTRIBUTING.md](https://github.com/keenthemes/reui/blob/main/CONTRIBUTING.md) for guidelines if you wish to contribute to KTUI.
+Please see our [CONTRIBUTING.md](https://github.com/keenthemes/ktui/blob/main/CONTRIBUTING.md) for guidelines if you wish to contribute to KTUI.
