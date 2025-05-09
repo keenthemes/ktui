@@ -355,21 +355,6 @@ export class KTSelect extends KTComponent {
 			});
 			selectOption.value = item.id || '';
 
-			// Add description and icon attributes if available and valid
-			if (
-				item.description &&
-				item.description !== 'null' &&
-				item.description !== 'undefined'
-			) {
-				selectOption.setAttribute(
-					'data-kt-select-option-description',
-					item.description,
-				);
-			}
-			if (item.icon && item.icon !== 'null' && item.icon !== 'undefined') {
-				selectOption.setAttribute('data-kt-select-option-icon', item.icon);
-			}
-
 			// Add the option to the original select element
 			this._element.appendChild(selectOption);
 
@@ -708,74 +693,15 @@ export class KTSelect extends KTComponent {
 						extractedLabel !== null ? String(extractedLabel) : 'Unnamed option';
 				}
 
-				// Get description - skip if null, undefined, or "null" string
-				let description = null;
-				if (
-					item.description !== undefined &&
-					item.description !== null &&
-					String(item.description) !== 'null' &&
-					String(item.description) !== 'undefined'
-				) {
-					description = String(item.description);
-				} else if (this._config.dataFieldDescription) {
-					const extractedDesc = this._getValueByKey(
-						item,
-						this._config.dataFieldDescription,
-					);
-					if (
-						extractedDesc !== null &&
-						extractedDesc !== undefined &&
-						String(extractedDesc) !== 'null' &&
-						String(extractedDesc) !== 'undefined'
-					) {
-						description = String(extractedDesc);
-					}
-				}
-
-				// Get icon - skip if null, undefined, or "null" string
-				let icon = null;
-				if (
-					item.icon !== undefined &&
-					item.icon !== null &&
-					String(item.icon) !== 'null' &&
-					String(item.icon) !== 'undefined'
-				) {
-					icon = String(item.icon);
-				} else if (this._config.dataFieldIcon) {
-					const extractedIcon = this._getValueByKey(
-						item,
-						this._config.dataFieldIcon,
-					);
-					if (
-						extractedIcon !== null &&
-						extractedIcon !== undefined &&
-						String(extractedIcon) !== 'null' &&
-						String(extractedIcon) !== 'undefined'
-					) {
-						icon = String(extractedIcon);
-					}
-				}
-
 				// Log the extracted values for debugging
 				if (this._config.debug)
 					console.log(
-						`Option: value=${value}, label=${label}, desc=${description ? description : 'none'}, icon=${icon ? icon : 'none'}`,
+						`Option: value=${value}, label=${label}`,
 					);
 
 				// Set option attributes
 				optionElement.value = value;
 				optionElement.textContent = label || 'Unnamed option';
-
-				if (description) {
-					optionElement.setAttribute(
-						'data-kt-select-option-description',
-						description,
-					);
-				}
-
-				if (icon) {
-					optionElement.setAttribute('data-kt-select-option-icon', icon);
-				}
 
 				if (item.selected) {
 					optionElement.setAttribute('selected', 'selected');
@@ -1898,15 +1824,6 @@ export class KTSelect extends KTComponent {
 				placeholder: item.title,
 			});
 			selectOption.value = item.id;
-			if (item.description) {
-				selectOption.setAttribute(
-					'data-kt-select-option-description',
-					item.description,
-				);
-			}
-			if (item.icon) {
-				selectOption.setAttribute('data-kt-select-option-icon', item.icon);
-			}
 
 			// Create option element for the dropdown
 			const ktOption = new KTSelectOption(selectOption, this._config);

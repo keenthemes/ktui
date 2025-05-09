@@ -9,6 +9,7 @@ import {
 	KTSelectConfigInterface,
 } from './config';
 import { defaultTemplates } from './templates';
+import { renderTemplateString } from './utils';
 
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
@@ -35,9 +36,36 @@ export class KTSelectOption extends KTComponent {
 
 	public render(): HTMLElement {
 		const optionElement = this.getHTMLOptionElement();
-		// Use the global config if available, or create a minimal valid config
 		const config = this._globalConfig || { height: 250 };
-		// Create a new option element every time
-		return defaultTemplates.option(optionElement, config);
+
+		// Check for user-provided template
+		const customTemplate = optionElement.getAttribute('data-kt-select-template-option');
+		let content = '';
+		if (customTemplate) {
+			// Merge all dataset properties into a data object
+			const data: Record<string, any> = {};
+			for (const [key, value] of Object.entries(optionElement.dataset)) {
+				data[key] = value;
+			}
+			// Also add value and text for convenience
+			data.value = optionElement.value;
+			data.text = optionElement.textContent;
+			content = renderTemplateString(customTemplate, data);
+		} else {
+			content = optionElement.textContent || optionElement.value;
+		}
+
+		// Render the option using the default template, injecting the content
+		let html = defaultTemplates.option(optionElement, this._globalConfig).outerHTML
+			.replace('{{value}}', optionElement.value)
+			.replace('{{selectedClass}}', optionElement.selected ? ' selected' : '')
+			.replace('{{disabledClass}}', optionElement.disabled ? ' disabled' : '')
+			.replace('{{selected}}', optionElement.selected ? 'aria-selected="true"' : 'aria-selected="false"')
+			.replace('{{disabled}}', optionElement.disabled ? 'aria-disabled="true"' : '')
+			.replace('{{content}}', content);
+
+		const template = document.createElement('template');
+		template.innerHTML = html.trim();
+		return template.content.firstElementChild as HTMLElement;
 	}
 }

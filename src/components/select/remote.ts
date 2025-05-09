@@ -363,48 +363,10 @@ export class KTSelectRemote {
 				console.log('After fallback checks, title:', title);
 		}
 
-		// Get description - make sure we don't pass null, undefined, or "null" string values
-		let description = getValue(item, descriptionField);
-		if (
-			description === null ||
-			description === undefined ||
-			String(description) === 'null' ||
-			String(description) === 'undefined'
-		) {
-			description = null;
-		} else {
-			description = String(description);
-		}
-		if (this._config.debug)
-			console.log(`Description field [${descriptionField}]:`, description);
-
-		// Try to get an icon - make sure we don't pass null, undefined, or "null" string values
-		let icon = getValue(item, iconField);
-		if (
-			icon === null ||
-			icon === undefined ||
-			String(icon) === 'null' ||
-			String(icon) === 'undefined'
-		) {
-			icon = null;
-		} else {
-			icon = String(icon);
-		}
-		if (this._config.debug) console.log(`Icon field [${iconField}]:`, icon);
-
-		// If ID is null, use the title as fallback
-		if (id === null || id === '') {
-			id = title;
-			if (this._config.debug)
-				console.log(`Using title as fallback for ID: ${id}`);
-		}
-
 		// Create the option object with non-empty values
 		const result = {
 			id: id || title || 'id-' + Math.random().toString(36).substr(2, 9), // Ensure we always have an ID
 			title: title || 'Unnamed option',
-			description: description,
-			icon: icon,
 		};
 
 		if (this._config.debug)

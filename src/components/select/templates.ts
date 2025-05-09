@@ -10,7 +10,7 @@ import { SelectMode } from './types';
  * Default HTML string templates for KTSelect. All UI structure is defined here.
  * Users can override any template by providing a matching key in the config.templates object.
  */
-const defaultTemplateStrings = {
+export const defaultTemplateStrings = {
 	dropdownContent: `<div data-kt-select-dropdown-content class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
 	optionsContainer: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container" data-kt-select-options-container="true" ]>{{content}}</ul>`,
 	emptyOption: `<option value="">{{content}}</option>`,
@@ -99,13 +99,6 @@ export interface KTSelectTemplateInterface {
 	dropdown: (
 		config: KTSelectConfigInterface,
 		optionsHtml: string,
-	) => HTMLElement;
-
-	// Icon rendering
-	icon: (icon: string, config: KTSelectConfigInterface) => HTMLElement;
-	description: (
-		description: string,
-		config: KTSelectConfigInterface,
 	) => HTMLElement;
 
 	// Option rendering
@@ -327,7 +320,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 */
 	option: (
 		option: KTSelectOption | HTMLOptionElement,
-		config: KTSelectConfigInterface & { templates: KTSelectTemplateInterface },
+		config: KTSelectConfigInterface,
 	): HTMLElement => {
 		const isHtmlOption = option instanceof HTMLOptionElement;
 
@@ -339,33 +332,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		const selected = isHtmlOption
 			? option.selected
 			: !!(option as KTSelectOption).selected;
-
-		// Prefer data-kt-select-option (JSON) if present
-		let description: string | undefined;
-		let icon: string | undefined;
-		if (isHtmlOption) {
-			const json = option.getAttribute('data-kt-select-option');
-			if (json) {
-				try {
-					const optionData = JSON.parse(json);
-					description = optionData?.description;
-					icon = optionData?.icon;
-				} catch (e) {
-					// fallback to legacy attributes if JSON is invalid
-					description =
-						option.getAttribute('data-kt-select-option-description') ||
-						undefined;
-					icon = option.getAttribute('data-kt-select-option-icon') || undefined;
-				}
-			} else {
-				description =
-					option.getAttribute('data-kt-select-option-description') || undefined;
-				icon = option.getAttribute('data-kt-select-option-icon') || undefined;
-			}
-		} else {
-			description = (option as KTSelectOption).description;
-			icon = (option as KTSelectOption).icon;
-		}
 
 		// Build option element with proper accessibility attributes
 		const selectedClass = selected ? ' selected' : '';
@@ -379,39 +345,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 				selected ? 'aria-selected="true"' : 'aria-selected="false"',
 			)
 			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
-			.replace(
-				/{{icon}}/g,
-				icon ? defaultTemplates.icon(icon, config).outerHTML : '',
-			)
-			.replace('{{text}}', text)
-			.replace(
-				/{{description}}/g,
-				description
-					? defaultTemplates.description(description, config).outerHTML
-					: '',
-			);
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders an icon
-	 */
-	icon: (icon: string, config: KTSelectConfigInterface): HTMLElement => {
-		const html = getTemplateStrings(config).icon.replace('{{icon}}', icon);
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders a description
-	 */
-	description: (
-		description: string,
-		config: KTSelectConfigInterface,
-	): HTMLElement => {
-		const html = getTemplateStrings(config).description.replace(
-			'{{description}}',
-			description,
-		);
+			.replace('{{text}}', text);
 		return stringToElement(html);
 	},
 

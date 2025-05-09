@@ -749,3 +749,13 @@ export function debounce(
 		timeout = setTimeout(() => func(...args), delay);
 	};
 }
+
+/**
+ * Replaces all {{key}} in the template with the corresponding value from the data object.
+ * If a key is missing in data, replaces with an empty string.
+ */
+export function renderTemplateString(template: string, data: Record<string, any>): string {
+	return template.replace(/{{(\w+)}}/g, (_, key) =>
+		data[key] !== undefined && data[key] !== null ? String(data[key]) : ''
+	);
+}
