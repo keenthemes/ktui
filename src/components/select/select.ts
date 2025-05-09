@@ -626,7 +626,8 @@ export class KTSelect extends KTComponent {
 	 * Initialize search module if search is enabled
 	 */
 	private _initializeSearchModule() {
-		if (this._config.enableSearch) {
+		// Only initialize search module if NOT in combobox mode
+		if (this._config.enableSearch && this._config.mode !== SelectMode.COMBOBOX) {
 			this._searchModule = new KTSelectSearch(this);
 			this._searchModule.init();
 
