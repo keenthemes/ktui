@@ -80,6 +80,9 @@ export function filterOptions(
 		const optionText = option.textContent?.toLowerCase() || '';
 		const isMatch = optionText.includes(query.toLowerCase());
 
+		// Check if option is disabled
+		const isDisabled = option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true';
+
 		if (isMatch || query.trim() === '') {
 			// Show option by removing the hidden class and any display inline styles
 			option.classList.remove('hidden');
@@ -106,7 +109,7 @@ export function filterOptions(
 			visibleOptionsCount++;
 
 			// Apply highlighting if needed - but preserve the option structure
-			if (isMatch && config.searchHighlight && query.trim() !== '') {
+			if (!isDisabled && isMatch && config.searchHighlight && query.trim() !== '') {
 				// Clone option elements that contain icons or descriptions
 				const hasIcon =
 					option.querySelector('[data-kt-select-option-icon]') !== null;
@@ -338,6 +341,11 @@ export class FocusManager {
 	public applyFocus(option: HTMLElement): void {
 		if (!option) return;
 
+		// Prevent focusing disabled options
+		if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
+			return;
+		}
+
 		// Remove focus from all options first
 		this.resetFocus();
 
@@ -554,10 +562,6 @@ export function handleDropdownKeyNavigation(
 					if (select.getConfig && select.getConfig().debug)
 						console.log(`[${origin}] Enter pressed with dropdown open`);
 
-					// For combobox mode, ensure we update the input value directly
-					const isCombobox = select.getConfig().mode === 'combobox';
-					const comboboxModule = (select as any)._comboboxModule;
-
 					if (callbacks?.onEnter) {
 						if (select.getConfig && select.getConfig().debug)
 							console.log(`[${origin}] Using custom onEnter callback`);
@@ -721,7 +725,7 @@ export class EventManager {
 		// Go through each event type
 		this._boundHandlers.forEach((eventMap, event) => {
 			// For each event type, go through each handler
-			eventMap.forEach((boundHandler, originalHandler) => {
+			eventMap.forEach((boundHandler) => {
 				element.removeEventListener(event, boundHandler);
 			});
 		});

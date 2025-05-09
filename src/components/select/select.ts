@@ -337,13 +337,13 @@ export class KTSelect extends KTComponent {
 		if (!this._dropdownContentElement || !newItems.length) return;
 
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options-container]',
+			`[data-kt-select-options-container]`,
 		);
 		if (!optionsContainer) return;
 
 		// Get the load more button
 		const loadMoreButton = optionsContainer.querySelector(
-			'[data-kt-select-load-more]',
+			`[data-kt-select-load-more]`,
 		);
 
 		// Process each new item
@@ -1017,6 +1017,12 @@ export class KTSelect extends KTComponent {
 	 * Select an option by value
 	 */
 	private _selectOption(value: string) {
+		// Prevent selection if the option is disabled (in dropdown or original select)
+		if (this._isOptionDisabled(value)) {
+			if (this._config.debug) console.log('_selectOption: Option is disabled, ignoring selection');
+			return;
+		}
+
 		// Get current selection state
 		const isSelected = this._state.isSelected(value);
 
@@ -1605,6 +1611,12 @@ export class KTSelect extends KTComponent {
 	 * Toggle the selection of an option
 	 */
 	public toggleSelection(value: string): void {
+		// Prevent selection if the option is disabled (in dropdown or original select)
+		if (this._isOptionDisabled(value)) {
+			if (this._config.debug) console.log('toggleSelection: Option is disabled, ignoring selection');
+			return;
+		}
+
 		// Get current selection state
 		const isSelected = this._state.isSelected(value);
 		if (this._config.debug)
@@ -1919,5 +1931,20 @@ export class KTSelect extends KTComponent {
 	 */
 	public isDropdownOpen(): boolean {
 		return this._dropdownIsOpen;
+	}
+
+	/**
+	 * Check if an option is disabled (either in dropdown or original select)
+	 */
+	private _isOptionDisabled(value: string): boolean {
+		const dropdownOption = Array.from(this._options).find(
+			(opt) => opt.getAttribute('data-value') === value
+		);
+		const isDropdownDisabled = dropdownOption && (dropdownOption.classList.contains('disabled') || dropdownOption.getAttribute('aria-disabled') === 'true');
+		const selectOption = Array.from(this._element.querySelectorAll('option')).find(
+			(opt) => opt.value === value
+		) as HTMLOptionElement;
+		const isNativeDisabled = selectOption && selectOption.disabled;
+		return Boolean(isDropdownDisabled || isNativeDisabled);
 	}
 }
