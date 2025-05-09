@@ -20,12 +20,20 @@
 	.kt-modal-close {
 		@apply shrink-0 size-6 cursor-pointer -me-2.5;
 
+		i {
+			@apply opacity-70 text-xs;
+		}
+
 		> svg {
-			@apply size-3.5 opacity-70;
+			@apply size-4 opacity-70;
 		}
 
 		&:focus,
 		&:hover {
+			i {
+				@apply opacity-100;
+			}
+
 			> svg {
 				@apply opacity-100;
 			}
@@ -56,9 +64,17 @@
 		@apply flex items-center justify-between gap-2 px-5 py-4 border-t border-border;
 	}
 
-	.kt-modal-center {
+	.kt-modal-center:not(.kt-modal-fit) {
 		.kt-modal-content {
 			@apply top-1/2 -translate-y-1/2;
+		}
+	}
+
+	.kt-modal-fit {
+		@apply p-0 overflow-visible;
+
+		&.kt-modal-center {
+			@apply start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2;
 		}
 	}
 }

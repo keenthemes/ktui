@@ -157,12 +157,17 @@
 	.kt-badge-btn {
 		@apply cursor-pointer inline-flex items-center justify-center leading-none size-3.5 p-0 rounded-md -me-0.5;
 
+		i {
+			@apply transition-[opacity] opacity-70 text-xs;
+		}
+
 		> svg {
 			@apply transition-[opacity] size-3.5 opacity-70;
 		}
 
 		&:focus,
 		&:hover {
+			i,
 			> svg {
 				@apply opacity-100;
 			}

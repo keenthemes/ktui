@@ -76,11 +76,6 @@ export class KTModal extends KTComponent implements KTModalInterface {
 			return;
 		}
 
-		//const beforeScroll = this.fireEvent('beforeScroll', this.el);
-		//this.dispatch('beforeScroll.hs.scrollspy', this.el, this.el);
-		//if (beforeScroll instanceof Promise) beforeScroll.then(() => scrollFn());
-		//else scrollFn();
-
 		if (targetElement) this._targetElement = targetElement;
 
 		const payload = { cancel: false };

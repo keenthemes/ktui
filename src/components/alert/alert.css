@@ -41,12 +41,17 @@
 	.kt-alert-close {
 		@apply shrink-0 size-4 cursor-pointer;
 
+		i {
+			@apply text-muted-foreground text-xs;
+		}
+
 		> svg {
 			@apply size-4 text-muted-foreground;
 		}
 
 		&:focus,
 		&:hover {
+			i,
 			> svg {
 				@apply text-foreground;
 			}
