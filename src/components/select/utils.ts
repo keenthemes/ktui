@@ -237,7 +237,7 @@ export class FocusManager {
 		// Use config values if provided, otherwise fallback to defaults
 		this._focusClass = config?.focusClass || 'option-focused';
 		this._hoverClass = config?.hoverClass || 'hovered';
-		this._bgClass = config?.bgClass || 'bg-blue-50';
+		this._bgClass = config?.bgClass || 'bg-gray-100';
 		this._fontClass = config?.fontClass || 'font-medium';
 
 		// Add click handler to update focus state when options are clicked

@@ -79,7 +79,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Styling
 	focusClass: 'option-focused',
 	hoverClass: 'hovered',
-	bgClass: 'bg-blue-50',
 	fontClass: 'font-medium',
 };
 
