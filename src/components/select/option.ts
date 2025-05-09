@@ -38,22 +38,8 @@ export class KTSelectOption extends KTComponent {
 		const optionElement = this.getHTMLOptionElement();
 		const config = this._globalConfig || { height: 250 };
 
-		// Check for user-provided template
-		const customTemplate = optionElement.getAttribute('data-kt-select-template-option');
 		let content = '';
-		if (customTemplate) {
-			// Merge all dataset properties into a data object
-			const data: Record<string, any> = {};
-			for (const [key, value] of Object.entries(optionElement.dataset)) {
-				data[key] = value;
-			}
-			// Also add value and text for convenience
-			data.value = optionElement.value;
-			data.text = optionElement.textContent;
-			content = renderTemplateString(customTemplate, data);
-		} else {
-			content = optionElement.textContent || optionElement.value;
-		}
+		content = optionElement.textContent || optionElement.value;
 
 		// Render the option using the default template, injecting the content
 		let html = defaultTemplates.option(optionElement, this._globalConfig).outerHTML

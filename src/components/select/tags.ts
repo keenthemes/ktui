@@ -77,18 +77,7 @@ export class KTSelectTags {
 		}
 
 		let content = '';
-		if (optionElement && optionElement.hasAttribute('data-kt-select-template-tag')) {
-			const customTemplate = optionElement.getAttribute('data-kt-select-template-tag');
-			const data: Record<string, any> = {};
-			for (const [key, value] of Object.entries(optionElement.dataset)) {
-				data[key] = value;
-			}
-			data.value = optionValue;
-			data.text = optionLabel;
-			content = renderTemplateString(customTemplate, data);
-		} else {
-			content = optionLabel;
-		}
+		content = optionLabel;
 
 		// Render the tag using the default template, injecting the content
 		let html = defaultTemplateStrings.tag.replace('{{content}}', content);
