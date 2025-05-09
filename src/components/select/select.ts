@@ -864,6 +864,10 @@ export class KTSelect extends KTComponent {
 	 * Toggle dropdown visibility
 	 */
 	public toggleDropdown() {
+		if (this._config.disabled) {
+			if (this._config.debug) console.log('toggleDropdown: select is disabled, not opening');
+			return;
+		}
 		if (this._config.debug) console.log('toggleDropdown called');
 		if (this._dropdownModule) {
 			// Always use the dropdown module's state to determine whether to open or close
@@ -881,6 +885,10 @@ export class KTSelect extends KTComponent {
 	 * Open the dropdown
 	 */
 	public openDropdown() {
+		if (this._config.disabled) {
+			if (this._config.debug) console.log('openDropdown: select is disabled, not opening');
+			return;
+		}
 		if (this._config.debug)
 			console.log(
 				'openDropdown called, dropdownModule exists:',

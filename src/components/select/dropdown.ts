@@ -274,6 +274,10 @@ export class KTSelectDropdown extends KTComponent {
 	 * Toggle the dropdown
 	 */
 	public toggle(): void {
+		if (this._config.disabled) {
+			if (this._config.debug) console.log('KTSelectDropdown.toggle: select is disabled, not toggling');
+			return;
+		}
 		if (this._config.debug)
 			console.log('KTSelectDropdown.toggle called - isOpen:', this._isOpen);
 
@@ -294,6 +298,10 @@ export class KTSelectDropdown extends KTComponent {
 	 * Open the dropdown
 	 */
 	public open(): void {
+		if (this._config.disabled) {
+			if (this._config.debug) console.log('KTSelectDropdown.open: select is disabled, not opening');
+			return;
+		}
 		if (this._isOpen || this._isTransitioning) return;
 
 		// Fire before show event

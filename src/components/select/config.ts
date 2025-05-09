@@ -29,8 +29,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	dataFieldText: null, // Property in the option object that contains the text (default: 'title')
 	dataFieldDescription: null, // Property in the option object that contains the description
 	dataFieldIcon: null, // Property in the option object that contains the icon
-	dataFieldIconWidth: null, // Property in the option object that contains the icon width
-	dataFieldIconHeight: null, // Property in the option object that contains the icon height
 
 	// Search Configuration
 	searchParam: '', // Query parameter for API search requests
@@ -139,8 +137,6 @@ export interface KTSelectConfigInterface {
 	dataFieldText?: string;
 	dataFieldDescription?: string;
 	dataFieldIcon?: string;
-	dataFieldIconWidth?: string;
-	dataFieldIconHeight?: string;
 
 	// Pagination Configuration
 	pagination?: boolean;
