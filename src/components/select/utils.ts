@@ -110,24 +110,8 @@ export function filterOptions(
 
 			// Apply highlighting if needed - but preserve the option structure
 			if (!isDisabled && isMatch && config.searchHighlight && query.trim() !== '') {
-				// Clone option elements that contain icons or descriptions
-				const hasIcon =
-					option.querySelector('[data-kt-select-option-icon]') !== null;
-				const hasDescription =
-					option.querySelector('[data-kt-select-option-description]') !== null;
-
-				if (hasIcon || hasDescription) {
-					// Only highlight the text part without changing structure
-					const titleElement = option.querySelector(
-						'[data-kt-option-title]',
-					) as HTMLElement;
-					if (titleElement) {
-						highlightTextInElement(titleElement, query, config);
-					}
-				} else {
-					// Simple option with just text - standard highlighting
-					highlightTextInElement(option, query, config);
-				}
+				// Simple option with just text - standard highlighting
+				highlightTextInElement(option, query, config);
 			}
 		} else {
 			// Hide option using hidden class

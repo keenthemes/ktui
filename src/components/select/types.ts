@@ -19,8 +19,6 @@ export interface KTSelectOption {
 	id: string;
 	title: string;
 	selected?: boolean;
-	description?: string;
-	icon?: string;
 	disabled?: boolean;
 }
 

@@ -27,8 +27,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Field Mapping
 	dataValueField: null, // Property in the option object that contains the value (default: 'id')
 	dataFieldText: null, // Property in the option object that contains the text (default: 'title')
-	dataFieldDescription: null, // Property in the option object that contains the description
-	dataFieldIcon: null, // Property in the option object that contains the icon
 
 	// Search Configuration
 	searchParam: '', // Query parameter for API search requests
@@ -134,8 +132,6 @@ export interface KTSelectConfigInterface {
 	// Field Mapping
 	dataValueField?: string;
 	dataFieldText?: string;
-	dataFieldDescription?: string;
-	dataFieldIcon?: string;
 
 	// Pagination Configuration
 	pagination?: boolean;
@@ -161,8 +157,6 @@ export interface KTSelectConfigInterface {
 export interface KTSelectOption {
 	id: string;
 	title: string;
-	icon?: string;
-	description?: string;
 	selected?: boolean;
 }
 
@@ -306,14 +300,4 @@ export class KTSelectState {
 	public modifyConfig(config: Partial<KTSelectConfigInterface>): void {
 		this._config = { ...this._config, ...config };
 	}
-}
-
-export const SelectOptionDefaultConfig: KTSelectOptionConfigInterface = {
-	description: '',
-	icon: null,
-};
-
-export interface KTSelectOptionConfigInterface {
-	description: string;
-	icon: string;
 }

@@ -103,3 +103,37 @@
 		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
 	}
 }
+
+/* Temporary styles */
+.kt-select-flag {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+.kt-badge {
+	display: inline-flex;
+	align-items: center;
+	background: #e0e7ef;
+	color: #1e293b;
+	border-radius: 9999px;
+	padding: 0.25em 0.75em;
+	font-size: 0.875em;
+	margin: 0 0.25em 0.25em 0;
+}
+.kt-badge-remove {
+	background: none;
+	border: none;
+	color: #64748b;
+	margin-left: 0.5em;
+	cursor: pointer;
+	font-size: 1em;
+	line-height: 1;
+}
+.kt-badge-remove:hover {
+	color: #ef4444;
+}
+.kt-select-field {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}

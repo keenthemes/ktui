@@ -259,12 +259,10 @@ export class KTSelectRemote {
 		// Get the field mapping from config with fallbacks for common field names
 		const valueField = this._config.dataValueField || 'id';
 		const labelField = this._config.dataFieldText || 'title';
-		const descriptionField = this._config.dataFieldDescription || 'description';
-		const iconField = this._config.dataFieldIcon || 'icon';
 
 		if (this._config.debug)
 			console.log(
-				`Mapping fields: value=${valueField}, label=${labelField}, description=${descriptionField}, icon=${iconField}`,
+				`Mapping fields: value=${valueField}, label=${labelField}`,
 			);
 		if (this._config.debug)
 			console.log('Item data:', JSON.stringify(item).substring(0, 200) + '...'); // Trimmed for readability
@@ -298,7 +296,7 @@ export class KTSelectRemote {
 								? typeof result === 'object'
 									? JSON.stringify(result).substring(0, 50)
 									: String(result).substring(0, 50)
-								: 'null'
+							: 'null'
 						}`,
 					);
 
