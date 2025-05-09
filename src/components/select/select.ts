@@ -475,6 +475,12 @@ export class KTSelect extends KTComponent {
 		const wrapperElement = defaultTemplates.main(this._config);
 		const displayElement = defaultTemplates.display(this._config);
 
+		// Move classes from original select to display element
+		if (this._element.classList.length > 0) {
+			displayElement.classList.add(...Array.from(this._element.classList));
+			this._element.className = '';
+		}
+
 		// Add the display element to the wrapper
 		wrapperElement.appendChild(displayElement);
 
