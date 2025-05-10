@@ -7,8 +7,6 @@ import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
 import { EventManager } from './utils';
-import { renderTemplateString } from './utils';
-import { defaultTemplateStrings } from './templates';
 
 /**
  * KTSelectTags - Handles tags-specific functionality for KTSelect
@@ -80,7 +78,7 @@ export class KTSelectTags {
 		content = optionLabel;
 
 		// Render the tag using the default template, injecting the content
-		let html = defaultTemplateStrings.tag.replace('{{content}}', content);
+		let html = defaultTemplates.tag(optionElement, this._config).outerHTML.replace('{{content}}', content);
 		const template = document.createElement('template');
 		template.innerHTML = html.trim();
 		const tag = template.content.firstElementChild as HTMLElement;

@@ -163,8 +163,15 @@ export function getTemplateStrings(
 		config && typeof config === 'object' && 'templates' in config
 			? (config as any).templates
 			: undefined;
+
+	console.log(config.templates);
+
 	if (templates) {
-		return { ...defaultTemplateStrings, ...userTemplateStrings, ...templates };
+		return {
+			...defaultTemplateStrings,
+			...userTemplateStrings,
+			...templates,
+		};
 	}
 	return { ...defaultTemplateStrings, ...userTemplateStrings };
 }

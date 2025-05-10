@@ -3,6 +3,7 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
+import { defaultTemplateStrings } from './templates';
 import { SelectMode } from './types';
 
 export const DefaultConfig: KTSelectConfigInterface = {
@@ -152,6 +153,8 @@ export interface KTSelectConfigInterface {
 	hoverClass?: string;
 	bgClass?: string;
 	fontClass?: string;
+
+	templates?: Partial<typeof defaultTemplateStrings>;
 }
 
 export interface KTSelectOption {
