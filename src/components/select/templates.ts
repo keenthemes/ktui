@@ -159,12 +159,13 @@ export function setTemplateStrings(
 export function getTemplateStrings(
 	config?: KTSelectConfigInterface,
 ): typeof defaultTemplateStrings {
-	const templates =
-		config && typeof config === 'object' && 'templates' in config
-			? (config as any).templates
-			: undefined;
 
-	console.log(config.templates);
+	const templates = {};
+
+	if (config.templateOption) {
+		// Add the option template to the templates object
+		templates.option = config.templateOption;
+	}
 
 	if (templates) {
 		return {
