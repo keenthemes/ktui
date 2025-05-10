@@ -159,22 +159,29 @@ export function setTemplateStrings(
 export function getTemplateStrings(
 	config?: KTSelectConfigInterface,
 ): typeof defaultTemplateStrings {
+	const templates = {
+		...(config?.templateOption && { option: config.templateOption }),
+		...(config?.templateDropdownContent && { dropdownContent: config.templateDropdownContent }),
+		...(config?.templateOptionsContainer && { optionsContainer: config.templateOptionsContainer }),
+		...(config?.templateEmptyOption && { emptyOption: config.templateEmptyOption }),
+		...(config?.templateErrorOption && { errorOption: config.templateErrorOption }),
+		...(config?.templateloadMore && { loadMore: config.loadMore }),
+		...(config?.templateerror && { error: config.error }),
+		...(config?.templatehighlight && { highlight: config.highlight }),
+		...(config?.templatemain && { main: config.main }),
+		...(config?.templatedisplay && { display: config.display }),
+		...(config?.templatedropdown && { dropdown: config.dropdown }),
+		...(config?.templatesearch && { search: config.search }),
+		...(config?.templatenoResults && { noResults: config.noResults }),
+		...(config?.templateloading && { loading: config.loading }),
+		...(config?.templatetag && { tag: config.tag }),
+	};
 
-	const templates = {};
-
-	if (config.templateOption) {
-		// Add the option template to the templates object
-		templates.option = config.templateOption;
-	}
-
-	if (templates) {
-		return {
-			...defaultTemplateStrings,
-			...userTemplateStrings,
-			...templates,
-		};
-	}
-	return { ...defaultTemplateStrings, ...userTemplateStrings };
+	return {
+		...defaultTemplateStrings,
+		...userTemplateStrings,
+		...templates,
+	};
 }
 
 /**
