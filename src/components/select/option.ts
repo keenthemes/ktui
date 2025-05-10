@@ -5,16 +5,14 @@
 
 import KTComponent from '../component';
 import {
-	KTSelectOptionConfigInterface,
 	KTSelectConfigInterface,
 } from './config';
 import { defaultTemplates } from './templates';
-import { renderTemplateString } from './utils';
 
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
 	protected override readonly _dataOptionPrefix: string = 'kt-'; // Use 'kt-' prefix to support data-kt-select-option attributes
-	protected override readonly _config: KTSelectOptionConfigInterface;
+	protected override readonly _config: KTSelectConfigInterface;
 	private _globalConfig: KTSelectConfigInterface;
 
 	constructor(element: HTMLElement, config?: KTSelectConfigInterface) {
@@ -36,7 +34,6 @@ export class KTSelectOption extends KTComponent {
 
 	public render(): HTMLElement {
 		const optionElement = this.getHTMLOptionElement();
-		const config = this._globalConfig || { height: 250 };
 
 		let content = '';
 		content = optionElement.textContent || optionElement.value;

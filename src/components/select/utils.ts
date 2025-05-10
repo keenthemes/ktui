@@ -6,7 +6,7 @@
 // utils.ts
 
 import { KTSelect } from './select';
-import { defaultTemplates, getTemplateStrings } from './templates';
+import { defaultTemplates } from './templates';
 import { KTSelectConfigInterface } from './config';
 
 /**

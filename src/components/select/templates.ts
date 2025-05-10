@@ -12,7 +12,7 @@ import { SelectMode } from './types';
  */
 export const defaultTemplateStrings = {
 	dropdownContent: `<div data-kt-select-dropdown-content class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
-	optionsContainer: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container" data-kt-select-options-container="true" ]>{{content}}</ul>`,
+	optionsContainer: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container" data-kt-select-options-container="true">{{content}}</ul>`,
 	emptyOption: `<option value="">{{content}}</option>`,
 	errorOption: `<option value="" disabled selected>{{content}}</option>`,
 

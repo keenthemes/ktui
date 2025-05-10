@@ -25,8 +25,6 @@ import {
 } from './utils';
 import { KTSelectTags } from './tags';
 import { SelectMode } from './types';
-import { renderTemplateString } from './utils';
-import { defaultTemplateStrings } from './templates';
 
 export class KTSelect extends KTComponent {
 	// Core properties
@@ -488,6 +486,9 @@ export class KTSelect extends KTComponent {
 
 		// Create options container using template
 		const optionsContainer = defaultTemplates.optionsContainer(this._config);
+
+		// Clear the options container
+		optionsContainer.innerHTML = '';
 
 		// Add each option directly to the container
 		options.forEach((optionElement) => {
