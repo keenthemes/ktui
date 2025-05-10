@@ -11,32 +11,18 @@ import { SelectMode } from './types';
  * Users can override any template by providing a matching key in the config.templates object.
  */
 export const defaultTemplateStrings = {
-	dropdownContent: `<div data-kt-select-dropdown-content class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
-	optionsContainer: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container" data-kt-select-options-container="true">{{content}}</ul>`,
-	emptyOption: `<option value="">{{content}}</option>`,
-	errorOption: `<option value="" disabled selected>{{content}}</option>`,
-
-	loadMore: `<li class="kt-select-load-more" data-kt-select-load-more="true">{{content}}</li>`,
-	dropdown: `
-		<div data-kt-select-dropdown-content="true" class="kt-select-dropdown">
-			{{search}}
-			<ul role="listbox" aria-label="{{label}}" data-kt-select-options-container="true" class="kt-select-options-container" style="max-height: {{height}}px;">
-				{{content}}
-			</ul>
-		</div>
-	`,
+	dropdown: `<div data-kt-select-dropdown-content class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
+	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container" data-kt-select-options-container="true">{{content}}</ul>`,
 	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
-
 	highlight: `<span class="kt-select-highlight">{{text}}</span>`,
 	main: `<div data-kt-select-wrapper="true" class="kt-select-main" data-kt-select-mode="{{mode}}"></div>`,
-	displayCombobox: `
+	combobox: `
 		<div class="kt-select-combobox">
 			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-display="true" data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
 			<button type="button" data-kt-select-clear-button="true" class="kt-select-combobox-clear-btn" aria-label="Clear selection">
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
 					<line x1="6" y1="6" x2="18" y2="18"></line>
-				</svg>
 			</button>
 		</div>
 	`,
@@ -46,11 +32,11 @@ export const defaultTemplateStrings = {
 		</div>
 	`,
 	option: `<li data-kt-select-option="true" data-value="{{value}}" class="kt-select-option {{selectedClass}} {{disabledClass}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
-	optionGroup: `<li role="group" aria-label="{{label}}" class="py-1"><div class="kt-select-option-group-label">{{label}}</div><ul class="kt-select-option-group-content">{{content}}</ul></li>`,
 	search: `<div class="kt-select-search"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
-	noResults: `<li class="kt-select-no-result" role="status">{{content}}</li>`,
+	empty: `<li class="kt-select-no-result" role="status">{{content}}</li>`,
 	loading: `<li class="kt-select-loading" role="status" aria-live="polite">{{content}}</li>`,
 	tag: `<div data-kt-select-tag="true" class="kt-select-tag">{{content}}</div>`,
+	loadMore: `<li class="kt-select-load-more" data-kt-select-load-more="true">{{content}}</li>`,
 };
 
 /**
@@ -61,26 +47,14 @@ export interface KTSelectTemplateInterface {
 	/**
 	 * Renders the dropdown content container
 	 */
-	dropdownContent: (
+	dropdown: (
 		config: KTSelectConfigInterface & { zindex?: number; content?: string },
 	) => HTMLElement;
 	/**
 	 * Renders the options container
 	 */
-	optionsContainer: (
+	options: (
 		config: KTSelectConfigInterface & { options?: string },
-	) => HTMLElement;
-	/**
-	 * Renders an empty <option> for native select
-	 */
-	emptyOption: (
-		config: KTSelectConfigInterface & { placeholder?: string },
-	) => HTMLOptionElement;
-	/**
-	 * Renders an error <option> for the native select
-	 */
-	errorOption: (
-		config: KTSelectConfigInterface & { errorMessage: string },
 	) => HTMLElement;
 	/**
 	 * Renders the load more button for pagination
@@ -96,10 +70,6 @@ export interface KTSelectTemplateInterface {
 	// Main components
 	main: (config: KTSelectConfigInterface) => HTMLElement;
 	display: (config: KTSelectConfigInterface) => HTMLElement;
-	dropdown: (
-		config: KTSelectConfigInterface,
-		optionsHtml: string,
-	) => HTMLElement;
 
 	// Option rendering
 	option: (
@@ -114,7 +84,7 @@ export interface KTSelectTemplateInterface {
 
 	// Search and empty states
 	search: (config: KTSelectConfigInterface) => HTMLElement;
-	noResults: (config: KTSelectConfigInterface) => HTMLElement;
+	empty: (config: KTSelectConfigInterface) => HTMLElement;
 	loading: (
 		config: KTSelectConfigInterface,
 		loadingMessage: string,
@@ -186,10 +156,10 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the dropdown content
 	 */
-	dropdownContent: (
+	dropdown: (
 		config: KTSelectConfigInterface & { zindex?: number; content?: string },
 	) => {
-		const template = getTemplateStrings(config).dropdownContent;
+		const template = getTemplateStrings(config).dropdown;
 		const html = template
 			.replace('{{zindex}}', config.zindex ? String(config.zindex) : '')
 			.replace('{{content}}', config.content || '');
@@ -199,38 +169,14 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the options container for the dropdown
 	 */
-	optionsContainer: (
+	options: (
 		config: KTSelectConfigInterface & { options?: string },
 	) => {
-		const template = getTemplateStrings(config).optionsContainer;
+		const template = getTemplateStrings(config).options;
 		const html = template
 			.replace('{{label}}', config.label || 'Options')
 			.replace('{{height}}', config.height ? String(config.height) : '250')
 			.replace('{{options}}', config.options || '');
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders an empty option in the dropdown
-	 */
-	emptyOption: (config: KTSelectConfigInterface & { placeholder?: string }) => {
-		const template = getTemplateStrings(config).emptyOption;
-		const html = template.replace(
-			'{{placeholder}}',
-			config.placeholder || 'Select...',
-		);
-		return stringToElement(html) as HTMLOptionElement;
-	},
-
-	/**
-	 * Renders an error option in the dropdown
-	 */
-	errorOption: (config: KTSelectConfigInterface & { errorMessage: string }) => {
-		const template = getTemplateStrings(config).errorOption;
-		const html = template.replace(
-			'{{errorMessage}}',
-			config.errorMessage || 'An error occurred',
-		);
 		return stringToElement(html);
 	},
 
@@ -274,7 +220,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		const isCombobox = config.mode === SelectMode.COMBOBOX;
 		if (isCombobox) {
 			let html = getTemplateStrings(config)
-				.displayCombobox.replace(
+				.combobox.replace(
 					/{{placeholder}}/g,
 					config.placeholder || 'Select...',
 				)
@@ -290,29 +236,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			.replace('{{label}}', config.label || config.placeholder || 'Select...')
 			.replace('{{disabled}}', config.disabled ? 'aria-disabled="true"' : '')
 			.replace('{{placeholder}}', config.placeholder || 'Select...');
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders the dropdown content container
-	 */
-	dropdown: (
-		config: KTSelectConfigInterface,
-		optionsHtml: string,
-	): HTMLElement => {
-		const isCombobox = config.mode === SelectMode.COMBOBOX;
-		const hasSearch = config.enableSearch && !isCombobox;
-		const template = getTemplateStrings(config).dropdown;
-		let searchHtml = '';
-		if (hasSearch) {
-			const searchElement = defaultTemplates.search(config);
-			searchHtml = searchElement.outerHTML;
-		}
-		const html = template
-			.replace('{{search}}', searchHtml)
-			.replace('{{options}}', optionsHtml)
-			.replace('{{label}}', config.label || 'Options')
-			.replace('{{height}}', config.height ? String(config.height) : '250');
 		return stringToElement(html);
 	},
 
@@ -351,20 +274,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	},
 
 	/**
-	 * Renders an option group with header
-	 */
-	optionGroup: (
-		label: string,
-		optionsHtml: string,
-		config: KTSelectConfigInterface,
-	): HTMLElement => {
-		let html = getTemplateStrings(config)
-			.optionGroup.replace(/{{label}}/g, label)
-			.replace('{{optionsHtml}}', optionsHtml);
-		return stringToElement(html);
-	},
-
-	/**
 	 * Renders the search input
 	 */
 	search: (config: KTSelectConfigInterface): HTMLElement => {
@@ -378,8 +287,8 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the no results message
 	 */
-	noResults: (config: KTSelectConfigInterface): HTMLElement => {
-		let html = getTemplateStrings(config).noResults.replace(
+	empty: (config: KTSelectConfigInterface): HTMLElement => {
+		let html = getTemplateStrings(config).empty.replace(
 			'{{searchNotFoundText}}',
 			config.searchNotFoundText || 'No results found',
 		);

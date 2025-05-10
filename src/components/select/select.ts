@@ -152,15 +152,6 @@ export class KTSelect extends KTComponent {
 			this._element.querySelectorAll('option:not([value=""])'),
 		);
 		options.forEach((option) => option.remove());
-
-		// Ensure we have at least an empty option
-		if (this._element.querySelectorAll('option').length === 0) {
-			const emptyOption = defaultTemplates.emptyOption({
-				...this._config,
-				placeholder: this._config.placeholder,
-			});
-			this._element.appendChild(emptyOption);
-		}
 	}
 
 	/**
@@ -191,7 +182,7 @@ export class KTSelect extends KTComponent {
 				break;
 			case 'noResults':
 				optionsContainer.innerHTML = '';
-				optionsContainer.appendChild(defaultTemplates.noResults(this._config));
+				optionsContainer.appendChild(defaultTemplates.empty(this._config));
 				break;
 		}
 	}
@@ -214,21 +205,6 @@ export class KTSelect extends KTComponent {
 	 * @param message Error message
 	 */
 	private _renderErrorState(message: string) {
-		// Create error option if the select is empty
-		if (this._element.querySelectorAll('option').length <= 1) {
-			const loadingOptions = this._element.querySelectorAll(
-				'option[disabled]:not([value])',
-			);
-			loadingOptions.forEach((option) => option.remove());
-
-			// Use template function for error option instead of hardcoded element
-			const errorOption = defaultTemplates.errorOption({
-				...this._config,
-				errorMessage: message,
-			});
-			this._element.appendChild(errorOption);
-		}
-
 		// If dropdown is already created, show error message there
 		this._showDropdownMessage('error', message);
 
@@ -349,27 +325,16 @@ export class KTSelect extends KTComponent {
 		// Process each new item
 		newItems.forEach((item) => {
 			// Create option for the original select
-			const selectOption = defaultTemplates.emptyOption({
-				...this._config,
-				placeholder: item.title || 'Unnamed option',
-			});
+			const selectOption = document.createElement('option');
 			selectOption.value = item.id || '';
-
-			// Add the option to the original select element
-			this._element.appendChild(selectOption);
-
-			// Create option element for the dropdown using the KTSelectOption class
-			// This ensures consistent option rendering
-			const ktOption = new KTSelectOption(selectOption, this._config);
-			const renderedOption = ktOption.render();
 
 			// Add to dropdown container
 			if (loadMoreButton) {
 				// Insert before the load more button
-				optionsContainer.insertBefore(renderedOption, loadMoreButton);
+				optionsContainer.insertBefore(selectOption, loadMoreButton);
 			} else {
 				// Append to the end
-				optionsContainer.appendChild(renderedOption);
+				optionsContainer.appendChild(selectOption);
 			}
 		});
 
@@ -470,7 +435,7 @@ export class KTSelect extends KTComponent {
 		wrapperElement.appendChild(displayElement);
 
 		// Create an empty dropdown first (without options) using template
-		const dropdownElement = defaultTemplates.dropdownContent({
+		const dropdownElement = defaultTemplates.dropdown({
 			...this._config,
 			zindex: this._config.dropdownZindex,
 		});
@@ -485,7 +450,7 @@ export class KTSelect extends KTComponent {
 		}
 
 		// Create options container using template
-		const optionsContainer = defaultTemplates.optionsContainer(this._config);
+		const optionsContainer = defaultTemplates.options(this._config);
 
 		// Clear the options container
 		optionsContainer.innerHTML = '';
@@ -1813,7 +1778,7 @@ export class KTSelect extends KTComponent {
 
 		if (items.length === 0) {
 			// Show no results message using template for consistency and customization
-			const noResultsElement = defaultTemplates.noResults(this._config);
+			const noResultsElement = defaultTemplates.empty(this._config);
 			optionsContainer.appendChild(noResultsElement);
 			return;
 		}
@@ -1821,18 +1786,11 @@ export class KTSelect extends KTComponent {
 		// Process each item individually to create options
 		items.forEach((item) => {
 			// Create option for the original select
-			const selectOption = defaultTemplates.emptyOption({
-				...this._config,
-				placeholder: item.title,
-			});
+			const selectOption = document.createElement('option');
 			selectOption.value = item.id;
 
-			// Create option element for the dropdown
-			const ktOption = new KTSelectOption(selectOption, this._config);
-			const renderedOption = ktOption.render();
-
 			// Add to dropdown container
-			optionsContainer.appendChild(renderedOption);
+			optionsContainer.appendChild(selectOption);
 		});
 
 		// Add pagination "Load More" button if needed
