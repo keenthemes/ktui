@@ -422,7 +422,7 @@ export class KTSelect extends KTComponent {
 		const options = Array.from(this._element.querySelectorAll('option'));
 
 		// Create wrapper and display elements
-		const wrapperElement = defaultTemplates.main(this._config);
+		const wrapperElement = defaultTemplates.wrapper(this._config);
 		const displayElement = defaultTemplates.display(this._config);
 
 		// Move classes from original select to display element
@@ -498,7 +498,7 @@ export class KTSelect extends KTComponent {
 
 		// Get dropdown content element - this is critical for dropdown functionality
 		this._dropdownContentElement = this._wrapperElement.querySelector(
-			`[data-kt-select-dropdown-content]`,
+			`[data-kt-select-dropdown]`,
 		) as HTMLElement;
 
 		if (!this._dropdownContentElement) {

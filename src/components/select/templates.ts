@@ -11,11 +11,11 @@ import { SelectMode } from './types';
  * Users can override any template by providing a matching key in the config.templates object.
  */
 export const defaultTemplateStrings = {
-	dropdown: `<div data-kt-select-dropdown-content class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
+	dropdown: `<div data-kt-select-dropdown class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
 	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container" data-kt-select-options-container="true">{{content}}</ul>`,
 	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
 	highlight: `<span class="kt-select-highlight">{{text}}</span>`,
-	main: `<div data-kt-select-wrapper="true" class="kt-select-main" data-kt-select-mode="{{mode}}"></div>`,
+	wrapper: `<div data-kt-select-wrapper="true" class="kt-select-main" data-kt-select-mode="{{mode}}"></div>`,
 	combobox: `
 		<div class="kt-select-combobox">
 			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-display="true" data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
@@ -32,7 +32,6 @@ export const defaultTemplateStrings = {
 		</div>
 	`,
 	option: `<li data-kt-select-option="true" data-value="{{value}}" class="kt-select-option {{selectedClass}} {{disabledClass}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
-	optionContent: ``,
 	search: `<div class="kt-select-search"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
 	empty: `<li class="kt-select-no-result" role="status">{{content}}</li>`,
 	loading: `<li class="kt-select-loading" role="status" aria-live="polite">{{content}}</li>`,
@@ -69,7 +68,7 @@ export interface KTSelectTemplateInterface {
 	highlight: (config: KTSelectConfigInterface, text: string) => HTMLElement;
 
 	// Main components
-	main: (config: KTSelectConfigInterface) => HTMLElement;
+	wrapper: (config: KTSelectConfigInterface) => HTMLElement;
 	display: (config: KTSelectConfigInterface) => HTMLElement;
 
 	// Option rendering
@@ -125,6 +124,7 @@ export function setTemplateStrings(
 export function getTemplateStrings(
 	config?: KTSelectConfigInterface,
 ): typeof defaultTemplateStrings {
+	console.log('config', config);
 	const templates = config && typeof config === 'object' && 'templates' in config
 		? (config as any).templates
 		: undefined;
@@ -201,8 +201,8 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the main container for the select component
 	 */
-	main: (config: KTSelectConfigInterface): HTMLElement => {
-		const html = getTemplateStrings(config).main.replace(
+	wrapper: (config: KTSelectConfigInterface): HTMLElement => {
+		const html = getTemplateStrings(config).wrapper.replace(
 			'{{mode}}',
 			config.mode || '',
 		);
