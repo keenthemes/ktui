@@ -980,12 +980,13 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 						}
 
 						if (typeof columnDef.render === 'function') {
-							td.innerHTML = columnDef.render.call(
-								this,
-								item[key] as string,
-								item,
-								this,
-							) as string;
+							const result = columnDef.render.call(this, item[key], item, this);
+							if (result instanceof HTMLElement || result instanceof DocumentFragment) {
+								td.appendChild(result);
+							}
+							else if (typeof result === 'string') {
+								td.innerHTML = result as string;
+							}
 						} else {
 							td.textContent = item[key] as string;
 						}
