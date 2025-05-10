@@ -32,6 +32,7 @@ export const defaultTemplateStrings = {
 		</div>
 	`,
 	option: `<li data-kt-select-option="true" data-value="{{value}}" class="kt-select-option {{selectedClass}} {{disabledClass}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
+	optionContent: ``,
 	search: `<div class="kt-select-search"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
 	empty: `<li class="kt-select-no-result" role="status">{{content}}</li>`,
 	loading: `<li class="kt-select-loading" role="status" aria-live="polite">{{content}}</li>`,
@@ -74,11 +75,6 @@ export interface KTSelectTemplateInterface {
 	// Option rendering
 	option: (
 		option: KTSelectOption | HTMLOptionElement,
-		config: KTSelectConfigInterface,
-	) => HTMLElement;
-	optionGroup: (
-		label: string,
-		optionsHtml: string,
 		config: KTSelectConfigInterface,
 	) => HTMLElement;
 
@@ -257,6 +253,11 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			? option.selected
 			: !!(option as KTSelectOption).selected;
 
+		let content = text;
+		if (config.templates && config.templates.optionContent) {
+			content = getTemplateStrings(config).optionContent.replace('{{content}}', text);
+		}
+
 		// Build option element with proper accessibility attributes
 		const selectedClass = selected ? ' selected' : '';
 		const disabledClass = disabled ? ' disabled' : '';
@@ -269,7 +270,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 				selected ? 'aria-selected="true"' : 'aria-selected="false"',
 			)
 			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
-			.replace('{{text}}', text);
+			.replace('{{content}}', content);
 		return stringToElement(html);
 	},
 

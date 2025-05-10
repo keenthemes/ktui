@@ -158,7 +158,7 @@ export class KTSelect extends KTComponent {
 	 * Helper to show a dropdown message (error, loading, noResults)
 	 */
 	private _showDropdownMessage(
-		type: 'error' | 'loading' | 'noResults',
+		type: 'error' | 'loading' | 'empty',
 		message?: string,
 	) {
 		if (!this._dropdownContentElement) return;
@@ -180,7 +180,7 @@ export class KTSelect extends KTComponent {
 					message || 'Loading...',
 				).outerHTML;
 				break;
-			case 'noResults':
+			case 'empty':
 				optionsContainer.innerHTML = '';
 				optionsContainer.appendChild(defaultTemplates.empty(this._config));
 				break;
