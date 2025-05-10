@@ -238,17 +238,16 @@ export class FocusManager {
 			const optionElement = target.closest(this._optionsSelector);
 
 			if (optionElement) {
-				// First clear all focus
-				this.resetFocus();
-
-				// Then update the focused index based on the clicked option
-				const options = this.getVisibleOptions();
-				const clickedIndex = options.indexOf(optionElement as HTMLElement);
-
-				if (clickedIndex >= 0) {
-					this._focusedOptionIndex = clickedIndex;
-					this.applyFocus(options[clickedIndex]);
-				}
+				// On click, do NOT set focus index or apply focus classes.
+				// Only selection logic should happen elsewhere if needed.
+				// This ensures focus is only managed by keyboard navigation.
+				// this.resetFocus();
+				// const options = this.getVisibleOptions();
+				// const clickedIndex = options.indexOf(optionElement as HTMLElement);
+				// if (clickedIndex >= 0) {
+				//   this._focusedOptionIndex = clickedIndex;
+				//   this.applyFocus(options[clickedIndex]);
+				// }
 			}
 		});
 	}
