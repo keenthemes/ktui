@@ -7,7 +7,7 @@ import KTComponent from '../component';
 import {
 	KTSelectConfigInterface,
 } from './config';
-import { defaultTemplates } from './templates';
+import { defaultTemplates, getTemplateStrings } from './templates';
 
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
@@ -35,20 +35,26 @@ export class KTSelectOption extends KTComponent {
 	public render(): HTMLElement {
 		const optionElement = this.getHTMLOptionElement();
 
-		let content = '';
-		content = optionElement.textContent || optionElement.value;
-
 		// Render the option using the default template, injecting the content
-		let html = defaultTemplates.option(optionElement, this._globalConfig).outerHTML
-			.replace('{{value}}', optionElement.value)
-			.replace('{{selectedClass}}', optionElement.selected ? ' selected' : '')
-			.replace('{{disabledClass}}', optionElement.disabled ? ' disabled' : '')
-			.replace('{{selected}}', optionElement.selected ? 'aria-selected="true"' : 'aria-selected="false"')
-			.replace('{{disabled}}', optionElement.disabled ? 'aria-disabled="true"' : '')
-			.replace('{{content}}', content);
+		let option = defaultTemplates.option(optionElement, this._globalConfig);
 
-		const template = document.createElement('template');
-		template.innerHTML = html.trim();
-		return template.content.firstElementChild as HTMLElement;
+		if (this._globalConfig.templates && this._globalConfig.templates.optionContent) {
+
+			let optionContent = this._globalConfig.templates.optionContent;
+
+			if ("" in this._config) {
+				const config = this._config[''] as any;
+				for (const key of Object.keys(config)) {
+					const value = config[key as keyof KTSelectConfigInterface];
+					if (typeof value === 'string') {
+						optionContent = optionContent.replace(`{{${key}}}`, value);
+					}
+				}
+			}
+
+			option.innerHTML = optionContent.replace('{{content}}', option.textContent);
+		}
+
+		return option;
 	}
 }

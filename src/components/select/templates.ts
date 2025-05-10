@@ -253,11 +253,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			? option.selected
 			: !!(option as KTSelectOption).selected;
 
-		let content = text;
-		if (config.templates && config.templates.optionContent) {
-			content = getTemplateStrings(config).optionContent.replace('{{content}}', text);
-		}
-
 		// Build option element with proper accessibility attributes
 		const selectedClass = selected ? ' selected' : '';
 		const disabledClass = disabled ? ' disabled' : '';
@@ -270,7 +265,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 				selected ? 'aria-selected="true"' : 'aria-selected="false"',
 			)
 			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
-			.replace('{{content}}', content);
+			.replace('{{content}}', text);
 		return stringToElement(html);
 	},
 

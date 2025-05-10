@@ -502,6 +502,7 @@ export class KTSelect extends KTComponent {
 		) as HTMLElement;
 
 		if (!this._dropdownContentElement) {
+			console.log(this._element)
 			console.error('Dropdown content element not found', this._wrapperElement);
 		}
 
