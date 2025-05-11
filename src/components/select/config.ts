@@ -76,8 +76,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	dropdownWidth: null, // Custom width for dropdown (e.g., '300px'), null to match toggle element width
 
 	// Styling
-	focusClass: 'option-focused',
-	hoverClass: 'hovered',
 };
 
 export interface KTSelectConfigInterface {
@@ -148,8 +146,18 @@ export interface KTSelectConfigInterface {
 	dropdownWidth?: string | null; // Custom width for dropdown, null to match toggle element width
 
 	// Styling
-	focusClass?: string;
-	hoverClass?: string;
+	dropdownClass?: string;
+	displayClass?: string;
+	optionsClass?: string;
+	optionClass?: string;
+	searchClass?: string;
+	emptyClass?: string;
+	loadingClass?: string;
+	tagClass?: string;
+	loadMoreClass?: string;
+	wrapperClass?: string;
+	errorClass?: string;
+	highlightClass?: string;
 
 	templates?: Partial<typeof defaultTemplateStrings>;
 }
