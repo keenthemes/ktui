@@ -205,7 +205,6 @@ export class FocusManager {
 	private _focusedOptionIndex: number | null = null;
 	private _focusClass: string;
 	private _hoverClass: string;
-	private _fontClass: string;
 	private _eventManager: EventManager;
 
 	constructor(
@@ -216,11 +215,6 @@ export class FocusManager {
 		this._element = element;
 		this._optionsSelector = optionsSelector;
 		this._eventManager = new EventManager();
-
-		// Use config values if provided, otherwise fallback to defaults
-		this._focusClass = config?.focusClass || 'option-focused';
-		this._hoverClass = config?.hoverClass || 'hovered';
-		this._fontClass = config?.fontClass || 'font-medium';
 
 		// Add click handler to update focus state when options are clicked
 		this._setupOptionClickHandlers();
@@ -236,16 +230,6 @@ export class FocusManager {
 			const optionElement = target.closest(this._optionsSelector);
 
 			if (optionElement) {
-				// On click, do NOT set focus index or apply focus classes.
-				// Only selection logic should happen elsewhere if needed.
-				// This ensures focus is only managed by keyboard navigation.
-				// this.resetFocus();
-				// const options = this.getVisibleOptions();
-				// const clickedIndex = options.indexOf(optionElement as HTMLElement);
-				// if (clickedIndex >= 0) {
-				//   this._focusedOptionIndex = clickedIndex;
-				//   this.applyFocus(options[clickedIndex]);
-				// }
 			}
 		});
 	}
@@ -300,6 +284,12 @@ export class FocusManager {
 		const options = this.getVisibleOptions();
 		if (options.length === 0) return null;
 
+		// If any option is hovered, start from there
+		const hoveredIndex = options.findIndex(option => option.classList.contains(this._hoverClass));
+		if (hoveredIndex !== -1) {
+			this._focusedOptionIndex = hoveredIndex;
+		}
+
 		this.resetFocus();
 
 		if (this._focusedOptionIndex === null) {
@@ -333,7 +323,6 @@ export class FocusManager {
 		// Add focus to this option
 		option.classList.add(this._focusClass);
 		option.classList.add(this._hoverClass);
-		option.classList.add(this._fontClass);
 	}
 
 	/**
@@ -342,14 +331,11 @@ export class FocusManager {
 	public resetFocus(): void {
 		// Find all elements with the focus classes
 		const focusedElements = this._element.querySelectorAll(
-			`.${this._focusClass}, .${this._hoverClass}, .${this._fontClass}`,
+			`.${this._focusClass}, .${this._hoverClass}`,
 		);
 
 		// Remove classes from all elements
 		focusedElements.forEach((element) => {
-			element.classList.remove(this._focusClass);
-			element.classList.remove(this._hoverClass);
-			element.classList.remove(this._fontClass);
 		});
 
 		// Reset index if visible options have changed

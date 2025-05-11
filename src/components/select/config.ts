@@ -78,7 +78,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Styling
 	focusClass: 'option-focused',
 	hoverClass: 'hovered',
-	fontClass: 'font-medium',
 };
 
 export interface KTSelectConfigInterface {
@@ -151,8 +150,6 @@ export interface KTSelectConfigInterface {
 	// Styling
 	focusClass?: string;
 	hoverClass?: string;
-	bgClass?: string;
-	fontClass?: string;
 
 	templates?: Partial<typeof defaultTemplateStrings>;
 }
