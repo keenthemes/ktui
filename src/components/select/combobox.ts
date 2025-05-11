@@ -33,11 +33,16 @@ export class KTSelectCombobox {
 				? (displayElement as HTMLInputElement)
 				: displayElement.querySelector('input[data-kt-select-search]');
 
-		// Find the clear button
-		this._clearButtonElement =
-			displayElement.tagName === 'DIV'
-				? displayElement.querySelector('[data-kt-select-clear-button]')
-				: null;
+		// Find the clear button robustly
+		let clearButtonContainer: HTMLElement | null = null;
+		if (displayElement.tagName === 'DIV') {
+			clearButtonContainer = displayElement;
+		} else if (displayElement.tagName === 'INPUT') {
+			clearButtonContainer = displayElement.parentElement as HTMLElement;
+		}
+		this._clearButtonElement = clearButtonContainer
+			? clearButtonContainer.querySelector('[data-kt-select-clear-button]')
+			: null;
 
 		// Create bound handler references to allow proper cleanup
 		this._boundKeyNavHandler = this._handleComboboxKeyNav.bind(this);
