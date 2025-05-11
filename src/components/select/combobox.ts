@@ -47,6 +47,13 @@ export class KTSelectCombobox {
 		// Attach event listeners
 		this._attachEventListeners();
 
+		// Reset combobox search state when dropdown closes
+		this._select.getElement().addEventListener('dropdown.close', () => {
+			this._searchInputElement.value = '';
+			this._toggleClearButtonVisibility('');
+			this._select.showAllOptions();
+		});
+
 		if (this._config.debug) console.log('KTSelectCombobox initialized');
 	}
 

@@ -37,6 +37,7 @@ export const defaultTemplateStrings = {
 	loading: `<li class="kt-select-loading" role="status" aria-live="polite">{{content}}</li>`,
 	tag: `<div data-kt-select-tag="true" class="kt-select-tag">{{content}}</div>`,
 	loadMore: `<li class="kt-select-load-more" data-kt-select-load-more="true">{{content}}</li>`,
+	optionContent: ``,
 };
 
 /**
@@ -124,7 +125,6 @@ export function setTemplateStrings(
 export function getTemplateStrings(
 	config?: KTSelectConfigInterface,
 ): typeof defaultTemplateStrings {
-	console.log('config', config);
 	const templates = config && typeof config === 'object' && 'templates' in config
 		? (config as any).templates
 		: undefined;

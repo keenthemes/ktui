@@ -205,7 +205,6 @@ export class FocusManager {
 	private _focusedOptionIndex: number | null = null;
 	private _focusClass: string;
 	private _hoverClass: string;
-	private _bgClass: string;
 	private _fontClass: string;
 	private _eventManager: EventManager;
 
@@ -221,7 +220,6 @@ export class FocusManager {
 		// Use config values if provided, otherwise fallback to defaults
 		this._focusClass = config?.focusClass || 'option-focused';
 		this._hoverClass = config?.hoverClass || 'hovered';
-		this._bgClass = config?.bgClass || 'bg-gray-100';
 		this._fontClass = config?.fontClass || 'font-medium';
 
 		// Add click handler to update focus state when options are clicked
@@ -335,7 +333,6 @@ export class FocusManager {
 		// Add focus to this option
 		option.classList.add(this._focusClass);
 		option.classList.add(this._hoverClass);
-		option.classList.add(this._bgClass);
 		option.classList.add(this._fontClass);
 	}
 
@@ -345,14 +342,13 @@ export class FocusManager {
 	public resetFocus(): void {
 		// Find all elements with the focus classes
 		const focusedElements = this._element.querySelectorAll(
-			`.${this._focusClass}, .${this._hoverClass}, .${this._bgClass}, .${this._fontClass}`,
+			`.${this._focusClass}, .${this._hoverClass}, .${this._fontClass}`,
 		);
 
 		// Remove classes from all elements
 		focusedElements.forEach((element) => {
 			element.classList.remove(this._focusClass);
 			element.classList.remove(this._hoverClass);
-			element.classList.remove(this._bgClass);
 			element.classList.remove(this._fontClass);
 		});
 

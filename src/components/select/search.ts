@@ -101,15 +101,10 @@ export class KTSelectSearch {
 				// Listen for dropdown close to reset options if search is empty
 				this._select.getElement().addEventListener('dropdown.close', () => {
 					this._focusManager.resetFocus();
-					// Always clear highlights when dropdown closes
 					this.clearSearchHighlights();
-					if (!this._searchInput.value) {
-						this._resetAllOptions();
-					}
-					// Clear the search input when dropdown closes if configured
-					if (this._select.getConfig().clearSearchOnClose) {
-						this._searchInput.value = '';
-					}
+					this._searchInput.value = '';
+					this._resetAllOptions();
+					this._clearNoResultsMessage();
 				});
 
 				// Clear highlights when an option is selected
