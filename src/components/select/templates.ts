@@ -28,17 +28,17 @@ export const defaultTemplateStrings = {
 		</div>
 	`,
 	display: `
-		<div data-kt-select-display="true" class="kt-select-display {{class}}" tabindex="{{tabindex}}" role="button" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
+		<div data-kt-select-display="true" class="kt-select-display {{class}}" tabindex="{{tabindex}}" role="button" data-selected="0" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
 			<div data-kt-select-value="true" class="kt-select-label">{{content}}</div>
 		</div>
 	`,
+
 	option: `<li data-kt-select-option="true" data-value="{{value}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
 	search: `<div class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
 	empty: `<li class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
 	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
 	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}">{{content}}</div>`,
 	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true">{{content}}</li>`,
-	optionContent: ``,
 };
 
 /**
@@ -126,9 +126,10 @@ export function setTemplateStrings(
 export function getTemplateStrings(
 	config?: KTSelectConfigInterface,
 ): typeof defaultTemplateStrings {
-	const templates = config && typeof config === 'object' && 'templates' in config
-		? (config as any).templates
-		: undefined;
+	const templates =
+		config && typeof config === 'object' && 'templates' in config
+			? (config as any).templates
+			: undefined;
 
 	if (templates) {
 		return { ...defaultTemplateStrings, ...userTemplateStrings, ...templates };
@@ -167,9 +168,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the options container for the dropdown
 	 */
-	options: (
-		config: KTSelectConfigInterface & { options?: string },
-	) => {
+	options: (config: KTSelectConfigInterface & { options?: string }) => {
 		const template = getTemplateStrings(config).options;
 		const html = template
 			.replace('{{label}}', config.label || 'Options')
@@ -196,10 +195,8 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface & { errorMessage: string },
 	): string => {
 		const template = getTemplateStrings(config).error;
-		return template.replace(
-			'{{errorMessage}}',
-			config.errorMessage || 'An error occurred',
-		)
+		return template
+			.replace('{{errorMessage}}', config.errorMessage || 'An error occurred')
 			.replace('{{class}}', config.errorClass || '');
 	},
 	/**
@@ -207,8 +204,8 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 */
 	wrapper: (config: KTSelectConfigInterface): HTMLElement => {
 		console.log('wrapper', config.wrapperClass);
-		const html = getTemplateStrings(config).wrapper
-			.replace('{{mode}}', config.mode || '')
+		const html = getTemplateStrings(config)
+			.wrapper.replace('{{mode}}', config.mode || '')
 			.replace('{{class}}', config.wrapperClass || '');
 		return stringToElement(html);
 	},
@@ -220,10 +217,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		const isCombobox = config.mode === SelectMode.COMBOBOX;
 		if (isCombobox) {
 			let html = getTemplateStrings(config)
-				.combobox.replace(
-					/{{placeholder}}/g,
-					config.placeholder || 'Select...',
-				)
+				.combobox.replace(/{{placeholder}}/g, config.placeholder || 'Select...')
 				.replace(
 					/{{label}}/g,
 					config.label || config.placeholder || 'Select...',
@@ -275,8 +269,11 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders the search input
 	 */
 	search: (config: KTSelectConfigInterface): HTMLElement => {
-		let html = getTemplateStrings(config).search
-			.replace('{{searchPlaceholder}}', config.searchPlaceholder || 'Search...')
+		let html = getTemplateStrings(config)
+			.search.replace(
+				'{{searchPlaceholder}}',
+				config.searchPlaceholder || 'Search...',
+			)
 			.replace('{{class}}', config.searchClass || '');
 		return stringToElement(html);
 	},
@@ -285,8 +282,11 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders the no results message
 	 */
 	empty: (config: KTSelectConfigInterface): HTMLElement => {
-		let html = getTemplateStrings(config).empty
-			.replace('{{searchNotFoundText}}', config.searchNotFoundText || 'No results found')
+		let html = getTemplateStrings(config)
+			.empty.replace(
+				'{{searchNotFoundText}}',
+				config.searchNotFoundText || 'No results found',
+			)
 			.replace('{{class}}', config.emptyClass || '');
 		return stringToElement(html);
 	},
@@ -298,8 +298,11 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface,
 		loadingMessage: string,
 	): HTMLElement => {
-		let html = getTemplateStrings(config).loading
-			.replace('{{loadingMessage}}', loadingMessage || 'Loading options...')
+		let html = getTemplateStrings(config)
+			.loading.replace(
+				'{{loadingMessage}}',
+				loadingMessage || 'Loading options...',
+			)
 			.replace('{{class}}', config.loadingClass || '');
 		return stringToElement(html);
 	},
