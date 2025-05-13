@@ -391,6 +391,25 @@ const KTDom = {
 		return attributes;
 	},
 
+	getDataAttributesByJson(element: HTMLElement, prefix: string): object {
+		if (!element) {
+			return {};
+		}
+
+		const attributes: { [key: string]: KTOptionType } = {};
+		const keys = Object.keys(element.dataset).filter((key) =>
+			key.startsWith(prefix),
+		);
+
+		for (const key of keys) {
+			let normalizedKey = key.replace(prefix, '');
+			normalizedKey = KTUtils.uncapitalize(normalizedKey);
+			attributes[normalizedKey] = JSON.parse(element.dataset[key]);
+		}
+
+		return attributes;
+	},
+
 	ready(callback: CallableFunction): void {
 		if (document.readyState === 'loading') {
 			document.addEventListener('DOMContentLoaded', () => {
