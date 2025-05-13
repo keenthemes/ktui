@@ -8,6 +8,7 @@ import {
 	KTSelectConfigInterface,
 } from './config';
 import { defaultTemplates } from './templates';
+import { renderTemplateString } from './utils';
 
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
@@ -15,7 +16,7 @@ export class KTSelectOption extends KTComponent {
 	protected override readonly _config: KTSelectConfigInterface;
 	private _globalConfig: KTSelectConfigInterface;
 
-	constructor(element: HTMLElement, config?: KTSelectConfigInterface) {
+	constructor(element: HTMLElement, config?: KTSelectConfigInterface,) {
 		super();
 
 		// Always initialize a new option instance
@@ -35,20 +36,21 @@ export class KTSelectOption extends KTComponent {
 	public render(): HTMLElement {
 		const optionElement = this.getHTMLOptionElement();
 
-		// Render the option using the default template, injecting the content
-		let option = defaultTemplates.option(optionElement, this._globalConfig);
+		// Get the original template
+		let originalTemplate = this._globalConfig.optionTemplate;
 
-		// Replace {{varname}} in option.innerHTML with values from _config
-		if (option && option.innerHTML) {
-			Object.entries(this._config).forEach(([key, value]) => {
-				if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-					option.innerHTML = option.innerHTML.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
-				}
-			});
-		}
+		// Replace all {{varname}} in option.innerHTML with values from _config
+		Object.entries((this._config as any)[''] || {}).forEach(([key, value]) => {
+			if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+				this._globalConfig.optionTemplate = this._globalConfig.optionTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+			}
+		});
 
-		console.log(this._config);
+		let template = defaultTemplates.option(optionElement, this._globalConfig);
 
-		return option;
+		// Restore the original template
+		this._globalConfig.optionTemplate = originalTemplate;
+
+		return template;
 	}
 }
