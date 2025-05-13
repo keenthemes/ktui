@@ -396,18 +396,29 @@ const KTDom = {
 			return {};
 		}
 
-		const attributes: { [key: string]: KTOptionType } = {};
-		const keys = Object.keys(element.dataset).filter((key) =>
-			key.startsWith(prefix),
-		);
+		const rawValue = element.dataset[prefix];
 
-		for (const key of keys) {
-			let normalizedKey = key.replace(prefix, '');
-			normalizedKey = KTUtils.uncapitalize(normalizedKey);
-			attributes[normalizedKey] = JSON.parse(element.dataset[key]);
+		if (!rawValue) {
+			return {};
 		}
 
-		return attributes;
+		const parsedValue = KTUtils.parseDataAttribute(rawValue);
+
+		if (typeof parsedValue === 'string') {
+			try {
+				return JSON.parse(parsedValue);
+			} catch (e) {
+				console.error(`Invalid JSON format for '${prefix}': ${e instanceof Error ? e.message : e} ${rawValue}`);
+			}
+		}
+
+		// If it's already an object, return as is
+		if (typeof parsedValue === 'object' && parsedValue !== null) {
+			return parsedValue;
+		}
+
+		// For other types (number, boolean, null), return an empty object
+		return {};
 	},
 
 	ready(callback: CallableFunction): void {
