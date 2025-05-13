@@ -150,7 +150,6 @@ export interface KTSelectConfigInterface {
 	dropdownClass?: string;
 	displayClass?: string;
 	optionsClass?: string;
-	optionClass?: string;
 	searchClass?: string;
 	emptyClass?: string;
 	loadingClass?: string;
@@ -164,17 +163,16 @@ export interface KTSelectConfigInterface {
 	tags?: boolean;
 	combobox?: boolean;
 	maxSelection?: number;
-	placeholderClasses?: string;
+	placeholderClass?: string;
 	placeholderTemplate?: string;
 	displaySeparator?: string;
 	displayTemplate?: string;
-	displayClasses?: string;
 	displayToggle?: boolean;
 	displayMaxSelected?: number;
 	optionTemplate?: string;
-	optionClasses?: string;
+	optionClass?: string;
 	tagTemplate?: string;
-	displayToggleClasses?: string;
+	displayToggleClass?: string;
 	displayToggleTemplate?: string;
 
 	templates?: Partial<typeof coreTemplateStrings>;

@@ -33,8 +33,7 @@ export const coreTemplateStrings = {
 			<div data-kt-select-value="true" class="kt-select-label">{{content}}</div>
 		</div>
 	`,
-
-	option: `<li data-kt-select-option="true" data-value="{{value}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
+	option: `<li data-kt-select-option="true" data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
 	search: `<div class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
 	empty: `<li class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
 	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
@@ -212,7 +211,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders the main container for the select component
 	 */
 	wrapper: (config: KTSelectConfigInterface): HTMLElement => {
-		console.log('wrapper', config.wrapperClass);
 		const html = getTemplateStrings(config)
 			.wrapper.replace('{{mode}}', config.mode || '')
 			.replace('{{class}}', config.wrapperClass || '');
@@ -277,6 +275,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		}
 		const html = template
 			.replace('{{value}}', value)
+			.replace('{{text}}', text)
 			.replace('{{selected}}', selected ? 'aria-selected="true"' : 'aria-selected="false"')
 			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
 			.replace('{{content}}', content)
