@@ -3,7 +3,7 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-import { defaultTemplateStrings } from './templates';
+import { coreTemplateStrings } from './templates';
 import { SelectMode } from './types';
 
 export const DefaultConfig: KTSelectConfigInterface = {
@@ -75,7 +75,8 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	dropdownStrategy: null,
 	dropdownWidth: null, // Custom width for dropdown (e.g., '300px'), null to match toggle element width
 
-	// Styling
+	// New Config
+	dropdownTemplate: '',
 };
 
 export interface KTSelectConfigInterface {
@@ -159,7 +160,26 @@ export interface KTSelectConfigInterface {
 	errorClass?: string;
 	highlightClass?: string;
 
-	templates?: Partial<typeof defaultTemplateStrings>;
+	// New Config
+	tags?: boolean;
+	combobox?: boolean;
+	maxSelection?: number;
+	placeholderClasses?: string;
+	placeholderTemplate?: string;
+	displaySeparator?: string;
+	displayTemplate?: string;
+	displayClasses?: string;
+	displayToggle?: boolean;
+	displayMaxSelected?: number;
+	optionTemplate?: string;
+	optionClasses?: string;
+	tagTemplate?: string;
+	displayToggleClasses?: string;
+	displayToggleTemplate?: string;
+
+	templates?: Partial<typeof coreTemplateStrings>;
+
+	dropdownTemplate?: string;
 }
 
 export interface KTSelectOption {

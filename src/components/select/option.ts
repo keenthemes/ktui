@@ -7,7 +7,7 @@ import KTComponent from '../component';
 import {
 	KTSelectConfigInterface,
 } from './config';
-import { defaultTemplates, getTemplateStrings } from './templates';
+import { defaultTemplates } from './templates';
 
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
@@ -38,22 +38,16 @@ export class KTSelectOption extends KTComponent {
 		// Render the option using the default template, injecting the content
 		let option = defaultTemplates.option(optionElement, this._globalConfig);
 
-		if (this._globalConfig.templates && this._globalConfig.templates.optionContent) {
-
-			let optionContent = this._globalConfig.templates.optionContent;
-
-			if ("" in this._config) {
-				const config = this._config[''] as any;
-				for (const key of Object.keys(config)) {
-					const value = config[key as keyof KTSelectConfigInterface];
-					if (typeof value === 'string') {
-						optionContent = optionContent.replace(`{{${key}}}`, value);
-					}
+		// Replace {{varname}} in option.innerHTML with values from _config
+		if (option && option.innerHTML) {
+			Object.entries(this._config).forEach(([key, value]) => {
+				if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+					option.innerHTML = option.innerHTML.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
 				}
-			}
-
-			option.innerHTML = optionContent.replace('{{content}}', option.textContent);
+			});
 		}
+
+		console.log(this._config);
 
 		return option;
 	}

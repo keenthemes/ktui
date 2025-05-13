@@ -5,12 +5,13 @@
 
 import { KTSelectConfigInterface, KTSelectOption } from './config';
 import { SelectMode } from './types';
+import { renderTemplateString } from './utils';
 
 /**
  * Default HTML string templates for KTSelect. All UI structure is defined here.
  * Users can override any template by providing a matching key in the config.templates object.
  */
-export const defaultTemplateStrings = {
+export const coreTemplateStrings = {
 	dropdown: `<div data-kt-select-dropdown class="kt-select-dropdown hidden {{class}}" style="z-index: {{zindex}};">{{content}}</div>`,
 	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container {{class}}" data-kt-select-options-container="true">{{content}}</ul>`,
 	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
@@ -107,14 +108,14 @@ function stringToElement(html: string): HTMLElement {
 /**
  * User-supplied template overrides. Use setTemplateStrings() to add or update.
  */
-let userTemplateStrings: Partial<typeof defaultTemplateStrings> = {};
+let userTemplateStrings: Partial<typeof coreTemplateStrings> = {};
 
 /**
  * Register or update user template overrides.
  * @param templates Partial template object to merge with defaults.
  */
 export function setTemplateStrings(
-	templates: Partial<typeof defaultTemplateStrings>,
+	templates: Partial<typeof coreTemplateStrings>,
 ): void {
 	userTemplateStrings = { ...userTemplateStrings, ...templates };
 }
@@ -125,17 +126,17 @@ export function setTemplateStrings(
  */
 export function getTemplateStrings(
 	config?: KTSelectConfigInterface,
-): typeof defaultTemplateStrings {
+): typeof coreTemplateStrings {
 	const templates =
 		config && typeof config === 'object' && 'templates' in config
 			? (config as any).templates
 			: undefined;
 
 	if (templates) {
-		return { ...defaultTemplateStrings, ...userTemplateStrings, ...templates };
+		return { ...coreTemplateStrings, ...userTemplateStrings, ...templates };
 	}
 
-	return { ...defaultTemplateStrings, ...userTemplateStrings };
+	return { ...coreTemplateStrings, ...userTemplateStrings };
 }
 
 /**
@@ -157,10 +158,18 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	dropdown: (
 		config: KTSelectConfigInterface & { zindex?: number; content?: string },
 	) => {
-		const template = getTemplateStrings(config).dropdown;
+		let template = getTemplateStrings(config).dropdown;
+		let content = config.content || '';
+		if (config.dropdownTemplate) {
+			content = renderTemplateString(config.dropdownTemplate, {
+				zindex: config.zindex ? String(config.zindex) : '',
+				content: config.content || '',
+				class: config.dropdownClass || '',
+			});
+		}
 		const html = template
 			.replace('{{zindex}}', config.zindex ? String(config.zindex) : '')
-			.replace('{{content}}', config.content || '')
+			.replace('{{content}}', content)
 			.replace('{{class}}', config.dropdownClass || '');
 		return stringToElement(html);
 	},
@@ -253,14 +262,24 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			? option.selected
 			: !!(option as KTSelectOption).selected;
 
-		let html = getTemplateStrings(config)
-			.option.replace('{{value}}', value)
-			.replace(
-				'{{selected}}',
-				selected ? 'aria-selected="true"' : 'aria-selected="false"',
-			)
+		let template = getTemplateStrings(config).option;
+		let content = text;
+		if (config.optionTemplate) {
+			// Use the user template to render the content, but only for {{content}}
+			content = renderTemplateString(config.optionTemplate, {
+				value,
+				text,
+				class: config.optionClass || '',
+				selected: selected ? 'aria-selected="true"' : 'aria-selected="false"',
+				disabled: disabled ? 'aria-disabled="true"' : '',
+				content: text,
+			});
+		}
+		const html = template
+			.replace('{{value}}', value)
+			.replace('{{selected}}', selected ? 'aria-selected="true"' : 'aria-selected="false"')
 			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
-			.replace('{{content}}', text)
+			.replace('{{content}}', content)
 			.replace('{{class}}', config.optionClass || '');
 		return stringToElement(html);
 	},
@@ -314,7 +333,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		option: KTSelectOption,
 		config: KTSelectConfigInterface,
 	): HTMLElement => {
-		// Escape HTML characters for aria-label to prevent HTML injection
 		const escapeHTML = (str: string) => {
 			return str.replace(/[&<>"']/g, (match) => {
 				const escapeMap: Record<string, string> = {
@@ -328,12 +346,24 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			});
 		};
 
-		// Ensure we have plain text for the aria-label
 		const safeTitle = escapeHTML(option.title);
-		let html = getTemplateStrings(config)
-			.tag.replace('{{title}}', option.title)
+		let template = getTemplateStrings(config).tag;
+		let content = option.title;
+		if (config.tagTemplate) {
+			content = renderTemplateString(config.tagTemplate, {
+				title: option.title,
+				id: option.id,
+				safeTitle,
+				class: config.tagClass || '',
+				content: option.title,
+				text: option.title,
+			});
+		}
+		const html = template
+			.replace('{{title}}', option.title)
 			.replace('{{id}}', option.id)
 			.replace('{{safeTitle}}', safeTitle)
+			.replace('{{content}}', content)
 			.replace('{{class}}', config.tagClass || '');
 		return stringToElement(html);
 	},
