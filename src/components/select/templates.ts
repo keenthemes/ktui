@@ -14,7 +14,7 @@ export const coreTemplateStrings = {
 	dropdown: `<div data-kt-select-dropdown class="kt-select-dropdown hidden {{class}}" style="z-index: {{zindex}};">{{content}}</div>`,
 	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container {{class}}" data-kt-select-options-container="true">{{content}}</ul>`,
 	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
-	highlight: `<span class="kt-select-highlight {{class}}">{{text}}</span>`,
+	highlight: `<span class="kt-select-highlight highlighted {{class}}">{{text}}</span>`,
 	wrapper: `<div data-kt-select-wrapper="true" class="kt-select-main {{class}}"></div>`,
 	combobox: `
 		<div class="kt-select-combobox {{class}}">
@@ -149,7 +149,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 */
 	highlight: (config: KTSelectConfigInterface, text: string) => {
 		const template = getTemplateStrings(config).highlight;
-		const html = template.replace('{{text}}', text);
+		const html = template.replace('{{text}}', text).replace('{{class}}', config.highlightClass || '');
 		return stringToElement(html);
 	},
 

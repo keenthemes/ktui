@@ -440,9 +440,7 @@ export class KTSelect extends KTComponent {
 		});
 
 		// Add search input if needed
-		const hasSearch = this._config.enableSearch;
-
-		if (hasSearch) {
+		if (this._config.enableSearch) {
 			const searchElement = defaultTemplates.search(this._config);
 			dropdownElement.appendChild(searchElement);
 		}

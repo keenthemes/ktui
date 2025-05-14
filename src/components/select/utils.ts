@@ -64,6 +64,18 @@ export function filterOptions(
 					);
 				}
 			}
+
+			// Clear highlights by restoring original text content
+			if (option.dataset && option.dataset.originalText) {
+				option.innerHTML = option.dataset.originalText;
+			} else {
+				option.innerHTML = option.textContent || '';
+			}
+			// Remove the cache if present
+			if (option.dataset && option.dataset.originalText) {
+				delete option.dataset.originalText;
+			}
+
 			visibleOptionsCount++;
 		}
 
@@ -108,11 +120,13 @@ export function filterOptions(
 
 			visibleOptionsCount++;
 
-			// Apply highlighting if needed - but preserve the option structure
-			if (!isDisabled && isMatch && config.searchHighlight && query.trim() !== '') {
-				// Simple option with just text - standard highlighting
-				highlightTextInElement(option, query, config);
+			if (config.searchHighlight && query.trim() !== '') {
+				if (option.dataset && !option.dataset.originalText) {
+					option.dataset.originalText = option.innerHTML;
+				}
+				highlightTextInElementDebounced(option, query, config);
 			}
+
 		} else {
 			// Hide option using hidden class
 			option.classList.add('hidden');
@@ -162,38 +176,44 @@ export function highlightTextInElement(
 	if (!element || !query || query.trim() === '') return;
 
 	const queryLower = query.toLowerCase();
+	const text = element.textContent || '';
+	if (!text) return;
 
-	function walk(node: Node) {
-		if (node.nodeType === Node.TEXT_NODE) {
-			const text = node.nodeValue || '';
-			const textLower = text.toLowerCase();
-			const matchIndex = textLower.indexOf(queryLower);
+	// Escape regex special characters in query
+	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const regex = new RegExp(escapedQuery, 'gi');
 
-			if (matchIndex !== -1) {
-				const before = text.slice(0, matchIndex);
-				const match = text.slice(matchIndex, matchIndex + query.length);
-				const after = text.slice(matchIndex + query.length);
-
-				const frag = document.createDocumentFragment();
-				if (before) frag.appendChild(document.createTextNode(before));
-
-				// Use the highlight template, which returns an HTMLElement
-				const highlightSpan = defaultTemplates.highlight(config, match);
-				frag.appendChild(highlightSpan);
-
-				if (after) frag.appendChild(document.createTextNode(after));
-
-				node.parentNode?.replaceChild(frag, node);
-				// Only highlight the first occurrence in this node
-			}
-		} else if (node.nodeType === Node.ELEMENT_NODE) {
-			// Don't re-highlight already highlighted nodes
-			if ((node as HTMLElement).classList.contains('highlight')) return;
-			Array.from(node.childNodes).forEach(walk);
-		}
+	// Replace all matches with the highlight template
+	let lastIndex = 0;
+	let result = '';
+	let match: RegExpExecArray | null;
+	let matches = [];
+	while ((match = regex.exec(text)) !== null) {
+		matches.push({ start: match.index, end: regex.lastIndex });
 	}
-	walk(element);
+
+	if (matches.length === 0) {
+		element.innerHTML = text;
+		return;
+	}
+
+	for (let i = 0; i < matches.length; i++) {
+		const { start, end } = matches[i];
+		// Add text before match
+		result += text.slice(lastIndex, start);
+		// Add highlighted match using template
+		const highlighted = defaultTemplates.highlight(config, text.slice(start, end)).outerHTML;
+		result += highlighted;
+		lastIndex = end;
+	}
+	// Add remaining text
+	result += text.slice(lastIndex);
+
+	element.innerHTML = result;
 }
+
+// Debounced version for performance
+export const highlightTextInElementDebounced = debounce(highlightTextInElement, 100);
 
 /**
  * Focus manager for keyboard navigation

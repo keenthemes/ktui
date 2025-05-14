@@ -5,7 +5,7 @@
 
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
-import { handleDropdownKeyNavigation } from './utils';
+import { handleDropdownKeyNavigation, filterOptions } from './utils';
 
 /**
  * KTSelectCombobox - Handles combobox-specific functionality for KTSelect
@@ -177,8 +177,11 @@ export class KTSelectCombobox {
 	 * Filter options for combobox based on input query
 	 */
 	private _filterOptionsForCombobox(query: string): void {
-		// Access the private method through type assertion
-		(this._select as any)._filterOptionsForCombobox(query);
+		// Use the same filter logic as KTSelectSearch
+		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		const config = this._select.getConfig();
+		const dropdownElement = this._select.getDropdownElement();
+		filterOptions(options, query, config, dropdownElement);
 	}
 
 	/**
