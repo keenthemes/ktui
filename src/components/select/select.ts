@@ -19,13 +19,11 @@ import { KTSelectCombobox } from './combobox';
 import { KTSelectDropdown } from './dropdown';
 import {
 	handleDropdownKeyNavigation,
-	filterOptions,
 	FocusManager,
 	EventManager,
 	renderTemplateString,
 } from './utils';
 import { KTSelectTags } from './tags';
-import { strict } from 'assert';
 
 export class KTSelect extends KTComponent {
 	// Core properties
@@ -442,7 +440,7 @@ export class KTSelect extends KTComponent {
 		});
 
 		// Add search input if needed
-		const hasSearch = this._config.enableSearch && !this._config.combobox;
+		const hasSearch = this._config.enableSearch;
 
 		if (hasSearch) {
 			const searchElement = defaultTemplates.search(this._config);
@@ -507,28 +505,14 @@ export class KTSelect extends KTComponent {
 		}
 
 		// Get search input element - this is used for the search functionality
-		// First check if it's in dropdown, then check if it's in display (for combobox)
 		this._searchInputElement = this._dropdownContentElement.querySelector(
 			`[data-kt-select-search]`,
 		) as HTMLInputElement;
 
-		// If not found in dropdown, check if it's the display element itself (for combobox)
-		if (
-			!this._searchInputElement &&
-			this._config.combobox
-		) {
+		// If not found in dropdown, check if it's the display element itself
+		if (!this._searchInputElement) {
 			this._searchInputElement = this._displayElement as HTMLInputElement;
 		}
-
-		if (this._config.debug)
-			console.log(
-				'Search input found:',
-				this._searchInputElement ? 'Yes' : 'No',
-				'Combobox:',
-				this._config.combobox,
-				'EnableSearch:',
-				this._config.enableSearch,
-			);
 
 		this._valueDisplayElement = this._wrapperElement.querySelector(
 			`[data-kt-select-value]`,
@@ -561,27 +545,18 @@ export class KTSelect extends KTComponent {
 			this._handleDropdownClick.bind(this),
 		);
 
-		// Only attach keyboard navigation to display element if NOT in combobox mode
-		// This prevents conflicts with the combobox module's keyboard handler
-		if (!this._config.combobox) {
-			if (this._config.debug)
-				console.log(
-					'Attaching keyboard navigation to display element (non-combobox mode)',
-				);
-			this._eventManager.addListener(
-				this._displayElement,
-				'keydown',
-				this._handleDropdownKeyDown.bind(this),
-			);
-		}
+		this._eventManager.addListener(
+			this._displayElement,
+			'keydown',
+			this._handleDropdownKeyDown.bind(this),
+		);
 	}
 
 	/**
 	 * Initialize search module if search is enabled
 	 */
 	private _initializeSearchModule() {
-		// Only initialize search module if NOT in combobox mode
-		if (this._config.enableSearch && !this._config.combobox) {
+		if (this._config.enableSearch) {
 			this._searchModule = new KTSelectSearch(this);
 			this._searchModule.init();
 
@@ -982,11 +957,13 @@ export class KTSelect extends KTComponent {
 
 		if (typeof this._config.renderSelected === 'function') {
 			// Use the custom renderSelected function if provided
-			this._updateValueDisplay(this._config.renderSelected(selectedOptions));
+			this._valueDisplayElement.innerHTML = this._config.renderSelected(selectedOptions);
 		} else {
+
 			if (selectedOptions.length === 0) {
-				const placeholder = defaultTemplates.placeholder(this._config).outerHTML;
-				this._updateValueDisplay(placeholder); // Use innerHTML for placeholder
+				const placeholder = defaultTemplates.placeholder(this._config);
+				this._valueDisplayElement.replaceChildren(placeholder);
+
 			} else {
 				// Default to comma-separated list of selected options
 				let content = '';
@@ -1009,40 +986,12 @@ export class KTSelect extends KTComponent {
 					content = this.getSelectedOptionsText();
 				}
 
-				this._updateValueDisplay(content);
-
-				// Update combobox input value if in combobox mode
-				if (
-					this._config.combobox &&
-					this._comboboxModule
-				) {
-					this._comboboxModule.updateComboboxDisplay(content);
-				}
-
-				// Update tags display if tags are enabled and tags module exists
-				if (this._config.tags && this._tagsModule) {
-					this._tagsModule.updateTagsDisplay(selectedOptions);
-				}
+				this._valueDisplayElement.innerHTML = content;
 			}
 		}
 
 		// Update any debug display boxes if they exist
 		this._updateDebugDisplays();
-	}
-
-	/**
-	 * Update the value display element
-	 */
-	private _updateValueDisplay(value: string) {
-		if (this._config.combobox) {
-			// For combobox, we only update the hidden value element, not the input
-			// The combobox module will handle updating the input value
-			if (!this._comboboxModule) {
-				(this._valueDisplayElement as HTMLInputElement).value = value;
-			}
-		} else {
-			this._valueDisplayElement.innerHTML = value;
-		}
 	}
 
 	/**
@@ -1068,19 +1017,6 @@ export class KTSelect extends KTComponent {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Get option inner HTML content by option value
-	 */
-	private _getOptionInnerHtml(optionValue: string) {
-		const option = Array.from(this._options).find(
-			(opt) => opt.dataset.value === optionValue,
-		);
-		if (this._config.combobox) {
-			return option.textContent;
-		}
-		return option.innerHTML; // Get the entire HTML content of the option
 	}
 
 	/**
@@ -1134,19 +1070,6 @@ export class KTSelect extends KTComponent {
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
 
-		// For combobox, also clear the input value
-		if (this._config.combobox) {
-			if (this._searchInputElement) {
-				this._searchInputElement.value = '';
-			}
-
-			// If combobox has a clear button, hide it
-			if (this._comboboxModule) {
-				// The combobox module will handle hiding the clear button
-				this._comboboxModule.resetInputValueToSelection();
-			}
-		}
-
 		// Dispatch change event
 		this._dispatchEvent('change');
 		this._fireEvent('change');
@@ -1168,7 +1091,6 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * Handle dropdown key down events for keyboard navigation
-	 * Only used for standard (non-combobox) dropdowns
 	 */
 	private _handleDropdownKeyDown(event: KeyboardEvent) {
 		// Log event for debugging
@@ -1236,54 +1158,7 @@ export class KTSelect extends KTComponent {
 			if (selectedValue) {
 				this._selectOption(selectedValue);
 			}
-
-			// For combobox mode, update input value AFTER selection to ensure consistency
-			if (this._config.combobox && this._comboboxModule) {
-				this._comboboxModule.updateComboboxDisplay(selectedText);
-				// Also directly update the input value for immediate visual feedback
-				if (this._searchInputElement) {
-					this._searchInputElement.value = selectedText;
-				}
-			}
 		}
-	}
-
-	/**
-	 * ========================================================================
-	 * COMBOBOX SPECIFIC METHODS
-	 * ========================================================================
-	 */
-
-	/**
-	 * Handle combobox input events
-	 */
-	private _handleComboboxInput(event: Event) {
-		if (this._comboboxModule) {
-			return;
-		}
-
-		const inputElement = event.target as HTMLInputElement;
-		const query = inputElement.value.toLowerCase();
-
-		// If dropdown isn't open, open it when user starts typing
-		if (!this._dropdownIsOpen) {
-			this.openDropdown();
-		}
-
-		// Filter options based on input
-		this._filterOptionsForCombobox(query);
-	}
-
-	/**
-	 * Filter options for combobox based on input query
-	 * Uses the shared filterOptions function
-	 */
-	private _filterOptionsForCombobox(query: string) {
-		const options = Array.from(
-			this._dropdownContentElement.querySelectorAll('[data-kt-select-option]'),
-		) as HTMLElement[];
-
-		filterOptions(options, query, this._config, this._dropdownContentElement);
 	}
 
 	/**
@@ -1476,7 +1351,7 @@ export class KTSelect extends KTComponent {
 		});
 
 		// If search input exists, clear it
-		if (this._searchInputElement && !this._config.combobox) {
+		if (this._searchInputElement) {
 			this._searchInputElement.value = '';
 			// If we have a search module, clear any search filtering
 			if (this._searchModule) {
@@ -1793,13 +1668,6 @@ export class KTSelect extends KTComponent {
 		this._options = this._wrapperElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
-	}
-
-	/**
-	 * Filter options by query
-	 */
-	public filterOptions(query: string): void {
-		this._filterOptionsForCombobox(query);
 	}
 
 	/**
