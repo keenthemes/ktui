@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Description</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="../../ktui/dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Description</label>
+
+				<select
+        data-kt-select
+        data-kt-select-placeholder="Select with description..."
+		data-kt-select-templates='{"optionContent":"<div class=\"some tw class\">{{content}}<span class=\"text-gray-500\">{{description}}</span></div>"}'
+      >
+        <option
+          value="name"
+          data-kt-select-option={JSON.stringify({
+            description: "User's full name"
+          })}
+        >
+          Name
+        </option>
+        <option
+          value="email"
+          data-kt-select-option={JSON.stringify({
+            description: "User's email address"
+          })}
+        >
+          Email
+        </option>
+        <option
+          value="phone"
+          data-kt-select-option={JSON.stringify({
+            description: "User's contact number"
+          })}
+        >
+          Phone Number
+        </option>
+        <option
+          value="address"
+          data-kt-select-option={JSON.stringify({
+            description: "User's physical address"
+          })}
+        >
+          Address
+        </option>
+        <option
+          value="username"
+          data-kt-select-option={JSON.stringify({
+            description: "User's login identifier"
+          })}
+        >
+          Username
+        </option>
+        <option
+          value="password"
+          data-kt-select-option={JSON.stringify({
+            description: "User's secure password"
+          })}
+        >
+          Password
+        </option>
+      </select>
+
+			</div>
+		</form>
+	</div>
+	<script src="../../../node_modules/@keenthemes/ktui/dist/ktui.js"></script>
+</body>
+
+</html>

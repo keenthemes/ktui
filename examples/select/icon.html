@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Icon</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="../../ktui/dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Icon</label>
+
+				<select data-kt-select data-kt-select-placeholder="Type or select a country..." data-kt-select-config='{
+						"displayTemplate": "<div class=\"kt-select-display\">{{icon}} {{text}}</div>",
+						"displayClass": "kt-select-display",
+						"displayToggle": true,
+						"optionTemplate": "{{icon}} <span>{{text}}</span>",
+						"optionClass": "kt-select-option",
+						"displayToggleTemplate": "<button type=\"button\" class=\"kt-select-toggle\">{{text}}</button>"
+					}'>
+					<option value="us"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
+						United States</option>
+					<option value="de"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/de.png\" class=\"w-6 h-6\" />"}'>
+						Germany</option>
+					<option value="it"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/it.png\" class=\"w-6 h-6\" />"}'>
+						Italy</option>
+					<option value="fr"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/fr.png\" class=\"w-6 h-6\" />"}'>
+						France</option>
+					<option value="es"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/es.png\" class=\"w-6 h-6\" />"}'>
+						Spain</option>
+					<option value="jp"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/jp.png\" class=\"w-6 h-6\" />"}'>
+						Japan</option>
+					<option value="ru"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/ru.png\" class=\"w-6 h-6\" />"}'>
+						Russia</option>
+				</select>
+
+			</div>
+		</form>
+	</div>
+	<script src="../../../node_modules/@keenthemes/ktui/dist/ktui.js"></script>
+</body>
+
+</html>

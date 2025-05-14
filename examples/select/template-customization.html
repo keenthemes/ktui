@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Template Customization</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="../../ktui/dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Template Customization</label>
+
+				<select
+        data-kt-select
+        data-kt-select-placeholder="Select a user..."
+        data-kt-select-enable-search="true"
+      >
+        <option
+          value="1"
+          data-kt-select-option='{"icon": "/media/avatars/300-1.png", "description": "Frontend Developer"}'
+        >
+          John Doe
+        </option>
+        <option
+          value="2"
+          data-kt-select-option='{"icon": "/media/avatars/300-2.png", "description": "UI/UX Designer"}'
+        >
+          Jane Smith
+        </option>
+        <option
+          value="3"
+          data-kt-select-option='{"icon": "/media/avatars/300-3.png", "description": "Backend Engineer"}'
+        >
+          Alex Lee
+        </option>
+        <option
+          value="4"
+          data-kt-select-option='{"icon": "/media/avatars/300-4.png", "description": "Project Manager"}'
+        >
+          Maria Garcia
+        </option>
+        <option
+          value="5"
+          data-kt-select-option='{"icon": "/media/avatars/300-5.png", "description": "QA Specialist"}'
+        >
+          Chris Kim
+        </option>
+        <option
+          value="6"
+          data-kt-select-option='{"icon": "/media/avatars/300-6.png", "description": "DevOps Engineer"}'
+        >
+          Patricia Chen
+        </option>
+        <option
+          value="7"
+          data-kt-select-option='{"icon": "/media/avatars/300-7.png", "description": "Support Lead"}'
+        >
+          Michael Brown
+        </option>
+        <option
+          value="8"
+          data-kt-select-option='{"icon": "/media/avatars/300-8.png", "description": "Marketing Director"}'
+        >
+          Lisa Wang
+        </option>
+      </select>
+
+			</div>
+		</form>
+	</div>
+	<script src="../../../node_modules/@keenthemes/ktui/dist/ktui.js"></script>
+</body>
+
+</html>
