@@ -385,6 +385,15 @@ export class KTSelectSearch {
 	 */
 	private _clearDisplayHighlights() {
 		// Implementation for clearing display highlights
+		const options = Array.from(
+			this._select.getOptionsElement(),
+		) as HTMLElement[];
+
+		options.forEach((option) => {
+			if (option.dataset && !option.dataset.originalText) {
+				option.dataset.originalText = option.innerHTML;
+			}
+		});
 	}
 
 	/**

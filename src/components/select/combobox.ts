@@ -58,6 +58,12 @@ export class KTSelectCombobox {
 			this._select.showAllOptions();
 		});
 
+		// When selection changes, update the input value to the selected option's text
+		this._select.getElement().addEventListener('change', () => {
+			// Only update the input value, do not reset the filter or show all options
+			this.resetInputValueToSelection();
+		});
+
 		if (this._config.debug) console.log('KTSelectCombobox initialized');
 	}
 
