@@ -968,13 +968,14 @@ export class KTSelect extends KTComponent {
 
 				// If a displayTemplate is provided, use it to render the content
 				if (this._config.displayTemplate) {
+					let displayTemplate = this._config.displayTemplate;
 					// Replace all {{varname}} in option.innerHTML with values from _config
 					Object.entries((this._config.optionsConfig as any)[selectedOptions[0]] || {}).forEach(([key, value]) => {
 						if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-							content += this._config.displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+							displayTemplate = displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
 						}
 					});
-					content = renderTemplateString(content, {
+					content = renderTemplateString(displayTemplate, {
 						selectedCount: selectedOptions.length || 0,
 						selectedTexts: this.getSelectedOptionsText() || '',
 						text: this.getSelectedOptionsText() || '',
@@ -1676,13 +1677,13 @@ export class KTSelect extends KTComponent {
 	}
 
 	public getSelectedOptionsText(): string {
-		let content: string[] = [];
+		let content: Set<string> = new Set();
 		this._options.forEach((option) => {
 			if (this.getSelectedOptions().includes(option.getAttribute('data-value') || '')) {
-				content.push(option.getAttribute('data-text') || '');
+				content.add(option.getAttribute('data-text') || '');
 			}
 		});
-		return content.join(this._config.displaySeparator || ', ');
+		return Array.from(content).join(this._config.displaySeparator || ', ');
 	}
 
 	/**

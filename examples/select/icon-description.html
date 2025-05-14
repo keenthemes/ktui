@@ -15,34 +15,34 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Icon Description</label>
 
-				<select data-kt-select>
-      <option value="">Select a programming language...</option>
-      <option
-        value="js"
-      >
-        JavaScript
-      </option>
-      <option
-        value="ts"
-      >
-        TypeScript
-      </option>
-      <option
-        value="python"
-      >
-        Python
-      </option>
-      <option
-        value="java"
-      >
-        Java
-      </option>
-      <option
-        value="go"
-      >
-        Go
-      </option>
-    </select>
+				<select data-kt-select data-kt-select-placeholder="Select with description..." data-kt-select-config='{
+					"displayTemplate": "<div class=\"flex items-start gap-3\">{{icon}}<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900 leading-tight\">{{text}}</span><span class=\"text-xs text-gray-500 leading-tight\">{{desc}}</span></div></div>",
+					"displayClass": "kt-select-display",
+					"displayToggle": true,
+					"optionTemplate": "<div class=\"flex items-start gap-3\">{{icon}}<div class=\"flex flex-col\"><span class=\"text-gray-800 leading-tight\">{{text}}</span><span class=\"text-xs text-gray-500 leading-tight\">{{desc}}</span></div></div>",
+					"optionClass": "kt-select-option"
+				}'>
+					<option value="mysql"
+						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/mysql/4479A1\" class=\"w-6 h-6\" />", "desc": "MySQL is a relational database management system"}'>
+						MySQL
+					</option>
+					<option value="postgres"
+						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/postgresql/4169E1\" class=\"w-6 h-6\" />", "desc": "PostgreSQL is a powerful object-relational database system"}'>
+						PostgreSQL
+					</option>
+					<option value="mongodb"
+						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/mongodb/47A248\" class=\"w-6 h-6\" />", "desc": "MongoDB is a NoSQL database that uses JSON-like documents with optional schemas"}'>
+						MongoDB
+					</option>
+					<option value="redis"
+						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/redis/DC382D\" class=\"w-6 h-6\" />", "desc": "Redis is an in-memory data structure store"}'>
+						Redis
+					</option>
+					<option value="sqlite"
+						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/sqlite/003B57\" class=\"w-6 h-6\" />", "desc": "SQLite is a lightweight, disk-based database"}'>
+						SQLite
+					</option>
+				</select>
 
 			</div>
 		</form>
