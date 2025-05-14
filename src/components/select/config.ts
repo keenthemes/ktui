@@ -4,7 +4,6 @@
  */
 
 import { coreTemplateStrings } from './templates';
-import { SelectMode } from './types';
 
 export const DefaultConfig: KTSelectConfigInterface = {
 	// ...other config options
@@ -46,7 +45,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	closeOnSelect: true, // Close the dropdown after selecting an option (single-select only)
 	disabled: false, // Disable the select component
 	isRequired: false, // Make selection required
-	mode: null, // Select mode: tags or combobox
 
 	// Search Functionality
 	enableSearch: false, // Enable/disable search functionality within the dropdown
@@ -93,7 +91,6 @@ export interface KTSelectConfigInterface {
 	closeOnSelect?: boolean;
 	disabled?: boolean;
 	isRequired?: boolean;
-	mode?: SelectMode | null;
 
 	// Search Functionality
 	enableSearch?: boolean;
@@ -178,6 +175,9 @@ export interface KTSelectConfigInterface {
 	templates?: Partial<typeof coreTemplateStrings>;
 
 	dropdownTemplate?: string;
+
+	// Option Configuration
+	optionConfig?: KTSelectConfigInterface;
 }
 
 export interface KTSelectOption {

@@ -7,14 +7,6 @@
  * Common type interfaces for the KTSelect component
  */
 
-/**
- * Select mode options
- */
-export enum SelectMode {
-	TAGS = 'tags',
-	COMBOBOX = 'combobox',
-}
-
 export interface KTSelectOption {
 	id: string;
 	title: string;

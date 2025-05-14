@@ -597,7 +597,7 @@ export function handleDropdownKeyNavigation(
 
 			case ' ': // Space key
 				// If dropdown is closed, space should open it (but not if in combobox mode)
-				if (!isDropdownOpen && !(select.getConfig().mode === 'combobox')) {
+				if (!isDropdownOpen && !(select.getConfig().combobox)) {
 					if (select.getConfig && select.getConfig().debug)
 						console.log(`[${origin}] Opening dropdown on Space`);
 					select.openDropdown();

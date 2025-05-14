@@ -6,7 +6,6 @@
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { handleDropdownKeyNavigation } from './utils';
-import { SelectMode } from './types';
 
 /**
  * KTSelectCombobox - Handles combobox-specific functionality for KTSelect
@@ -235,7 +234,7 @@ export class KTSelectCombobox {
 	/**
 	 * Update the combobox input value when an option is selected
 	 */
-	public updateSelectedValue(selectedText: string): void {
+	public updateComboboxDisplay(selectedText: string): void {
 		if (this._searchInputElement) {
 			// Extract just the text content if it contains HTML
 			let cleanText = selectedText;
@@ -297,7 +296,7 @@ export class KTSelectCombobox {
 					selectedText = selectedOption.textContent?.trim() || '';
 				}
 
-				this.updateSelectedValue(selectedText);
+				this.updateComboboxDisplay(selectedText);
 			}
 		} else {
 			// No selection, clear the input

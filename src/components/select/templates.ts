@@ -4,7 +4,6 @@
  */
 
 import { KTSelectConfigInterface, KTSelectOption } from './config';
-import { SelectMode } from './types';
 import { renderTemplateString } from './utils';
 
 /**
@@ -16,7 +15,7 @@ export const coreTemplateStrings = {
 	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container {{class}}" data-kt-select-options-container="true">{{content}}</ul>`,
 	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
 	highlight: `<span class="kt-select-highlight {{class}}">{{text}}</span>`,
-	wrapper: `<div data-kt-select-wrapper="true" class="kt-select-main {{class}}" data-kt-select-mode="{{mode}}"></div>`,
+	wrapper: `<div data-kt-select-wrapper="true" class="kt-select-main {{class}}"></div>`,
 	combobox: `
 		<div class="kt-select-combobox {{class}}">
 			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-display="true" data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
@@ -71,7 +70,7 @@ export interface KTSelectTemplateInterface {
 
 	// Main components
 	wrapper: (config: KTSelectConfigInterface) => HTMLElement;
-	display: (config: KTSelectConfigInterface) => HTMLElement;
+	display: (config: KTSelectConfigInterface, selectedOptions: string[]) => HTMLElement;
 
 	// Option rendering
 	option: (
@@ -211,18 +210,19 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders the main container for the select component
 	 */
 	wrapper: (config: KTSelectConfigInterface): HTMLElement => {
-		const html = getTemplateStrings(config)
-			.wrapper.replace('{{mode}}', config.mode || '')
+		const html = getTemplateStrings(config).wrapper
 			.replace('{{class}}', config.wrapperClass || '');
-		return stringToElement(html);
+		const element = stringToElement(html);
+		element.setAttribute('data-kt-select-combobox', config.combobox ? 'true' : 'false');
+		element.setAttribute('data-kt-select-tags', config.tags ? 'true' : 'false');
+		return element;
 	},
 
 	/**
 	 * Renders the display element (trigger) for the select
 	 */
-	display: (config: KTSelectConfigInterface): HTMLElement => {
-		const isCombobox = config.mode === SelectMode.COMBOBOX;
-		if (isCombobox) {
+	display: (config: KTSelectConfigInterface, selectedOptions: string[]): HTMLElement => {
+		if (config.combobox) {
 			let html = getTemplateStrings(config)
 				.combobox.replace(/{{placeholder}}/g, config.placeholder || 'Select...')
 				.replace(
@@ -233,12 +233,22 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 				.replace('{{class}}', config.displayClass || '');
 			return stringToElement(html);
 		}
-		let html = getTemplateStrings(config)
-			.display.replace('{{tabindex}}', config.disabled ? '-1' : '0')
+
+		let content = config.label || config.placeholder || 'Select...';
+		if (config.displayTemplate) {
+			content = renderTemplateString(config.displayTemplate, {
+				selectedCount: selectedOptions.length || 0,
+				selectedTexts: selectedOptions.map((option) => option).join(', ') || '',
+			});
+		}
+
+		let html = getTemplateStrings(config).display
+			.replace('{{tabindex}}', config.disabled ? '-1' : '0')
 			.replace('{{label}}', config.label || config.placeholder || 'Select...')
 			.replace('{{disabled}}', config.disabled ? 'aria-disabled="true"' : '')
 			.replace('{{placeholder}}', config.placeholder || 'Select...')
-			.replace('{{class}}', config.displayClass || '');
+			.replace('{{class}}', config.displayClass || '')
+			.replace('{{content}}', content);
 		return stringToElement(html);
 	},
 
@@ -260,7 +270,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			? option.selected
 			: !!(option as KTSelectOption).selected;
 
-		let template = getTemplateStrings(config).option;
 		let content = text;
 		if (config.optionTemplate) {
 			// Use the user template to render the content, but only for {{content}}
@@ -273,7 +282,8 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 				content: text,
 			});
 		}
-		const html = template
+
+		const html = getTemplateStrings(config).option
 			.replace('{{value}}', value)
 			.replace('{{text}}', text)
 			.replace('{{selected}}', selected ? 'aria-selected="true"' : 'aria-selected="false"')
