@@ -15,65 +15,52 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Description</label>
 
-				<select
-        data-kt-select
-        data-kt-select-placeholder="Select with description..."
-		data-kt-select-templates='{"optionContent":"<div class=\"some tw class\">{{content}}<span class=\"text-gray-500\">{{description}}</span></div>"}'
-      >
-        <option
-          value="name"
-          data-kt-select-option={JSON.stringify({
-            description: "User's full name"
-          })}
-        >
-          Name
-        </option>
-        <option
-          value="email"
-          data-kt-select-option={JSON.stringify({
-            description: "User's email address"
-          })}
-        >
-          Email
-        </option>
-        <option
-          value="phone"
-          data-kt-select-option={JSON.stringify({
-            description: "User's contact number"
-          })}
-        >
-          Phone Number
-        </option>
-        <option
-          value="address"
-          data-kt-select-option={JSON.stringify({
-            description: "User's physical address"
-          })}
-        >
-          Address
-        </option>
-        <option
-          value="username"
-          data-kt-select-option={JSON.stringify({
-            description: "User's login identifier"
-          })}
-        >
-          Username
-        </option>
-        <option
-          value="password"
-          data-kt-select-option={JSON.stringify({
-            description: "User's secure password"
-          })}
-        >
-          Password
-        </option>
-      </select>
+				<select data-kt-select data-kt-select-placeholder="Select with description..." data-kt-select-config='{
+					"displayTemplate": "<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900\">{{text}}</span><span class=\"text-xs text-gray-500\">Your selection</span></div>",
+					"optionTemplate": "<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900\">{{text}}</span><span class=\"text-xs text-gray-500\">{{desc}}</span></div>"
+				}'>
+					<option value="us"
+						data-kt-select-option='{"desc": "MySQL is a relational database management system"}'>
+						MySQL
+					</option>
+					<option value="postgres"
+						data-kt-select-option='{"desc": "PostgreSQL is a powerful object-relational database system"}'>
+						PostgreSQL
+					</option>
+					<option value="mongodb"
+						data-kt-select-option='{"desc": "MongoDB is a NoSQL database that uses JSON-like documents with optional schemas"}'>
+						MongoDB
+					</option>
+					<option value="redis"
+						data-kt-select-option='{"desc": "Redis is an in-memory data structure store"}'>
+						Redis
+					</option>
+					<option value="sqlite"
+						data-kt-select-option='{"desc": "SQLite is a lightweight, disk-based database"}'>
+						SQLite
+					</option>
+					<option value="mariadb"
+						data-kt-select-option='{"desc": "MariaDB is a community-driven fork of MySQL"}'>
+						MariaDB
+					</option>
+					<option value="mssql"
+						data-kt-select-option='{"desc": "Microsoft SQL Server is a relational database management system"}'>
+						Microsoft SQL Server
+					</option>
+					<option value="oracle"
+						data-kt-select-option='{"desc": "Oracle is a powerful, object-oriented database management system"}'>
+						Oracle
+					</option>
+					<option value="db2"
+						data-kt-select-option='{"desc": "IBM DB2 is a relational database management system"}'>
+						IBM DB2
+					</option>
+				</select>
 
 			</div>
 		</form>
 	</div>
-	<script src="../../../node_modules/@keenthemes/ktui/dist/ktui.js"></script>
+	<script src="../../dist/ktui.js"></script>
 </body>
 
 </html>
