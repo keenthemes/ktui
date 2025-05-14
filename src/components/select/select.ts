@@ -996,7 +996,7 @@ export class KTSelect extends KTComponent {
 				// If a displayTemplate is provided, use it to render the content
 				if (this._config.displayTemplate) {
 					// Replace all {{varname}} in option.innerHTML with values from _config
-					Object.entries((this._config.optionConfig as any)[''] || {}).forEach(([key, value]) => {
+					Object.entries((this._config.optionsConfig as any)[selectedOptions[0]] || {}).forEach(([key, value]) => {
 						if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
 							content += this._config.displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
 						}
@@ -1818,7 +1818,7 @@ export class KTSelect extends KTComponent {
 				content.push(option.getAttribute('data-text') || '');
 			}
 		});
-		return content.join(', ');
+		return content.join(this._config.displaySeparator || ', ');
 	}
 
 	/**

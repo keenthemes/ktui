@@ -23,7 +23,13 @@ export class KTSelectOption extends KTComponent {
 		this._init(element);
 		this._buildConfig();
 		this._globalConfig = config;
-		this._globalConfig.optionConfig = this._config;
+
+		// Clean the config
+		this._config = (this._config as any)[''] || {};
+
+		// Add the option config to the global config
+		this._globalConfig.optionsConfig = this._globalConfig.optionsConfig || {};
+		this._globalConfig.optionsConfig[(element as HTMLInputElement).value] = this._config;
 
 		// Don't store in KTData to avoid Singleton pattern issues
 		// Each option should be a unique instance
@@ -42,7 +48,7 @@ export class KTSelectOption extends KTComponent {
 
 		if (this._globalConfig.optionTemplate) {
 			// Replace all {{varname}} in option.innerHTML with values from _config
-			Object.entries((this._config as any)[''] || {}).forEach(([key, value]) => {
+			Object.entries((this._config as any) || {}).forEach(([key, value]) => {
 				if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
 					this._globalConfig.optionTemplate = this._globalConfig.optionTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
 				}
