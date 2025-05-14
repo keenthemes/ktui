@@ -978,7 +978,6 @@ export class KTSelect extends KTComponent {
 	 * Update selected option display value
 	 */
 	public updateSelectedOptionDisplay() {
-		console.log(this._config);
 		const selectedOptions = this.getSelectedOptions();
 
 		if (typeof this._config.renderSelected === 'function') {
@@ -986,9 +985,8 @@ export class KTSelect extends KTComponent {
 			this._updateValueDisplay(this._config.renderSelected(selectedOptions));
 		} else {
 			if (selectedOptions.length === 0) {
-				if (!this._config.combobox) {
-					this._updateValueDisplay(this._config.placeholder); // Use innerHTML for placeholder
-				}
+				const placeholder = defaultTemplates.placeholder(this._config).outerHTML;
+				this._updateValueDisplay(placeholder); // Use innerHTML for placeholder
 			} else {
 				// Default to comma-separated list of selected options
 				let content = '';

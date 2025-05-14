@@ -32,6 +32,7 @@ export const coreTemplateStrings = {
 			<div data-kt-select-value="true" class="kt-select-label">{{content}}</div>
 		</div>
 	`,
+	placeholder: `<div class="kt-select-placeholder {{class}}">{{content}}</div>`,
 	option: `<li data-kt-select-option="true" data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
 	search: `<div class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
 	empty: `<li class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
@@ -92,6 +93,8 @@ export interface KTSelectTemplateInterface {
 		selectedOptions: KTSelectOption[],
 		config: KTSelectConfigInterface,
 	) => string;
+
+	placeholder: (config: KTSelectConfigInterface) => HTMLElement;
 }
 
 /**
@@ -405,5 +408,21 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		} else {
 			return selectedOptions[0].title;
 		}
+	},
+
+	/**
+	 * Renders the placeholder for the select
+	 */
+	placeholder: (config: KTSelectConfigInterface): HTMLElement => {
+		let html = getTemplateStrings(config).placeholder.replace('{{class}}', config.placeholderClass || '');
+		let content = config.placeholder || 'Select...';
+		if (config.placeholderTemplate) {
+			content = renderTemplateString(config.placeholderTemplate, {
+				placeholder: config.placeholder || 'Select...',
+				class: config.placeholderClass || '',
+			});
+		}
+		html = html.replace('{{content}}', content);
+		return stringToElement(html);
 	},
 };

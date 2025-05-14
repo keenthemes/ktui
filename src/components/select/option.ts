@@ -8,7 +8,6 @@ import {
 	KTSelectConfigInterface,
 } from './config';
 import { defaultTemplates } from './templates';
-import { renderTemplateString } from './utils';
 
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
