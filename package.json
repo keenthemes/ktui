@@ -61,7 +61,7 @@
 		"build": "npx npx webpack --mode=development",
 		"build:prod": "npx webpack --env production --mode=production",
 		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
-		"build:css": "npx @tailwindcss/cli -i ./styles.css -o ./dist/styles.css --watch",
+		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
 		"lint": "npx eslint src --ext .ts",
 		"format": "prettier --write src"
 	},
