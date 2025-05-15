@@ -58,9 +58,10 @@
 	"license": "MIT",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "npx webpack --mode=development",
+		"build": "npx npx webpack --mode=development",
 		"build:prod": "npx webpack --env production --mode=production",
 		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
+		"build:css": "npx @tailwindcss/cli -i ./styles.css -o ./dist/styles.css --watch",
 		"lint": "npx eslint src --ext .ts",
 		"format": "prettier --write src"
 	},
@@ -68,6 +69,7 @@
 		"@babel/core": "^7.27.1",
 		"@babel/preset-env": "^7.27.2",
 		"@eslint/js": "^9.26.0",
+		"@tailwindcss/cli": "^4.1.6",
 		"@types/node": "^22.15.14",
 		"autoprefixer": "^10.4.21",
 		"babel-loader": "^10.0.0",
@@ -76,6 +78,7 @@
 		"mini-svg-data-uri": "^1.4.4",
 		"prettier": "^3.5.3",
 		"source-map-loader": "^5.0.0",
+		"tailwindcss": "^4.1.6",
 		"terser-webpack-plugin": "^5.3.14",
 		"ts-loader": "^9.5.2",
 		"typescript": "^5.8.3",

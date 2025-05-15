@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /** Components **/
 @import './src/components/avatar/avatar.css';
 @import './src/components/accordion/accordion.css';
