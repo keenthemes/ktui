@@ -15,52 +15,36 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Multiple Icons</label>
 
-				<select
-      data-kt-select
-      data-kt-select-multiple="true"
-      data-kt-select-templates='{"optionContent":"<div class=\"flex items-center gap-2\">{{icon}} {{content}}</div>"}'
-    >
-      <option
-        value="react"
-        data-kt-select-option={JSON.stringify({
-          icon: '<svg width="20" height="20" viewBox="0 0 256 256"><g fill="none"><ellipse cx="128" cy="128" rx="28" ry="28" fill="#61DAFB"/><g stroke="#61DAFB" stroke-width="12"><ellipse cx="128" cy="128" rx="100" ry="40"/><ellipse cx="128" cy="128" rx="100" ry="40" transform="rotate(60 128 128)"/><ellipse cx="128" cy="128" rx="100" ry="40" transform="rotate(120 128 128)"/></g></g></svg>',
-        })}
-      >
-        React
-      </option>
-      <option
-        value="vue"
-        data-kt-select-option={JSON.stringify({
-          icon: '<svg width="20" height="20" viewBox="0 0 261.76 226.69"><g fill="none"><polygon fill="#41B883" points="130.88 0 0 0 130.88 226.69 261.76 0 130.88 0"/><polygon fill="#34495E" points="130.88 41.89 44.8 41.89 130.88 186.11 216.96 41.89 130.88 41.89"/><polygon fill="#41B883" points="130.88 73.36 76.8 73.36 130.88 165.36 184.96 73.36 130.88 73.36"/></g></svg>',
-        })}
-      >
-        Vue.js
-      </option>
-      <option
-        value="angular"
-        data-kt-select-option={JSON.stringify({
-          icon: '<svg width="20" height="20" viewBox="0 0 250 250"><polygon fill="#DD0031" points="125,10 10,50 25,210 125,240 225,210 240,50"/><polygon fill="#C3002F" points="125,30 30,60 45,200 125,220 205,200 220,60"/><polygon fill="#FFF" points="125,60 90,170 110,170 115,150 135,150 140,170 160,170"/></svg>',
-        })}
-      >
-        Angular
-      </option>
-      <option
-        value="svelte"
-        data-kt-select-option={JSON.stringify({
-          icon: '<svg width="20" height="20" viewBox="0 0 256 256"><g fill="none"><circle cx="128" cy="128" r="120" fill="#FF3E00"/><path d="M180 128c0 28.7-23.3 52-52 52s-52-23.3-52-52 23.3-52 52-52 52 23.3 52 52z" fill="#FFF"/></g></svg>',
-        })}
-      >
-        Svelte
-      </option>
-      <option
-        value="node"
-        data-kt-select-option={JSON.stringify({
-          icon: '<svg width="20" height="20" viewBox="0 0 256 272"><g fill="none"><polygon fill="#8CC84B" points="128 0 256 64 256 208 128 272 0 208 0 64"/><path fill="#FFF" d="M128 40l96 48v96l-96 48-96-48V88z"/></g></svg>',
-        })}
-      >
-        Node.js
-      </option>
-    </select>
+				<select data-kt-select data-kt-select-placeholder="Type or select a country..." data-kt-select-multiple="true" data-kt-select-config='{
+					"displayTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"font-semibold text-gray-900\">{{text}}</span></div>",
+					"displayClass": "kt-select-display",
+					"displayToggle": true,
+					"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
+					"optionClass": "kt-select-option"
+				}'>
+					<option value="us"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
+						United States</option>
+					<option value="de"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/de.png\" class=\"w-6 h-6\" />"}'>
+						Germany</option>
+					<option value="it"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/it.png\" class=\"w-6 h-6\" />"}'>
+						Italy</option>
+					<option value="fr"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/fr.png\" class=\"w-6 h-6\" />"}'>
+						France</option>
+					<option value="es"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/es.png\" class=\"w-6 h-6\" />"}'>
+						Spain</option>
+					<option value="jp"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/jp.png\" class=\"w-6 h-6\" />"}'>
+						Japan</option>
+					<option value="ru"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/ru.png\" class=\"w-6 h-6\" />"}'>
+						Russia</option>
+				</select>
+
 
 			</div>
 		</form>

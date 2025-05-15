@@ -89,10 +89,6 @@ export interface KTSelectTemplateInterface {
 
 	// Multi-select
 	tag: (option: KTSelectOption, config: KTSelectConfigInterface) => HTMLElement;
-	selectedDisplay: (
-		selectedOptions: KTSelectOption[],
-		config: KTSelectConfigInterface,
-	) => string;
 
 	placeholder: (config: KTSelectConfigInterface) => HTMLElement;
 }
@@ -238,12 +234,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		}
 
 		let content = config.label || config.placeholder || 'Select...';
-		if (config.displayTemplate) {
-			content = renderTemplateString(config.displayTemplate, {
-				selectedCount: selectedOptions.length || 0,
-				selectedTexts: selectedOptions.map((option) => option).join(', ') || '',
-			});
-		}
 
 		let html = getTemplateStrings(config).display
 			.replace('{{tabindex}}', config.disabled ? '-1' : '0')
@@ -378,36 +368,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			.replace('{{content}}', content)
 			.replace('{{class}}', config.tagClass || '');
 		return stringToElement(html);
-	},
-
-	/**
-	 * Formats the display of selected values
-	 */
-	selectedDisplay: (
-		selectedOptions: KTSelectOption[],
-		config: KTSelectConfigInterface,
-	): string => {
-		if (!selectedOptions || selectedOptions.length === 0) {
-			return config.placeholder || 'Select...';
-		}
-
-		if (config.multiple) {
-			if (
-				config.renderSelected &&
-				typeof config.renderSelected === 'function'
-			) {
-				return config.renderSelected(selectedOptions);
-			}
-
-			if (config.showSelectedCount) {
-				const count = selectedOptions.length;
-				return `${count} ${count === 1 ? 'item' : 'items'} selected`;
-			}
-
-			return selectedOptions.map((option) => option.title).join(', ');
-		} else {
-			return selectedOptions[0].title;
-		}
 	},
 
 	/**
