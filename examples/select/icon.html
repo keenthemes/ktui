@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Icon</title>
 	<script src="https://cdn.tailwindcss.com"></script>
-	<link rel="stylesheet" href="../../ktui/dist/styles.css">
+	<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -16,12 +16,11 @@
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Icon</label>
 
 				<select data-kt-select data-kt-select-placeholder="Type or select a country..." data-kt-select-config='{
-						"displayTemplate": "<div class=\"kt-select-display\">{{icon}} {{text}}</div>",
+						"displayTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"font-semibold text-gray-900\">{{text}}</span></div>",
 						"displayClass": "kt-select-display",
 						"displayToggle": true,
-						"optionTemplate": "{{icon}} <span>{{text}}</span>",
-						"optionClass": "kt-select-option",
-						"displayToggleTemplate": "<button type=\"button\" class=\"kt-select-toggle\">{{text}}</button>"
+						"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
+						"optionClass": "kt-select-option"
 					}'>
 					<option value="us"
 						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
@@ -49,7 +48,7 @@
 			</div>
 		</form>
 	</div>
-	<script src="../../../node_modules/@keenthemes/ktui/dist/ktui.js"></script>
+	<script src="../../dist/ktui.js"></script>
 </body>
 
 </html>

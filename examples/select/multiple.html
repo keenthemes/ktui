@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Multiple</title>
 	<script src="https://cdn.tailwindcss.com"></script>
-	<link rel="stylesheet" href="../../ktui/dist/styles.css">
+	<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="bg-gray-50 min-h-screen">
@@ -15,26 +15,26 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Multiple</label>
 
-				<select
-      data-kt-select
-      data-kt-select-multiple="true"
-      data-kt-select-placeholder="Select multiple fields..."
-    >
-      <option value="">Select one or more fields...</option>
-      <option value="name">Name</option>
-      <option value="email">Email Address</option>
-      <option value="phone">Phone Number</option>
-      <option value="address">Physical Address</option>
-      <option value="username">Username</option>
-      <option value="password">Password</option>
-      <option value="company">Company Name</option>
-      <option value="website">Website URL</option>
-    </select>
+				<select data-kt-select data-kt-select-multiple="true"
+					data-kt-select-placeholder="Select multiple fields..."
+					data-kt-select-config='{
+						"displaySeparator": " | ",
+						"displayTemplate": "<span class=\"text-gray-800 leading-tight\">{{selectedTexts}}</span>"
+					}'>
+					<option value="name">Name</option>
+					<option value="email">Email Address</option>
+					<option value="phone">Phone Number</option>
+					<option value="address">Physical Address</option>
+					<option value="username">Username</option>
+					<option value="password">Password</option>
+					<option value="company">Company Name</option>
+					<option value="website">Website URL</option>
+				</select>
 
 			</div>
 		</form>
 	</div>
-	<script src="../../../node_modules/@keenthemes/ktui/dist/ktui.js"></script>
+	<script src="../../dist/ktui.js"></script>
 </body>
 
 </html>
