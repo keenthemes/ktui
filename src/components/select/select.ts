@@ -422,16 +422,17 @@ export class KTSelect extends KTComponent {
 
 		// Create wrapper and display elements
 		const wrapperElement = defaultTemplates.wrapper(this._config);
-		const displayElement = defaultTemplates.display(this._config, this.getSelectedOptions());
+
+		const displayElement = defaultTemplates.display(this._config);
+
+		// Add the display element to the wrapper
+		wrapperElement.appendChild(displayElement);
 
 		// Move classes from original select to display element
 		if (this._element.classList.length > 0) {
 			wrapperElement.classList.add(...Array.from(this._element.classList));
 			this._element.className = '';
 		}
-
-		// Add the display element to the wrapper
-		wrapperElement.appendChild(displayElement);
 
 		// Create an empty dropdown first (without options) using template
 		const dropdownElement = defaultTemplates.dropdown({
@@ -953,6 +954,12 @@ export class KTSelect extends KTComponent {
 	public updateSelectedOptionDisplay() {
 		const selectedOptions = this.getSelectedOptions();
 
+		// Tag mode: render tags if enabled
+		if (this._config.tags && this._tagsModule) {
+			this._tagsModule.updateTagsDisplay(selectedOptions);
+			return;
+		}
+
 		if (typeof this._config.renderSelected === 'function') {
 			// Use the custom renderSelected function if provided
 			this._valueDisplayElement.innerHTML = this._config.renderSelected(selectedOptions);
@@ -1000,34 +1007,6 @@ export class KTSelect extends KTComponent {
 				}
 
 				this._valueDisplayElement.innerHTML = content;
-			}
-		}
-
-		// Update any debug display boxes if they exist
-		this._updateDebugDisplays();
-	}
-
-	/**
-	 * Update debug displays if present
-	 */
-	private _updateDebugDisplays() {
-		// Check if we're in a test environment with debug boxes
-		const selectId = this.getElement().id;
-		if (selectId) {
-			const debugElement = document.getElementById(`${selectId}-value`);
-			if (debugElement) {
-				const selectedOptions = this.getSelectedOptions();
-
-				// Format display based on selection mode
-				if (this._config.multiple) {
-					// For multiple selection, show comma-separated list
-					debugElement.textContent =
-						selectedOptions.length > 0 ? selectedOptions.join(', ') : 'None';
-				} else {
-					// For single selection, show just the one value
-					debugElement.textContent =
-						selectedOptions.length > 0 ? selectedOptions[0] : 'None';
-				}
 			}
 		}
 	}
