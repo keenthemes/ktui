@@ -4,22 +4,282 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><!-- paste title here --></title>
+	<title>KTUI Toast Examples</title>
 	<link rel="stylesheet" href="../../dist/styles.css">
 </head>
 
 <body class="bg-gray-50 min-h-screen">
-	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
-		<form class="flex flex-col gap-6">
-			<div>
-				<label class="block mb-2 font-medium text-gray-700" for="select-basic"><!-- paste title here --></label>
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-md mt-10 mx-auto">
+<h2 class="text-xl font-bold mb-4">KTUI Toast Examples</h2>
+<div class="flex flex-col gap-3">
+  <button id="toast-basic" class="kt-btn">Basic Toast</button>
+  <button id="toast-custom-headless" class="kt-btn">Custom Headless Toast</button>
+  <button id="toast-success" class="kt-btn">Success Toast</button>
+  <button id="toast-error" class="kt-btn">Error Toast</button>
+  <button id="toast-warning" class="kt-btn">Warning Toast</button>
+  <button id="toast-info" class="kt-btn">Info Toast</button>
+  <button id="toast-description" class="kt-btn">With Description</button>
+  <button id="toast-action" class="kt-btn">With Action Button</button>
+  <button id="toast-cancel" class="kt-btn">With Cancel Button</button>
+  <button id="toast-custom-icon" class="kt-btn">With Custom Icon</button>
+  <button id="toast-invert" class="kt-btn">Inverted Colors</button>
+  <button id="toast-long" class="kt-btn">Long Duration</button>
+  <button id="toast-important" class="kt-btn">Important (No Auto Dismiss)</button>
+  <button id="toast-progress-off" class="kt-btn">No Progress Bar</button>
+  <button id="toast-close-btn-off" class="kt-btn">No Close Button</button>
+  <button id="toast-non-dismissible" class="kt-btn">Non-dismissible</button>
+  <button id="toast-position-top-left" class="kt-btn">Position: Top Left</button>
+  <button id="toast-position-bottom-center" class="kt-btn">Position: Bottom Center</button>
+  <button id="toast-custom-class" class="kt-btn">Custom Class</button>
+  <button id="toast-aria" class="kt-btn">Custom ARIA Role</button>
+  <button id="toast-callbacks" class="kt-btn">With Callbacks</button>
+  <button id="toast-id" class="kt-btn">Custom ID</button>
+  <button id="toast-clear" class="kt-btn">Clear All Toasts</button>
+</div>
+</div>
 
-				<!-- paste select here -->
-
-			</div>
-		</form>
-	</div>
+<!-- Hidden template for custom headless toast -->
+<div id="custom-toast-template" style="display:none">
+  <div style="padding:1rem; background:#fff; color:#222; border-radius:8px; min-width:220px; max-width:400px; box-shadow:0 2px 12px rgba(0,0,0,0.12); display:flex; align-items:center; gap:1rem;">
+    <div>
+      <strong>🎉 Custom Headless Toast</strong>
+      <div style="font-size:0.95em; color:#555;">This toast uses your own markup and logic!</div>
+    </div>
+    <button data-kt-toast-dismiss style="margin-left:auto; background:transparent; border:none; font-size:1.5em; cursor:pointer;">&times;</button>
+  </div>
+</div>
 	<script src="../../dist/ktui.js"></script>
+<script>
+// Basic toast
+const btnBasic = document.getElementById('toast-basic');
+btnBasic.addEventListener('click', () => {
+  KTToast.show({ message: 'This is a basic toast!' });
+});
+
+// Success toast
+const btnSuccess = document.getElementById('toast-success');
+btnSuccess.addEventListener('click', () => {
+  KTToast.show({ message: 'Action was successful!', type: 'success' });
+});
+
+// Error toast
+const btnError = document.getElementById('toast-error');
+btnError.addEventListener('click', () => {
+  KTToast.show({ message: 'Something went wrong.', type: 'error' });
+});
+
+// Warning toast
+const btnWarning = document.getElementById('toast-warning');
+btnWarning.addEventListener('click', () => {
+  KTToast.show({ message: 'This is a warning!', type: 'warning' });
+});
+
+// Info toast
+const btnInfo = document.getElementById('toast-info');
+btnInfo.addEventListener('click', () => {
+  KTToast.show({ message: 'For your information.', type: 'info' });
+});
+
+// With description
+const btnDesc = document.getElementById('toast-description');
+btnDesc.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Saved!',
+    description: 'Your changes have been saved successfully.',
+    type: 'success',
+    duration: 3500
+  });
+});
+
+// With action
+const btnAction = document.getElementById('toast-action');
+btnAction.addEventListener('click', () => {
+  KTToast.show({
+    message: 'File uploaded',
+    description: 'Click undo to revert this action.',
+    type: 'info',
+    action: {
+      label: 'Undo',
+      onClick: (id) => {
+        KTToast.show({ message: 'Undo clicked!', type: 'warning' });
+      }
+    }
+  });
+});
+
+// With cancel
+const btnCancel = document.getElementById('toast-cancel');
+btnCancel.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Are you sure?',
+    description: 'You can cancel this operation.',
+    type: 'warning',
+    cancel: {
+      label: 'Cancel',
+      onClick: (id) => {
+        KTToast.show({ message: 'Cancelled!', type: 'info' });
+      }
+    }
+  });
+});
+
+// Custom icon
+const btnCustomIcon = document.getElementById('toast-custom-icon');
+btnCustomIcon.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Custom Icon!',
+    icon: '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12l2 2 4-4"/></svg>',
+    type: 'success'
+  });
+});
+
+// Inverted colors
+const btnInvert = document.getElementById('toast-invert');
+btnInvert.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Inverted colors!',
+    invert: true,
+    type: 'info'
+  });
+});
+
+// Long duration
+const btnLong = document.getElementById('toast-long');
+btnLong.addEventListener('click', () => {
+  KTToast.show({
+    message: 'This toast will last 10 seconds.',
+    duration: 10000,
+    type: 'info'
+  });
+});
+
+// Important (no auto dismiss)
+const btnImportant = document.getElementById('toast-important');
+btnImportant.addEventListener('click', () => {
+  KTToast.show({
+    message: 'This toast will not auto-dismiss.',
+    important: true,
+    type: 'error'
+  });
+});
+
+// No progress bar
+const btnProgressOff = document.getElementById('toast-progress-off');
+btnProgressOff.addEventListener('click', () => {
+  KTToast.show({
+    message: 'No progress bar!',
+    progress: false,
+    type: 'info'
+  });
+});
+
+// No close button
+const btnCloseBtnOff = document.getElementById('toast-close-btn-off');
+btnCloseBtnOff.addEventListener('click', () => {
+  KTToast.show({
+    message: 'No close button!',
+    closeButton: false,
+    type: 'warning'
+  });
+});
+
+// Non-dismissible
+const btnNonDismiss = document.getElementById('toast-non-dismissible');
+btnNonDismiss.addEventListener('click', () => {
+  KTToast.show({
+    message: 'You cannot dismiss this toast by clicking it.',
+    dismissible: false,
+    type: 'info'
+  });
+});
+
+// Position top left
+const btnTopLeft = document.getElementById('toast-position-top-left');
+btnTopLeft.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Top left!',
+    position: 'top-left',
+    type: 'success'
+  });
+});
+
+// Position bottom center
+const btnBottomCenter = document.getElementById('toast-position-bottom-center');
+btnBottomCenter.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Bottom center!',
+    position: 'bottom-center',
+    type: 'info'
+  });
+});
+
+// Custom class
+const btnCustomClass = document.getElementById('toast-custom-class');
+btnCustomClass.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Custom class!',
+    className: 'bg-pink-500 text-white',
+    type: 'info'
+  });
+});
+
+// Custom ARIA role
+const btnAria = document.getElementById('toast-aria');
+btnAria.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Custom ARIA role!',
+    role: 'alert',
+    type: 'info'
+  });
+});
+
+// With callbacks
+const btnCallbacks = document.getElementById('toast-callbacks');
+btnCallbacks.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Watch the console!',
+    type: 'info',
+    onAutoClose: (id) => {
+      console.log('Toast auto-closed:', id);
+    },
+    onDismiss: (id) => {
+      console.log('Toast dismissed:', id);
+    }
+  });
+});
+
+// Custom ID
+const btnId = document.getElementById('toast-id');
+btnId.addEventListener('click', () => {
+  KTToast.show({
+    message: 'Toast with custom ID!',
+    id: 'my-custom-toast',
+    type: 'info'
+  });
+  setTimeout(() => {
+    KTToast.close('my-custom-toast');
+  }, 2000);
+});
+
+// Custom headless toast
+const btnCustomHeadless = document.getElementById('toast-custom-headless');
+btnCustomHeadless.addEventListener('click', () => {
+  KTToast.show({
+    content: `
+      <div class="text-white flex items-center gap-2">
+        <span>Custom content</span>
+        <button data-kt-toast-dismiss class="kt-btn">&times;</button>
+      </div>
+    `
+  });
+});
+
+// Clear all toasts
+const btnClear = document.getElementById('toast-clear');
+btnClear.addEventListener('click', () => {
+  KTToast.clearAll();
+});
+</script>
 </body>
 
 </html>

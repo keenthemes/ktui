@@ -19,7 +19,27 @@ export type KTToastPosition =
 	| 'bottom-center'
 	| 'bottom-left';
 
+/**
+ * Allows overriding all internal class names for headless usage.
+ * Each property corresponds to a slot in the toast UI.
+ */
+export interface KTToastClassNames {
+	container?: string; // Toast container (positioned wrapper)
+	toast?: string; // Main toast element
+	icon?: string; // Icon element
+	content?: string; // Content wrapper
+	message?: string; // Message element
+	description?: string; // Description element
+	close?: string; // Close button
+	progress?: string; // Progress bar
+	action?: string; // Action button
+	cancel?: string; // Cancel button
+}
+
 export interface KTToastConfigInterface {
+	/** Override internal class names for headless usage */
+	classNames?: Partial<KTToastClassNames>;
+
 	position?: KTToastPosition;
 	duration?: number;
 	className?: string;
@@ -29,6 +49,7 @@ export interface KTToastConfigInterface {
 	icon?: string | HTMLElement | (() => HTMLElement);
 	action?: KTToastAction;
 	cancel?: KTToastAction;
+	close?: KTToastAction;
 	type?: KTToastType;
 	important?: boolean;
 	onAutoClose?: (id: string) => void;
@@ -39,20 +60,29 @@ export interface KTToastConfigInterface {
 	role?: string;
 	dismissible?: boolean;
 	id?: string;
+	progress?: boolean; // NEW: enable/disable progress indicator
 }
 
 export interface KTToastInterface {
-	show(options?: KTToastOptions): string | void;
-	hide(id?: string): void;
-	toggle?(id?: string): void;
+	show(
+		options?: KTToastOptions,
+	): (KTToastInstance & { dismiss: () => void }) | undefined;
+	hide(idOrInstance?: string | KTToastInstance): void;
+	toggle?(idOrInstance?: string | KTToastInstance): void;
 	clearAll?(): void;
 	getElement?(): HTMLElement;
 	getConfig?(): KTToastConfigInterface;
 }
 
 export interface KTToastOptions {
+	/** Custom content for the toast. HTMLElement, function returning HTMLElement, or string (DOM id). If set, replaces all default markup. */
+	content?: HTMLElement | (() => HTMLElement) | string;
+	/** Override internal class names for headless usage */
+	classNames?: Partial<KTToastClassNames>;
+	/** Show/hide progress indicator */
+	progress?: boolean;
 	/** Main content of the toast */
-	message: string | HTMLElement | (() => HTMLElement);
+	message?: string | HTMLElement | (() => HTMLElement);
 	/** Optional secondary content */
 	description?: string | HTMLElement | (() => HTMLElement);
 	/** Leading icon or visual */
@@ -61,6 +91,8 @@ export interface KTToastOptions {
 	action?: KTToastAction;
 	/** Cancel/secondary action button */
 	cancel?: KTToastAction;
+	/** Close button */
+	close?: KTToastAction;
 	/** Toast type (info, success, etc) */
 	type?: KTToastType;
 	/** Auto-dismiss duration (ms) */
@@ -77,8 +109,6 @@ export interface KTToastOptions {
 	closeButton?: boolean;
 	/** Custom class for toast */
 	className?: string;
-	/** Inline style for toast */
-	style?: Partial<CSSStyleDeclaration>;
 	/** Invert color scheme */
 	invert?: boolean;
 	/** ARIA role */
@@ -90,6 +120,8 @@ export interface KTToastOptions {
 }
 
 export interface KTToastConfig {
+	/** Override internal class names for headless usage */
+	classNames?: Partial<KTToastClassNames>;
 	position?: KTToastPosition;
 	duration?: number;
 	className?: string;

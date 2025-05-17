@@ -39,12 +39,21 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	}
 
 	// Instance API (for per-element toasts)
-	public show(options: KTToastOptions): string {
-		return KTToast.show({ ...this._config, ...options });
+	public show(
+		options?: KTToastOptions,
+	): (KTToastInstance & { dismiss: () => void }) | undefined {
+		const merged = { ...this._config, ...(options || {}) };
+		if (!merged.message && !merged.content) {
+			return undefined;
+		}
+		return KTToast.show(merged);
 	}
 
-	public hide(id: string): void {
-		KTToast.close(id);
+	/**
+	 * Hide this toast. Accepts id string or KTToastInstance.
+	 */
+	public hide(idOrInstance?: string | KTToastInstance): void {
+		KTToast.close(idOrInstance);
 	}
 
 	public clearAll(): void {
@@ -64,21 +73,36 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		this.globalConfig = { ...this.globalConfig, ...options };
 	}
 
-	static show(options: KTToastOptions): string {
+	static show(
+		options?: KTToastOptions,
+	): (KTToastInstance & { dismiss: () => void }) | undefined {
+		if (!options || (!options.message && !options.content)) {
+			return undefined;
+		}
 		const id =
 			options.id ||
 			`kt-toast-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 		const position =
 			options.position || this.globalConfig.position || 'top-right';
+		const classNames = {
+			...((this.globalConfig.classNames as any) || {}),
+			...((options.classNames as any) || {}),
+		};
 		let container = this.containerMap.get(position);
 		if (!container) {
 			container = document.createElement('div');
-			container.className = `kt-toast-container ${position}`;
+			const classNames = {
+				...((this.globalConfig.classNames as any) || {}),
+				...((options.classNames as any) || {}),
+			};
+			// Fallback to default hardcoded classes if not provided in options or globalConfig
+			container.className =
+				classNames.container || `kt-toast-container ${position}`;
 			document.body.appendChild(container);
 			this.containerMap.set(position, container);
 		}
 		// Enforce maxToasts
-		while (
+		if (
 			container.children.length >=
 			(this.globalConfig.maxToasts || DEFAULT_CONFIG.maxToasts)
 		) {
@@ -92,7 +116,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		}
 		// Create toast element
 		const toast = document.createElement('div');
-		toast.className = `kt-toast${options.type ? ' ' + options.type : ''}${options.className ? ' ' + options.className : ''}${this.globalConfig.className ? ' ' + this.globalConfig.className : ''}${options.invert ? ' kt-toast-invert' : ''}`;
+		toast.className =
+			classNames.toast ||
+			`kt-toast${options.type ? ' ' + options.type : ''}${options.className ? ' ' + options.className : ''}${this.globalConfig.className ? ' ' + this.globalConfig.className : ''}${options.invert ? ' kt-toast-invert' : ''}`;
 		// ARIA support
 		toast.setAttribute('role', options.role || 'status');
 		toast.setAttribute('aria-live', 'polite');
@@ -101,7 +127,40 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		// If modal-like, set aria-modal
 		if (options.important) toast.setAttribute('aria-modal', 'true');
 		toast.style.pointerEvents = 'auto';
-		if (options.style) Object.assign(toast.style, options.style);
+
+		// --- CUSTOM CONTENT SUPPORT ---
+		if (options.content) {
+			let customContent: HTMLElement | null = null;
+			if (typeof options.content === 'function') {
+				const node = options.content();
+				if (node instanceof HTMLElement) customContent = node;
+			} else if (typeof options.content === 'string') {
+				const dom = document.getElementById(options.content);
+				if (dom instanceof HTMLElement) {
+					customContent = dom.cloneNode(true) as HTMLElement;
+				} else {
+					// treat as raw HTML string
+					const wrapper = document.createElement('div');
+					wrapper.innerHTML = options.content;
+					customContent = wrapper.firstElementChild as HTMLElement;
+				}
+			} else if (options.content instanceof HTMLElement) {
+				customContent = options.content.cloneNode(true) as HTMLElement;
+			}
+			if (customContent) {
+				toast.appendChild(customContent);
+				container.appendChild(toast);
+				KTToast._fireEventOnElement(toast, 'show', { id });
+				KTToast._dispatchEventOnElement(toast, 'show', { id });
+				const instance: KTToastInstance = { id, element: toast, timeoutId: 0 };
+				this.toasts.set(id, instance);
+				return {
+					...instance,
+					dismiss: () => KTToast.close(id),
+				};
+			}
+		}
+
 		// Icon
 		if (options.icon) {
 			let iconNode: HTMLElement | null = null;
@@ -115,13 +174,13 @@ export class KTToast extends KTComponent implements KTToastInterface {
 				iconNode = options.icon;
 			}
 			if (iconNode) {
-				iconNode.classList.add('kt-toast-icon');
+				iconNode.className = classNames.icon || 'kt-toast-icon';
 				toast.appendChild(iconNode);
 			}
 		}
 		// Toast content (message)
 		let contentWrapper = document.createElement('div');
-		contentWrapper.className = 'kt-toast-content';
+		contentWrapper.className = classNames.content || 'kt-toast-content';
 		// Main message
 		if (typeof options.message === 'string') {
 			const message = document.createElement('div');
@@ -147,7 +206,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 				descNode = options.description;
 			}
 			if (descNode) {
-				descNode.classList.add('kt-toast-description');
+				descNode.className = classNames.description || 'kt-toast-description';
 				contentWrapper.appendChild(descNode);
 			}
 		}
@@ -156,7 +215,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		if (options.action) {
 			const actionBtn = document.createElement('button');
 			actionBtn.className =
-				'kt-toast-action' +
+				(classNames.action || 'kt-toast-action') +
 				(options.action.className ? ' ' + options.action.className : '');
 			actionBtn.textContent = options.action.label;
 			actionBtn.onclick = (e) => {
@@ -172,7 +231,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		if (options.cancel) {
 			const cancelBtn = document.createElement('button');
 			cancelBtn.className =
-				'kt-toast-cancel' +
+				(classNames.cancel || 'kt-toast-cancel') +
 				(options.cancel.className ? ' ' + options.cancel.className : '');
 			cancelBtn.textContent = options.cancel.label;
 			cancelBtn.onclick = (e) => {
@@ -187,8 +246,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		// Close button
 		if (options.closeButton !== false) {
 			const closeBtn = document.createElement('button');
-			closeBtn.className = 'kt-toast-close';
-			closeBtn.innerHTML = '&times;';
+			closeBtn.className = classNames.close || 'kt-toast-close';
+			closeBtn.innerHTML = `<svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+
 			closeBtn.onclick = (e) => {
 				e.stopPropagation();
 				KTToast.close(id);
@@ -201,9 +261,10 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			: (options.duration ??
 				this.globalConfig.duration ??
 				DEFAULT_CONFIG.duration);
-		if (duration) {
+		const showProgress = options.progress !== false; // default true
+		if (duration && showProgress) {
 			const progress = document.createElement('div');
-			progress.className = 'kt-toast-progress';
+			progress.className = classNames.progress || 'kt-toast-progress';
 			progress.style.animationDuration = duration + 'ms';
 			toast.appendChild(progress);
 		}
@@ -231,19 +292,39 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			}, duration);
 		}
 		// Store instance
-		this.toasts.set(id, { id, element: toast, timeoutId: timeoutId || 0 });
+		const instance: KTToastInstance = {
+			id,
+			element: toast,
+			timeoutId: timeoutId || 0,
+		};
+		this.toasts.set(id, instance);
 		// Dismissible
 		if (options.dismissible !== false) {
 			toast.onclick = () => KTToast.close(id);
 		}
 		KTToast._fireEventOnElement(toast, 'shown', { id });
 		KTToast._dispatchEventOnElement(toast, 'shown', { id });
-		return id;
+		return {
+			...instance,
+			dismiss: () => KTToast.close(id),
+		};
 	}
 
-	static close(id: string) {
-		const inst = this.toasts.get(id);
-		if (!inst) return;
+	/**
+	 * Close a toast by id or instance.
+	 */
+	static close(idOrInstance?: string | KTToastInstance) {
+		let inst: KTToastInstance | undefined;
+		let id: string | undefined;
+		if (!idOrInstance) return;
+		if (typeof idOrInstance === 'string') {
+			id = idOrInstance;
+			inst = this.toasts.get(id);
+		} else if (typeof idOrInstance === 'object' && idOrInstance.id) {
+			id = idOrInstance.id;
+			inst = idOrInstance;
+		}
+		if (!inst || !id) return;
 		clearTimeout(inst.timeoutId);
 		KTToast._fireEventOnElement(inst.element, 'hide', { id });
 		KTToast._dispatchEventOnElement(inst.element, 'hide', { id });
@@ -275,70 +356,5 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		element.dispatchEvent(event);
 	}
 
-	// Instance management for per-element toasts
-	static getInstance(element: HTMLElement): KTToast {
-		if (!element) return null;
-		if (KTData.has(element, 'toast')) {
-			return KTData.get(element, 'toast') as KTToast;
-		}
-		if (element.getAttribute('data-kt-toast')) {
-			return new KTToast(element);
-		}
-		return null;
-	}
-
-	static getOrCreateInstance(
-		element: HTMLElement,
-		config?: Partial<KTToastConfig>,
-	): KTToast {
-		return this.getInstance(element) || new KTToast(element, config);
-	}
-
-	static createInstances(): void {
-		const elements = document.querySelectorAll('[data-kt-toast]');
-		elements.forEach((element) => {
-			new KTToast(element as HTMLElement);
-		});
-	}
-
-	static handleDelegatedEvents(): void {
-		KTEventHandler.on(
-			document.body,
-			'[data-kt-toast-toggle]',
-			'click',
-			(event: Event, target: HTMLElement) => {
-				event.stopPropagation();
-				const selector = target.getAttribute('data-kt-toast-toggle');
-				if (!selector) return;
-				const toastElement = document.querySelector(selector) as HTMLElement;
-				const toast = KTToast.getInstance(toastElement);
-				if (toast) {
-					toast.show({
-						message: '',
-					});
-				}
-			},
-		);
-		KTEventHandler.on(
-			document.body,
-			'[data-kt-toast-dismiss]',
-			'click',
-			(event: Event, target: HTMLElement) => {
-				event.stopPropagation();
-				const toastElement = target.closest('[data-kt-toast]') as HTMLElement;
-				if (toastElement) {
-					const toast = KTToast.getInstance(toastElement);
-					if (toast) {
-						// Only close this toast, not all
-						toast.hide?.(toastElement.id || '');
-					}
-				}
-			},
-		);
-	}
-
-	static init(): void {
-		KTToast.createInstances();
-		KTToast.handleDelegatedEvents();
-	}
+	static init(): void {}
 }
