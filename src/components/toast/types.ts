@@ -3,21 +3,33 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-export type KTToastType = 'info' | 'success' | 'error' | 'warning';
+export type KTToastVariantType =
+	| 'info'
+	| 'success'
+	| 'error'
+	| 'warning'
+	| 'primary'
+	| 'secondary'
+	| 'destructive'
+	| 'mono';
 
-export interface KTToastAction {
-	label: string;
-	onClick: (toastId: string) => void;
-	className?: string;
-}
+export type KTToastAppearanceType = 'solid' | 'outline' | 'light';
+
+export type KTToastSizeType = 'sm' | 'md' | 'lg';
 
 export type KTToastPosition =
-	| 'top-right'
+	| 'top-end'
 	| 'top-center'
-	| 'top-left'
-	| 'bottom-right'
+	| 'top-start'
+	| 'bottom-end'
 	| 'bottom-center'
-	| 'bottom-left';
+	| 'bottom-start';
+
+export interface KTToastAction {
+	label?: string;
+	onClick?: (toastId: string) => void;
+	className?: string;
+}
 
 /**
  * Allows overriding all internal class names for headless usage.
@@ -27,15 +39,17 @@ export interface KTToastClassNames {
 	container?: string; // Toast container (positioned wrapper)
 	toast?: string; // Main toast element
 	icon?: string; // Icon element
-	content?: string; // Content wrapper
 	message?: string; // Message element
-	description?: string; // Description element
-	close?: string; // Close button
+	dismiss?: string; // Close button
 	progress?: string; // Progress bar
 	action?: string; // Action button
 	cancel?: string; // Cancel button
 }
 
+/**
+ * Toast configuration
+ * @property offset - The vertical offset (in px) from the edge of the screen for stacking toasts.
+ */
 export interface KTToastConfigInterface {
 	/** Override internal class names for headless usage */
 	classNames?: Partial<KTToastClassNames>;
@@ -44,13 +58,16 @@ export interface KTToastConfigInterface {
 	duration?: number;
 	className?: string;
 	maxToasts?: number;
+	offset?: number; // NEW: global offset for toast stacking
 	message?: string | HTMLElement | (() => HTMLElement);
 	description?: string | HTMLElement | (() => HTMLElement);
 	icon?: string | HTMLElement | (() => HTMLElement);
 	action?: KTToastAction;
 	cancel?: KTToastAction;
-	close?: KTToastAction;
-	type?: KTToastType;
+	dismiss?: boolean;
+	variant?: KTToastVariantType;
+	appearance?: KTToastAppearanceType;
+	size?: KTToastSizeType;
 	important?: boolean;
 	onAutoClose?: (id: string) => void;
 	onDismiss?: (id: string) => void;
@@ -58,7 +75,6 @@ export interface KTToastConfigInterface {
 	style?: Partial<CSSStyleDeclaration>;
 	invert?: boolean;
 	role?: string;
-	dismissible?: boolean;
 	id?: string;
 	progress?: boolean; // NEW: enable/disable progress indicator
 }
@@ -83,18 +99,20 @@ export interface KTToastOptions {
 	progress?: boolean;
 	/** Main content of the toast */
 	message?: string | HTMLElement | (() => HTMLElement);
-	/** Optional secondary content */
-	description?: string | HTMLElement | (() => HTMLElement);
 	/** Leading icon or visual */
-	icon?: string | HTMLElement | (() => HTMLElement);
+	icon?: string | boolean;
 	/** Primary action button */
-	action?: KTToastAction;
+	action?: KTToastAction | boolean;
 	/** Cancel/secondary action button */
-	cancel?: KTToastAction;
+	cancel?: KTToastAction | boolean;
 	/** Close button */
-	close?: KTToastAction;
-	/** Toast type (info, success, etc) */
-	type?: KTToastType;
+	dismiss?: KTToastAction | boolean;
+	/** Toast variant */
+	variant?: KTToastVariantType;
+	/** Toast appearance */
+	appearance?: KTToastAppearanceType;
+	/** Toast size */
+	size?: KTToastSizeType;
 	/** Auto-dismiss duration (ms) */
 	duration?: number;
 	/** Prevents auto-dismiss if true */
@@ -105,27 +123,23 @@ export interface KTToastOptions {
 	onDismiss?: (id: string) => void;
 	/** Toast position */
 	position?: KTToastPosition;
-	/** Show/hide close button */
-	closeButton?: boolean;
 	/** Custom class for toast */
 	className?: string;
-	/** Invert color scheme */
-	invert?: boolean;
 	/** ARIA role */
 	role?: string;
-	/** If false, disables manual dismiss */
-	dismissible?: boolean;
 	/** Optional custom id */
 	id?: string;
 }
 
 export interface KTToastConfig {
-	/** Override internal class names for headless usage */
 	classNames?: Partial<KTToastClassNames>;
 	position?: KTToastPosition;
 	duration?: number;
 	className?: string;
 	maxToasts?: number;
+	offset?: number;
+	gap?: number;
+	dismiss?: boolean;
 }
 
 export interface KTToastInstance {

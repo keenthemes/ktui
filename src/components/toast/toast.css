@@ -3,99 +3,47 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-/* KTToast Container */
-.kt-toast-container {
-  position: fixed;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  pointer-events: none;
-}
-.kt-toast-container.top-right { top: 1.5rem; right: 1.5rem; align-items: flex-end; }
-.kt-toast-container.top-center { top: 1.5rem; left: 50%; transform: translateX(-50%); align-items: center; }
-.kt-toast-container.top-left { top: 1.5rem; left: 1.5rem; align-items: flex-start; }
-.kt-toast-container.bottom-right { bottom: 1.5rem; right: 1.5rem; align-items: flex-end; }
-.kt-toast-container.bottom-center { bottom: 1.5rem; left: 50%; transform: translateX(-50%); align-items: center; }
-.kt-toast-container.bottom-left { bottom: 1.5rem; left: 1.5rem; align-items: flex-start; }
+ @layer components {
+  .kt-toast-container {
+    @apply fixed;
+  }
 
-/* KTToast Toast */
-.kt-toast {
-  min-width: 220px;
-  max-width: 380px;
-  background: #18181b;
-  color: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.14);
-  padding: 1rem 1.25rem 0.75rem 1.25rem;
-  margin: 0.25rem 0;
-  font-size: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  pointer-events: auto;
-  position: relative;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(24px) scale(0.98);
-  animation: kt-toast-in 0.28s cubic-bezier(.4,0,.2,1) forwards;
-}
-.kt-toast.success { background: #22c55e; color: #fff; }
-.kt-toast.error { background: #ef4444; color: #fff; }
-.kt-toast.warning { background: #f59e42; color: #fff; }
-.kt-toast.info { background: #2563eb; color: #fff; }
+  /* Toast */
+  .kt-toast {
+    @apply fixed z-9999 max-w-[95%] w-76 shadow-sm pointer-events-auto overflow-hidden;
 
-@keyframes kt-toast-in {
-  from { opacity: 0; transform: translateY(24px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes kt-toast-out {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(24px) scale(0.98); }
-}
+    opacity: 0;
+    animation: kt-toast-in 0.28s cubic-bezier(.4,0,.2,1) forwards;
+    transition: top 0.28s cubic-bezier(.4,0,.2,1), opacity 0.28s cubic-bezier(.4,0,.2,1);
 
-.kt-toast-close {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  background: transparent;
-  border: none;
-  color: inherit;
-  font-size: 1.25rem;
-  cursor: pointer;
-  opacity: 0.75;
-  transition: opacity 0.15s;
-}
-.kt-toast-close:hover { opacity: 1; }
+    &.kt-toast-top-end { @apply bottom-auto top-0 end-0; }
+    &.kt-toast-top-center { @apply bottom-auto top-0 start-1/2 -translate-x-1/2; }
+    &.kt-toast-top-start { @apply bottom-auto top-0 start-0; }
+    &.kt-toast-bottom-end { @apply top-auto bottom-0 end-0; }
+    &.kt-toast-bottom-center { @apply top-auto bottom-0 start-1/2 -translate-x-1/2; } 
+    &.kt-toast-bottom-start { @apply top-auto bottom-0 start-0; }
+  }
 
-/* Sonner-style progress line */
-.kt-toast-progress {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 3px;
-  background: rgba(255,255,255,0.7);
-  width: 100%;
-  transform-origin: left;
-  animation: kt-toast-progress-line linear forwards;
-}
+  /* Progress */
+  .kt-toast-progress {
+    @apply relative left-0 bottom-0 w-full h-[3px] bg-primary;
+    transform-origin: left;
+    animation: kt-toast-progress-line linear forwards;
+  }
 
-/* This will be set via style attribute for duration */
-@keyframes kt-toast-progress-line {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
-}
+  /* Animations */
+  @keyframes kt-toast-in {
+    from { opacity: 0; transform: translateY(-24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-/* Action button */
-.kt-toast-action {
-  margin-top: 0.25rem;
-  background: rgba(0,0,0,0.1);
-  color: inherit;
-  border: none;
-  border-radius: 0.25rem;
-  padding: 0.25rem 0.75rem;
-  cursor: pointer;
-  font-size: 0.95em;
-  transition: background 0.15s;
-}
-.kt-toast-action:hover { background: rgba(0,0,0,0.2); }
+  @keyframes kt-toast-out {
+    from { opacity: 1;  }
+    to { opacity: 0;  }
+  }
+
+  @keyframes kt-toast-progress-line {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+ }

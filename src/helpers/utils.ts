@@ -178,6 +178,40 @@ const KTUtils = {
 		}
 		return null;
 	},
+
+	merge: (target: any, source: any): any => {
+		if (Array.isArray(target) && Array.isArray(source)) {
+			return source.slice(); // or [...target, ...source] for concatenation
+		}
+		if (typeof target !== 'object' || target === null) return source;
+		if (typeof source !== 'object' || source === null) return target;
+
+		const output: any = {};
+		const keys = Array.from(
+			new Set([...Object.keys(target), ...Object.keys(source)]),
+		);
+		for (const key of keys) {
+			const tVal = target[key];
+			const sVal = source[key];
+			if (
+				tVal !== undefined &&
+				sVal !== undefined &&
+				typeof tVal === 'object' &&
+				tVal !== null &&
+				typeof sVal === 'object' &&
+				sVal !== null &&
+				!Array.isArray(tVal) &&
+				!Array.isArray(sVal)
+			) {
+				output[key] = KTUtils.merge(tVal, sVal);
+			} else if (sVal !== undefined) {
+				output[key] = sVal;
+			} else {
+				output[key] = tVal;
+			}
+		}
+		return output;
+	},
 };
 
 export default KTUtils;
