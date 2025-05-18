@@ -18,7 +18,6 @@ import { defaultTemplates } from './templates';
 import { KTSelectCombobox } from './combobox';
 import { KTSelectDropdown } from './dropdown';
 import {
-	handleDropdownKeyNavigation,
 	FocusManager,
 	EventManager,
 	renderTemplateString,
@@ -422,16 +421,17 @@ export class KTSelect extends KTComponent {
 
 		// Create wrapper and display elements
 		const wrapperElement = defaultTemplates.wrapper(this._config);
-		const displayElement = defaultTemplates.display(this._config, this.getSelectedOptions());
+
+		const displayElement = defaultTemplates.display(this._config);
+
+		// Add the display element to the wrapper
+		wrapperElement.appendChild(displayElement);
 
 		// Move classes from original select to display element
 		if (this._element.classList.length > 0) {
 			wrapperElement.classList.add(...Array.from(this._element.classList));
 			this._element.className = '';
 		}
-
-		// Add the display element to the wrapper
-		wrapperElement.appendChild(displayElement);
 
 		// Create an empty dropdown first (without options) using template
 		const dropdownElement = defaultTemplates.dropdown({
@@ -527,7 +527,6 @@ export class KTSelect extends KTComponent {
 	private _attachEventListeners() {
 		// Document level event listeners
 		document.addEventListener('click', this._handleDocumentClick.bind(this));
-		document.addEventListener('keydown', this._handleEscKey.bind(this));
 
 		// Dropdown option click events
 		this._eventManager.addListener(
@@ -541,12 +540,6 @@ export class KTSelect extends KTComponent {
 			this._displayElement,
 			'click',
 			this._handleDropdownClick.bind(this),
-		);
-
-		this._eventManager.addListener(
-			this._displayElement,
-			'keydown',
-			this._handleDropdownKeyDown.bind(this),
 		);
 	}
 
@@ -953,6 +946,12 @@ export class KTSelect extends KTComponent {
 	public updateSelectedOptionDisplay() {
 		const selectedOptions = this.getSelectedOptions();
 
+		// Tag mode: render tags if enabled
+		if (this._config.tags && this._tagsModule) {
+			this._tagsModule.updateTagsDisplay(selectedOptions);
+			return;
+		}
+
 		if (typeof this._config.renderSelected === 'function') {
 			// Use the custom renderSelected function if provided
 			this._valueDisplayElement.innerHTML = this._config.renderSelected(selectedOptions);
@@ -1000,34 +999,6 @@ export class KTSelect extends KTComponent {
 				}
 
 				this._valueDisplayElement.innerHTML = content;
-			}
-		}
-
-		// Update any debug display boxes if they exist
-		this._updateDebugDisplays();
-	}
-
-	/**
-	 * Update debug displays if present
-	 */
-	private _updateDebugDisplays() {
-		// Check if we're in a test environment with debug boxes
-		const selectId = this.getElement().id;
-		if (selectId) {
-			const debugElement = document.getElementById(`${selectId}-value`);
-			if (debugElement) {
-				const selectedOptions = this.getSelectedOptions();
-
-				// Format display based on selection mode
-				if (this._config.multiple) {
-					// For multiple selection, show comma-separated list
-					debugElement.textContent =
-						selectedOptions.length > 0 ? selectedOptions.join(', ') : 'None';
-				} else {
-					// For single selection, show just the one value
-					debugElement.textContent =
-						selectedOptions.length > 0 ? selectedOptions[0] : 'None';
-				}
 			}
 		}
 	}
@@ -1094,55 +1065,6 @@ export class KTSelect extends KTComponent {
 	public setSelectedOptions(options: HTMLOptionElement[]) {
 		const values = Array.from(options).map((option) => option.value);
 		this._state.setSelectedOptions(values);
-	}
-
-	/**
-	 * ========================================================================
-	 * KEYBOARD NAVIGATION
-	 * ========================================================================
-	 */
-
-	/**
-	 * Handle dropdown key down events for keyboard navigation
-	 */
-	private _handleDropdownKeyDown(event: KeyboardEvent) {
-		// Log event for debugging
-		if (this._config.debug)
-			console.log('Standard dropdown keydown:', event.key);
-
-		// Use the shared handler
-		handleDropdownKeyNavigation(event, this, {
-			multiple: this._config.multiple,
-			closeOnSelect: this._config.closeOnSelect,
-		});
-	}
-
-	/**
-	 * Focus next option in dropdown
-	 */
-	private _focusNextOption(): Element | null {
-		return this._focusManager.focusNext();
-	}
-
-	/**
-	 * Focus previous option in dropdown
-	 */
-	private _focusPreviousOption(): Element | null {
-		return this._focusManager.focusPrevious();
-	}
-
-	/**
-	 * Apply hover/focus state to focused option
-	 */
-	private _hoverFocusedOption(option: Element) {
-		this._focusManager.applyFocus(option as HTMLElement);
-	}
-
-	/**
-	 * Scroll option into view when navigating
-	 */
-	private _scrollOptionIntoView(option: Element) {
-		this._focusManager.scrollIntoView(option as HTMLElement);
 	}
 
 	/**
@@ -1250,15 +1172,6 @@ export class KTSelect extends KTComponent {
 		const targetElement = event.target as HTMLElement;
 		// Check if the click is outside the dropdown and the display element
 		if (!this._wrapperElement.contains(targetElement)) {
-			this.closeDropdown();
-		}
-	}
-
-	/**
-	 * Handle escape key press
-	 */
-	private _handleEscKey(event: KeyboardEvent) {
-		if (event.key === 'Escape' && this._dropdownIsOpen) {
 			this.closeDropdown();
 		}
 	}

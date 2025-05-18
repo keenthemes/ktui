@@ -37,8 +37,11 @@ export const coreTemplateStrings = {
 	search: `<div class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
 	empty: `<li class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
 	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
-	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}">{{content}}</div>`,
+	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}">
+			{{content}}
+		</div>`,
 	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true">{{content}}</li>`,
+	tagRemoveButton: `<button type="button" data-kt-select-remove-button class="kt-select-tag-remove" aria-label="Remove tag" tabindex="0"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg></button>`,
 };
 
 /**
@@ -71,7 +74,7 @@ export interface KTSelectTemplateInterface {
 
 	// Main components
 	wrapper: (config: KTSelectConfigInterface) => HTMLElement;
-	display: (config: KTSelectConfigInterface, selectedOptions: string[]) => HTMLElement;
+	display: (config: KTSelectConfigInterface) => HTMLElement;
 
 	// Option rendering
 	option: (
@@ -88,7 +91,7 @@ export interface KTSelectTemplateInterface {
 	) => HTMLElement;
 
 	// Multi-select
-	tag: (option: KTSelectOption, config: KTSelectConfigInterface) => HTMLElement;
+	tag: (option: HTMLOptionElement, config: KTSelectConfigInterface) => HTMLElement;
 
 	placeholder: (config: KTSelectConfigInterface) => HTMLElement;
 }
@@ -220,7 +223,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the display element (trigger) for the select
 	 */
-	display: (config: KTSelectConfigInterface, selectedOptions: string[]): HTMLElement => {
+	display: (config: KTSelectConfigInterface): HTMLElement => {
 		if (config.combobox) {
 			let html = getTemplateStrings(config)
 				.combobox.replace(/{{placeholder}}/g, config.placeholder || 'Select...')
@@ -332,39 +335,38 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders a tag for multi-select
 	 */
 	tag: (
-		option: KTSelectOption,
+		option: HTMLOptionElement,
 		config: KTSelectConfigInterface,
 	): HTMLElement => {
-		const escapeHTML = (str: string) => {
-			return str.replace(/[&<>"']/g, (match) => {
-				const escapeMap: Record<string, string> = {
-					'&': '&amp;',
-					'<': '&lt;',
-					'>': '&gt;',
-					'"': '&quot;',
-					"'": '&#39;',
-				};
-				return escapeMap[match];
-			});
-		};
-
-		const safeTitle = escapeHTML(option.title);
 		let template = getTemplateStrings(config).tag;
 		let content = option.title;
 		if (config.tagTemplate) {
-			content = renderTemplateString(config.tagTemplate, {
+			let tagTemplate = config.tagTemplate;
+
+			const text = option.getAttribute('data-text');
+			const value = option.getAttribute('data-value');
+
+			// Replace all {{varname}} in option.innerHTML with values from _config
+			Object.entries((config.optionsConfig as any)[value] || {}).forEach(([key, value]) => {
+				if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+					tagTemplate = tagTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+				}
+			});
+
+			content = renderTemplateString(tagTemplate, {
 				title: option.title,
 				id: option.id,
-				safeTitle,
 				class: config.tagClass || '',
-				content: option.title,
-				text: option.title,
+				content: option.innerHTML,
+				text: option.innerText,
 			});
 		}
+
+		content += getTemplateStrings(config).tagRemoveButton;
+
 		const html = template
 			.replace('{{title}}', option.title)
 			.replace('{{id}}', option.id)
-			.replace('{{safeTitle}}', safeTitle)
 			.replace('{{content}}', content)
 			.replace('{{class}}', config.tagClass || '');
 		return stringToElement(html);

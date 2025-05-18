@@ -14,60 +14,43 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Template Customization</label>
 
-				<select
-        data-kt-select
-        data-kt-select-placeholder="Select a user..."
-        data-kt-select-enable-search="true"
-      >
-        <option
-          value="1"
-          data-kt-select-option='{"icon": "/media/avatars/300-1.png", "description": "Frontend Developer"}'
-        >
-          John Doe
-        </option>
-        <option
-          value="2"
-          data-kt-select-option='{"icon": "/media/avatars/300-2.png", "description": "UI/UX Designer"}'
-        >
-          Jane Smith
-        </option>
-        <option
-          value="3"
-          data-kt-select-option='{"icon": "/media/avatars/300-3.png", "description": "Backend Engineer"}'
-        >
-          Alex Lee
-        </option>
-        <option
-          value="4"
-          data-kt-select-option='{"icon": "/media/avatars/300-4.png", "description": "Project Manager"}'
-        >
-          Maria Garcia
-        </option>
-        <option
-          value="5"
-          data-kt-select-option='{"icon": "/media/avatars/300-5.png", "description": "QA Specialist"}'
-        >
-          Chris Kim
-        </option>
-        <option
-          value="6"
-          data-kt-select-option='{"icon": "/media/avatars/300-6.png", "description": "DevOps Engineer"}'
-        >
-          Patricia Chen
-        </option>
-        <option
-          value="7"
-          data-kt-select-option='{"icon": "/media/avatars/300-7.png", "description": "Support Lead"}'
-        >
-          Michael Brown
-        </option>
-        <option
-          value="8"
-          data-kt-select-option='{"icon": "/media/avatars/300-8.png", "description": "Marketing Director"}'
-        >
-          Lisa Wang
-        </option>
-      </select>
+				<select data-kt-select data-kt-select-placeholder="Type or select a country..." data-kt-select-config='{
+					"displayTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"font-semibold text-gray-900\">{{text}}</span></div>",
+					"displayClass": "kt-select-display",
+					"displayToggle": true,
+					"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
+					"optionClass": "kt-select-option",
+					"placeholder": "Select a country...",
+					"placeholderClass": "kt-select-placeholder",
+					"placeholderTemplate": "<span class=\"kt-select-placeholder\">{{placeholder}}</span>",
+					"displaySeparator": ", ",
+					"tagClasses": "flex gap-2",
+					"tagTemplate": "<span class=\"kt-select-tag\">{{text}}</span>",
+					"displayToggleClass": "flex gap-2",
+					"displayToggleTemplate": "<button type=\"button\" class=\"kt-select-toggle\">{{text}}</button>"
+				}'>
+					<option value="us"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
+						United States</option>
+					<option value="de"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/de.png\" class=\"w-6 h-6\" />"}'>
+						Germany</option>
+					<option value="it"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/it.png\" class=\"w-6 h-6\" />"}'>
+						Italy</option>
+					<option value="fr"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/fr.png\" class=\"w-6 h-6\" />"}'>
+						France</option>
+					<option value="es"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/es.png\" class=\"w-6 h-6\" />"}'>
+						Spain</option>
+					<option value="jp"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/jp.png\" class=\"w-6 h-6\" />"}'>
+						Japan</option>
+					<option value="ru"
+						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/ru.png\" class=\"w-6 h-6\" />"}'>
+						Russia</option>
+				</select>
 
 			</div>
 		</form>

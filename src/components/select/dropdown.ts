@@ -7,11 +7,9 @@ import {
 	Instance as PopperInstance,
 	createPopper,
 	Placement,
-	VirtualElement,
 } from '@popperjs/core';
 import KTDom from '../../helpers/dom';
 import KTData from '../../helpers/data';
-import KTEventHandler from '../../helpers/event-handler';
 import KTComponent from '../component';
 import { KTSelectConfigInterface } from './config';
 import { FocusManager, EventManager } from './utils';
@@ -79,13 +77,6 @@ export class KTSelectDropdown extends KTComponent {
 			this._handleToggleClick.bind(this),
 		);
 
-		// Keyboard navigation
-		this._eventManager.addListener(
-			this._element,
-			'keydown',
-			this._handleKeyDown.bind(this),
-		);
-
 		// Close on outside click
 		this._eventManager.addListener(
 			document as unknown as HTMLElement,
@@ -102,48 +93,6 @@ export class KTSelectDropdown extends KTComponent {
 		event.stopPropagation();
 
 		this.toggle();
-	}
-
-	/**
-	 * Handle keyboard events
-	 */
-	private _handleKeyDown(event: KeyboardEvent): void {
-		if (!this._isOpen) return;
-
-		switch (event.key) {
-			case 'Escape':
-				event.preventDefault();
-				this.close();
-				this._toggleElement.focus();
-				break;
-			case 'ArrowDown':
-				event.preventDefault();
-				this._focusManager.focusNext();
-				break;
-			case 'ArrowUp':
-				event.preventDefault();
-				this._focusManager.focusPrevious();
-				break;
-			case 'Home':
-				event.preventDefault();
-				// Focus first visible option
-				const firstOption = this._focusManager.getVisibleOptions()[0];
-				if (firstOption) {
-					this._focusManager.applyFocus(firstOption);
-					this._focusManager.scrollIntoView(firstOption);
-				}
-				break;
-			case 'End':
-				event.preventDefault();
-				// Focus last visible option
-				const visibleOptions = this._focusManager.getVisibleOptions();
-				const lastOption = visibleOptions[visibleOptions.length - 1];
-				if (lastOption) {
-					this._focusManager.applyFocus(lastOption);
-					this._focusManager.scrollIntoView(lastOption);
-				}
-				break;
-		}
 	}
 
 	/**

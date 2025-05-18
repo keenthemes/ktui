@@ -5,7 +5,7 @@
 
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
-import { handleDropdownKeyNavigation, filterOptions } from './utils';
+import { filterOptions } from './utils';
 
 /**
  * KTSelectCombobox - Handles combobox-specific functionality for KTSelect
@@ -15,7 +15,6 @@ export class KTSelectCombobox {
 	private _config: KTSelectConfigInterface;
 	private _searchInputElement: HTMLInputElement;
 	private _clearButtonElement: HTMLElement | null;
-	private _boundKeyNavHandler: (event: KeyboardEvent) => void;
 	private _boundInputHandler: (event: Event) => void;
 	private _boundClearHandler: (event: MouseEvent) => void;
 
@@ -44,7 +43,6 @@ export class KTSelectCombobox {
 			: null;
 
 		// Create bound handler references to allow proper cleanup
-		this._boundKeyNavHandler = this._handleComboboxKeyNav.bind(this);
 		this._boundInputHandler = this._handleComboboxInput.bind(this);
 		this._boundClearHandler = this._handleClearButtonClick.bind(this);
 
@@ -77,12 +75,6 @@ export class KTSelectCombobox {
 		// Add input event handler to filter options as user types
 		this._searchInputElement.addEventListener('input', this._boundInputHandler);
 
-		// Add keyboard navigation for the combobox
-		this._searchInputElement.addEventListener(
-			'keydown',
-			this._boundKeyNavHandler,
-		);
-
 		// Add clear button click event listener
 		if (this._clearButtonElement) {
 			this._clearButtonElement.addEventListener(
@@ -106,10 +98,6 @@ export class KTSelectCombobox {
 			this._searchInputElement.removeEventListener(
 				'input',
 				this._boundInputHandler,
-			);
-			this._searchInputElement.removeEventListener(
-				'keydown',
-				this._boundKeyNavHandler,
 			);
 		}
 
@@ -188,56 +176,6 @@ export class KTSelectCombobox {
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
 		filterOptions(options, query, config, dropdownElement);
-	}
-
-	/**
-	 * Handle keyboard navigation in combobox mode
-	 */
-	private _handleComboboxKeyNav(event: KeyboardEvent): void {
-		if (this._config.debug) console.log('Combobox keydown event:', event.key);
-
-		// Prevent event propagation to stop bubbling to other handlers
-		event.stopPropagation();
-
-		// Handle clear with Escape when dropdown is closed
-		if (
-			event.key === 'Escape' &&
-			!(this._select as any)._dropdownIsOpen &&
-			this._searchInputElement.value !== ''
-		) {
-			event.preventDefault();
-			this._searchInputElement.value = '';
-			this._toggleClearButtonVisibility('');
-			this._select.clearSelection();
-			return;
-		}
-
-		// Handle dropdown visibility with special keys
-		if (
-			!(this._select as any)._dropdownIsOpen &&
-			(event.key === 'ArrowDown' ||
-				event.key === 'ArrowUp' ||
-				event.key === 'Enter')
-		) {
-			if (this._config.debug)
-				console.log('Opening dropdown from keyboard in combobox');
-			this._select.openDropdown();
-			event.preventDefault();
-
-			// If it's arrow keys, also move focus
-			if (event.key === 'ArrowDown') {
-				(this._select as any)._focusNextOption();
-			} else if (event.key === 'ArrowUp') {
-				(this._select as any)._focusPreviousOption();
-			}
-			return;
-		}
-
-		// Use the shared keyboard navigation handler
-		handleDropdownKeyNavigation(event, this._select, {
-			multiple: this._config.multiple,
-			closeOnSelect: this._config.closeOnSelect,
-		});
 	}
 
 	/**
