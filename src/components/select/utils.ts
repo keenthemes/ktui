@@ -225,6 +225,7 @@ export class FocusManager {
 	private _focusClass: string;
 	private _hoverClass: string;
 	private _eventManager: EventManager;
+	private _onFocusChange: ((option: HTMLElement | null, index: number | null) => void) | null = null;
 
 	constructor(
 		element: HTMLElement,
@@ -237,6 +238,9 @@ export class FocusManager {
 
 		// Add click handler to update focus state when options are clicked
 		this._setupOptionClickHandlers();
+
+		this._focusClass = 'focus'; // or whatever your intended class is
+		this._hoverClass = 'hover'; // or your intended class
 	}
 
 	/**
@@ -274,26 +278,88 @@ export class FocusManager {
 	}
 
 	/**
+	 * Focus the first visible option
+	 */
+	public focusFirst(): HTMLElement | null {
+		const options = this.getVisibleOptions();
+		if (options.length === 0) return null;
+		for (let i = 0; i < options.length; i++) {
+			const option = options[i];
+			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+				this.resetFocus();
+				this._focusedOptionIndex = i;
+				this.applyFocus(option);
+				this.scrollIntoView(option);
+				return option;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Focus the last visible option
+	 */
+	public focusLast(): HTMLElement | null {
+		const options = this.getVisibleOptions();
+		if (options.length === 0) return null;
+		for (let i = options.length - 1; i >= 0; i--) {
+			const option = options[i];
+			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+				this.resetFocus();
+				this._focusedOptionIndex = i;
+				this.applyFocus(option);
+				this.scrollIntoView(option);
+				return option;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Focus the next visible option that matches the search string
+	 */
+	public focusByString(str: string): HTMLElement | null {
+		const options = this.getVisibleOptions();
+		if (options.length === 0) return null;
+		const lowerStr = str.toLowerCase();
+		const startIdx = (this._focusedOptionIndex ?? -1) + 1;
+		for (let i = 0; i < options.length; i++) {
+			const idx = (startIdx + i) % options.length;
+			const option = options[idx];
+			if (
+				!option.classList.contains('disabled') &&
+				option.getAttribute('aria-disabled') !== 'true' &&
+				(option.textContent?.toLowerCase().startsWith(lowerStr) || option.dataset.value?.toLowerCase().startsWith(lowerStr))
+			) {
+				this._focusedOptionIndex = idx;
+				this.applyFocus(option);
+				this.scrollIntoView(option);
+				return option;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Focus the next visible option
 	 */
 	public focusNext(): HTMLElement | null {
 		const options = this.getVisibleOptions();
 		if (options.length === 0) return null;
-
-		this.resetFocus();
-
-		if (this._focusedOptionIndex === null) {
-			this._focusedOptionIndex = 0;
-		} else {
-			this._focusedOptionIndex =
-				(this._focusedOptionIndex + 1) % options.length;
-		}
-
-		const option = options[this._focusedOptionIndex];
-		this.applyFocus(option);
-		this.scrollIntoView(option);
-
-		return option;
+		let idx = this._focusedOptionIndex === null ? 0 : (this._focusedOptionIndex + 1) % options.length;
+		let startIdx = idx;
+		do {
+			const option = options[idx];
+			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+				this.resetFocus();
+				this._focusedOptionIndex = idx;
+				this.applyFocus(option);
+				this.scrollIntoView(option);
+				return option;
+			}
+			idx = (idx + 1) % options.length;
+		} while (idx !== startIdx);
+		return null;
 	}
 
 	/**
@@ -302,27 +368,20 @@ export class FocusManager {
 	public focusPrevious(): HTMLElement | null {
 		const options = this.getVisibleOptions();
 		if (options.length === 0) return null;
-
-		// If any option is hovered, start from there
-		const hoveredIndex = options.findIndex(option => option.classList.contains(this._hoverClass));
-		if (hoveredIndex !== -1) {
-			this._focusedOptionIndex = hoveredIndex;
-		}
-
-		this.resetFocus();
-
-		if (this._focusedOptionIndex === null) {
-			this._focusedOptionIndex = options.length - 1;
-		} else {
-			this._focusedOptionIndex =
-				(this._focusedOptionIndex - 1 + options.length) % options.length;
-		}
-
-		const option = options[this._focusedOptionIndex];
-		this.applyFocus(option);
-		this.scrollIntoView(option);
-
-		return option;
+		let idx = this._focusedOptionIndex === null ? options.length - 1 : (this._focusedOptionIndex - 1 + options.length) % options.length;
+		let startIdx = idx;
+		do {
+			const option = options[idx];
+			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+				this.resetFocus();
+				this._focusedOptionIndex = idx;
+				this.applyFocus(option);
+				this.scrollIntoView(option);
+				return option;
+			}
+			idx = (idx - 1 + options.length) % options.length;
+		} while (idx !== startIdx);
+		return null;
 	}
 
 	/**
@@ -330,31 +389,26 @@ export class FocusManager {
 	 */
 	public applyFocus(option: HTMLElement): void {
 		if (!option) return;
-
-		// Prevent focusing disabled options
 		if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
 			return;
 		}
-
-		// Remove focus from all options first
 		this.resetFocus();
-
-		// Add focus to this option
 		option.classList.add(this._focusClass);
 		option.classList.add(this._hoverClass);
+		this._triggerFocusChange();
 	}
 
 	/**
 	 * Reset focus on all options
 	 */
 	public resetFocus(): void {
-		// Find all elements with the focus classes
 		const focusedElements = this._element.querySelectorAll(
 			`.${this._focusClass}, .${this._hoverClass}`,
 		);
 
-		// Remove classes from all elements
+		// Remove focus and hover classes from all options
 		focusedElements.forEach((element) => {
+			element.classList.remove(this._focusClass, this._hoverClass);
 		});
 
 		// Reset index if visible options have changed
@@ -436,6 +490,19 @@ export class FocusManager {
 	 */
 	public setFocusedIndex(index: number | null): void {
 		this._focusedOptionIndex = index;
+	}
+
+	/**
+	 * Set a callback to be called when focus changes
+	 */
+	public setOnFocusChange(cb: (option: HTMLElement | null, index: number | null) => void) {
+		this._onFocusChange = cb;
+	}
+
+	private _triggerFocusChange() {
+		if (this._onFocusChange) {
+			this._onFocusChange(this.getFocusedOption(), this._focusedOptionIndex);
+		}
 	}
 
 	/**
@@ -555,4 +622,32 @@ export function renderTemplateString(template: string, data: Record<string, any>
 	return template.replace(/{{(\w+)}}/g, (_, key) =>
 		data[key] !== undefined && data[key] !== null ? String(data[key]) : ''
 	);
+}
+
+// Type-to-search buffer utility for keyboard navigation
+export class TypeToSearchBuffer {
+	private buffer: string = '';
+	private lastTime: number = 0;
+	private timeout: number;
+
+	constructor(timeout: number = 500) {
+		this.timeout = timeout;
+	}
+
+	public push(char: string) {
+		const now = Date.now();
+		if (now - this.lastTime > this.timeout) {
+			this.buffer = '';
+		}
+		this.buffer += char;
+		this.lastTime = now;
+	}
+
+	public getBuffer() {
+		return this.buffer;
+	}
+
+	public clear() {
+		this.buffer = '';
+	}
 }

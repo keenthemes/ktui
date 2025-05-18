@@ -21,6 +21,7 @@ import {
 	FocusManager,
 	EventManager,
 	renderTemplateString,
+	TypeToSearchBuffer,
 } from './utils';
 import { KTSelectTags } from './tags';
 
@@ -50,6 +51,7 @@ export class KTSelect extends KTComponent {
 	private _loadMoreIndicator: HTMLElement | null = null;
 	private _focusManager: FocusManager;
 	private _eventManager: EventManager;
+	private _typeToSearchBuffer: TypeToSearchBuffer = new TypeToSearchBuffer();
 
 	/**
 	 * Constructor: Initializes the select component
@@ -541,6 +543,12 @@ export class KTSelect extends KTComponent {
 			'click',
 			this._handleDropdownClick.bind(this),
 		);
+
+		// Attach centralized keyboard handler
+		const keyboardTarget = this._searchInputElement || this._displayElement;
+		if (keyboardTarget) {
+			keyboardTarget.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
+		}
 	}
 
 	/**
@@ -1626,5 +1634,83 @@ export class KTSelect extends KTComponent {
 		) as HTMLOptionElement;
 		const isNativeDisabled = selectOption && selectOption.disabled;
 		return Boolean(isDropdownDisabled || isNativeDisabled);
+	}
+
+	/**
+	 * Centralized keyboard event handler for all select modes
+	 */
+	private _handleKeyboardEvent(event: KeyboardEvent) {
+		const isOpen = this._dropdownIsOpen;
+		const config = this._config;
+		const focusManager = this._focusManager;
+		const buffer = this._typeToSearchBuffer;
+
+		// Ignore modifier keys
+		if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+		// Type-to-search: only for single char keys
+		if (event.key.length === 1 && !event.repeat && !event.key.match(/\s/)) {
+			buffer.push(event.key);
+			const str = buffer.getBuffer();
+			focusManager.focusByString(str);
+			return;
+		}
+
+		switch (event.key) {
+			case 'ArrowDown':
+				event.preventDefault();
+				if (!isOpen) {
+					this.openDropdown();
+				} else {
+					focusManager.focusNext();
+				}
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				if (!isOpen) {
+					this.openDropdown();
+				} else {
+					focusManager.focusPrevious();
+				}
+				break;
+			case 'Home':
+				event.preventDefault();
+				if (isOpen) focusManager.focusFirst();
+				break;
+			case 'End':
+				event.preventDefault();
+				if (isOpen) focusManager.focusLast();
+				break;
+			case 'Enter':
+			case ' ': // Space
+				if (isOpen) {
+					const focused = focusManager.getFocusedOption();
+					if (focused) {
+						const value = focused.dataset.value;
+						if (value) {
+							this.toggleSelection(value);
+							if (!config.multiple && config.closeOnSelect) {
+								this.closeDropdown();
+							}
+						}
+					}
+					// Prevent form submit
+					event.preventDefault();
+				} else {
+					this.openDropdown();
+				}
+				break;
+			case 'Escape':
+				if (isOpen) {
+					this.closeDropdown();
+					(event.target as HTMLElement).blur();
+				}
+				break;
+			case 'Tab':
+				// Let Tab propagate for normal focus movement
+				break;
+			default:
+				break;
+		}
 	}
 }
