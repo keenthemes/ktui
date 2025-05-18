@@ -18,7 +18,6 @@ import { defaultTemplates } from './templates';
 import { KTSelectCombobox } from './combobox';
 import { KTSelectDropdown } from './dropdown';
 import {
-	handleDropdownKeyNavigation,
 	FocusManager,
 	EventManager,
 	renderTemplateString,
@@ -528,7 +527,6 @@ export class KTSelect extends KTComponent {
 	private _attachEventListeners() {
 		// Document level event listeners
 		document.addEventListener('click', this._handleDocumentClick.bind(this));
-		document.addEventListener('keydown', this._handleEscKey.bind(this));
 
 		// Dropdown option click events
 		this._eventManager.addListener(
@@ -542,12 +540,6 @@ export class KTSelect extends KTComponent {
 			this._displayElement,
 			'click',
 			this._handleDropdownClick.bind(this),
-		);
-
-		this._eventManager.addListener(
-			this._displayElement,
-			'keydown',
-			this._handleDropdownKeyDown.bind(this),
 		);
 	}
 
@@ -1076,55 +1068,6 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
-	 * ========================================================================
-	 * KEYBOARD NAVIGATION
-	 * ========================================================================
-	 */
-
-	/**
-	 * Handle dropdown key down events for keyboard navigation
-	 */
-	private _handleDropdownKeyDown(event: KeyboardEvent) {
-		// Log event for debugging
-		if (this._config.debug)
-			console.log('Standard dropdown keydown:', event.key);
-
-		// Use the shared handler
-		handleDropdownKeyNavigation(event, this, {
-			multiple: this._config.multiple,
-			closeOnSelect: this._config.closeOnSelect,
-		});
-	}
-
-	/**
-	 * Focus next option in dropdown
-	 */
-	private _focusNextOption(): Element | null {
-		return this._focusManager.focusNext();
-	}
-
-	/**
-	 * Focus previous option in dropdown
-	 */
-	private _focusPreviousOption(): Element | null {
-		return this._focusManager.focusPrevious();
-	}
-
-	/**
-	 * Apply hover/focus state to focused option
-	 */
-	private _hoverFocusedOption(option: Element) {
-		this._focusManager.applyFocus(option as HTMLElement);
-	}
-
-	/**
-	 * Scroll option into view when navigating
-	 */
-	private _scrollOptionIntoView(option: Element) {
-		this._focusManager.scrollIntoView(option as HTMLElement);
-	}
-
-	/**
 	 * Select the currently focused option
 	 */
 	public selectFocusedOption() {
@@ -1229,15 +1172,6 @@ export class KTSelect extends KTComponent {
 		const targetElement = event.target as HTMLElement;
 		// Check if the click is outside the dropdown and the display element
 		if (!this._wrapperElement.contains(targetElement)) {
-			this.closeDropdown();
-		}
-	}
-
-	/**
-	 * Handle escape key press
-	 */
-	private _handleEscKey(event: KeyboardEvent) {
-		if (event.key === 'Escape' && this._dropdownIsOpen) {
 			this.closeDropdown();
 		}
 	}

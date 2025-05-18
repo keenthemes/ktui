@@ -6,7 +6,6 @@
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
 import {
-	handleDropdownKeyNavigation,
 	filterOptions,
 	FocusManager,
 	EventManager,
@@ -17,7 +16,6 @@ export class KTSelectSearch {
 	private _searchInput: HTMLInputElement;
 	private _noResultsElement: HTMLElement | null = null;
 	private _originalOptionContents = new Map<string, string>();
-	private _boundKeyNavHandler: (event: KeyboardEvent) => void;
 	private _eventManager: EventManager;
 	private _focusManager: FocusManager;
 	private _config: import('./config').KTSelectConfigInterface;
@@ -34,7 +32,6 @@ export class KTSelectSearch {
 			'[data-kt-select-option]',
 			select.getConfig(),
 		);
-		this._boundKeyNavHandler = this._handleKeyboardNavigation.bind(this);
 		this.handleSearchInput = this._handleSearchInput.bind(this);
 		this._config = select.getConfig();
 		this._cacheOriginalOptionContents();
@@ -90,14 +87,6 @@ export class KTSelectSearch {
 					});
 				}
 
-				// Add keyboard navigation for search results
-				// This is stopping event propagation to prevent conflicts
-				this._eventManager.addListener(
-					this._searchInput,
-					'keydown',
-					this._boundKeyNavHandler,
-				);
-
 				// Listen for dropdown close to reset options if search is empty
 				this._select.getElement().addEventListener('dropdown.close', () => {
 					this._focusManager.resetFocus();
@@ -148,39 +137,6 @@ export class KTSelectSearch {
 		if (this._searchInput) {
 			this._eventManager.removeAllListeners(this._searchInput);
 		}
-	}
-
-	/**
-	 * Handle keyboard navigation for search results
-	 */
-	private _handleKeyboardNavigation(event: KeyboardEvent) {
-		// Stop propagation to prevent multiple handlers from firing
-		event.stopPropagation();
-
-		if (this._config.debug) console.log('Search module keydown:', event.key);
-
-		const visibleOptions = this._focusManager.getVisibleOptions();
-		if (visibleOptions.length === 0) return;
-
-		// Use the shared keyboard navigation handler with custom callbacks
-		handleDropdownKeyNavigation(
-			event,
-			this._select,
-			{
-				multiple: this._select.getConfig().multiple,
-				closeOnSelect: this._select.getConfig().closeOnSelect,
-			},
-			{
-				onArrowDown: () => this._focusManager.focusNext(),
-				onArrowUp: () => this._focusManager.focusPrevious(),
-				onEnter: () => this._selectFocusedOption(),
-				onClose: () => {
-					if (event.key === 'Escape') {
-						this.clearSearchHighlights();
-					}
-				},
-			},
-		);
 	}
 
 	/**
