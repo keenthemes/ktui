@@ -42,7 +42,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Selection Behavior
 	multiple: false, // Enable/disable multi-select
 	maxSelections: null, // Maximum number of selections allowed in multi-select mode (null for unlimited)
-	closeOnSelect: true, // Close the dropdown after selecting an option (single-select only)
+	closeOnSelect: false, // Close the dropdown after selecting an option (single-select only)
 	disabled: false, // Disable the select component
 	isRequired: false, // Make selection required
 
