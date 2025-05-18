@@ -163,7 +163,7 @@ export class KTSelect extends KTComponent {
 	) {
 		if (!this._dropdownContentElement) return;
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (!optionsContainer) return;
 
@@ -231,7 +231,7 @@ export class KTSelect extends KTComponent {
 
 		// Add to dropdown
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (optionsContainer) {
 			optionsContainer.appendChild(this._loadMoreIndicator);
@@ -313,7 +313,7 @@ export class KTSelect extends KTComponent {
 		if (!this._dropdownContentElement || !newItems.length) return;
 
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			`[data-kt-select-options-container]`,
+			`[data-kt-select-options]`,
 		);
 		if (!optionsContainer) return;
 
@@ -1541,7 +1541,7 @@ export class KTSelect extends KTComponent {
 	private _renderSearchLoadingState() {
 		if (!this._originalOptionsHtml && this._dropdownContentElement) {
 			const optionsContainer = this._dropdownContentElement.querySelector(
-				'[data-kt-select-options-container]',
+				'[data-kt-select-options]',
 			);
 			if (optionsContainer) {
 				this._originalOptionsHtml = optionsContainer.innerHTML;
@@ -1569,7 +1569,7 @@ export class KTSelect extends KTComponent {
 		if (!this._dropdownContentElement) return;
 
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (!optionsContainer) return;
 

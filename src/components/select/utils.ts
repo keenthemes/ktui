@@ -428,7 +428,7 @@ export class FocusManager {
 		if (!option) return;
 
 		const container = this._element.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (!container) return;
 
