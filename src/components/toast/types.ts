@@ -137,8 +137,6 @@ export interface KTToastOptions {
 	role?: string; // ARIA role
 	/** Beep sound */
 	beep?: boolean; // Beep sound
-	/** Optional custom id */
-	id?: string; // Optional custom id
 }
 
 /**

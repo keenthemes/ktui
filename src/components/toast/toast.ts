@@ -215,9 +215,8 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			return undefined;
 		}
 
-		const id =
-			options.id ||
-			`kt-toast-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+		// Always resolve the id once and use it everywhere
+		const id = `kt-toast-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 		const position =
 			options.position || this.globalConfig.position || 'top-end';
@@ -290,14 +289,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		toast.setAttribute('aria-atomic', 'true');
 		toast.setAttribute('tabindex', '0');
 
-		// Set unique toast id for event handlers
-		if (options.id) {
-			toast.setAttribute('data-kt-toast-id', options.id);
-		} else {
-			const toastId = `kt-toast-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-			toast.setAttribute('data-kt-toast-id', toastId);
-			options.id = toastId;
-		}
+		// Always resolve the id once and use it everywhere
+		// Always resolve id ONCE at the top, use everywhere
+		// (Move this up to replace the previous const id = ... assignment)
 
 		// Populate content via getContent
 		const contentHtml = KTToast.getContent(options);

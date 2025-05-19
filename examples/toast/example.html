@@ -90,7 +90,6 @@
   <button id="toast-custom-class" class="kt-btn">Custom Class</button>
   <button id="toast-aria" class="kt-btn">Custom ARIA Role</button>
   <button id="toast-callbacks" class="kt-btn">With Callbacks</button>
-  <button id="toast-id" class="kt-btn">Custom ID</button>
   <button id="toast-clear" class="kt-btn">Clear All Toasts</button>
   <button id="toast-beep" class="kt-btn kt-btn-primary">Show Toast with Beep</button>
 <button id="toast-hover" class="kt-btn kt-btn-primary">Show Toast (Pause on Hover)</button>
@@ -402,19 +401,6 @@ if (btnGlobalReset) {
           console.log('Toast dismissed:', id);
         }
       });
-    });
-
-    // Custom ID
-    const btnId = document.getElementById('toast-id');
-    btnId.addEventListener('click', () => {
-      KTToast.show({
-        message: 'Toast with custom ID!',
-        id: 'my-custom-toast',
-        variant: 'info'
-      });
-      setTimeout(() => {
-        KTToast.close('my-custom-toast');
-      }, 2000);
     });
 
     // Custom headless toast
