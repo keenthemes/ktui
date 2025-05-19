@@ -182,11 +182,11 @@ export class KTToast extends KTComponent implements KTToastInterface {
 					'bottom 0.28s cubic-bezier(.4,0,.2,1), opacity 0.28s cubic-bezier(.4,0,.2,1)';
 				currentOffset += toast.offsetHeight + gap;
 
-				if (toast.classList.contains('kt-toast-top-start')) {
+				if (toast.classList.contains('kt-toast-bottom-start')) {
 					toast.style.insetInlineStart = `${offset}px`;
 				}
 
-				if (toast.classList.contains('kt-toast-top-end')) {
+				if (toast.classList.contains('kt-toast-bottom-end')) {
 					toast.style.insetInlineEnd = `${offset}px`;
 				}
 			}
@@ -505,6 +505,16 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	}
 
 	/**
+	 * Close and remove all active toasts.
+	 */
+	static clearAll() {
+		for (const id of Array.from(this.toasts.keys())) {
+			console.log('clearAll:', id);
+			this.close(id);
+		}
+	}
+
+	/**
 	 * Close a toast by ID or instance.
 	 * @param idOrInstance Toast ID string or KTToastInstance.
 	 */
@@ -525,15 +535,14 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		inst._closing = true;
 
 		clearTimeout(inst.timeoutId);
+
 		KTToast._fireEventOnElement(inst.element, 'hide', { id });
 		KTToast._dispatchEventOnElement(inst.element, 'hide', { id });
 		inst.element.style.animation = 'kt-toast-out 0.25s forwards';
 
 		setTimeout(() => {
+			const parent = inst?.element.parentElement as HTMLElement | null;
 			inst?.element.remove();
-			KTToast.repositionToasts(
-				inst?.element.parentElement as HTMLElement | null,
-			);
 			KTToast.toasts.delete(id!);
 			// Try to call onDismiss if available in the toast instance (if stored)
 			if (typeof (inst as any).options?.onDismiss === 'function') {
@@ -541,16 +550,11 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			}
 			KTToast._fireEventOnElement(inst.element, 'hidden', { id });
 			KTToast._dispatchEventOnElement(inst.element, 'hidden', { id });
+			// Reposition toasts asynchronously after DOM update
+			setTimeout(() => {
+				KTToast.repositionToasts(parent);
+			}, 0);
 		}, 250);
-	}
-
-	/**
-	 * Close and remove all toasts.
-	 */
-	static clearAll() {
-		for (const id of Array.from(this.toasts.keys())) {
-			this.close(id);
-		}
 	}
 
 	/**
