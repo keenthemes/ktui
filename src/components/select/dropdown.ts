@@ -310,11 +310,7 @@ export class KTSelectDropdown extends KTComponent {
 				);
 				if (searchInput) {
 					(searchInput as HTMLInputElement).focus();
-				} else {
-					this._focusFirstOption();
 				}
-			} else {
-				this._focusFirstOption();
 			}
 
 			// Fire after show event

@@ -12,13 +12,13 @@ import { renderTemplateString } from './utils';
  */
 export const coreTemplateStrings = {
 	dropdown: `<div data-kt-select-dropdown class="kt-select-dropdown hidden {{class}}" style="z-index: {{zindex}};">{{content}}</div>`,
-	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options-container {{class}}" data-kt-select-options-container="true">{{content}}</ul>`,
+	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options {{class}}" data-kt-select-options="true">{{content}}</ul>`,
 	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
-	highlight: `<span class="kt-select-highlight highlighted {{class}}">{{text}}</span>`,
-	wrapper: `<div data-kt-select-wrapper="true" class="kt-select-main {{class}}"></div>`,
+	highlight: `<span data-kt-select-highlight class="kt-select-highlight highlighted {{class}}">{{text}}</span>`,
+	wrapper: `<div data-kt-select-wrapper="true" class="kt-select-wrapper {{class}}"></div>`,
 	combobox: `
-		<div class="kt-select-combobox {{class}}">
-			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-display="true" data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
+		<div data-kt-select-combobox class="kt-select-combobox {{class}}">
+			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-display data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
 			<button type="button" data-kt-select-clear-button="true" class="kt-select-combobox-clear-btn" aria-label="Clear selection">
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
@@ -28,14 +28,14 @@ export const coreTemplateStrings = {
 		</div>
 	`,
 	display: `
-		<div data-kt-select-display="true" class="kt-select-display {{class}}" tabindex="{{tabindex}}" role="button" data-selected="0" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
+		<div data-kt-select-display class="kt-select-display {{class}}" tabindex="{{tabindex}}" role="button" data-selected="0" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
 			<div data-kt-select-value="true" class="kt-select-label">{{content}}</div>
 		</div>
 	`,
-	placeholder: `<div class="kt-select-placeholder {{class}}">{{content}}</div>`,
-	option: `<li data-kt-select-option="true" data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
-	search: `<div class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
-	empty: `<li class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
+	placeholder: `<div data-kt-select-placeholder class="kt-select-placeholder {{class}}">{{content}}</div>`,
+	option: `<li data-kt-select-option data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
+	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
+	empty: `<li data-kt-select-empty class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
 	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
 	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}">
 			{{content}}

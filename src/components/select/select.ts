@@ -21,6 +21,7 @@ import {
 	FocusManager,
 	EventManager,
 	renderTemplateString,
+	TypeToSearchBuffer,
 } from './utils';
 import { KTSelectTags } from './tags';
 
@@ -50,6 +51,7 @@ export class KTSelect extends KTComponent {
 	private _loadMoreIndicator: HTMLElement | null = null;
 	private _focusManager: FocusManager;
 	private _eventManager: EventManager;
+	private _typeToSearchBuffer: TypeToSearchBuffer = new TypeToSearchBuffer();
 
 	/**
 	 * Constructor: Initializes the select component
@@ -161,7 +163,7 @@ export class KTSelect extends KTComponent {
 	) {
 		if (!this._dropdownContentElement) return;
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (!optionsContainer) return;
 
@@ -229,7 +231,7 @@ export class KTSelect extends KTComponent {
 
 		// Add to dropdown
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (optionsContainer) {
 			optionsContainer.appendChild(this._loadMoreIndicator);
@@ -311,7 +313,7 @@ export class KTSelect extends KTComponent {
 		if (!this._dropdownContentElement || !newItems.length) return;
 
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			`[data-kt-select-options-container]`,
+			`[data-kt-select-options]`,
 		);
 		if (!optionsContainer) return;
 
@@ -361,7 +363,7 @@ export class KTSelect extends KTComponent {
 		this._initZIndex();
 
 		// Initialize options
-		this._initializeOptionsHtml();
+		// this._initializeOptionsHtml();
 		this._preSelectOptions(this._element);
 
 		// Apply disabled state if needed
@@ -409,9 +411,9 @@ export class KTSelect extends KTComponent {
 	/**
 	 * Initialize options HTML from data
 	 */
-	private _initializeOptionsHtml() {
-		this._generateOptionsHtml(this._element);
-	}
+	// private _initializeOptionsHtml() {
+	// 	this._generateOptionsHtml(this._element);
+	// }
 
 	/**
 	 * Creates the HTML structure for the select component
@@ -541,6 +543,12 @@ export class KTSelect extends KTComponent {
 			'click',
 			this._handleDropdownClick.bind(this),
 		);
+
+		// Attach centralized keyboard handler
+		const keyboardTarget = this._searchInputElement || this._displayElement;
+		if (keyboardTarget) {
+			keyboardTarget.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
+		}
 	}
 
 	/**
@@ -962,37 +970,37 @@ export class KTSelect extends KTComponent {
 				this._valueDisplayElement.replaceChildren(placeholder);
 
 			} else {
-				// Default to comma-separated list of selected options
-				let contentArray: string[] = [];
 				let content = '';
 
-				// If a displayTemplate is provided, use it to render the content
 				if (this._config.displayTemplate) {
+					const selectedValues = this.getSelectedOptions();
+					const optionsConfig = this._config.optionsConfig as any || {};
+					const displaySeparator = this._config.displaySeparator || ', ';
 
-					this._options.forEach((option) => {
-						let displayTemplate = this._config.displayTemplate;
+					const contentArray = Array.from(new Set(
+						selectedValues.map(value => {
+							const option = Array.from(this._options).find(opt => opt.getAttribute('data-value') === value);
+							if (!option) return '';
 
-						if (this.getSelectedOptions().includes(option.getAttribute('data-value') || '')) {
-							const text = option.getAttribute('data-text');
-							const value = option.getAttribute('data-value');
+							let displayTemplate = this._config.displayTemplate;
+							const text = option.getAttribute('data-text') || '';
 
 							// Replace all {{varname}} in option.innerHTML with values from _config
-							Object.entries((this._config.optionsConfig as any)[value] || {}).forEach(([key, value]) => {
-								if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-									displayTemplate = displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+							Object.entries(optionsConfig[value] || {}).forEach(([key, val]) => {
+								if (['string', 'number', 'boolean'].includes(typeof val)) {
+									displayTemplate = displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(val));
 								}
 							});
 
-							contentArray.push(renderTemplateString(displayTemplate, {
-								selectedCount: selectedOptions.length || 0,
+							return renderTemplateString(displayTemplate, {
+								selectedCount: selectedValues.length || 0,
 								selectedTexts: this.getSelectedOptionsText() || '',
-								text: text || '',
-							}));
-						}
-					});
+								text,
+							});
+						}).filter(Boolean)
+					));
 
-					content = contentArray.join(this._config.displaySeparator || ', ');
-
+					content = contentArray.join(displaySeparator);
 				} else {
 					// If no displayTemplate is provided, use the default comma-separated list of selected options
 					content = this.getSelectedOptionsText();
@@ -1313,23 +1321,17 @@ export class KTSelect extends KTComponent {
 		// Get current selection state
 		const isSelected = this._state.isSelected(value);
 		if (this._config.debug)
-			console.log(
-				`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}, closeOnSelect: ${this._config.closeOnSelect}`,
-			);
+			console.log(`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}, closeOnSelect: ${this._config.closeOnSelect}`);
 
 		// If already selected in single select mode, do nothing (can't deselect in single select)
 		if (isSelected && !this._config.multiple) {
 			if (this._config.debug)
-				console.log(
-					'Early return from toggleSelection - already selected in single select mode',
-				);
+				console.log('Early return from toggleSelection - already selected in single select mode');
 			return;
 		}
 
 		if (this._config.debug)
-			console.log(
-				`Toggling selection for option: ${value}, currently selected: ${isSelected}`,
-			);
+			console.log(`Toggling selection for option: ${value}, currently selected: ${isSelected}`);
 
 		// Ensure any search highlights are cleared when selection changes
 		if (this._searchModule) {
@@ -1366,15 +1368,11 @@ export class KTSelect extends KTComponent {
 		// For multiple select mode, only close if closeOnSelect is true
 		if (!this._config.multiple) {
 			if (this._config.debug)
-				console.log(
-					'About to call closeDropdown() for single select mode - always close after selection',
-				);
+				console.log('About to call closeDropdown() for single select mode - always close after selection');
 			this.closeDropdown();
 		} else if (this._config.closeOnSelect) {
 			if (this._config.debug)
-				console.log(
-					'About to call closeDropdown() for multiple select with closeOnSelect:true',
-				);
+				console.log('About to call closeDropdown() for multiple select with closeOnSelect:true');
 			this.closeDropdown();
 		}
 
@@ -1533,7 +1531,7 @@ export class KTSelect extends KTComponent {
 	private _renderSearchLoadingState() {
 		if (!this._originalOptionsHtml && this._dropdownContentElement) {
 			const optionsContainer = this._dropdownContentElement.querySelector(
-				'[data-kt-select-options-container]',
+				'[data-kt-select-options]',
 			);
 			if (optionsContainer) {
 				this._originalOptionsHtml = optionsContainer.innerHTML;
@@ -1561,7 +1559,7 @@ export class KTSelect extends KTComponent {
 		if (!this._dropdownContentElement) return;
 
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (!optionsContainer) return;
 
@@ -1604,13 +1602,13 @@ export class KTSelect extends KTComponent {
 	}
 
 	public getSelectedOptionsText(): string {
-		let content: Set<string> = new Set();
-		this._options.forEach((option) => {
-			if (this.getSelectedOptions().includes(option.getAttribute('data-value') || '')) {
-				content.add(option.getAttribute('data-text') || '');
-			}
-		});
-		return Array.from(content).join(this._config.displaySeparator || ', ');
+		const selectedValues = this.getSelectedOptions();
+		const displaySeparator = this._config.displaySeparator || ', ';
+		const texts = selectedValues.map(value => {
+			const option = Array.from(this._options).find(opt => opt.getAttribute('data-value') === value);
+			return option?.getAttribute('data-text') || '';
+		}).filter(Boolean);
+		return texts.join(displaySeparator);
 	}
 
 	/**
@@ -1626,5 +1624,83 @@ export class KTSelect extends KTComponent {
 		) as HTMLOptionElement;
 		const isNativeDisabled = selectOption && selectOption.disabled;
 		return Boolean(isDropdownDisabled || isNativeDisabled);
+	}
+
+	/**
+	 * Centralized keyboard event handler for all select modes
+	 */
+	private _handleKeyboardEvent(event: KeyboardEvent) {
+		const isOpen = this._dropdownIsOpen;
+		const config = this._config;
+		const focusManager = this._focusManager;
+		const buffer = this._typeToSearchBuffer;
+
+		// Ignore modifier keys
+		if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+		// Type-to-search: only for single char keys
+		if (event.key.length === 1 && !event.repeat && !event.key.match(/\s/)) {
+			buffer.push(event.key);
+			const str = buffer.getBuffer();
+			focusManager.focusByString(str);
+			return;
+		}
+
+		switch (event.key) {
+			case 'ArrowDown':
+				event.preventDefault();
+				if (!isOpen) {
+					this.openDropdown();
+				} else {
+					focusManager.focusNext();
+				}
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				if (!isOpen) {
+					this.openDropdown();
+				} else {
+					focusManager.focusPrevious();
+				}
+				break;
+			case 'Home':
+				event.preventDefault();
+				if (isOpen) focusManager.focusFirst();
+				break;
+			case 'End':
+				event.preventDefault();
+				if (isOpen) focusManager.focusLast();
+				break;
+			case 'Enter':
+			case ' ': // Space
+				if (isOpen) {
+					const focused = focusManager.getFocusedOption();
+					if (focused) {
+						const value = focused.dataset.value;
+						if (value) {
+							this.toggleSelection(value);
+							if (!config.multiple && config.closeOnSelect) {
+								this.closeDropdown();
+							}
+						}
+					}
+					// Prevent form submit
+					event.preventDefault();
+				} else {
+					this.openDropdown();
+				}
+				break;
+			case 'Escape':
+				if (isOpen) {
+					this.closeDropdown();
+					(event.target as HTMLElement).blur();
+				}
+				break;
+			case 'Tab':
+				// Let Tab propagate for normal focus movement
+				break;
+			default:
+				break;
+		}
 	}
 }

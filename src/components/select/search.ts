@@ -299,7 +299,7 @@ export class KTSelectSearch {
 
 		const dropdownElement = this._select.getDropdownElement();
 		const optionsContainer = dropdownElement.querySelector(
-			'[data-kt-select-options-container]',
+			'[data-kt-select-options]',
 		);
 		if (optionsContainer) {
 			optionsContainer.appendChild(this._noResultsElement);
