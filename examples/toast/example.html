@@ -47,6 +47,30 @@
   </div>
 </div>
 
+<!-- Position Examples -->
+<div class="mb-6">
+  <h3 class="font-semibold mb-2">Positions</h3>
+  <div class="flex flex-wrap gap-2 mb-2">
+    <button id="toast-pos-top-end" class="kt-btn">Top End (Right)</button>
+    <button id="toast-pos-top-center" class="kt-btn">Top Center</button>
+    <button id="toast-pos-top-start" class="kt-btn">Top Start (Left)</button>
+    <button id="toast-pos-bottom-end" class="kt-btn">Bottom End (Right)</button>
+    <button id="toast-pos-bottom-center" class="kt-btn">Bottom Center</button>
+    <button id="toast-pos-bottom-start" class="kt-btn">Bottom Start (Left)</button>
+  </div>
+</div>
+
+<!-- Global Config Example -->
+<div class="mb-6">
+  <h3 class="font-semibold mb-2">Global Config</h3>
+  <div class="flex flex-wrap gap-2 mb-2">
+    <button id="toast-set-global-bottom-end" class="kt-btn kt-btn-primary">Set Global: Bottom End</button>
+    <button id="toast-set-global-top-center" class="kt-btn">Set Global: Top Center</button>
+    <button id="toast-set-global-reset" class="kt-btn">Reset Global Config</button>
+  </div>
+  <div class="text-xs text-gray-500">Current global position will apply to all new toasts unless overridden.</div>
+</div>
+
 <!-- Other and legacy examples -->
 <div class="flex flex-col gap-3">
   <button id="toast-basic" class="kt-btn">Basic Toast</button>
@@ -68,6 +92,8 @@
   <button id="toast-callbacks" class="kt-btn">With Callbacks</button>
   <button id="toast-id" class="kt-btn">Custom ID</button>
   <button id="toast-clear" class="kt-btn">Clear All Toasts</button>
+  <button id="toast-beep" class="kt-btn kt-btn-primary">Show Toast with Beep</button>
+<button id="toast-hover" class="kt-btn kt-btn-primary">Show Toast (Pause on Hover)</button>
 </div>
 </div>
 
@@ -84,6 +110,80 @@
 <!-- Scripts should be outside the template -->
 <script src="../../dist/ktui.js"></script>
 <script>
+  // --- Position Examples ---
+const posExamples = [
+  { id: 'toast-pos-top-end', position: 'top-end', label: 'Top End (Right)' },
+  { id: 'toast-pos-top-center', position: 'top-center', label: 'Top Center' },
+  { id: 'toast-pos-top-start', position: 'top-start', label: 'Top Start (Left)' },
+  { id: 'toast-pos-bottom-end', position: 'bottom-end', label: 'Bottom End (Right)' },
+  { id: 'toast-pos-bottom-center', position: 'bottom-center', label: 'Bottom Center' },
+  { id: 'toast-pos-bottom-start', position: 'bottom-start', label: 'Bottom Start (Left)' }
+];
+posExamples.forEach(({ id, position, label }) => {
+  const btn = document.getElementById(id);
+  if (btn) {
+    btn.addEventListener('click', () => {
+      KTToast.show({
+        message: `Toast at ${label}`,
+        position,
+        variant: 'info'
+      });
+    });
+  }
+});
+
+// --- Global Config Example ---
+const defaultGlobalConfig = {
+  position: 'top-end',
+  duration: 4000,
+  maxToasts: 5,
+  gap: 10,
+  dismiss: true
+};
+KTToast.configToast({ ...defaultGlobalConfig }); // Ensure default on load
+
+const btnGlobalBottomEnd = document.getElementById('toast-set-global-bottom-end');
+const btnGlobalTopCenter = document.getElementById('toast-set-global-top-center');
+const btnGlobalReset = document.getElementById('toast-set-global-reset');
+
+if (btnGlobalBottomEnd) {
+  btnGlobalBottomEnd.addEventListener('click', () => {
+    KTToast.configToast({ position: 'bottom-end' });
+    KTToast.show({ message: 'Global position set to Bottom End (Right)', variant: 'primary' });
+  });
+}
+if (btnGlobalTopCenter) {
+  btnGlobalTopCenter.addEventListener('click', () => {
+    KTToast.configToast({ position: 'top-center' });
+    KTToast.show({ message: 'Global position set to Top Center', variant: 'primary' });
+  });
+}
+if (btnGlobalReset) {
+  btnGlobalReset.addEventListener('click', () => {
+    KTToast.configToast({ ...defaultGlobalConfig });
+    KTToast.show({ message: 'Global config reset to default', variant: 'primary' });
+  });
+}
+
+// Beep toast demo
+  document.getElementById('toast-beep').addEventListener('click', function() {
+    KTToast.show({
+      message: 'Beep! Toast with sound.',
+      variant: 'success',
+      beep: true
+    });
+  });
+
+  // Pause on hover toast demo
+  document.getElementById('toast-hover').addEventListener('click', function() {
+    KTToast.show({
+      message: 'This toast will pause auto-dismiss while hovered!',
+      variant: 'info',
+      pauseOnHover: true,
+      progress: true,
+      duration: 4000
+    });
+  });
 		// --- Variants ---
 		const variants = ['info', 'success', 'error', 'warning', 'primary', 'secondary', 'destructive', 'mono'];
 		variants.forEach(variant => {
@@ -155,6 +255,7 @@
 				variant: 'info',
 				action: {
 					label: 'Undo',
+					className: 'text-white kt-link kt-link-underlined',
 					onClick: (id) => {
 						KTToast.show({ message: 'Undo clicked!', variant: 'warning' });
 					}
@@ -177,8 +278,6 @@
 				}
 			});
 		});
-
-
 
     // Custom icon
     const btnCustomIcon = document.getElementById('toast-custom-icon');
@@ -224,8 +323,8 @@
     const btnProgressOff = document.getElementById('toast-progress-off');
     btnProgressOff.addEventListener('click', () => {
       KTToast.show({
-        message: 'No progress bar!',
-        progress: false,
+        message: 'Progress bar!',
+        progress: true,
         variant: 'info'
       });
     });

@@ -5,7 +5,6 @@
 
 import KTComponent from '../component';
 import KTData from '../../helpers/data';
-import KTUtils from '../../helpers/utils';
 import {
 	KTToastOptions,
 	KTToastConfig,
@@ -27,16 +26,8 @@ const DEFAULT_TOAST_OPTIONS: KTToastOptions = {
 	appearance: 'solid',
 	progress: false,
 	size: 'md',
-	action: {
-		label: 'Ok',
-		className: 'kt-btn btn-sm btn-mono',
-		onClick: () => {},
-	},
-	cancel: {
-		label: 'Cancel',
-		className: 'kt-btn btn-sm btn-outline',
-		onClick: () => {},
-	},
+	action: false,
+	cancel: false,
 	dismiss: true,
 };
 
@@ -51,6 +42,11 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	private static toasts: Map<string, KTToastInstance> = new Map();
 	private static globalConfig: KTToastConfig = { ...DEFAULT_CONFIG };
 
+	/**
+	 * Creates a new KTToast instance for a specific element (not commonly used; most use static API).
+	 * @param element The target HTML element.
+	 * @param config Optional toast config for this instance.
+	 */
 	constructor(element: HTMLElement, config?: Partial<KTToastConfigInterface>) {
 		super();
 		if (KTData.has(element, this._name)) return;
@@ -59,38 +55,11 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		KTData.set(element, this._name, this);
 	}
 
-	// Instance API (for per-element toasts)
-	public show(
-		options?: KTToastOptions,
-	): (KTToastInstance & { dismiss: () => void }) | undefined {
-		const merged = KTUtils.merge(this._defaultToastOptions, options || {});
-
-		if (!merged.message && !merged.content) {
-			return undefined;
-		}
-
-		return KTToast.show(merged);
-	}
-
 	/**
-	 * Hide this toast. Accepts id string or KTToastInstance.
+	 * Generates the HTML content for a toast based on the provided options.
+	 * @param options Toast options (message, icon, actions, etc).
+	 * @returns The toast's HTML markup as a string.
 	 */
-	public hide(idOrInstance?: string | KTToastInstance): void {
-		KTToast.close(idOrInstance);
-	}
-
-	public clearAll(): void {
-		KTToast.clearAll();
-	}
-
-	public getElement(): HTMLElement {
-		return this._element;
-	}
-
-	public getConfig(): KTToastConfigInterface {
-		return this._config;
-	}
-
 	static getContent(options?: KTToastOptions) {
 		if (options?.content) {
 			if (typeof options.content === 'string') {
@@ -115,17 +84,12 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			template += '<div class="kt-alert-title">' + options.message + '</div>';
 		}
 
-		if (options?.action || options?.dismiss !== false || options?.cancel) {
+		if (
+			options?.action !== false ||
+			options?.dismiss !== false ||
+			options?.cancel !== false
+		) {
 			template += '<div class="kt-alert-toolbar">';
-
-			if (options?.cancel && typeof options.cancel === 'object') {
-				template +=
-					'<button data-kt-toast-cancel="true" class="' +
-					(options.cancel.className || '') +
-					'">' +
-					options.cancel.label +
-					'</button>';
-			}
 
 			if (options?.action && typeof options.action === 'object') {
 				template +=
@@ -136,9 +100,18 @@ export class KTToast extends KTComponent implements KTToastInterface {
 					'</button>';
 			}
 
+			if (options?.cancel && typeof options.cancel === 'object') {
+				template +=
+					'<button data-kt-toast-cancel="true" class="' +
+					(options.cancel.className || '') +
+					'">' +
+					options.cancel.label +
+					'</button>';
+			}
+
 			if (options?.dismiss !== false) {
 				template +=
-					'<button data-kt-toast-dismiss="true" class="kt-alert-close"><svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
+					'<button data-kt-toast-dismiss="true" class="kt-alert-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
 			}
 
 			template += '</div>';
@@ -149,10 +122,13 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		return template;
 	}
 
-	// --- Static API --- //
-
 	/**
 	 * Reposition all toasts in the container with smooth animation
+	 */
+	/**
+	 * Reposition all toasts in the container with smooth animation.
+	 * @param container The toast container element.
+	 * @param offset Optional offset from the edge.
 	 */
 	static repositionToasts(container: HTMLElement | null, offset?: number) {
 		if (!container) return;
@@ -195,6 +171,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 					toast.style.insetInlineEnd = `${offset}px`;
 				}
 			});
+
 			// Stack bottom toasts from the bottom up
 			currentOffset = offset;
 			for (let i = positionGroups.bottom.length - 1; i >= 0; i--) {
@@ -216,13 +193,24 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		});
 	}
 
+	/**
+	 * Set global toast configuration options.
+	 * @param options Partial toast config to merge with global config.
+	 */
 	static configToast(options: Partial<KTToastConfig>) {
 		this.globalConfig = { ...this.globalConfig, ...options };
 	}
 
+	/**
+	 * Show a toast notification.
+	 * @param inputOptions Toast options (message, duration, variant, etc).
+	 * @returns Toast instance with dismiss method, or undefined if invalid input.
+	 */
 	static show(
-		options?: KTToastOptions,
+		inputOptions?: KTToastOptions,
 	): (KTToastInstance & { dismiss: () => void }) | undefined {
+		const options = { ...DEFAULT_TOAST_OPTIONS, ...inputOptions };
+
 		if (!options || (!options.message && !options.content)) {
 			return undefined;
 		}
@@ -374,8 +362,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 
 		if (duration && options.progress) {
 			const progress = document.createElement('div');
-			progress.className = classNames.progress || 'kt-toast-progress';
+			progress.className = 'kt-toast-progress ' + (classNames.progress || '');
 			progress.style.animationDuration = duration + 'ms';
+			progress.setAttribute('data-kt-toast-progress', 'true');
 			toast.appendChild(progress);
 		}
 
@@ -394,9 +383,48 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		const dirClass = directionClassMap[position] || 'kt-toast-top-end';
 		toast.classList.add(dirClass);
 
+		// Enforce maxToasts: remove oldest if needed
+		const maxToasts =
+			options.maxToasts ??
+			this.globalConfig.maxToasts ??
+			DEFAULT_CONFIG.maxToasts;
+		const currentToasts = Array.from(container.children) as HTMLElement[];
+		if (currentToasts.length >= maxToasts && currentToasts.length > 0) {
+			const oldestToast = currentToasts[currentToasts.length - 1];
+			const oldestId = oldestToast.getAttribute('data-kt-toast-id');
+			if (oldestId) {
+				KTToast.close(oldestId);
+			} else {
+				oldestToast.remove();
+			}
+		}
+
 		// Insert toast at the top
 		container.insertBefore(toast, container.firstChild);
 		KTToast.repositionToasts(container);
+
+		// Play beep if requested
+		if (options.beep) {
+			try {
+				// Use Web Audio API for a short beep
+				const ctx = new (window.AudioContext ||
+					(window as any).webkitAudioContext)();
+				const o = ctx.createOscillator();
+				const g = ctx.createGain();
+				o.type = 'sine';
+				o.frequency.value = 880;
+				g.gain.value = 0.09;
+				o.connect(g);
+				g.connect(ctx.destination);
+				o.start();
+				setTimeout(() => {
+					o.stop();
+					ctx.close();
+				}, 120);
+			} catch (e) {
+				/* ignore */
+			}
+		}
 
 		KTToast._fireEventOnElement(toast, 'show', { id });
 		KTToast._dispatchEventOnElement(toast, 'show', { id });
@@ -405,12 +433,66 @@ export class KTToast extends KTComponent implements KTToastInterface {
 
 		// Auto-dismiss
 		let timeoutId: number | undefined = undefined;
+		let remaining = duration;
+		let startTime: number | undefined;
+		let paused = false;
+		let progressEl: HTMLElement | null = null;
 		if (duration) {
-			timeoutId = window.setTimeout(() => {
-				options.onAutoClose?.(id);
-				KTToast.close(id);
-			}, duration);
-			instance.timeoutId = timeoutId;
+			const startTimer = (ms: number) => {
+				startTime = Date.now();
+				timeoutId = window.setTimeout(() => {
+					options.onAutoClose?.(id);
+					KTToast.close(id);
+				}, ms);
+				instance.timeoutId = timeoutId;
+			};
+			startTimer(duration);
+
+			if (options.pauseOnHover) {
+				progressEl = toast.querySelector('[data-kt-toast-progress]');
+				let progressPausedAt = 0;
+				const pause = () => {
+					if (!paused && timeoutId) {
+						paused = true;
+						window.clearTimeout(timeoutId);
+						if (startTime) {
+							remaining -= Date.now() - startTime;
+						}
+						// Pause progress bar
+						if (progressEl) {
+							const computedStyle = window.getComputedStyle(progressEl);
+							const matrix = computedStyle.transform;
+							let scaleX = 1;
+							if (matrix && matrix !== 'none') {
+								const values = matrix.match(/matrix\(([^)]+)\)/);
+								if (values && values[1]) {
+									scaleX = parseFloat(values[1].split(',')[0]);
+								}
+							}
+							progressPausedAt = scaleX;
+							progressEl.style.animation = 'none';
+							progressEl.style.transition = 'none';
+							progressEl.style.transform = `scaleX(${scaleX})`;
+						}
+					}
+				};
+				const resume = () => {
+					if (paused && remaining > 0) {
+						paused = false;
+						startTimer(remaining);
+						// Resume progress bar
+						if (progressEl) {
+							progressEl.style.transition = 'transform 0ms';
+							progressEl.style.transform = `scaleX(${progressPausedAt})`;
+							progressEl.offsetHeight; // force reflow
+							progressEl.style.transition = `transform ${remaining}ms linear`;
+							progressEl.style.transform = 'scaleX(0)';
+						}
+					}
+				};
+				toast.addEventListener('mouseenter', pause);
+				toast.addEventListener('mouseleave', resume);
+			}
 		}
 
 		KTToast._fireEventOnElement(toast, 'shown', { id });
@@ -423,7 +505,8 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	}
 
 	/**
-	 * Close a toast by id or instance.
+	 * Close a toast by ID or instance.
+	 * @param idOrInstance Toast ID string or KTToastInstance.
 	 */
 	static close(idOrInstance?: string | KTToastInstance) {
 		let inst: (KTToastInstance & { _closing?: boolean }) | undefined;
@@ -432,7 +515,6 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		if (typeof idOrInstance === 'string') {
 			id = idOrInstance;
 			inst = this.toasts.get(id);
-			console.log('this.toasts', this.toasts.get(id));
 		} else if (typeof idOrInstance === 'object' && idOrInstance.id) {
 			id = idOrInstance.id;
 			inst = idOrInstance as KTToastInstance & { _closing?: boolean };
@@ -463,7 +545,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	}
 
 	/**
-	 * Clear all toasts.
+	 * Close and remove all toasts.
 	 */
 	static clearAll() {
 		for (const id of Array.from(this.toasts.keys())) {
@@ -471,6 +553,12 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		}
 	}
 
+	/**
+	 * Dispatches a custom 'kt.toast.{eventType}' event on the given element.
+	 * @param element The toast element.
+	 * @param eventType The event type (e.g. 'show', 'hide').
+	 * @param payload Optional event detail payload.
+	 */
 	private static _fireEventOnElement(
 		element: HTMLElement,
 		eventType: string,
@@ -480,6 +568,12 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		element.dispatchEvent(event);
 	}
 
+	/**
+	 * Dispatches a custom event (not namespaced) on the given element.
+	 * @param element The toast element.
+	 * @param eventType The event type.
+	 * @param payload Optional event detail payload.
+	 */
 	private static _dispatchEventOnElement(
 		element: HTMLElement,
 		eventType: string,
@@ -489,5 +583,8 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		element.dispatchEvent(event);
 	}
 
+	/**
+	 * Initialize toast system (placeholder for future use).
+	 */
 	public static init(): void {}
 }

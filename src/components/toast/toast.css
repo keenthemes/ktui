@@ -3,7 +3,9 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
+ /* Base Styles */
  @layer components {
+  /* Container */
   .kt-toast-container {
     @apply fixed;
   }
@@ -26,12 +28,21 @@
 
   /* Progress */
   .kt-toast-progress {
-    @apply relative left-0 bottom-0 w-full h-[3px] bg-primary;
+    @apply fixed start-0 bottom-0 w-full h-1 bg-primary;
     transform-origin: left;
     animation: kt-toast-progress-line linear forwards;
   }
+ }
 
-  /* Animations */
+/* RTL Styles */
+@layer components {
+	[dir='rtl'] .kt-toast-progress {
+    transform-origin: right;
+  }
+}
+
+/* Animations */
+@layer components {
   @keyframes kt-toast-in {
     from { opacity: 0; transform: translateY(-24px); }
     to { opacity: 1; transform: translateY(0); }
@@ -46,4 +57,4 @@
     from { transform: scaleX(1); }
     to { transform: scaleX(0); }
   }
- }
+}
