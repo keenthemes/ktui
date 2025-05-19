@@ -402,9 +402,7 @@ export class FocusManager {
 	 * Reset focus on all options
 	 */
 	public resetFocus(): void {
-		const focusedElements = this._element.querySelectorAll(
-			`.${this._focusClass}, .${this._hoverClass}`,
-		);
+		const focusedElements = this._element.querySelectorAll(`.${this._focusClass}, .${this._hoverClass}`);
 
 		// Remove focus and hover classes from all options
 		focusedElements.forEach((element) => {

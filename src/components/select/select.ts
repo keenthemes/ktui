@@ -363,7 +363,7 @@ export class KTSelect extends KTComponent {
 		this._initZIndex();
 
 		// Initialize options
-		this._initializeOptionsHtml();
+		// this._initializeOptionsHtml();
 		this._preSelectOptions(this._element);
 
 		// Apply disabled state if needed
@@ -411,9 +411,9 @@ export class KTSelect extends KTComponent {
 	/**
 	 * Initialize options HTML from data
 	 */
-	private _initializeOptionsHtml() {
-		this._generateOptionsHtml(this._element);
-	}
+	// private _initializeOptionsHtml() {
+	// 	this._generateOptionsHtml(this._element);
+	// }
 
 	/**
 	 * Creates the HTML structure for the select component
@@ -1321,23 +1321,17 @@ export class KTSelect extends KTComponent {
 		// Get current selection state
 		const isSelected = this._state.isSelected(value);
 		if (this._config.debug)
-			console.log(
-				`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}, closeOnSelect: ${this._config.closeOnSelect}`,
-			);
+			console.log(`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}, closeOnSelect: ${this._config.closeOnSelect}`);
 
 		// If already selected in single select mode, do nothing (can't deselect in single select)
 		if (isSelected && !this._config.multiple) {
 			if (this._config.debug)
-				console.log(
-					'Early return from toggleSelection - already selected in single select mode',
-				);
+				console.log('Early return from toggleSelection - already selected in single select mode');
 			return;
 		}
 
 		if (this._config.debug)
-			console.log(
-				`Toggling selection for option: ${value}, currently selected: ${isSelected}`,
-			);
+			console.log(`Toggling selection for option: ${value}, currently selected: ${isSelected}`);
 
 		// Ensure any search highlights are cleared when selection changes
 		if (this._searchModule) {
@@ -1374,15 +1368,11 @@ export class KTSelect extends KTComponent {
 		// For multiple select mode, only close if closeOnSelect is true
 		if (!this._config.multiple) {
 			if (this._config.debug)
-				console.log(
-					'About to call closeDropdown() for single select mode - always close after selection',
-				);
+				console.log('About to call closeDropdown() for single select mode - always close after selection');
 			this.closeDropdown();
 		} else if (this._config.closeOnSelect) {
 			if (this._config.debug)
-				console.log(
-					'About to call closeDropdown() for multiple select with closeOnSelect:true',
-				);
+				console.log('About to call closeDropdown() for multiple select with closeOnSelect:true');
 			this.closeDropdown();
 		}
 

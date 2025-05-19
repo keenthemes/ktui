@@ -34,10 +34,10 @@ export const coreTemplateStrings = {
 	`,
 	placeholder: `<div data-kt-select-placeholder class="kt-select-placeholder {{class}}">{{content}}</div>`,
 	option: `<li data-kt-select-option data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
-	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
+	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
 	empty: `<li data-kt-select-empty class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
-	loading: `<li data-kt-select-loading class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
-	tag: `<div data-kt-select-tag class="kt-select-tag {{class}}">
+	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
+	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}">
 			{{content}}
 		</div>`,
 	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true">{{content}}</li>`,
