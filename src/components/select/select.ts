@@ -970,37 +970,37 @@ export class KTSelect extends KTComponent {
 				this._valueDisplayElement.replaceChildren(placeholder);
 
 			} else {
-				// Default to comma-separated list of selected options
-				let contentArray: string[] = [];
 				let content = '';
 
-				// If a displayTemplate is provided, use it to render the content
 				if (this._config.displayTemplate) {
+					const selectedValues = this.getSelectedOptions();
+					const optionsConfig = this._config.optionsConfig as any || {};
+					const displaySeparator = this._config.displaySeparator || ', ';
 
-					this._options.forEach((option) => {
-						let displayTemplate = this._config.displayTemplate;
+					const contentArray = Array.from(new Set(
+						selectedValues.map(value => {
+							const option = Array.from(this._options).find(opt => opt.getAttribute('data-value') === value);
+							if (!option) return '';
 
-						if (this.getSelectedOptions().includes(option.getAttribute('data-value') || '')) {
-							const text = option.getAttribute('data-text');
-							const value = option.getAttribute('data-value');
+							let displayTemplate = this._config.displayTemplate;
+							const text = option.getAttribute('data-text') || '';
 
 							// Replace all {{varname}} in option.innerHTML with values from _config
-							Object.entries((this._config.optionsConfig as any)[value] || {}).forEach(([key, value]) => {
-								if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-									displayTemplate = displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+							Object.entries(optionsConfig[value] || {}).forEach(([key, val]) => {
+								if (['string', 'number', 'boolean'].includes(typeof val)) {
+									displayTemplate = displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(val));
 								}
 							});
 
-							contentArray.push(renderTemplateString(displayTemplate, {
-								selectedCount: selectedOptions.length || 0,
+							return renderTemplateString(displayTemplate, {
+								selectedCount: selectedValues.length || 0,
 								selectedTexts: this.getSelectedOptionsText() || '',
-								text: text || '',
-							}));
-						}
-					});
+								text,
+							});
+						}).filter(Boolean)
+					));
 
-					content = contentArray.join(this._config.displaySeparator || ', ');
-
+					content = contentArray.join(displaySeparator);
 				} else {
 					// If no displayTemplate is provided, use the default comma-separated list of selected options
 					content = this.getSelectedOptionsText();
@@ -1612,13 +1612,13 @@ export class KTSelect extends KTComponent {
 	}
 
 	public getSelectedOptionsText(): string {
-		let content: Set<string> = new Set();
-		this._options.forEach((option) => {
-			if (this.getSelectedOptions().includes(option.getAttribute('data-value') || '')) {
-				content.add(option.getAttribute('data-text') || '');
-			}
-		});
-		return Array.from(content).join(this._config.displaySeparator || ', ');
+		const selectedValues = this.getSelectedOptions();
+		const displaySeparator = this._config.displaySeparator || ', ';
+		const texts = selectedValues.map(value => {
+			const option = Array.from(this._options).find(opt => opt.getAttribute('data-value') === value);
+			return option?.getAttribute('data-text') || '';
+		}).filter(Boolean);
+		return texts.join(displaySeparator);
 	}
 
 	/**
