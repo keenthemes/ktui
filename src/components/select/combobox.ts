@@ -5,7 +5,7 @@
 
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
-import { filterOptions } from './utils';
+import { filterOptions, renderTemplateString, stringToElement } from './utils';
 
 /**
  * KTSelectCombobox - Handles combobox-specific functionality for KTSelect
@@ -59,7 +59,13 @@ export class KTSelectCombobox {
 		// When selection changes, update the input value to the selected option's text
 		this._select.getElement().addEventListener('change', () => {
 			// Only update the input value, do not reset the filter or show all options
-			this.resetInputValueToSelection();
+			if (this._config.displayTemplate) {
+				const selectedValues = this._select.getSelectedOptions();
+				const content = this._select.renderDisplayTemplateForSelected(selectedValues);
+				displayElement.parentElement?.prepend(stringToElement(content));
+			} else {
+				this._select.updateSelectedOptionDisplay();
+			}
 		});
 
 		if (this._config.debug) console.log('KTSelectCombobox initialized');
@@ -176,82 +182,6 @@ export class KTSelectCombobox {
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
 		filterOptions(options, query, config, dropdownElement);
-	}
-
-	/**
-	 * Update the combobox input value when an option is selected
-	 */
-	public updateComboboxDisplay(selectedText: string): void {
-		if (this._searchInputElement) {
-			// Extract just the text content if it contains HTML
-			let cleanText = selectedText;
-
-			// If the text might contain HTML (when description is present)
-			if (selectedText.includes('<') || selectedText.includes('>')) {
-				// Create a temporary element to extract just the text
-				const tempDiv = document.createElement('div');
-				tempDiv.innerHTML = selectedText;
-
-				// Find and use only the option-title text if available
-				const titleElement = tempDiv.querySelector('[data-kt-option-title]');
-				if (titleElement) {
-					cleanText = titleElement.textContent || selectedText;
-				} else {
-					// Fallback to all text content if option-title not found
-					cleanText = tempDiv.textContent || selectedText;
-				}
-			}
-
-			// Set the input value directly for immediate feedback
-			this._searchInputElement.value = cleanText;
-
-			// Show the clear button if there's a value
-			this._toggleClearButtonVisibility(cleanText);
-
-			// Trigger an input event to ensure any input-based listeners are notified
-			const inputEvent = new Event('input', { bubbles: true });
-			this._searchInputElement.dispatchEvent(inputEvent);
-
-			if (this._config.debug)
-				console.log('Combobox value updated to:', cleanText);
-		}
-	}
-
-	/**
-	 * Reset the input value to match the current selection
-	 * This can be called to sync the input with the current state
-	 */
-	public resetInputValueToSelection(): void {
-		const selectedOptions = this._select.getSelectedOptions();
-		if (selectedOptions.length > 0) {
-			const selectedOption = Array.from(this._select.getOptionsElement()).find(
-				(opt) => opt.dataset.value === selectedOptions[0],
-			) as HTMLElement;
-
-			if (selectedOption) {
-				// Find the option-title element to get just the title text
-				const titleElement = selectedOption.querySelector(
-					'[data-kt-option-title]',
-				);
-				let selectedText = '';
-
-				if (titleElement) {
-					// If it has a structured content with a title element
-					selectedText = titleElement.textContent?.trim() || '';
-				} else {
-					// Fallback to the whole text content
-					selectedText = selectedOption.textContent?.trim() || '';
-				}
-
-				this.updateComboboxDisplay(selectedText);
-			}
-		} else {
-			// No selection, clear the input
-			if (this._searchInputElement) {
-				this._searchInputElement.value = '';
-				this._toggleClearButtonVisibility('');
-			}
-		}
 	}
 
 	/**

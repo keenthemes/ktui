@@ -14,37 +14,38 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Combobox Icons</label>
 
-				<select data-kt-select data-kt-select-combobox="true"
-					data-kt-select-placeholder="Type or select a country..." data-kt-select-config='{
-						"displayTemplate": "<div class=\"kt-select-display\">{{icon}} {{selectedTexts}} <span class=\"text-xs text-gray-400\">({{selectedCount}} selected)</span></div>",
-						"displayClass": "kt-select-display",
-						"displayToggle": true,
-						"optionTemplate": "{{icon}} <span>{{text}}</span>",
-						"optionClass": "kt-select-option",
-						"displayToggleTemplate": "<button type=\"button\" class=\"kt-select-toggle\">{{text}}</button>"
-					}'>
-					<option value="us"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
-						United States</option>
-					<option value="de"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/de.png\" class=\"w-6 h-6\" />"}'>
-						Germany</option>
-					<option value="it"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/it.png\" class=\"w-6 h-6\" />"}'>
-						Italy</option>
-					<option value="fr"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/fr.png\" class=\"w-6 h-6\" />"}'>
-						France</option>
-					<option value="es"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/es.png\" class=\"w-6 h-6\" />"}'>
-						Spain</option>
-					<option value="jp"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/jp.png\" class=\"w-6 h-6\" />"}'>
-						Japan</option>
-					<option value="ru"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/ru.png\" class=\"w-6 h-6\" />"}'>
-						Russia</option>
-				</select>
+				<select data-kt-select
+				data-kt-select-combobox="true"
+				data-kt-select-placeholder="Type or select a country..."
+				data-kt-select-config='{
+					"displayTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"font-semibold text-gray-900\">{{text}}</span></div>",
+					"displayClass": "kt-select-display",
+					"displayToggle": true,
+					"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
+					"optionClass": "kt-select-option"
+				}'>
+				<option value="us"
+					data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
+					United States</option>
+				<option value="de"
+					data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/de.png\" class=\"w-6 h-6\" />"}'>
+					Germany</option>
+				<option value="it"
+					data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/it.png\" class=\"w-6 h-6\" />"}'>
+					Italy</option>
+				<option value="fr"
+					data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/fr.png\" class=\"w-6 h-6\" />"}'>
+					France</option>
+				<option value="es"
+					data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/es.png\" class=\"w-6 h-6\" />"}'>
+					Spain</option>
+				<option value="jp"
+					data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/jp.png\" class=\"w-6 h-6\" />"}'>
+					Japan</option>
+				<option value="ru"
+					data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/ru.png\" class=\"w-6 h-6\" />"}'>
+					Russia</option>
+			</select>
 
 			</div>
 		</form>

@@ -539,13 +539,13 @@ export class KTSelect extends KTComponent {
 
 		// Only attach click handler to display element
 		this._eventManager.addListener(
-			this._displayElement,
+			this._wrapperElement,
 			'click',
 			this._handleDropdownClick.bind(this),
 		);
 
 		// Attach centralized keyboard handler
-		const keyboardTarget = this._searchInputElement || this._displayElement;
+		const keyboardTarget = this._searchInputElement || this._wrapperElement;
 		if (keyboardTarget) {
 			keyboardTarget.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
 		}
@@ -974,33 +974,7 @@ export class KTSelect extends KTComponent {
 
 				if (this._config.displayTemplate) {
 					const selectedValues = this.getSelectedOptions();
-					const optionsConfig = this._config.optionsConfig as any || {};
-					const displaySeparator = this._config.displaySeparator || ', ';
-
-					const contentArray = Array.from(new Set(
-						selectedValues.map(value => {
-							const option = Array.from(this._options).find(opt => opt.getAttribute('data-value') === value);
-							if (!option) return '';
-
-							let displayTemplate = this._config.displayTemplate;
-							const text = option.getAttribute('data-text') || '';
-
-							// Replace all {{varname}} in option.innerHTML with values from _config
-							Object.entries(optionsConfig[value] || {}).forEach(([key, val]) => {
-								if (['string', 'number', 'boolean'].includes(typeof val)) {
-									displayTemplate = displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(val));
-								}
-							});
-
-							return renderTemplateString(displayTemplate, {
-								selectedCount: selectedValues.length || 0,
-								selectedTexts: this.getSelectedOptionsText() || '',
-								text,
-							});
-						}).filter(Boolean)
-					));
-
-					content = contentArray.join(displaySeparator);
+					content = this.renderDisplayTemplateForSelected(selectedValues);
 				} else {
 					// If no displayTemplate is provided, use the default comma-separated list of selected options
 					content = this.getSelectedOptionsText();
@@ -1702,5 +1676,33 @@ export class KTSelect extends KTComponent {
 			default:
 				break;
 		}
+	}
+
+	public renderDisplayTemplateForSelected(selectedValues: string[]): string {
+		const optionsConfig = this._config.optionsConfig as any || {};
+		const displaySeparator = this._config.displaySeparator || ', ';
+		const contentArray = Array.from(new Set(
+			selectedValues.map(value => {
+				const option = Array.from(this._options).find(opt => opt.getAttribute('data-value') === value);
+				if (!option) return '';
+
+				let displayTemplate = this._config.displayTemplate;
+				const text = option.getAttribute('data-text') || '';
+
+				// Replace all {{varname}} in option.innerHTML with values from _config
+				Object.entries(optionsConfig[value] || {}).forEach(([key, val]) => {
+					if (["string", "number", "boolean"].includes(typeof val)) {
+						displayTemplate = displayTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(val));
+					}
+				});
+
+				return renderTemplateString(displayTemplate, {
+					selectedCount: selectedValues.length || 0,
+					selectedTexts: this.getSelectedOptionsText() || '',
+					text,
+				});
+			}).filter(Boolean)
+		));
+		return contentArray.join(displaySeparator);
 	}
 }
