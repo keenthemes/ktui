@@ -141,14 +141,12 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	}
 
 	/**
-	 * Reposition all toasts in the container with smooth animation
-	 */
-	/**
-	 * Reposition all toasts in the container with smooth animation.
+	 * Update all toasts in the container with smooth animation.
+	 *
 	 * @param container The toast container element.
 	 * @param offset Optional offset from the edge.
 	 */
-	static repositionToasts(container: HTMLElement | null, offset?: number) {
+	static update(container: HTMLElement | null, offset?: number) {
 		if (!container) return;
 		offset =
 			typeof offset === 'number' ? offset : (this.globalConfig.offset ?? 15);
@@ -411,7 +409,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 
 		// Insert toast at the top
 		container.insertBefore(toast, container.firstChild);
-		KTToast.repositionToasts(container);
+		KTToast.update(container);
 
 		// Play beep if requested
 		if (options.beep) {
@@ -548,6 +546,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 
 		KTToast._fireEventOnElement(inst.element, 'hide', { id });
 		KTToast._dispatchEventOnElement(inst.element, 'hide', { id });
+		// Remove progress bar instantly if present
+		const progressEl = inst.element.querySelector('[data-kt-toast-progress]');
+		if (progressEl) progressEl.remove();
 		inst.element.style.animation = 'kt-toast-out 0.25s forwards';
 
 		setTimeout(() => {
@@ -560,9 +561,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			}
 			KTToast._fireEventOnElement(inst.element, 'hidden', { id });
 			KTToast._dispatchEventOnElement(inst.element, 'hidden', { id });
-			// Reposition toasts asynchronously after DOM update
+			// update toasts asynchronously after DOM update
 			setTimeout(() => {
-				KTToast.repositionToasts(parent);
+				KTToast.update(parent);
 			}, 0);
 		}, 250);
 	}
