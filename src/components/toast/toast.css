@@ -28,7 +28,7 @@
 
   /* Progress */
   .kt-toast-progress {
-    @apply fixed start-0 bottom-0 w-full h-1 bg-primary;
+    @apply fixed start-0 bottom-0 w-full h-[3px] bg-primary;
     transform-origin: left;
     animation: kt-toast-progress-line linear forwards;
   }

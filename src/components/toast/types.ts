@@ -51,14 +51,12 @@ export interface KTToastAction {
  * Each property corresponds to a slot in the toast UI.
  */
 export interface KTToastClassNames {
-	container?: string; // Toast container (positioned wrapper)
-	toast?: string; // Main toast element
-	icon?: string; // Icon element
-	message?: string; // Message element
-	dismiss?: string; // Close button
-	progress?: string; // Progress bar
-	action?: string; // Action button
-	cancel?: string; // Cancel button
+	container?: string; // Toast container
+	toast?: string; // Taast
+	icon?: string; // Icon
+	message?: string; // Message
+	toolbar?: string; // Toolbar
+	actions?: string; // Actions
 }
 
 /**

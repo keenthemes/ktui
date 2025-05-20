@@ -62,12 +62,12 @@
 	/* Styles */
 	/* When you want a hover underline (non-permanent) */
 	.kt-link-underline {
-		@apply hover:underline hover:underline-offset-4 decoration-solid;
+		@apply hover:underline hover:underline-offset-4 decoration-solid -mt-0.5;
 	}
 
 	/* When the text should always be underlined */
 	.kt-link-underlined {
-		@apply underline underline-offset-4 decoration-solid;
+		@apply underline underline-offset-4 decoration-solid -mt-0.5;
 	}
 
 	.kt-link-dashed {

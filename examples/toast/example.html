@@ -139,7 +139,7 @@ const defaultGlobalConfig = {
   gap: 10,
   dismiss: true
 };
-KTToast.configToast({ ...defaultGlobalConfig }); // Ensure default on load
+KTToast.config({ ...defaultGlobalConfig }); // Ensure default on load
 
 const btnGlobalBottomEnd = document.getElementById('toast-set-global-bottom-end');
 const btnGlobalTopCenter = document.getElementById('toast-set-global-top-center');
@@ -147,19 +147,19 @@ const btnGlobalReset = document.getElementById('toast-set-global-reset');
 
 if (btnGlobalBottomEnd) {
   btnGlobalBottomEnd.addEventListener('click', () => {
-    KTToast.configToast({ position: 'bottom-end' });
+    KTToast.config({ position: 'bottom-end' });
     KTToast.show({ message: 'Global position set to Bottom End (Right)', variant: 'primary' });
   });
 }
 if (btnGlobalTopCenter) {
   btnGlobalTopCenter.addEventListener('click', () => {
-    KTToast.configToast({ position: 'top-center' });
+    KTToast.config({ position: 'top-center' });
     KTToast.show({ message: 'Global position set to Top Center', variant: 'primary' });
   });
 }
 if (btnGlobalReset) {
   btnGlobalReset.addEventListener('click', () => {
-    KTToast.configToast({ ...defaultGlobalConfig });
+    KTToast.config({ ...defaultGlobalConfig });
     KTToast.show({ message: 'Global config reset to default', variant: 'primary' });
   });
 }

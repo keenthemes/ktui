@@ -22,7 +22,6 @@ const DEFAULT_CONFIG: KTToastConfig = {
 };
 
 const DEFAULT_TOAST_OPTIONS: KTToastOptions = {
-	variant: 'primary',
 	appearance: 'solid',
 	progress: false,
 	size: 'md',
@@ -61,6 +60,11 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	 * @returns The toast's HTML markup as a string.
 	 */
 	static getContent(options?: KTToastOptions) {
+		const classNames = {
+			...((this.globalConfig.classNames as any) || {}),
+			...((options?.classNames as any) || {}),
+		};
+
 		if (options?.content) {
 			if (typeof options.content === 'string') {
 				return options.content;
@@ -77,11 +81,21 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		let template = '';
 
 		if (options?.icon) {
-			template += '<div class="kt-alert-icon">' + options.icon + '</div>';
+			template +=
+				'<div class="kt-alert-icon ' +
+				(classNames.icon || '') +
+				'">' +
+				options.icon +
+				'</div>';
 		}
 
 		if (options?.message) {
-			template += '<div class="kt-alert-title">' + options.message + '</div>';
+			template +=
+				'<div class="kt-alert-title ' +
+				(classNames.message || '') +
+				'">' +
+				options.message +
+				'</div>';
 		}
 
 		if (
@@ -89,7 +103,10 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			options?.dismiss !== false ||
 			options?.cancel !== false
 		) {
-			template += '<div class="kt-alert-toolbar">';
+			template +=
+				'<div class="kt-alert-toolbar ' + (classNames.toolbar || '') + '">';
+			template +=
+				'<div class="kt-alert-actions ' + (classNames.actions || '') + '">';
 
 			if (options?.action && typeof options.action === 'object') {
 				template +=
@@ -114,6 +131,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 					'<button data-kt-toast-dismiss="true" class="kt-alert-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
 			}
 
+			template += '</div>';
 			template += '</div>';
 		}
 
@@ -197,7 +215,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	 * Set global toast configuration options.
 	 * @param options Partial toast config to merge with global config.
 	 */
-	static configToast(options: Partial<KTToastConfig>) {
+	static config(options: Partial<KTToastConfig>) {
 		this.globalConfig = { ...this.globalConfig, ...options };
 	}
 
@@ -280,9 +298,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		};
 
 		const toast = document.createElement('div');
-		toast.className =
-			classNames.toast ||
-			`kt-toast kt-alert ${variantMap[options.variant]} ${appearanceMap[options.appearance]} ${sizeMap[options.size]} ${options.className || ''}`;
+		toast.className = `kt-toast kt-alert ${variantMap[options.variant] || ''} ${appearanceMap[options.appearance] || ''} ${sizeMap[options.size] || ''} ${options.className || ''} ${classNames.toast || ''}`;
 		// ARIA support
 		toast.setAttribute('role', options.role || 'status');
 		toast.setAttribute('aria-live', 'polite');
