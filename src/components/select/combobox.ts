@@ -17,6 +17,7 @@ export class KTSelectCombobox {
 	private _clearButtonElement: HTMLElement | null;
 	private _boundInputHandler: (event: Event) => void;
 	private _boundClearHandler: (event: MouseEvent) => void;
+	private _valuesContainerElement: HTMLElement | null;
 
 	constructor(select: KTSelect) {
 		this._select = select;
@@ -38,9 +39,12 @@ export class KTSelectCombobox {
 		} else if (displayElement.tagName === 'INPUT') {
 			clearButtonContainer = displayElement.parentElement as HTMLElement;
 		}
+
 		this._clearButtonElement = clearButtonContainer
 			? clearButtonContainer.querySelector('[data-kt-select-clear-button]')
 			: null;
+
+		this._valuesContainerElement = displayElement?.closest('[data-kt-select-combobox]')?.querySelector('[data-kt-select-combobox-values]');
 
 		// Create bound handler references to allow proper cleanup
 		this._boundInputHandler = this._handleComboboxInput.bind(this);
@@ -52,21 +56,17 @@ export class KTSelectCombobox {
 		// Reset combobox search state when dropdown closes
 		this._select.getElement().addEventListener('dropdown.close', () => {
 			this._searchInputElement.value = '';
-			this._toggleClearButtonVisibility('');
+			// this._toggleClearButtonVisibility('');
 			this._select.showAllOptions();
 		});
 
 		// When selection changes, update the input value to the selected option's text
-		this._select.getElement().addEventListener('change', () => {
-			// Only update the input value, do not reset the filter or show all options
-			if (this._config.displayTemplate) {
-				const selectedValues = this._select.getSelectedOptions();
-				const content = this._select.renderDisplayTemplateForSelected(selectedValues);
-				displayElement.parentElement?.prepend(stringToElement(content));
-			} else {
-				this._select.updateSelectedOptionDisplay();
-			}
-		});
+		// this._select.getElement().addEventListener('change', () => {
+		// 	// Only update the input value, do not reset the filter or show all options
+		// 	const selectedValues = this._select.getSelectedOptions();
+		// 	const content = this._select.renderDisplayTemplateForSelected(selectedValues);
+		// 	this._valuesContainerElement?.append(stringToElement(content));
+		// });
 
 		if (this._config.debug) console.log('KTSelectCombobox initialized');
 	}
@@ -125,7 +125,7 @@ export class KTSelectCombobox {
 		if (this._config.debug) console.log('Combobox input event, query:', query);
 
 		// Toggle clear button visibility based on input value
-		this._toggleClearButtonVisibility(query);
+		// this._toggleClearButtonVisibility(query);
 
 		// If dropdown isn't open, open it when user starts typing
 		if (!(this._select as any)._dropdownIsOpen) {
@@ -147,7 +147,7 @@ export class KTSelectCombobox {
 		this._searchInputElement.value = '';
 
 		// Hide the clear button
-		this._toggleClearButtonVisibility('');
+		// this._toggleClearButtonVisibility('');
 
 		// Show all options and open dropdown
 		this._select.showAllOptions();
@@ -155,6 +155,11 @@ export class KTSelectCombobox {
 
 		// Clear the current selection
 		this._select.clearSelection();
+
+		// Clear the combobox values container if present (for displayTemplate)
+		if (this._valuesContainerElement) {
+			this._valuesContainerElement.innerHTML = '';
+		}
 
 		// Focus on the input
 		this._searchInputElement.focus();

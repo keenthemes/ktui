@@ -538,11 +538,11 @@ export class KTSelect extends KTComponent {
 		);
 
 		// Only attach click handler to display element
-		this._eventManager.addListener(
-			this._wrapperElement,
-			'click',
-			this._handleDropdownClick.bind(this),
-		);
+		// this._eventManager.addListener(
+		// 	this._wrapperElement,
+		// 	'click',
+		// 	this._handleDropdownClick.bind(this),
+		// );
 
 		// Attach centralized keyboard handler
 		const keyboardTarget = this._searchInputElement || this._wrapperElement;
@@ -731,6 +731,7 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * Toggle dropdown visibility
+	 * @deprecated
 	 */
 	public toggleDropdown() {
 		if (this._config.disabled) {
@@ -1086,6 +1087,7 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * Handle display element click
+	 * @deprecated
 	 */
 	private _handleDropdownClick(event: Event) {
 		if (this._config.debug)
