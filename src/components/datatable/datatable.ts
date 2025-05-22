@@ -56,6 +56,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _sortHandler: KTDataTableSortAPI<T>;
 
 	private _data: T[] = [];
+	private _isFetching: boolean = false;
 
 	constructor(element: HTMLElement, config?: KTDataTableConfigInterface) {
 		super();
@@ -442,16 +443,22 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {Promise<void>} Promise which is resolved after data has been fetched and checkbox plugin initialized.
 	 */
 	private async _updateData(): Promise<void> {
-		this._showSpinner(); // Show spinner before fetching data
+		if (this._isFetching) return; // Prevent duplicate fetches
+		this._isFetching = true;
+		try {
+			this._showSpinner(); // Show spinner before fetching data
 
-		// Fetch data from the DOM and initialize the checkbox plugin
-		return typeof this._config.apiEndpoint === 'undefined'
-			? this._fetchDataFromLocal().then(
-					this._finalize.bind(this) as () => Promise<void>,
-				)
-			: this._fetchDataFromServer().then(
-					this._finalize.bind(this) as () => Promise<void>,
-				);
+			// Fetch data from the DOM and initialize the checkbox plugin
+			return typeof this._config.apiEndpoint === 'undefined'
+				? this._fetchDataFromLocal().then(
+						this._finalize.bind(this) as () => Promise<void>,
+					)
+				: this._fetchDataFromServer().then(
+						this._finalize.bind(this) as () => Promise<void>,
+					);
+		} finally {
+			this._isFetching = false;
+		}
 	}
 
 	/**
