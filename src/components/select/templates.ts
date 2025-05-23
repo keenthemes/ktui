@@ -18,7 +18,6 @@ export const coreTemplateStrings = {
 	wrapper: `<div data-kt-select-wrapper class="kt-select-wrapper {{class}}"></div>`,
 	combobox: `
 		<div data-kt-select-combobox data-kt-select-display class="kt-select-combobox {{class}}">
-			<div></div>
 			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
 			<button type="button" data-kt-select-clear-button="true" class="kt-select-combobox-clear-btn" aria-label="Clear selection">
 				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

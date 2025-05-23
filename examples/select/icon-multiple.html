@@ -14,15 +14,18 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Icon Multiple</label>
 
-				<select data-kt-select data-kt-select-placeholder="Type or select a country..."
+				<select
+					class="kt-select"
+					data-kt-select
+					data-kt-select-placeholder="Type or select a country..."
 					data-kt-select-multiple="true" data-kt-select-config='{
-					"displaySeparator": " / ",
-					"displayTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"font-semibold text-gray-900\">{{text}}</span></div>",
-					"displayClass": "kt-select-display",
-					"displayToggle": true,
-					"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
-					"optionClass": "kt-select-option"
-				}'>
+						"displaySeparator": " / ",
+						"displayTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"font-semibold text-gray-900\">{{text}}</span></div>",
+						"displayClass": "kt-select-display",
+						"displayToggle": true,
+						"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
+						"optionClass": "kt-select-option"
+					}'>
 					<option value="us"
 						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
 						United States</option>
