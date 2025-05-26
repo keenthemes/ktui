@@ -17,7 +17,13 @@
 				<select
 					class="kt-select"
 					data-kt-select
-					data-kt-select-placeholder="Please select a field type...">
+					data-kt-select-placeholder="Please select a field type..."
+					data-kt-select-config='{
+						"placeholder": "Select a country...",
+						"placeholderClass": "kt-select-placeholder",
+						"placeholderTemplate": "<span class=\"kt-select-placeholder\">{{placeholder}}</span>",
+						"displaySeparator": ", ",
+					}'>
 					<option value="name">Name</option>
 					<option value="email">Email Address</option>
 					<option value="phone">Phone Number</option>
