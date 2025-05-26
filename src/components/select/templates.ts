@@ -376,14 +376,18 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders the placeholder for the select
 	 */
 	placeholder: (config: KTSelectConfigInterface): HTMLElement => {
-		let html = getTemplateStrings(config).placeholder.replace('{{class}}', config.placeholderClass || '');
+		let html = getTemplateStrings(config)
+			.placeholder.replace('{{class}}', config.placeholderClass || '');
+
 		let content = config.placeholder || 'Select...';
+
 		if (config.placeholderTemplate) {
 			content = renderTemplateString(config.placeholderTemplate, {
 				placeholder: config.placeholder || 'Select...',
 				class: config.placeholderClass || '',
 			});
 		}
+
 		html = html.replace('{{content}}', content);
 		return stringToElement(html);
 	},
