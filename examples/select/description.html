@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Description</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Description</label>
+
+				<select
+					class="kt-select"
+					data-kt-select
+					data-kt-select-placeholder="Select with description..."
+					data-kt-select-config='{
+					"displayTemplate": "<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900\">{{text}}</span><span class=\"text-xs text-gray-500\">Your selection</span></div>",
+					"optionTemplate": "<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900\">{{text}}</span><span class=\"text-xs text-gray-500\">{{desc}}</span></div>"
+				}'>
+					<option value="us"
+						data-kt-select-option='{"desc": "MySQL is a relational database management system"}'>
+						MySQL
+					</option>
+					<option value="postgres"
+						data-kt-select-option='{"desc": "PostgreSQL is a powerful object-relational database system"}'>
+						PostgreSQL
+					</option>
+					<option value="mongodb"
+						data-kt-select-option='{"desc": "MongoDB is a NoSQL database that uses JSON-like documents with optional schemas"}'>
+						MongoDB
+					</option>
+					<option value="redis"
+						data-kt-select-option='{"desc": "Redis is an in-memory data structure store"}'>
+						Redis
+					</option>
+					<option value="sqlite"
+						data-kt-select-option='{"desc": "SQLite is a lightweight, disk-based database"}'>
+						SQLite
+					</option>
+					<option value="mariadb"
+						data-kt-select-option='{"desc": "MariaDB is a community-driven fork of MySQL"}'>
+						MariaDB
+					</option>
+					<option value="mssql"
+						data-kt-select-option='{"desc": "Microsoft SQL Server is a relational database management system"}'>
+						Microsoft SQL Server
+					</option>
+					<option value="oracle"
+						data-kt-select-option='{"desc": "Oracle is a powerful, object-oriented database management system"}'>
+						Oracle
+					</option>
+					<option value="db2"
+						data-kt-select-option='{"desc": "IBM DB2 is a relational database management system"}'>
+						IBM DB2
+					</option>
+				</select>
+
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>

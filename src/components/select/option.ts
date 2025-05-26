@@ -5,7 +5,6 @@
 
 import KTComponent from '../component';
 import {
-	KTSelectOptionConfigInterface,
 	KTSelectConfigInterface,
 } from './config';
 import { defaultTemplates } from './templates';
@@ -13,16 +12,23 @@ import { defaultTemplates } from './templates';
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
 	protected override readonly _dataOptionPrefix: string = 'kt-'; // Use 'kt-' prefix to support data-kt-select-option attributes
-	protected override readonly _config: KTSelectOptionConfigInterface;
+	protected override readonly _config: KTSelectConfigInterface;
 	private _globalConfig: KTSelectConfigInterface;
 
-	constructor(element: HTMLElement, config?: KTSelectConfigInterface) {
+	constructor(element: HTMLElement, config?: KTSelectConfigInterface,) {
 		super();
 
 		// Always initialize a new option instance
 		this._init(element);
 		this._buildConfig();
 		this._globalConfig = config;
+
+		// Clean the config
+		this._config = (this._config as any)[''] || {};
+
+		// Add the option config to the global config
+		this._globalConfig.optionsConfig = this._globalConfig.optionsConfig || {};
+		this._globalConfig.optionsConfig[(element as HTMLInputElement).value] = this._config;
 
 		// Don't store in KTData to avoid Singleton pattern issues
 		// Each option should be a unique instance
@@ -35,9 +41,24 @@ export class KTSelectOption extends KTComponent {
 
 	public render(): HTMLElement {
 		const optionElement = this.getHTMLOptionElement();
-		// Use the global config if available, or create a minimal valid config
-		const config = this._globalConfig || { height: 250 };
-		// Create a new option element every time
-		return defaultTemplates.option(optionElement, config);
+
+		// Get the original template
+		let originalTemplate = this._globalConfig.optionTemplate;
+
+		if (this._globalConfig.optionTemplate) {
+			// Replace all {{varname}} in option.innerHTML with values from _config
+			Object.entries((this._config as any) || {}).forEach(([key, value]) => {
+				if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+					this._globalConfig.optionTemplate = this._globalConfig.optionTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+				}
+			});
+		}
+
+		let template = defaultTemplates.option(optionElement, this._globalConfig);
+
+		// Restore the original template
+		this._globalConfig.optionTemplate = originalTemplate;
+
+		return template;
 	}
 }

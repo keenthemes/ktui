@@ -6,7 +6,7 @@
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
-import { EventManager } from './utils';
+import { EventManager, renderTemplateString } from './utils';
 
 /**
  * KTSelectTags - Handles tags-specific functionality for KTSelect
@@ -34,50 +34,53 @@ export class KTSelectTags {
 	 * Renders selected options as tags in the display element
 	 */
 	public updateTagsDisplay(selectedOptions: string[]): void {
-		// Clear existing content
-		this._valueDisplayElement.innerHTML = '';
+		// Remove any existing tag elements
+		const wrapper = this._valueDisplayElement.parentElement;
+		if (!wrapper) return;
 
-		// If no options selected, show placeholder
+		// Remove all previous tags
+		Array.from(wrapper.querySelectorAll('[data-kt-select-tag]')).forEach(tag => tag.remove());
+
+		// If no options selected, do nothing (let display show placeholder)
 		if (selectedOptions.length === 0) {
-			this._valueDisplayElement.textContent = this._config.placeholder || '';
 			return;
 		}
 
-		// Create and append a tag element for each selected option
+		// Insert each tag before the display element
 		selectedOptions.forEach((optionValue) => {
-			const tagElement = this._createTagElement(optionValue);
-			this._valueDisplayElement.appendChild(tagElement);
+			// Find the original option element (in dropdown or select)
+			let optionElement: HTMLOptionElement | null = null;
+			const optionElements = this._select.getOptionsElement();
+			for (const opt of Array.from(optionElements)) {
+				if ((opt as HTMLElement).dataset.value === optionValue) {
+					optionElement = opt as HTMLOptionElement;
+					break;
+				}
+			}
+			if (!optionElement) {
+				const originalOptions = this._select.getElement().querySelectorAll('option');
+				for (const opt of Array.from(originalOptions)) {
+					if ((opt as HTMLOptionElement).value === optionValue) {
+						optionElement = opt as HTMLOptionElement;
+						break;
+					}
+				}
+			}
+
+			const tag = defaultTemplates.tag(optionElement, this._config);
+
+			// Add event listener to the close button
+			const closeButton = tag.querySelector('[data-kt-select-remove-button]') as HTMLElement;
+			if (closeButton) {
+				this._eventManager.addListener(closeButton, 'click', (event: Event) => {
+					event.stopPropagation();
+					this._removeTag(optionValue);
+				});
+			}
+
+			// Insert tag before the display element
+			wrapper.insertBefore(tag, this._valueDisplayElement);
 		});
-	}
-
-	/**
-	 * Create tag element for a selected option
-	 */
-	private _createTagElement(optionValue: string): HTMLElement {
-		const optionLabel = this._getOptionLabel(optionValue);
-		// Create a mock option object to pass to the tag template
-		const mockOption = {
-			id: optionValue,
-			title: optionLabel,
-			selected: true,
-		};
-
-		// Use the tag template
-		const tag = defaultTemplates.tag(mockOption, this._config);
-
-		// Add event listener to the close button
-		const closeButton = tag.querySelector(
-			`[data-kt-select-remove-button]`,
-		) as HTMLElement;
-
-		if (closeButton) {
-			this._eventManager.addListener(closeButton, 'click', (event: Event) => {
-				event.stopPropagation();
-				this._removeTag(optionValue);
-			});
-		}
-
-		return tag;
 	}
 
 	/**

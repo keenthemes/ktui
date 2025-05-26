@@ -16,7 +16,12 @@
 
 	/* Alert Toolbar */
 	.kt-alert-toolbar {
-		@apply flex items-center gap-2.5;
+		@apply flex items-baseline gap-2.5;
+	}
+
+	/* Alert Actions */
+	.kt-alert-actions {
+		@apply flex items-center gap-2;
 	}
 
 	/* Alert Descriptopn */
@@ -65,6 +70,10 @@
 		.kt-alert-icon svg {
 			@apply size-5;
 		}
+
+		.kt-alert-toolbar {
+			@apply pt-0.25;
+		}
 	}
 
 	.kt-alert-sm {
@@ -74,7 +83,7 @@
 			@apply size-3.5;
 
 			> svg {
-				@apply size-3.5 text-muted-foreground;
+				@apply size-3.5;
 			}
 		}
 
@@ -88,6 +97,10 @@
 
 		.kt-alert-icon svg {
 			@apply size-6;
+		}
+
+		.kt-alert-toolbar {
+			@apply pt-0.75;
 		}
 	}
 

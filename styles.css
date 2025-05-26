@@ -43,6 +43,7 @@
 @import './src/components/skeleton/skeleton.css';
 @import './src/components/kbd/kbd.css';
 @import './src/components/breadcrumb/breadcrumb.css';
+@import './src/components/toast/toast.css';
 
 /** Dark Mode Variant **/
 @custom-variant dark (&:is(.dark *));
