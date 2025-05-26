@@ -4,57 +4,44 @@
  */
 
 import { KTSelectConfigInterface, KTSelectOption } from './config';
-import { SelectMode } from './types';
+import { renderTemplateString } from './utils';
 
 /**
  * Default HTML string templates for KTSelect. All UI structure is defined here.
  * Users can override any template by providing a matching key in the config.templates object.
  */
-const defaultTemplateStrings = {
-	dropdownContent: `<div data-kt-select-dropdown-content class="kt-select-dropdown hidden" style="z-index: {{zindex}};">{{content}}</div>`,
-	optionsContainer: `<ul role="listbox" aria-label="{{label}}" data-kt-select-options-container style="max-height: {{height}}px; overflow-y: auto;">{{options}}</ul>`,
-	emptyOption: `<option value="">{{placeholder}}</option>`,
-	errorOption: `<option value="" disabled selected>{{errorMessage}}</option>`, // Template for error <option>
-
-	loadMore: `<li class="py-2 px-4 text-center text-gray-600 cursor-pointer hover:bg-gray-100" data-kt-select-load-more>{{loadMoreText}}</li>`,
-	dropdown: `<div data-kt-select-dropdown-content class="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-md shadow-md">
-		{{search}}
-		<ul role="listbox" aria-label="{{label}}" data-kt-select-options-container style="max-height: {{height}}px; overflow-y: auto;">
-			{{options}}
-		</ul>
-	</div>`,
-	error: `<li class="px-3 py-2 text-red-500" role="alert">{{errorMessage}}</li>`,
-
-	highlight: `<span class="highlight">{{text}}</span>`,
-	main: `<div data-kt-select-wrapper class="relative" data-kt-select-mode="{{mode}}"></div>`,
-	displayCombobox: `<div class="relative flex items-center w-full">
-		<input data-kt-select-search data-kt-select-display data-kt-select-value type="text" class="flex-1 w-full items-center justify-between px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
-		<button type="button" data-kt-select-clear-button class="absolute right-3 hidden text-gray-400 hover:text-gray-600" aria-label="Clear selection">
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<line x1="18" y1="6" x2="6" y2="18"></line>
-			<line x1="6" y1="6" x2="18" y2="18"></line>
-		</svg>
-		</button>
-	</div>`,
-
-	icon: `<span class="option-icon mr-2"><img src="{{icon}}" class="rounded-full w-6 h-6" /></span>`,
-	description: `<div class="option-description text-sm text-gray-500">{{description}}</div>`,
-
-	display: `<div data-kt-select-display class="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400" tabindex="{{tabindex}}" role="button" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
-		<span data-kt-select-value>{{placeholder}}</span>
-		<span data-kt-select-arrow class="ml-2">
-			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<polyline points="6 9 12 15 18 9"></polyline>
-			</svg>
-		</span>
-	</div>`,
-	option: `<li data-kt-select-option data-value="{{value}}" class="px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center{{selectedClass}}{{disabledClass}}" role="option" {{selected}} {{disabled}}>{{icon}}<div class="option-content"><div class="option-title" data-kt-option-title>{{text}}</div>{{description}}</div></li>`,
-
-	optionGroup: `<li role="group" aria-label="{{label}}" class="py-1"><div class="px-3 py-1 text-xs font-semibold text-gray-500 uppercase">{{label}}</div><ul>{{optionsHtml}}</ul></li>`,
-	search: `<div class="px-3 py-2 border-b border-gray-200"><input type="text" data-kt-select-search placeholder="{{searchPlaceholder}}" class="w-full border-none focus:outline-none text-sm" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
-	noResults: `<li class="px-3 py-2 text-gray-500" role="status">{{searchNotFoundText}}</li>`,
-	loading: `<li class="px-3 py-2 text-gray-500 italic" role="status" aria-live="polite">{{loadingMessage}}</li>`,
-	tag: `<div data-kt-select-tag class="inline-flex items-center bg-blue-50 border border-blue-100 rounded px-2 py-1 text-sm mr-1 mb-1"><span>{{title}}</span><span data-kt-select-remove-button data-value="{{id}}" class="ml-1 text-blue-400 hover:text-blue-600 cursor-pointer" role="button" aria-label="Remove {{safeTitle}}" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></span></div>`,
+export const coreTemplateStrings = {
+	dropdown: `<div data-kt-select-dropdown class="kt-select-dropdown hidden {{class}}" style="z-index: {{zindex}};">{{content}}</div>`,
+	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options {{class}}" data-kt-select-options="true">{{content}}</ul>`,
+	error: `<li class="kt-select-error" role="alert">{{content}}</li>`,
+	highlight: `<span data-kt-select-highlight class="kt-select-highlight highlighted {{class}}">{{text}}</span>`,
+	wrapper: `<div data-kt-select-wrapper class="kt-select-wrapper {{class}}"></div>`,
+	combobox: `
+		<div data-kt-select-combobox data-kt-select-display class="kt-select-combobox {{class}}">
+			<input class="kt-input kt-select-combobox-input" data-kt-select-search="true" data-kt-select-value="true" type="text" placeholder="{{placeholder}}" role="searchbox" aria-label="{{label}}" {{disabled}} />
+			<button type="button" data-kt-select-clear-button="true" class="kt-select-combobox-clear-btn" aria-label="Clear selection">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+		</div>
+	`,
+	display: `
+		<div data-kt-select-display class="kt-select-display {{class}}" tabindex="{{tabindex}}" role="button" data-selected="0" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
+			<div data-kt-select-value="true" class="kt-select-label">{{content}}</div>
+		</div>
+	`,
+	placeholder: `<div data-kt-select-placeholder class="kt-select-placeholder {{class}}">{{content}}</div>`,
+	option: `<li data-kt-select-option data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>{{content}}</li>`,
+	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-select-search-input" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
+	empty: `<li data-kt-select-empty class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
+	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
+	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}">
+			{{content}}
+		</div>`,
+	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true">{{content}}</li>`,
+	tagRemoveButton: `<button type="button" data-kt-select-remove-button class="kt-select-tag-remove" aria-label="Remove tag" tabindex="0"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg></button>`,
 };
 
 /**
@@ -65,26 +52,14 @@ export interface KTSelectTemplateInterface {
 	/**
 	 * Renders the dropdown content container
 	 */
-	dropdownContent: (
+	dropdown: (
 		config: KTSelectConfigInterface & { zindex?: number; content?: string },
 	) => HTMLElement;
 	/**
 	 * Renders the options container
 	 */
-	optionsContainer: (
+	options: (
 		config: KTSelectConfigInterface & { options?: string },
-	) => HTMLElement;
-	/**
-	 * Renders an empty <option> for native select
-	 */
-	emptyOption: (
-		config: KTSelectConfigInterface & { placeholder?: string },
-	) => HTMLOptionElement;
-	/**
-	 * Renders an error <option> for the native select
-	 */
-	errorOption: (
-		config: KTSelectConfigInterface & { errorMessage: string },
 	) => HTMLElement;
 	/**
 	 * Renders the load more button for pagination
@@ -98,45 +73,27 @@ export interface KTSelectTemplateInterface {
 	highlight: (config: KTSelectConfigInterface, text: string) => HTMLElement;
 
 	// Main components
-	main: (config: KTSelectConfigInterface) => HTMLElement;
+	wrapper: (config: KTSelectConfigInterface) => HTMLElement;
 	display: (config: KTSelectConfigInterface) => HTMLElement;
-	dropdown: (
-		config: KTSelectConfigInterface,
-		optionsHtml: string,
-	) => HTMLElement;
-
-	// Icon rendering
-	icon: (icon: string, config: KTSelectConfigInterface) => HTMLElement;
-	description: (
-		description: string,
-		config: KTSelectConfigInterface,
-	) => HTMLElement;
 
 	// Option rendering
 	option: (
 		option: KTSelectOption | HTMLOptionElement,
 		config: KTSelectConfigInterface,
 	) => HTMLElement;
-	optionGroup: (
-		label: string,
-		optionsHtml: string,
-		config: KTSelectConfigInterface,
-	) => HTMLElement;
 
 	// Search and empty states
 	search: (config: KTSelectConfigInterface) => HTMLElement;
-	noResults: (config: KTSelectConfigInterface) => HTMLElement;
+	empty: (config: KTSelectConfigInterface) => HTMLElement;
 	loading: (
 		config: KTSelectConfigInterface,
 		loadingMessage: string,
 	) => HTMLElement;
 
 	// Multi-select
-	tag: (option: KTSelectOption, config: KTSelectConfigInterface) => HTMLElement;
-	selectedDisplay: (
-		selectedOptions: KTSelectOption[],
-		config: KTSelectConfigInterface,
-	) => string;
+	tag: (option: HTMLOptionElement, config: KTSelectConfigInterface) => HTMLElement;
+
+	placeholder: (config: KTSelectConfigInterface) => HTMLElement;
 }
 
 /**
@@ -151,14 +108,14 @@ function stringToElement(html: string): HTMLElement {
 /**
  * User-supplied template overrides. Use setTemplateStrings() to add or update.
  */
-let userTemplateStrings: Partial<typeof defaultTemplateStrings> = {};
+let userTemplateStrings: Partial<typeof coreTemplateStrings> = {};
 
 /**
  * Register or update user template overrides.
  * @param templates Partial template object to merge with defaults.
  */
 export function setTemplateStrings(
-	templates: Partial<typeof defaultTemplateStrings>,
+	templates: Partial<typeof coreTemplateStrings>,
 ): void {
 	userTemplateStrings = { ...userTemplateStrings, ...templates };
 }
@@ -169,15 +126,17 @@ export function setTemplateStrings(
  */
 export function getTemplateStrings(
 	config?: KTSelectConfigInterface,
-): typeof defaultTemplateStrings {
+): typeof coreTemplateStrings {
 	const templates =
 		config && typeof config === 'object' && 'templates' in config
 			? (config as any).templates
 			: undefined;
+
 	if (templates) {
-		return { ...defaultTemplateStrings, ...userTemplateStrings, ...templates };
+		return { ...coreTemplateStrings, ...userTemplateStrings, ...templates };
 	}
-	return { ...defaultTemplateStrings, ...userTemplateStrings };
+
+	return { ...coreTemplateStrings, ...userTemplateStrings };
 }
 
 /**
@@ -189,58 +148,42 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 */
 	highlight: (config: KTSelectConfigInterface, text: string) => {
 		const template = getTemplateStrings(config).highlight;
-		const html = template.replace('{{text}}', text);
+		const html = template.replace('{{text}}', text).replace('{{class}}', config.highlightClass || '');
 		return stringToElement(html);
 	},
 
 	/**
 	 * Renders the dropdown content
 	 */
-	dropdownContent: (
+	dropdown: (
 		config: KTSelectConfigInterface & { zindex?: number; content?: string },
 	) => {
-		const template = getTemplateStrings(config).dropdownContent;
+		let template = getTemplateStrings(config).dropdown;
+		let content = config.content || '';
+		if (config.dropdownTemplate) {
+			content = renderTemplateString(config.dropdownTemplate, {
+				zindex: config.zindex ? String(config.zindex) : '',
+				content: config.content || '',
+				class: config.dropdownClass || '',
+			});
+		}
 		const html = template
 			.replace('{{zindex}}', config.zindex ? String(config.zindex) : '')
-			.replace('{{content}}', config.content || '');
+			.replace('{{content}}', content)
+			.replace('{{class}}', config.dropdownClass || '');
 		return stringToElement(html);
 	},
 
 	/**
 	 * Renders the options container for the dropdown
 	 */
-	optionsContainer: (
-		config: KTSelectConfigInterface & { options?: string },
-	) => {
-		const template = getTemplateStrings(config).optionsContainer;
+	options: (config: KTSelectConfigInterface & { options?: string }) => {
+		const template = getTemplateStrings(config).options;
 		const html = template
 			.replace('{{label}}', config.label || 'Options')
 			.replace('{{height}}', config.height ? String(config.height) : '250')
-			.replace('{{options}}', config.options || '');
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders an empty option in the dropdown
-	 */
-	emptyOption: (config: KTSelectConfigInterface & { placeholder?: string }) => {
-		const template = getTemplateStrings(config).emptyOption;
-		const html = template.replace(
-			'{{placeholder}}',
-			config.placeholder || 'Select...',
-		);
-		return stringToElement(html) as HTMLOptionElement;
-	},
-
-	/**
-	 * Renders an error option in the dropdown
-	 */
-	errorOption: (config: KTSelectConfigInterface & { errorMessage: string }) => {
-		const template = getTemplateStrings(config).errorOption;
-		const html = template.replace(
-			'{{errorMessage}}',
-			config.errorMessage || 'An error occurred',
-		);
+			.replace('{{options}}', config.options || '')
+			.replace('{{class}}', config.optionsClass || '');
 		return stringToElement(html);
 	},
 
@@ -261,68 +204,47 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface & { errorMessage: string },
 	): string => {
 		const template = getTemplateStrings(config).error;
-		return template.replace(
-			'{{errorMessage}}',
-			config.errorMessage || 'An error occurred',
-		);
+		return template
+			.replace('{{errorMessage}}', config.errorMessage || 'An error occurred')
+			.replace('{{class}}', config.errorClass || '');
 	},
 	/**
 	 * Renders the main container for the select component
 	 */
-	main: (config: KTSelectConfigInterface): HTMLElement => {
-		const html = getTemplateStrings(config).main.replace(
-			'{{mode}}',
-			config.mode || '',
-		);
-		return stringToElement(html);
+	wrapper: (config: KTSelectConfigInterface): HTMLElement => {
+		const html = getTemplateStrings(config).wrapper
+			.replace('{{class}}', config.wrapperClass || '');
+		const element = stringToElement(html);
+		element.setAttribute('data-kt-select-combobox', config.combobox ? 'true' : 'false');
+		element.setAttribute('data-kt-select-tags', config.tags ? 'true' : 'false');
+		return element;
 	},
 
 	/**
 	 * Renders the display element (trigger) for the select
 	 */
 	display: (config: KTSelectConfigInterface): HTMLElement => {
-		const isCombobox = config.mode === SelectMode.COMBOBOX;
-		if (isCombobox) {
+		if (config.combobox) {
 			let html = getTemplateStrings(config)
-				.displayCombobox.replace(
-					/{{placeholder}}/g,
-					config.placeholder || 'Select...',
-				)
+				.combobox.replace(/{{placeholder}}/g, config.placeholder || 'Select...')
 				.replace(
 					/{{label}}/g,
 					config.label || config.placeholder || 'Select...',
 				)
-				.replace('{{disabled}}', config.disabled ? 'disabled' : '');
+				.replace('{{disabled}}', config.disabled ? 'disabled' : '')
+				.replace('{{class}}', config.displayClass || '');
 			return stringToElement(html);
 		}
-		let html = getTemplateStrings(config)
-			.display.replace('{{tabindex}}', config.disabled ? '-1' : '0')
+
+		let content = config.label || config.placeholder || 'Select...';
+
+		let html = getTemplateStrings(config).display
+			.replace('{{tabindex}}', config.disabled ? '-1' : '0')
 			.replace('{{label}}', config.label || config.placeholder || 'Select...')
 			.replace('{{disabled}}', config.disabled ? 'aria-disabled="true"' : '')
-			.replace('{{placeholder}}', config.placeholder || 'Select...');
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders the dropdown content container
-	 */
-	dropdown: (
-		config: KTSelectConfigInterface,
-		optionsHtml: string,
-	): HTMLElement => {
-		const isCombobox = config.mode === SelectMode.COMBOBOX;
-		const hasSearch = config.enableSearch && !isCombobox;
-		const template = getTemplateStrings(config).dropdown;
-		let searchHtml = '';
-		if (hasSearch) {
-			const searchElement = defaultTemplates.search(config);
-			searchHtml = searchElement.outerHTML;
-		}
-		const html = template
-			.replace('{{search}}', searchHtml)
-			.replace('{{options}}', optionsHtml)
-			.replace('{{label}}', config.label || 'Options')
-			.replace('{{height}}', config.height ? String(config.height) : '250');
+			.replace('{{placeholder}}', config.placeholder || 'Select...')
+			.replace('{{class}}', config.displayClass || '')
+			.replace('{{content}}', content);
 		return stringToElement(html);
 	},
 
@@ -331,7 +253,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 */
 	option: (
 		option: KTSelectOption | HTMLOptionElement,
-		config: KTSelectConfigInterface & { templates: KTSelectTemplateInterface },
+		config: KTSelectConfigInterface,
 	): HTMLElement => {
 		const isHtmlOption = option instanceof HTMLOptionElement;
 
@@ -344,92 +266,26 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			? option.selected
 			: !!(option as KTSelectOption).selected;
 
-		// Prefer data-kt-select-option (JSON) if present
-		let description: string | undefined;
-		let icon: string | undefined;
-		if (isHtmlOption) {
-			const json = option.getAttribute('data-kt-select-option');
-			if (json) {
-				try {
-					const optionData = JSON.parse(json);
-					description = optionData?.description;
-					icon = optionData?.icon;
-				} catch (e) {
-					// fallback to legacy attributes if JSON is invalid
-					description =
-						option.getAttribute('data-kt-select-option-description') ||
-						undefined;
-					icon = option.getAttribute('data-kt-select-option-icon') || undefined;
-				}
-			} else {
-				description =
-					option.getAttribute('data-kt-select-option-description') || undefined;
-				icon = option.getAttribute('data-kt-select-option-icon') || undefined;
-			}
-		} else {
-			description = (option as KTSelectOption).description;
-			icon = (option as KTSelectOption).icon;
+		let content = text;
+		if (config.optionTemplate) {
+			// Use the user template to render the content, but only for {{content}}
+			content = renderTemplateString(config.optionTemplate, {
+				value,
+				text,
+				class: config.optionClass || '',
+				selected: selected ? 'aria-selected="true"' : 'aria-selected="false"',
+				disabled: disabled ? 'aria-disabled="true"' : '',
+				content: text,
+			});
 		}
 
-		// Build option element with proper accessibility attributes
-		const selectedClass = selected ? ' selected' : '';
-		const disabledClass = disabled ? ' disabled' : '';
-		let html = getTemplateStrings(config)
-			.option.replace('{{value}}', value)
-			.replace('{{selectedClass}}', selectedClass)
-			.replace('{{disabledClass}}', disabledClass)
-			.replace(
-				'{{selected}}',
-				selected ? 'aria-selected="true"' : 'aria-selected="false"',
-			)
-			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
-			.replace(
-				/{{icon}}/g,
-				icon ? defaultTemplates.icon(icon, config).outerHTML : '',
-			)
+		const html = getTemplateStrings(config).option
+			.replace('{{value}}', value)
 			.replace('{{text}}', text)
-			.replace(
-				/{{description}}/g,
-				description
-					? defaultTemplates.description(description, config).outerHTML
-					: '',
-			);
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders an icon
-	 */
-	icon: (icon: string, config: KTSelectConfigInterface): HTMLElement => {
-		const html = getTemplateStrings(config).icon.replace('{{icon}}', icon);
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders a description
-	 */
-	description: (
-		description: string,
-		config: KTSelectConfigInterface,
-	): HTMLElement => {
-		const html = getTemplateStrings(config).description.replace(
-			'{{description}}',
-			description,
-		);
-		return stringToElement(html);
-	},
-
-	/**
-	 * Renders an option group with header
-	 */
-	optionGroup: (
-		label: string,
-		optionsHtml: string,
-		config: KTSelectConfigInterface,
-	): HTMLElement => {
-		let html = getTemplateStrings(config)
-			.optionGroup.replace(/{{label}}/g, label)
-			.replace('{{optionsHtml}}', optionsHtml);
+			.replace('{{selected}}', selected ? 'aria-selected="true"' : 'aria-selected="false"')
+			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
+			.replace('{{content}}', content)
+			.replace('{{class}}', config.optionClass || '');
 		return stringToElement(html);
 	},
 
@@ -437,21 +293,25 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders the search input
 	 */
 	search: (config: KTSelectConfigInterface): HTMLElement => {
-		let html = getTemplateStrings(config).search.replace(
-			'{{searchPlaceholder}}',
-			config.searchPlaceholder || 'Search...',
-		);
+		let html = getTemplateStrings(config)
+			.search.replace(
+				'{{searchPlaceholder}}',
+				config.searchPlaceholder || 'Search...',
+			)
+			.replace('{{class}}', config.searchClass || '');
 		return stringToElement(html);
 	},
 
 	/**
 	 * Renders the no results message
 	 */
-	noResults: (config: KTSelectConfigInterface): HTMLElement => {
-		let html = getTemplateStrings(config).noResults.replace(
-			'{{searchNotFoundText}}',
-			config.searchNotFoundText || 'No results found',
-		);
+	empty: (config: KTSelectConfigInterface): HTMLElement => {
+		let html = getTemplateStrings(config)
+			.empty.replace(
+				'{{searchNotFoundText}}',
+				config.searchNotFoundText || 'No results found',
+			)
+			.replace('{{class}}', config.emptyClass || '');
 		return stringToElement(html);
 	},
 
@@ -462,10 +322,12 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface,
 		loadingMessage: string,
 	): HTMLElement => {
-		let html = getTemplateStrings(config).loading.replace(
-			'{{loadingMessage}}',
-			loadingMessage || 'Loading options...',
-		);
+		let html = getTemplateStrings(config)
+			.loading.replace(
+				'{{loadingMessage}}',
+				loadingMessage || 'Loading options...',
+			)
+			.replace('{{class}}', config.loadingClass || '');
 		return stringToElement(html);
 	},
 
@@ -473,59 +335,60 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders a tag for multi-select
 	 */
 	tag: (
-		option: KTSelectOption,
+		option: HTMLOptionElement,
 		config: KTSelectConfigInterface,
 	): HTMLElement => {
-		// Escape HTML characters for aria-label to prevent HTML injection
-		const escapeHTML = (str: string) => {
-			return str.replace(/[&<>"']/g, (match) => {
-				const escapeMap: Record<string, string> = {
-					'&': '&amp;',
-					'<': '&lt;',
-					'>': '&gt;',
-					'"': '&quot;',
-					"'": '&#39;',
-				};
-				return escapeMap[match];
-			});
-		};
+		let template = getTemplateStrings(config).tag;
+		let content = option.title;
+		if (config.tagTemplate) {
+			let tagTemplate = config.tagTemplate;
 
-		// Ensure we have plain text for the aria-label
-		const safeTitle = escapeHTML(option.title);
-		let html = getTemplateStrings(config)
-			.tag.replace('{{title}}', option.title)
+			const text = option.getAttribute('data-text');
+			const value = option.getAttribute('data-value');
+
+			// Replace all {{varname}} in option.innerHTML with values from _config
+			Object.entries((config.optionsConfig as any)[value] || {}).forEach(([key, value]) => {
+				if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+					tagTemplate = tagTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+				}
+			});
+
+			content = renderTemplateString(tagTemplate, {
+				title: option.title,
+				id: option.id,
+				class: config.tagClass || '',
+				content: option.innerHTML,
+				text: option.innerText,
+			});
+		}
+
+		content += getTemplateStrings(config).tagRemoveButton;
+
+		const html = template
+			.replace('{{title}}', option.title)
 			.replace('{{id}}', option.id)
-			.replace('{{safeTitle}}', safeTitle);
+			.replace('{{content}}', content)
+			.replace('{{class}}', config.tagClass || '');
 		return stringToElement(html);
 	},
 
 	/**
-	 * Formats the display of selected values
+	 * Renders the placeholder for the select
 	 */
-	selectedDisplay: (
-		selectedOptions: KTSelectOption[],
-		config: KTSelectConfigInterface,
-	): string => {
-		if (!selectedOptions || selectedOptions.length === 0) {
-			return config.placeholder || 'Select...';
+	placeholder: (config: KTSelectConfigInterface): HTMLElement => {
+		let html = getTemplateStrings(config)
+			.placeholder.replace('{{class}}', config.placeholderClass || '');
+
+		let content = config.placeholder || 'Select...';
+
+		if (config.placeholderTemplate) {
+			content = renderTemplateString(config.placeholderTemplate, {
+				placeholder: config.placeholder || 'Select...',
+				class: config.placeholderClass || '',
+			});
 		}
 
-		if (config.multiple) {
-			if (
-				config.renderSelected &&
-				typeof config.renderSelected === 'function'
-			) {
-				return config.renderSelected(selectedOptions);
-			}
-
-			if (config.showSelectedCount) {
-				const count = selectedOptions.length;
-				return `${count} ${count === 1 ? 'item' : 'items'} selected`;
-			}
-
-			return selectedOptions.map((option) => option.title).join(', ');
-		} else {
-			return selectedOptions[0].title;
-		}
+		html = html.replace('{{content}}', content);
+		return stringToElement(html);
 	},
 };

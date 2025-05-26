@@ -391,6 +391,36 @@ const KTDom = {
 		return attributes;
 	},
 
+	getDataAttributesByJson(element: HTMLElement, prefix: string): object {
+		if (!element) {
+			return {};
+		}
+
+		const rawValue = element.dataset[prefix];
+
+		if (!rawValue) {
+			return {};
+		}
+
+		const parsedValue = KTUtils.parseDataAttribute(rawValue);
+
+		if (typeof parsedValue === 'string') {
+			try {
+				return JSON.parse(parsedValue);
+			} catch (e) {
+				console.error(`Invalid JSON format for '${prefix}': ${e instanceof Error ? e.message : e} ${rawValue}`);
+			}
+		}
+
+		// If it's already an object, return as is
+		if (typeof parsedValue === 'object' && parsedValue !== null) {
+			return parsedValue;
+		}
+
+		// For other types (number, boolean, null), return an empty object
+		return {};
+	},
+
 	ready(callback: CallableFunction): void {
 		if (document.readyState === 'loading') {
 			document.addEventListener('DOMContentLoaded', () => {

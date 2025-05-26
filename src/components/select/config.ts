@@ -3,7 +3,7 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-import { SelectMode } from './types';
+import { coreTemplateStrings } from './templates';
 
 export const DefaultConfig: KTSelectConfigInterface = {
 	// ...other config options
@@ -27,10 +27,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Field Mapping
 	dataValueField: null, // Property in the option object that contains the value (default: 'id')
 	dataFieldText: null, // Property in the option object that contains the text (default: 'title')
-	dataFieldDescription: null, // Property in the option object that contains the description
-	dataFieldIcon: null, // Property in the option object that contains the icon
-	dataFieldIconWidth: null, // Property in the option object that contains the icon width
-	dataFieldIconHeight: null, // Property in the option object that contains the icon height
 
 	// Search Configuration
 	searchParam: '', // Query parameter for API search requests
@@ -46,10 +42,9 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Selection Behavior
 	multiple: false, // Enable/disable multi-select
 	maxSelections: null, // Maximum number of selections allowed in multi-select mode (null for unlimited)
-	closeOnSelect: true, // Close the dropdown after selecting an option (single-select only)
+	closeOnSelect: false, // Close the dropdown after selecting an option (single-select only)
 	disabled: false, // Disable the select component
 	isRequired: false, // Make selection required
-	mode: null, // Select mode: tags or combobox
 
 	// Search Functionality
 	enableSearch: false, // Enable/disable search functionality within the dropdown
@@ -78,11 +73,8 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	dropdownStrategy: null,
 	dropdownWidth: null, // Custom width for dropdown (e.g., '300px'), null to match toggle element width
 
-	// Styling
-	focusClass: 'option-focused',
-	hoverClass: 'hovered',
-	bgClass: 'bg-blue-50',
-	fontClass: 'font-medium',
+	// New Config
+	dropdownTemplate: '',
 };
 
 export interface KTSelectConfigInterface {
@@ -99,7 +91,6 @@ export interface KTSelectConfigInterface {
 	closeOnSelect?: boolean;
 	disabled?: boolean;
 	isRequired?: boolean;
-	mode?: SelectMode | null;
 
 	// Search Functionality
 	enableSearch?: boolean;
@@ -137,10 +128,6 @@ export interface KTSelectConfigInterface {
 	// Field Mapping
 	dataValueField?: string;
 	dataFieldText?: string;
-	dataFieldDescription?: string;
-	dataFieldIcon?: string;
-	dataFieldIconWidth?: string;
-	dataFieldIconHeight?: string;
 
 	// Pagination Configuration
 	pagination?: boolean;
@@ -157,17 +144,45 @@ export interface KTSelectConfigInterface {
 	dropdownWidth?: string | null; // Custom width for dropdown, null to match toggle element width
 
 	// Styling
-	focusClass?: string;
-	hoverClass?: string;
-	bgClass?: string;
-	fontClass?: string;
+	dropdownClass?: string;
+	displayClass?: string;
+	optionsClass?: string;
+	searchClass?: string;
+	emptyClass?: string;
+	loadingClass?: string;
+	tagClass?: string;
+	loadMoreClass?: string;
+	wrapperClass?: string;
+	errorClass?: string;
+	highlightClass?: string;
+
+	// New Config
+	tags?: boolean;
+	combobox?: boolean;
+	maxSelection?: number;
+	placeholderClass?: string;
+	placeholderTemplate?: string;
+	displaySeparator?: string;
+	displayTemplate?: string;
+	displayToggle?: boolean;
+	displayMaxSelected?: number;
+	optionTemplate?: string;
+	optionClass?: string;
+	tagTemplate?: string;
+	displayToggleClass?: string;
+	displayToggleTemplate?: string;
+
+	templates?: Partial<typeof coreTemplateStrings>;
+
+	dropdownTemplate?: string;
+
+	// Option Configuration
+	optionsConfig?: Record<string, KTSelectConfigInterface>;
 }
 
 export interface KTSelectOption {
 	id: string;
 	title: string;
-	icon?: string;
-	description?: string;
 	selected?: boolean;
 }
 
@@ -311,14 +326,4 @@ export class KTSelectState {
 	public modifyConfig(config: Partial<KTSelectConfigInterface>): void {
 		this._config = { ...this._config, ...config };
 	}
-}
-
-export const SelectOptionDefaultConfig: KTSelectOptionConfigInterface = {
-	description: '',
-	icon: null,
-};
-
-export interface KTSelectOptionConfigInterface {
-	description: string;
-	icon: string;
 }

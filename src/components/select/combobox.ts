@@ -5,8 +5,7 @@
 
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
-import { handleDropdownKeyNavigation } from './utils';
-import { SelectMode } from './types';
+import { filterOptions, renderTemplateString, stringToElement } from './utils';
 
 /**
  * KTSelectCombobox - Handles combobox-specific functionality for KTSelect
@@ -16,9 +15,9 @@ export class KTSelectCombobox {
 	private _config: KTSelectConfigInterface;
 	private _searchInputElement: HTMLInputElement;
 	private _clearButtonElement: HTMLElement | null;
-	private _boundKeyNavHandler: (event: KeyboardEvent) => void;
 	private _boundInputHandler: (event: Event) => void;
 	private _boundClearHandler: (event: MouseEvent) => void;
+	private _valuesContainerElement: HTMLElement | null;
 
 	constructor(select: KTSelect) {
 		this._select = select;
@@ -33,19 +32,41 @@ export class KTSelectCombobox {
 				? (displayElement as HTMLInputElement)
 				: displayElement.querySelector('input[data-kt-select-search]');
 
-		// Find the clear button
-		this._clearButtonElement =
-			displayElement.tagName === 'DIV'
-				? displayElement.querySelector('[data-kt-select-clear-button]')
-				: null;
+		// Find the clear button robustly
+		let clearButtonContainer: HTMLElement | null = null;
+		if (displayElement.tagName === 'DIV') {
+			clearButtonContainer = displayElement;
+		} else if (displayElement.tagName === 'INPUT') {
+			clearButtonContainer = displayElement.parentElement as HTMLElement;
+		}
+
+		this._clearButtonElement = clearButtonContainer
+			? clearButtonContainer.querySelector('[data-kt-select-clear-button]')
+			: null;
+
+		this._valuesContainerElement = displayElement?.closest('[data-kt-select-combobox]')?.querySelector('[data-kt-select-combobox-values]');
 
 		// Create bound handler references to allow proper cleanup
-		this._boundKeyNavHandler = this._handleComboboxKeyNav.bind(this);
 		this._boundInputHandler = this._handleComboboxInput.bind(this);
 		this._boundClearHandler = this._handleClearButtonClick.bind(this);
 
 		// Attach event listeners
 		this._attachEventListeners();
+
+		// Reset combobox search state when dropdown closes
+		this._select.getElement().addEventListener('dropdown.close', () => {
+			this._searchInputElement.value = '';
+			// this._toggleClearButtonVisibility('');
+			this._select.showAllOptions();
+		});
+
+		// When selection changes, update the input value to the selected option's text
+		// this._select.getElement().addEventListener('change', () => {
+		// 	// Only update the input value, do not reset the filter or show all options
+		// 	const selectedValues = this._select.getSelectedOptions();
+		// 	const content = this._select.renderDisplayTemplateForSelected(selectedValues);
+		// 	this._valuesContainerElement?.append(stringToElement(content));
+		// });
 
 		if (this._config.debug) console.log('KTSelectCombobox initialized');
 	}
@@ -59,12 +80,6 @@ export class KTSelectCombobox {
 
 		// Add input event handler to filter options as user types
 		this._searchInputElement.addEventListener('input', this._boundInputHandler);
-
-		// Add keyboard navigation for the combobox
-		this._searchInputElement.addEventListener(
-			'keydown',
-			this._boundKeyNavHandler,
-		);
 
 		// Add clear button click event listener
 		if (this._clearButtonElement) {
@@ -90,10 +105,6 @@ export class KTSelectCombobox {
 				'input',
 				this._boundInputHandler,
 			);
-			this._searchInputElement.removeEventListener(
-				'keydown',
-				this._boundKeyNavHandler,
-			);
 		}
 
 		if (this._clearButtonElement) {
@@ -114,7 +125,7 @@ export class KTSelectCombobox {
 		if (this._config.debug) console.log('Combobox input event, query:', query);
 
 		// Toggle clear button visibility based on input value
-		this._toggleClearButtonVisibility(query);
+		// this._toggleClearButtonVisibility(query);
 
 		// If dropdown isn't open, open it when user starts typing
 		if (!(this._select as any)._dropdownIsOpen) {
@@ -136,7 +147,7 @@ export class KTSelectCombobox {
 		this._searchInputElement.value = '';
 
 		// Hide the clear button
-		this._toggleClearButtonVisibility('');
+		// this._toggleClearButtonVisibility('');
 
 		// Show all options and open dropdown
 		this._select.showAllOptions();
@@ -144,6 +155,11 @@ export class KTSelectCombobox {
 
 		// Clear the current selection
 		this._select.clearSelection();
+
+		// Clear the combobox values container if present (for displayTemplate)
+		if (this._valuesContainerElement) {
+			this._valuesContainerElement.innerHTML = '';
+		}
 
 		// Focus on the input
 		this._searchInputElement.focus();
@@ -166,134 +182,11 @@ export class KTSelectCombobox {
 	 * Filter options for combobox based on input query
 	 */
 	private _filterOptionsForCombobox(query: string): void {
-		// Access the private method through type assertion
-		(this._select as any)._filterOptionsForCombobox(query);
-	}
-
-	/**
-	 * Handle keyboard navigation in combobox mode
-	 */
-	private _handleComboboxKeyNav(event: KeyboardEvent): void {
-		if (this._config.debug) console.log('Combobox keydown event:', event.key);
-
-		// Prevent event propagation to stop bubbling to other handlers
-		event.stopPropagation();
-
-		// Handle clear with Escape when dropdown is closed
-		if (
-			event.key === 'Escape' &&
-			!(this._select as any)._dropdownIsOpen &&
-			this._searchInputElement.value !== ''
-		) {
-			event.preventDefault();
-			this._searchInputElement.value = '';
-			this._toggleClearButtonVisibility('');
-			this._select.clearSelection();
-			return;
-		}
-
-		// Handle dropdown visibility with special keys
-		if (
-			!(this._select as any)._dropdownIsOpen &&
-			(event.key === 'ArrowDown' ||
-				event.key === 'ArrowUp' ||
-				event.key === 'Enter')
-		) {
-			if (this._config.debug)
-				console.log('Opening dropdown from keyboard in combobox');
-			this._select.openDropdown();
-			event.preventDefault();
-
-			// If it's arrow keys, also move focus
-			if (event.key === 'ArrowDown') {
-				(this._select as any)._focusNextOption();
-			} else if (event.key === 'ArrowUp') {
-				(this._select as any)._focusPreviousOption();
-			}
-			return;
-		}
-
-		// Use the shared keyboard navigation handler
-		handleDropdownKeyNavigation(event, this._select, {
-			multiple: this._config.multiple,
-			closeOnSelect: this._config.closeOnSelect,
-		});
-	}
-
-	/**
-	 * Update the combobox input value when an option is selected
-	 */
-	public updateSelectedValue(selectedText: string): void {
-		if (this._searchInputElement) {
-			// Extract just the text content if it contains HTML
-			let cleanText = selectedText;
-
-			// If the text might contain HTML (when description is present)
-			if (selectedText.includes('<') || selectedText.includes('>')) {
-				// Create a temporary element to extract just the text
-				const tempDiv = document.createElement('div');
-				tempDiv.innerHTML = selectedText;
-
-				// Find and use only the option-title text if available
-				const titleElement = tempDiv.querySelector('[data-kt-option-title]');
-				if (titleElement) {
-					cleanText = titleElement.textContent || selectedText;
-				} else {
-					// Fallback to all text content if option-title not found
-					cleanText = tempDiv.textContent || selectedText;
-				}
-			}
-
-			// Set the input value directly for immediate feedback
-			this._searchInputElement.value = cleanText;
-
-			// Show the clear button if there's a value
-			this._toggleClearButtonVisibility(cleanText);
-
-			// Trigger an input event to ensure any input-based listeners are notified
-			const inputEvent = new Event('input', { bubbles: true });
-			this._searchInputElement.dispatchEvent(inputEvent);
-
-			if (this._config.debug)
-				console.log('Combobox value updated to:', cleanText);
-		}
-	}
-
-	/**
-	 * Reset the input value to match the current selection
-	 * This can be called to sync the input with the current state
-	 */
-	public resetInputValueToSelection(): void {
-		const selectedOptions = this._select.getSelectedOptions();
-		if (selectedOptions.length > 0) {
-			const selectedOption = Array.from(this._select.getOptionsElement()).find(
-				(opt) => opt.dataset.value === selectedOptions[0],
-			) as HTMLElement;
-
-			if (selectedOption) {
-				// Find the option-title element to get just the title text
-				const titleElement = selectedOption.querySelector(
-					'[data-kt-option-title]',
-				);
-				let selectedText = '';
-
-				if (titleElement) {
-					// If it has a structured content with a title element
-					selectedText = titleElement.textContent?.trim() || '';
-				} else {
-					// Fallback to the whole text content
-					selectedText = selectedOption.textContent?.trim() || '';
-				}
-
-				this.updateSelectedValue(selectedText);
-			}
-		} else {
-			// No selection, clear the input
-			if (this._searchInputElement) {
-				this._searchInputElement.value = '';
-				this._toggleClearButtonVisibility('');
-			}
-		}
+		// Use the same filter logic as KTSelectSearch
+		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		const config = this._select.getConfig();
+		const dropdownElement = this._select.getDropdownElement();
+		filterOptions(options, query, config, dropdownElement);
 	}
 
 	/**
