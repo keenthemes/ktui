@@ -94,10 +94,6 @@ export default class KTComponent {
 				this._element,
 				this._dataOptionPrefix + this._name,
 			),
-			...KTDom.getDataAttributesByJson(
-				this._element,
-				this._dataOptionPrefix + this._name + '-config',
-			),
 			...config,
 		};
 	}
