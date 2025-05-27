@@ -499,7 +499,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		// Set search value
 		if (searchElement) {
 			searchElement.value =
-				typeof search === 'string' ? search : String(search);
+				search === undefined || search === null ? '' : typeof search === 'string' ? search : String(search);
 		}
 
 		if (searchElement) {
