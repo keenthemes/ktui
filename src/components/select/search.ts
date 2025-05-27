@@ -290,7 +290,7 @@ export class KTSelectSearch {
 	}
 
 	private _handleNoResults(visibleOptionsCount: number) {
-		if (visibleOptionsCount === 0 && this._searchInput.value.trim() !== '') {
+		if (visibleOptionsCount === 0 && this._searchInput?.value?.trim() !== '') {
 			this._showNoResultsMessage();
 		} else {
 			this._clearNoResultsMessage();
