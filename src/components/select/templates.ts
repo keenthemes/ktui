@@ -335,6 +335,11 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 
 		const element = stringToElement(html);
 
+		// If a custom option template is provided, replace the element's innerHTML with the content.
+		if (config.optionTemplate) {
+			element.innerHTML = content;
+		}
+
 		// Ensure data-text attribute is set to the original, clean text for searching/filtering
 		element.setAttribute('data-text', optionData?.text?.trim() || '');
 
