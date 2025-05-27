@@ -64,7 +64,7 @@ export class KTSelectSearch {
 					setTimeout(() => {
 						if (!this._searchInput.value) {
 							this._resetAllOptions();
-							this.clearSearchHighlights();
+							this.clearSearch();
 						}
 					}, 100);
 				});
@@ -90,7 +90,7 @@ export class KTSelectSearch {
 				// Listen for dropdown close to reset options if search is empty
 				this._select.getElement().addEventListener('dropdown.close', () => {
 					this._focusManager.resetFocus();
-					this.clearSearchHighlights();
+					this.clearSearch();
 					this._searchInput.value = '';
 					this._resetAllOptions();
 					this._clearNoResultsMessage();
@@ -98,7 +98,7 @@ export class KTSelectSearch {
 
 				// Clear highlights when an option is selected
 				this._select.getElement().addEventListener('change', () => {
-					this.clearSearchHighlights();
+					this.clearSearch();
 
 					// Close dropdown if configured to do so
 					if (
@@ -123,7 +123,7 @@ export class KTSelectSearch {
 				this._select.getElement().addEventListener('dropdown.show', () => {
 					// If search input is empty, ensure highlights are cleared on open
 					if (!this._searchInput?.value) {
-						this.clearSearchHighlights();
+						this.clearSearch();
 					}
 				});
 			}
@@ -150,7 +150,7 @@ export class KTSelectSearch {
 
 			if (optionValue) {
 				// Ensure highlights are cleared before selection
-				this.clearSearchHighlights();
+				this.clearSearch();
 
 				// Trigger the selection in the main select component
 				this._select['_selectOption'](optionValue);
@@ -249,11 +249,6 @@ export class KTSelectSearch {
 		filterOptions(options, query, config, dropdownElement, (visibleCount) =>
 			this._handleNoResults(visibleCount),
 		);
-
-		// Apply specialized text highlighting if needed
-		if (config.searchHighlight && query.trim() !== '') {
-			this._applyHighlightToDisplay(query);
-		}
 	}
 
 	/**
@@ -330,7 +325,7 @@ export class KTSelectSearch {
 	 * Public method to explicitly clear all search highlights
 	 * This is called when search is reset or selection changes
 	 */
-	public clearSearchHighlights() {
+	public clearSearch() {
 		// Restore original option content (removes highlighting)
 		const optionsToClear = Array.from(
 			this._select.getOptionsElement(),
@@ -415,6 +410,6 @@ export class KTSelectSearch {
 		this._originalOptionContents.clear();
 
 		// Clear highlight elements
-		this.clearSearchHighlights();
+		this.clearSearch();
 	}
 }

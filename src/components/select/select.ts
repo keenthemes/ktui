@@ -833,7 +833,7 @@ export class KTSelect extends KTComponent {
 			}
 
 			// Always clear the highlights when dropdown closes
-			this._searchModule.clearSearchHighlights();
+			this._searchModule.clearSearch();
 		}
 
 		// Set our internal flag to match what we're doing
@@ -1281,7 +1281,7 @@ export class KTSelect extends KTComponent {
 			this._searchInputElement.value = '';
 			// If we have a search module, clear any search filtering
 			if (this._searchModule) {
-				this._searchModule.clearSearchHighlights();
+				this._searchModule.clearSearch();
 			}
 		}
 	}
@@ -1327,7 +1327,7 @@ export class KTSelect extends KTComponent {
 
 		// Ensure any search highlights are cleared when selection changes
 		if (this._searchModule) {
-			this._searchModule.clearSearchHighlights();
+			this._searchModule.clearSearch();
 		}
 
 		// Toggle the selection in the state

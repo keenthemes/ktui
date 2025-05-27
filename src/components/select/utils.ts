@@ -61,10 +61,6 @@ export function filterOptions(
 			if (option.style.display === 'none') option.style.display = ''; // Ensure visible
 			visibleOptionsCount++;
 
-			if (config.searchHighlight) {
-				// The option is already in its original state here thanks to KTSelectSearch
-				highlightTextInElementDebounced(option, query, config);
-			}
 		} else {
 			option.classList.add('hidden');
 		}
@@ -91,7 +87,7 @@ export function highlightTextInElement(
 	query: string,
 	config: KTSelectConfigInterface,
 ): void {
-	if (!element || !query || query.trim() === '' || !config.searchHighlight) return;
+	if (!element || !query || query.trim() === '') return;
 
 	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	const regex = new RegExp(escapedQuery, 'gi');
