@@ -39,10 +39,10 @@ export const coreTemplateStrings = {
 		</li>
 	`,
 	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-input-ghost" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
-	empty: `<li data-kt-select-empty class="kt-select-no-result {{class}}" role="status">{{content}}</li>`,
-	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite">{{content}}</li>`,
-	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}">{{content}}</div>`,
-	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true">{{content}}</li>`,
+	empty: `<li data-kt-select-empty class="kt-select-no-result {{class}}" role="status"></li>`,
+	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite"></li>`,
+	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}"></div>`,
+	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true"></li>`,
 	tagRemoveButton: `<button type="button" data-kt-select-remove-button class="kt-select-tag-remove" aria-label="Remove tag" tabindex="0"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg></button>`,
 };
 
@@ -359,7 +359,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	empty: (config: KTSelectConfigInterface): HTMLElement => {
 		let html = getTemplateStrings(config)
 			.empty
-			// .replace('{{searchNotFoundText}}', config.searchNotFoundText || 'No results found') // Content is no longer in template string
 			.replace('{{class}}', config.emptyClass || '');
 		const element = stringToElement(html);
 		element.textContent = config.searchNotFoundText || 'No results found';
@@ -375,7 +374,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	): HTMLElement => {
 		let html = getTemplateStrings(config)
 			.loading
-			// .replace('{{loadingMessage}}', loadingMessage || 'Loading options...') // Content is no longer in template string
 			.replace('{{class}}', config.loadingClass || '');
 		const element = stringToElement(html);
 		element.textContent = loadingMessage || 'Loading options...';
@@ -390,49 +388,42 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface,
 	): HTMLElement => {
 		let template = getTemplateStrings(config).tag;
-		let content = option.title;
+		let preparedContent = option.title; // Default content is the option's title
+
 		if (config.tagTemplate) {
-			let tagTemplate = config.tagTemplate;
+			let tagTemplateString = config.tagTemplate;
+			const optionValue = option.getAttribute('data-value') || option.value;
 
-			const text = option.getAttribute('data-text');
-			const value = option.getAttribute('data-value');
-
-			// Replace all {{varname}} in option.innerHTML with values from _config
-			Object.entries((config.optionsConfig as any)[value] || {}).forEach(
-				([key, value]) => {
-					if (
-						typeof value === 'string' ||
-						typeof value === 'number' ||
-						typeof value === 'boolean'
-					) {
-						tagTemplate = tagTemplate.replace(
-							new RegExp(`{{${key}}}`, 'g'),
-							String(value),
-						);
+			// Replace all {{varname}} in option.innerHTML with values from _config.optionsConfig
+			Object.entries((config.optionsConfig as any)?.[optionValue] || {}).forEach(
+				([key, val]) => {
+					if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
+						tagTemplateString = tagTemplateString.replace(new RegExp(`{{${key}}}`, 'g'), String(val));
 					}
 				},
 			);
 
-			content = renderTemplateString(tagTemplate, {
+			// Render the custom tag template with option data
+			preparedContent = renderTemplateString(tagTemplateString, {
 				title: option.title,
 				id: option.id,
-				class: config.tagClass || '',
-				content: option.innerHTML,
-				text: option.innerText,
+				class: config.tagClass || '', // This class is for content, not the main tag div
+				// content: option.innerHTML, // Avoid direct innerHTML from option due to potential XSS
+				text: option.innerText || option.textContent || '',
+				value: optionValue,
 			});
 		}
 
-		// content += getTemplateStrings(config).tagRemoveButton; // Remove button is now part of the prepared content string
+		// Append the remove button HTML string to the prepared content
+		preparedContent += getTemplateStrings(config).tagRemoveButton;
 
 		const html = template
-			.replace('{{title}}', option.title)
-			.replace('{{id}}', option.id)
-			// .replace('{{content}}', content) // Content is no longer in template string
-			.replace('{{class}}', config.tagClass || '');
+			// .replace('{{title}}', option.title) // Title is part of preparedContent if using custom template
+			// .replace('{{id}}', option.id)       // ID is part of preparedContent if using custom template
+			.replace('{{class}}', config.tagClass || ''); // Class for the main tag div
+
 		const element = stringToElement(html);
-		// If content was prepared (from custom template or default), set it as innerHTML
-		// Otherwise, it defaults to option.title + remove button if no custom template.
-		element.innerHTML = content;
+		element.innerHTML = preparedContent; // Set the fully prepared content (text/HTML + remove button)
 		return element;
 	},
 
