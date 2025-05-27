@@ -84,7 +84,7 @@
 	}
 
 	.kt-select-option {
-		@apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md text-sm text-start cursor-pointer;
+		@apply w-full flex items-center gap-x-2.5 py-1.75 px-2.5 rounded-md text-sm text-start cursor-pointer;
 		@apply hover:bg-accent hover:text-accent-foreground;
 
 		&[aria-disabled=true],

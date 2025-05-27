@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Icon Description</title>
+	<title>Search</title>
 	<link rel="stylesheet" href="../../dist/styles.css">
 </head>
 
@@ -12,41 +12,32 @@
 	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
 		<form class="flex flex-col gap-6">
 			<div>
-				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Icon Description</label>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Search</label>
 
 				<select
 					class="kt-select"
-					data-kt-select
-					data-kt-select-placeholder="Select with description..."
+					data-kt-select="true"
+					data-kt-select-enable-search="true"
+					data-kt-select-search-placeholder="Search..."
+					data-kt-select-placeholder="Select a country..."
 					data-kt-select-config='{
-						"displayTemplate": "<div class=\"flex items-start gap-3\">{{icon}}<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900 leading-tight\">{{text}}</span><span class=\"text-xs text-gray-500 leading-tight\">{{desc}}</span></div></div>",
-						"displayClass": "kt-select-display",
-						"displayToggle": true,
-						"optionTemplate": "<div class=\"flex items-start gap-3\">{{icon}}<div class=\"flex flex-col\"><span class=\"text-gray-800 leading-tight\">{{text}}</span><span class=\"text-xs text-gray-500 leading-tight\">{{desc}}</span></div></div>",
-						"optionClass": "kt-select-option"
-					}'>
-					<option value="mysql"
-						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/mysql/4479A1\" class=\"w-6 h-6\" />", "desc": "MySQL is a relational database management system"}'>
-						MySQL
-					</option>
-					<option value="postgres"
-						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/postgresql/4169E1\" class=\"w-6 h-6\" />", "desc": "PostgreSQL is a powerful object-relational database system"}'>
-						PostgreSQL
-					</option>
-					<option value="mongodb"
-						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/mongodb/47A248\" class=\"w-6 h-6\" />", "desc": "MongoDB is a NoSQL database that uses JSON-like documents with optional schemas"}'>
-						MongoDB
-					</option>
-					<option value="redis"
-						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/redis/DC382D\" class=\"w-6 h-6\" />", "desc": "Redis is an in-memory data structure store"}'>
-						Redis
-					</option>
-					<option value="sqlite"
-						data-kt-select-option='{"icon": "<img src=\"https://cdn.simpleicons.org/sqlite/003B57\" class=\"w-6 h-6\" />", "desc": "SQLite is a lightweight, disk-based database"}'>
-						SQLite
-					</option>
-				</select>
+						"displayTemplate": "<div class=\"flex items-center gap-2\"><img src=\"{{avatar}}\" alt=\"{{text}}\" class=\"size-5 border border-border rounded-full\" /> <span class=\"text-foreground\">{{text}}</span></div>",
+						"optionTemplate": "<div class=\"flex items-center gap-2\"><img src=\"{{avatar}}\" alt=\"{{text}}\" class=\"size-6 border border-border rounded-full\" /> <span class=\"text-foreground\">{{text}}</span></div><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-3.5 ms-auto hidden text-primary kt-select-option-selected:block\"><path d=\"M20 6 9 17l-5-5\"/></svg>"
+					}'
+				>
+					<option value="1" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/women/68.jpg"}'>Ana Nilson</option>
+					<option value="2" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/men/46.jpg"}'>Robert Brown</option>
+					<option value="3" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/men/29.jpg"}'>John Doe</option>
+					<option value="4" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/women/48.jpg"}'>Nina Erin</option>
+					<option value="5" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/men/58.jpg"}'>Mark Larson</option>
+					<option value="6" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/men/68.jpg"}'>Nick Strong</option>
+					<option value="7" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/women/68.jpg"}'>Ana Nilson</option>
+					<option value="8" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/women/58.jpg"}'>Kate Leo</option>
+					<option value="9" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/men/38.jpg"}'>Elon White</option>
+					<option value="10" data-kt-select-option='{"avatar": "https://randomuser.me/api/portraits/men/8.jpg"}'>Bill Smith</option>
 
+					
+					
 			</div>
 		</form>
 	</div>

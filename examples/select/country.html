@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Search</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Search</label>
+
+				<select
+					class="kt-select"
+					data-kt-select="true"
+					data-kt-select-enable-search="true"
+					data-kt-select-search-placeholder="Search..."
+					data-kt-select-placeholder="Select a country..."
+					data-kt-select-config='{
+						"displayTemplate": "<div class=\"flex items-center leading-none gap-2\">{{flag}}<span class=\"text-foreground\">{{text}}</span></div>",
+						"optionTemplate": "<div class=\"flex items-center leading-none gap-2\">{{flag}} <span class=\"text-foreground\">{{text}}</span></div><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-3.5 ms-auto hidden text-primary kt-select-option-selected:block\"><path d=\"M20 6 9 17l-5-5\"/></svg></div>"
+					}'
+				>
+					<option value="usa" data-kt-select-option='{"flag": "🇺🇸"}'>USA</option>
+					<option value="germany" data-kt-select-option='{"flag": "🇩🇪"}'>Germany</option>
+					<option value="italy" data-kt-select-option='{"flag": "🇮🇹"}'>Italy</option>
+					<option value="france" data-kt-select-option='{"flag": "🇫🇷"}'>France</option>
+					<option value="spain" data-kt-select-option='{"flag": "🇪🇸"}'>Spain</option>
+					<option value="canada" data-kt-select-option='{"flag": "🇨🇦"}'>Canada</option>
+					<option value="australia" data-kt-select-option='{"flag": "🇦🇺"}'>Australia</option>
+					<option value="japan" data-kt-select-option='{"flag": "🇯🇵"}'>Japan</option>	
+				</select>
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>
