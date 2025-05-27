@@ -19,7 +19,7 @@ import { FocusManager, EventManager } from './utils';
  *
  * A specialized dropdown implementation for the KTSelect component.
  * This module handles the dropdown functionality for the select component,
- * including positioning, showing/hiding, and keyboard navigation.
+ * including positioning and showing/hiding.
  */
 export class KTSelectDropdown extends KTComponent {
 	protected override readonly _name: string = 'select-dropdown';
