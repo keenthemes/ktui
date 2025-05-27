@@ -177,6 +177,7 @@ export interface KTSelectConfigInterface {
 	dropdownTemplate?: string;
 
 	// Option Configuration
+	config?: KTSelectConfigInterface; // config from data-kt-select-config attribute
 	optionsConfig?: Record<string, KTSelectConfigInterface>;
 }
 

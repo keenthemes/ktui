@@ -12,16 +12,16 @@ import { defaultTemplates } from './templates';
 export class KTSelectOption extends KTComponent {
 	protected override readonly _name: string = 'select-option';
 	protected override readonly _dataOptionPrefix: string = 'kt-'; // Use 'kt-' prefix to support data-kt-select-option attributes
-	protected override readonly _config: KTSelectConfigInterface;
-	private _globalConfig: KTSelectConfigInterface;
+	protected override readonly _config: KTSelectConfigInterface; // Holds option-specific data from data-kt-*
+	private _globalConfig: KTSelectConfigInterface; // Main select's config
 
 	constructor(element: HTMLElement, config?: KTSelectConfigInterface,) {
 		super();
 
 		// Always initialize a new option instance
 		this._init(element);
+		this._globalConfig = config.config;
 		this._buildConfig();
-		this._globalConfig = config;
 
 		// Clean the config
 		this._config = (this._config as any)[''] || {};
