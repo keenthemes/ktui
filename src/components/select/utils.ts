@@ -30,133 +30,51 @@ export function filterOptions(
 ): number {
 	let visibleOptionsCount = 0;
 
-	// Clear existing "no results" messages
-	const noResultsElement = dropdownElement.querySelector(
-		'[data-kt-select-no-results]',
-	);
-	if (noResultsElement) {
-		noResultsElement.remove();
-	}
-
-	// For empty query, ensure highlights are cleared from all options
+	// For empty query, make all options visible and ensure no highlights.
+	// The KTSelectSearch class is now responsible for restoring original content before calling this.
 	if (!query || query.trim() === '') {
-		// Just make all options visible without highlighting
 		for (const option of options) {
-			// Make option visible by removing hidden classes and inline styles
 			option.classList.remove('hidden');
-
-			// Clean up any inline display styles from legacy code
-			if (
-				option.hasAttribute('style') &&
-				option.getAttribute('style').includes('display:')
-			) {
-				const styleAttr = option.getAttribute('style');
-				if (
-					styleAttr.trim() === 'display: none;' ||
-					styleAttr.trim() === 'display: block;'
-				) {
-					option.removeAttribute('style');
-				} else {
-					option.setAttribute(
-						'style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
-					);
-				}
+			// Remove inline display style if it was used to hide
+			if (option.style.display === 'none') {
+				option.style.display = '';
 			}
-
-			// Clear highlights by restoring original text content
-			if (option.dataset && option.dataset.originalText) {
-				option.innerHTML = option.dataset.originalText;
-			} else {
-				option.innerHTML = option.textContent || '';
-			}
-			// Remove the cache if present
-			if (option.dataset && option.dataset.originalText) {
-				delete option.dataset.originalText;
-			}
-
+			// At this point, option.innerHTML should be its original, non-highlighted state.
 			visibleOptionsCount++;
 		}
 
-		// Call the callback with the visible count if provided
 		if (onVisibleCount) {
 			onVisibleCount(visibleOptionsCount);
 		}
-
 		return visibleOptionsCount;
 	}
 
-	// Filter options based on query
+	const queryLower = query.toLowerCase();
+
 	for (const option of options) {
-		const optionText = option.textContent?.toLowerCase() || '';
-		const isMatch = optionText.includes(query.toLowerCase());
+		// Use data-text for matching if available, otherwise fall back to textContent
+		const optionText = (option.dataset.text || option.textContent || '').toLowerCase();
+		const isMatch = optionText.includes(queryLower);
 
-		// Check if option is disabled
-		const isDisabled = option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true';
-
-		if (isMatch || query.trim() === '') {
-			// Show option by removing the hidden class and any display inline styles
+		if (isMatch) {
 			option.classList.remove('hidden');
-
-			// Remove any inline display styles that might be present
-			if (
-				option.hasAttribute('style') &&
-				option.getAttribute('style').includes('display:')
-			) {
-				const styleAttr = option.getAttribute('style');
-				if (
-					styleAttr.trim() === 'display: none;' ||
-					styleAttr.trim() === 'display: block;'
-				) {
-					option.removeAttribute('style');
-				} else {
-					option.setAttribute(
-						'style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
-					);
-				}
-			}
-
+			if (option.style.display === 'none') option.style.display = ''; // Ensure visible
 			visibleOptionsCount++;
 
-			if (config.searchHighlight && query.trim() !== '') {
-				if (option.dataset && !option.dataset.originalText) {
-					option.dataset.originalText = option.innerHTML;
-				}
+			if (config.searchHighlight) {
+				// The option is already in its original state here thanks to KTSelectSearch
 				highlightTextInElementDebounced(option, query, config);
 			}
-
 		} else {
-			// Hide option using hidden class
 			option.classList.add('hidden');
-
-			// Remove any inline display styles
-			if (
-				option.hasAttribute('style') &&
-				option.getAttribute('style').includes('display:')
-			) {
-				const styleAttr = option.getAttribute('style');
-				if (
-					styleAttr.trim() === 'display: none;' ||
-					styleAttr.trim() === 'display: block;'
-				) {
-					option.removeAttribute('style');
-				} else {
-					option.setAttribute(
-						'style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
-					);
-				}
-			}
 		}
 
-		// Early exit if maxItems limit is reached
-		if (config.searchMaxItems && visibleOptionsCount >= config.searchMaxItems) {
-			break;
-		}
+		// Early exit if maxItems limit is reached (optional)
+		// if (config.searchMaxItems && visibleOptionsCount >= config.searchMaxItems) {
+		// 	break;
+		// }
 	}
 
-	// Call the callback with the visible count if provided
 	if (onVisibleCount) {
 		onVisibleCount(visibleOptionsCount);
 	}
@@ -165,50 +83,62 @@ export function filterOptions(
 }
 
 /**
- * Highlight text only within a specific element, preserving other elements
+ * Highlight text within an element by traversing its text nodes.
+ * Preserves existing HTML structure, suitable for custom templates.
  */
 export function highlightTextInElement(
 	element: HTMLElement,
 	query: string,
 	config: KTSelectConfigInterface,
 ): void {
-	if (!element || !query || query.trim() === '') return;
+	if (!element || !query || query.trim() === '' || !config.searchHighlight) return;
 
-	const queryLower = query.toLowerCase();
-	const text = element.textContent || '';
-	if (!text) return;
-
-	// Escape regex special characters in query
 	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	const regex = new RegExp(escapedQuery, 'gi');
 
-	// Replace all matches with the highlight template
-	let lastIndex = 0;
-	let result = '';
-	let match: RegExpExecArray | null;
-	let matches = [];
-	while ((match = regex.exec(text)) !== null) {
-		matches.push({ start: match.index, end: regex.lastIndex });
+	// Ensure we don't highlight within existing highlight spans
+	const highlightSelector = `[data-kt-select-highlight]`;
+
+	function walk(node: Node) {
+		if (node.nodeType === Node.TEXT_NODE) {
+			// Do not touch text nodes that are children of an existing highlight span
+			if (node.parentElement && node.parentElement.closest(highlightSelector)) {
+				return;
+			}
+
+			const text = node.nodeValue || '';
+			let match;
+			let lastIndex = 0;
+			const fragment = document.createDocumentFragment();
+			let foundMatch = false;
+
+			while ((match = regex.exec(text)) !== null) {
+				foundMatch = true;
+				// Add text before the match
+				if (match.index > lastIndex) {
+					fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+				}
+				// Add the highlighted match
+				const highlightedSpan = defaultTemplates.highlight(config, match[0]);
+				fragment.appendChild(highlightedSpan);
+				lastIndex = regex.lastIndex;
+			}
+
+			if (foundMatch) {
+				// Add any remaining text after the last match
+				if (lastIndex < text.length) {
+					fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+				}
+				// Replace the original text node with the fragment
+				node.parentNode?.replaceChild(fragment, node);
+			}
+		} else if (node.nodeType === Node.ELEMENT_NODE && !(node as HTMLElement).matches(highlightSelector)) {
+			// Recursively walk child nodes for element nodes, but not if it's a highlight span itself
+			Array.from(node.childNodes).forEach(walk);
+		}
 	}
 
-	if (matches.length === 0) {
-		element.innerHTML = text;
-		return;
-	}
-
-	for (let i = 0; i < matches.length; i++) {
-		const { start, end } = matches[i];
-		// Add text before match
-		result += text.slice(lastIndex, start);
-		// Add highlighted match using template
-		const highlighted = defaultTemplates.highlight(config, text.slice(start, end)).outerHTML;
-		result += highlighted;
-		lastIndex = end;
-	}
-	// Add remaining text
-	result += text.slice(lastIndex);
-
-	element.innerHTML = result;
+	walk(element);
 }
 
 // Debounced version for performance

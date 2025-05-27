@@ -27,38 +27,57 @@ export class KTSelectOption extends KTComponent {
 		this._config = (this._config as any)[''] || {};
 
 		// Add the option config to the global config
-		this._globalConfig.optionsConfig = this._globalConfig.optionsConfig || {};
-		this._globalConfig.optionsConfig[(element as HTMLInputElement).value] = this._config;
+		// Ensure optionsConfig is initialized
+		if (this._globalConfig) {
+			this._globalConfig.optionsConfig = this._globalConfig.optionsConfig || {};
+			this._globalConfig.optionsConfig[(element as HTMLInputElement).value] = this._config;
+		} else {
+			// Handle case where _globalConfig might be undefined, though constructor expects it.
+			// This might indicate a need to ensure config is always passed or has a default.
+			console.warn('KTSelectOption: _globalConfig is undefined during constructor.');
+		}
 
 		// Don't store in KTData to avoid Singleton pattern issues
 		// Each option should be a unique instance
 		(element as any).instance = this;
 	}
 
+	public get id(): string {
+		return this.getHTMLOptionElement().value;
+	}
+
+	public get title(): string {
+		return this.getHTMLOptionElement().textContent || '';
+	}
+
 	public getHTMLOptionElement(): HTMLOptionElement {
 		return this._element as HTMLOptionElement;
 	}
 
+	/**
+	 * Gathers all necessary data for rendering this option,
+	 * including standard HTML attributes and custom data-kt-* attributes.
+	 */
+	public getOptionDataForTemplate(): Record<string, any> {
+		const el = this.getHTMLOptionElement();
+		const text = el.textContent || '';
+		return {
+			// Custom data from data-kt-select-option attributes (parsed into this._config)
+			...this._config,
+			// Standard HTMLOptionElement properties
+			value: el.value,
+			text: text, // Original text
+			selected: el.selected,
+			disabled: el.disabled,
+			// Provide 'content' for convenience in templates, defaulting to text.
+			// User's optionTemplate can then use {{content}} or specific fields like {{text}}, {{icon}}, etc.
+			content: text,
+		};
+	}
+
 	public render(): HTMLElement {
-		const optionElement = this.getHTMLOptionElement();
-
-		// Get the original template
-		let originalTemplate = this._globalConfig.optionTemplate;
-
-		if (this._globalConfig.optionTemplate) {
-			// Replace all {{varname}} in option.innerHTML with values from _config
-			Object.entries((this._config as any) || {}).forEach(([key, value]) => {
-				if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-					this._globalConfig.optionTemplate = this._globalConfig.optionTemplate.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
-				}
-			});
-		}
-
-		let template = defaultTemplates.option(optionElement, this._globalConfig);
-
-		// Restore the original template
-		this._globalConfig.optionTemplate = originalTemplate;
-
-		return template;
+		// 'this' is the KTSelectOption instance.
+		// defaultTemplates.option will handle using this instance's data along with _globalConfig.
+		return defaultTemplates.option(this, this._globalConfig);
 	}
 }

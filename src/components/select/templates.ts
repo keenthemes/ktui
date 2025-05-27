@@ -256,37 +256,61 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface,
 	): HTMLElement => {
 		const isHtmlOption = option instanceof HTMLOptionElement;
+		let optionData: Record<string, any>;
 
-		const value = isHtmlOption ? option.value : (option as KTSelectOption).id;
-		const text = isHtmlOption ? option.text : (option as KTSelectOption).title;
-		const disabled = isHtmlOption
-			? option.disabled
-			: (option as any).disabled === true;
-		const selected = isHtmlOption
-			? option.selected
-			: !!(option as KTSelectOption).selected;
-
-		let content = text;
-		if (config.optionTemplate) {
-			// Use the user template to render the content, but only for {{content}}
-			content = renderTemplateString(config.optionTemplate, {
-				value,
-				text,
-				class: config.optionClass || '',
-				selected: selected ? 'aria-selected="true"' : 'aria-selected="false"',
-				disabled: disabled ? 'aria-disabled="true"' : '',
-				content: text,
-			});
+		if (isHtmlOption) {
+			// If it's a plain HTMLOptionElement, construct data similarly to how KTSelectOption would
+			// This branch might be less common if KTSelectOption instances are always used for rendering.
+			const el = option as HTMLOptionElement;
+			const textContent = el.textContent || '';
+			optionData = {
+				value: el.value,
+				text: textContent,
+				selected: el.selected,
+				disabled: el.disabled,
+				content: textContent, // Default content to text
+				// Attempt to get custom config for this specific option value if available
+				...(config.optionsConfig?.[el.value] || {}),
+			};
+		} else {
+			// If it's a KTSelectOption class instance (from './option')
+			// which should have the getOptionDataForTemplate method.
+			optionData = (option as import('./option').KTSelectOption).getOptionDataForTemplate();
 		}
 
-		const html = getTemplateStrings(config).option
-			.replace('{{value}}', value)
-			.replace('{{text}}', text)
-			.replace('{{selected}}', selected ? 'aria-selected="true"' : 'aria-selected="false"')
-			.replace('{{disabled}}', disabled ? 'aria-disabled="true"' : '')
-			.replace('{{content}}', content)
-			.replace('{{class}}', config.optionClass || '');
-		return stringToElement(html);
+		let content = optionData.text; // Default content to option's text
+
+		if (config.optionTemplate) {
+			// Use the user-provided template string, rendering with the full optionData.
+			// renderTemplateString will replace {{key}} with values from optionData.
+			content = renderTemplateString(config.optionTemplate, optionData);
+		} else {
+			// If no custom template, the content might be just the text or based on other data.
+			// For basic default rendering, {{content}} in coreTemplateStrings.option will use this.
+			// If the optionData contains an explicit 'content' field from data-kt-select-option,
+			// it would have been part of optionData and could be used here if desired.
+			// For now, let's stick to `optionData.text` as the primary source for default `content`
+			// if no `config.optionTemplate` is given. The `coreTemplateStrings.option` uses `{{content}}`.
+			content = optionData.content || optionData.text; // Prefer explicit content, fallback to text
+		}
+
+		// Use the core option template string as the base structure.
+		const baseTemplate = getTemplateStrings(config).option;
+
+		// Populate the base template. The crucial part is that `{{content}}` here
+		// will be replaced by the `content` generated above (either from custom template or default text).
+		const html = renderTemplateString(baseTemplate, {
+			...optionData, // Pass all data for {{value}}, {{text}}, {{selected}}, {{disabled}}, etc.
+			class: config.optionClass || '', // Add general option class
+			selected: optionData.selected ? 'aria-selected="true"' : 'aria-selected="false"',
+			disabled: optionData.disabled ? 'aria-disabled="true"' : '',
+			content: content, // This is the potentially custom-rendered content
+		});
+
+		const element = stringToElement(html);
+		// Ensure data-text attribute is set to the original, clean text for searching/filtering
+		element.setAttribute('data-text', optionData.text || '');
+		return element;
 	},
 
 	/**
