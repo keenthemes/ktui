@@ -347,7 +347,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		}
 
 		// Ensure data-text attribute is set to the original, clean text for searching/filtering
-		element.setAttribute('data-text', optionData.text || '');
+		element.setAttribute('data-text', optionData?.text?.trim() || '');
 
 		return element;
 	},

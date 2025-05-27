@@ -286,6 +286,7 @@ export class KTSelectSearch {
 				}
 			}
 		});
+
 		this._clearNoResultsMessage(); // Ensure no results message is cleared when resetting
 	}
 

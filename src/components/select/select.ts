@@ -1264,7 +1264,7 @@ export class KTSelect extends KTComponent {
 						// Otherwise, remove just the display property
 						option.setAttribute(
 							'style',
-							styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
+							styleAttr?.replace(/display:\s*[^;]+;?/gi, '')?.trim(),
 						);
 					}
 				}
