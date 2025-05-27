@@ -37,7 +37,6 @@ export class KTSelect extends KTComponent {
 	private _displayElement: HTMLElement;
 	private _dropdownContentElement: HTMLElement;
 	private _searchInputElement: HTMLInputElement | null;
-	private _valueDisplayElement: HTMLElement;
 	private _options: NodeListOf<HTMLElement>;
 
 	// State
@@ -516,10 +515,6 @@ export class KTSelect extends KTComponent {
 			this._searchInputElement = this._displayElement as HTMLInputElement;
 		}
 
-		this._valueDisplayElement = this._wrapperElement.querySelector(
-			`[data-kt-select-value]`,
-		) as HTMLElement;
-
 		this._options = this._wrapperElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
@@ -963,12 +958,12 @@ export class KTSelect extends KTComponent {
 
 		if (typeof this._config.renderSelected === 'function') {
 			// Use the custom renderSelected function if provided
-			this._valueDisplayElement.innerHTML = this._config.renderSelected(selectedOptions);
+			this._displayElement.innerHTML = this._config.renderSelected(selectedOptions);
 		} else {
 
 			if (selectedOptions.length === 0) {
 				const placeholder = defaultTemplates.placeholder(this._config);
-				this._valueDisplayElement.replaceChildren(placeholder);
+				this._displayElement.replaceChildren(placeholder);
 
 			} else {
 				let content = '';
@@ -981,7 +976,7 @@ export class KTSelect extends KTComponent {
 					content = this.getSelectedOptionsText();
 				}
 
-				this._valueDisplayElement.innerHTML = content;
+				this._displayElement.innerHTML = content;
 			}
 		}
 	}
@@ -1237,7 +1232,7 @@ export class KTSelect extends KTComponent {
 	 * Get value display element
 	 */
 	public getValueDisplayElement() {
-		return this._valueDisplayElement;
+		return this._displayElement;
 	}
 
 	/**

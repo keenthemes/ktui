@@ -30,7 +30,6 @@ export const coreTemplateStrings = {
 	`,
 	display: `
 		<div data-kt-select-display class="kt-select-display {{class}}" tabindex="{{tabindex}}" role="button" data-selected="0" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
-			<div data-kt-select-value="true" class="kt-select-label"></div>
 		</div>
 	`,
 	placeholder: `<div data-kt-select-placeholder class="kt-select-placeholder {{class}}"></div>`,
