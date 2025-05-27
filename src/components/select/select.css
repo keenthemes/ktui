@@ -45,11 +45,27 @@
 		}
 	}
 
+	.kt-select-label {
+		@apply flex items-center truncate;
+	}
+
+	.kt-select-display {
+		@apply flex items-center truncate;
+	}
+
 	.kt-select-arrow {
 		@apply ms-auto;
 
 		svg {
 			@apply size-4 text-muted-foreground;
+		}
+	}
+
+	.kt-select-search {
+		@apply px-4 py-1 border-b border-border;
+		
+		.kt-input {
+			@apply text-sm;
 		}
 	}
 
@@ -123,6 +139,7 @@
 	@apply bg-accent text-accent-foreground;
 }
 
+/* Custom variants */
 @custom-variant kt-select-option-selected {
 	[data-kt-select-option].selected {
 		@slot;

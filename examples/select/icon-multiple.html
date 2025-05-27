@@ -16,37 +16,29 @@
 
 				<select
 					class="kt-select"
-					data-kt-select
-					data-kt-select-placeholder="Type or select a country..."
-					data-kt-select-multiple="true" data-kt-select-config='{
-						"displaySeparator": " / ",
-						"displayTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"font-semibold text-gray-900\">{{text}}</span></div>",
-						"displayClass": "kt-select-display",
-						"displayToggle": true,
-						"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
-						"optionClass": "kt-select-option"
+					data-kt-select="true"
+					data-kt-select-multiple="true"
+					data-kt-select-placeholder="Select an option..."
+					data-kt-select-config='{
+						"displaySeparator": ",&nbsp;",
+						"displayTemplate": "<div class=\"flex items-center gap-2 [&>svg]:size-3.5\">{{icon}}<span class=\"text-foreground\">{{text}}</span></div>",
+						"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}} <span class=\"text-foreground\">{{text}}</span></div><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-3.5 ms-auto hidden text-primary kt-select-option-selected:block\"><path d=\"M20 6 9 17l-5-5\"/></svg></div>"
 					}'>
-					<option value="us"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/us.png\" class=\"w-6 h-6\" />"}'>
-						United States</option>
-					<option value="de"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/de.png\" class=\"w-6 h-6\" />"}'>
-						Germany</option>
-					<option value="it"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/it.png\" class=\"w-6 h-6\" />"}'>
-						Italy</option>
-					<option value="fr"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/fr.png\" class=\"w-6 h-6\" />"}'>
-						France</option>
-					<option value="es"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/es.png\" class=\"w-6 h-6\" />"}'>
-						Spain</option>
-					<option value="jp"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/jp.png\" class=\"w-6 h-6\" />"}'>
-						Japan</option>
-					<option value="ru"
-						data-kt-select-option='{"icon": "<img src=\"https://flagcdn.com/w40/ru.png\" class=\"w-6 h-6\" />"}'>
-						Russia</option>
+					<option value="hardwere" data-kt-select-option='{"icon": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-4 text-muted-foreground\"><circle cx=\"19\" cy=\"6\" r=\"3\"/><path d=\"M22 12v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9\/><path d=\"M12 17v4\/><path d=\"M8 21h8\"/></svg>"}'>
+						Hardwere
+					</option>
+					<option value="software" data-kt-select-option='{"icon": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-4 text-muted-foreground\"><path d=\"M10 10.5 8 13l2 2.5\/><path d=\"m14 10.5 2 2.5-2 2.5\/><path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z\"/></svg>"}'>
+						Software
+					</option>
+					<option value="network" data-kt-select-option='{"icon": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-4 text-muted-foreground\"><rect x=\"16\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\"/><rect x=\"2\" y=\"16\" width=\"6\" height=\"6\" rx=\"1\"/><rect x=\"9\" y=\"2\" width=\"6\" height=\"6\" rx=\"1\"/><path d=\"M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3\/><path d=\"M12 12V8\/></svg>"}'>
+						Network
+					</option>	
+					<option value="storage" data-kt-select-option='{"icon": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-4 text-muted-foreground\"><ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"/><path d=\"M3 5V19A9 3 0 0 0 21 19V5\/><path d=\"M3 12A9 3 0 0 0 21 12\"/></svg>"}'>
+						Storage
+					</option>		
+					<option value="security" data-kt-select-option='{"icon": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-4 text-muted-foreground\"><circle cx=\"12\" cy=\"16\" r=\"1\"/><rect x=\"3\" y=\"10\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M7 10V7a5 5 0 0 1 10 0v3\"/></svg>"}'>
+						Security
+					</option>	
 				</select>
 
 			</div>
