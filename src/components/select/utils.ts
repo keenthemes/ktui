@@ -38,7 +38,7 @@ export function filterOptions(
 			// Remove inline display style if it was used to hide
 			if (option.style.display === 'none') {
 				option.style.display = '';
-			}
+				}
 			// At this point, option.innerHTML should be its original, non-highlighted state.
 			visibleOptionsCount++;
 		}
@@ -103,8 +103,8 @@ export function highlightTextInElement(
 		if (node.nodeType === Node.TEXT_NODE) {
 			// Do not touch text nodes that are children of an existing highlight span
 			if (node.parentElement && node.parentElement.closest(highlightSelector)) {
-				return;
-			}
+		return;
+	}
 
 			const text = node.nodeValue || '';
 			let match;
@@ -122,7 +122,7 @@ export function highlightTextInElement(
 				const highlightedSpan = defaultTemplates.highlight(config, match[0]);
 				fragment.appendChild(highlightedSpan);
 				lastIndex = regex.lastIndex;
-			}
+	}
 
 			if (foundMatch) {
 				// Add any remaining text after the last match

@@ -205,30 +205,31 @@ export class KTSelectSearch {
 		// Restore original content for all options before filtering/highlighting again
 		this._restoreOptionContentsBeforeFilter();
 
-		// If search query is empty, clear all highlights and reset options
 		if (query.trim() === '') {
-			this._resetAllOptions(); // This also clears highlights and no-results message
-			return; // Important: return early if query is empty
+			this._resetAllOptions();
+			this._focusManager.focusFirst(); // Focus first option when search is cleared
+			return;
 		}
 
-		// For remote search, we don't filter locally
-		// The KTSelect component will handle the remote search
+		// For remote search, KTSelect component handles it.
+		// KTSelect will call refreshAfterSearch on this module when remote data is updated.
 		if (config.remote && config.searchParam) {
-			// If query is too short, reset all options to visible state
 			if (query.length < config.searchMinLength) {
 				this._resetAllOptions();
 				this._clearNoResultsMessage();
+				this._focusManager.focusFirst(); // Focus first if query too short
 			}
-			// Otherwise, let KTSelect handle remote search
 			return;
 		}
 
 		// For local search
 		if (query.length >= config.searchMinLength) {
 			this._filterOptions(query);
+			this._focusManager.focusFirst(); // Focus first visible option after local filtering
 		} else {
 			this._resetAllOptions();
 			this._clearNoResultsMessage();
+			this._focusManager.focusFirst(); // Focus first if query too short and not remote
 		}
 	}
 
@@ -387,6 +388,16 @@ export class KTSelectSearch {
 				this._originalOptionContents.set(value, option.innerHTML);
 			}
 		});
+	}
+
+	/**
+	 * Called after search (local or remote via KTSelect) to reset focus.
+	 */
+	public refreshAfterSearch(): void {
+		this._focusManager.resetFocus();
+		this._focusManager.focusFirst();
+		// Re-cache original contents as options might have changed (especially after remote search)
+		this.refreshOptionCache();
 	}
 
 	/**

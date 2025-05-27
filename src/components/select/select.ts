@@ -1476,9 +1476,9 @@ export class KTSelect extends KTComponent {
 							// Update options in the dropdown
 							this._updateSearchResults(items);
 
-							// Refresh the search module's option cache if search is enabled
-							if (this._searchModule && this._config.enableSearch) {
-								this._searchModule.refreshOptionCache();
+							// Refresh the search module to update focus and cache
+							if (this._searchModule) {
+								this._searchModule.refreshAfterSearch();
 							}
 						})
 						.catch((error) => {
