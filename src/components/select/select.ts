@@ -985,6 +985,16 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
+	 * Check if an option was originally disabled in the HTML
+	 */
+	private _isOptionOriginallyDisabled(value: string): boolean {
+		const originalOption = Array.from(this._element.querySelectorAll('option')).find(
+			(opt) => opt.value === value
+		) as HTMLOptionElement;
+		return originalOption ? originalOption.disabled : false;
+	}
+
+	/**
 	 * Update CSS classes for selected options
 	 */
 	private _updateSelectedOptionClass(): void {
@@ -1005,17 +1015,23 @@ export class KTSelect extends KTComponent {
 		allOptions.forEach((option) => {
 			const optionValue = option.getAttribute('data-value');
 			if (!optionValue) return;
+
 			const isSelected = selectedValues.includes(optionValue);
+			const isOriginallyDisabled = this._isOptionOriginallyDisabled(optionValue);
+
 			if (isSelected) {
 				option.classList.add('selected');
 				option.setAttribute('aria-selected', 'true');
+				// Selected options should not be visually hidden or disabled by maxSelections logic
 				option.classList.remove('hidden');
 				option.classList.remove('disabled');
 				option.removeAttribute('aria-disabled');
 			} else {
 				option.classList.remove('selected');
 				option.setAttribute('aria-selected', 'false');
-				if (maxReached) {
+
+				// An option should be disabled if it was originally disabled OR if maxSelections is reached
+				if (isOriginallyDisabled || maxReached) {
 					option.classList.add('disabled');
 					option.setAttribute('aria-disabled', 'true');
 				} else {
@@ -1634,7 +1650,7 @@ export class KTSelect extends KTComponent {
 			buffer.push(event.key);
 			const str = buffer.getBuffer();
 			if (isOpen) {
-				focusManager.focusByString(str);
+			focusManager.focusByString(str);
 			} else {
 				// If closed, type-to-search could potentially open and select.
 				// For now, let's assume it only works when open or opens it first.

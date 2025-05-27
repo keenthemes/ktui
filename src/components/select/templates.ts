@@ -268,7 +268,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 				value: el.value,
 				text: textContent,
 				selected: el.selected,
-				disabled: el.disabled,
+				disabled: el.disabled, // This captures original disabled state
 				content: textContent, // Default content to text
 				// Attempt to get custom config for this specific option value if available
 				...(config.optionsConfig?.[el.value] || {}),
@@ -298,14 +298,19 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		// Use the core option template string as the base structure.
 		const baseTemplate = getTemplateStrings(config).option;
 
+		const optionClasses = [config.optionClass || ''];
+		if (optionData.disabled) {
+			optionClasses.push('disabled');
+		}
+
 		// Populate the base template. The crucial part is that `{{content}}` here
 		// will be replaced by the `content` generated above (either from custom template or default text).
 		const html = renderTemplateString(baseTemplate, {
 			...optionData, // Pass all data for {{value}}, {{text}}, {{selected}}, {{disabled}}, etc.
-			class: config.optionClass || '', // Add general option class
+			class: optionClasses.join(' ').trim(), // Add general option class
 			selected: optionData.selected ? 'aria-selected="true"' : 'aria-selected="false"',
-			disabled: optionData.disabled ? 'aria-disabled="true"' : '',
-			content: content, // This is the potentially custom-rendered content
+			disabled: optionData.disabled ? 'aria-disabled="true"' : '', // This is the potentially custom-rendered content
+			content: content,
 		});
 
 		const element = stringToElement(html);
