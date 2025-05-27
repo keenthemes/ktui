@@ -58,11 +58,13 @@
 	"license": "MIT",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "npx npx webpack --mode=development",
-		"build:prod": "npx webpack --env production --mode=production",
+		"build": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
+		"build:webpack": "webpack --mode=development",
+		"build:webpack:watch": "webpack --mode=development --watch",
+		"build:prod": "webpack --env production --mode=production",
 		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
 		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
-		"lint": "npx eslint src --ext .ts",
+		"lint": "eslint src --ext .ts",
 		"format": "prettier --write src"
 	},
 	"devDependencies": {
@@ -73,6 +75,7 @@
 		"autoprefixer": "^10.4.21",
 		"babel-loader": "^10.0.0",
 		"clean-webpack-plugin": "^4.0.0",
+		"concurrently": "^9.1.2",
 		"eslint": "^9.27.0",
 		"mini-svg-data-uri": "^1.4.4",
 		"prettier": "^3.5.3",
