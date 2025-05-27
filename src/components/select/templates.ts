@@ -324,25 +324,32 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		const baseTemplate = getTemplateStrings(config).option;
 
 		const optionClasses = [config.optionClass || ''];
-		if (optionData.disabled) {
-			optionClasses.push('disabled');
-		}
+        if (optionData.disabled) {
+            optionClasses.push('disabled');
+        }
 
-		// Populate the base template. The crucial part is that `{{content}}` here
-		// will be replaced by the `content` generated above (either from custom template or default text).
+		// Populate the base template for the <li> attributes.
+		// The actual display content (text or custom HTML) will be set on the inner span later.
 		const html = renderTemplateString(baseTemplate, {
 			...optionData, // Pass all data for {{value}}, {{text}}, {{selected}}, {{disabled}}, etc.
-			class: config.optionClass || '', // Add general option class
+			class: optionClasses || '',
 			selected: optionData.selected
 				? 'aria-selected="true"'
 				: 'aria-selected="false"',
 			disabled: optionData.disabled ? 'aria-disabled="true"' : '',
-			content: content, // This is the potentially custom-rendered content
+			content: content,
 		});
 
 		const element = stringToElement(html);
+
+		// If a custom option template is provided, use it to render the content.
+		if (config.optionTemplate) {
+			element.innerHTML = content;
+		}
+
 		// Ensure data-text attribute is set to the original, clean text for searching/filtering
 		element.setAttribute('data-text', optionData.text || '');
+
 		return element;
 	},
 
