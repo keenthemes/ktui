@@ -91,7 +91,12 @@ module.exports = (env) => {
 			...baseConfig.optimization,
 			minimize: false, // Disable minimization for normal JS files
 		},
-		plugins: [...baseConfig.plugins, new CleanWebpackPlugin()],
+		plugins: [
+			...baseConfig.plugins,
+			new CleanWebpackPlugin({
+				cleanOnceBeforeBuildPatterns: ['**/*', '!styles.css'],
+			}),
+		],
 	};
 
 	const minifiedConfig = {

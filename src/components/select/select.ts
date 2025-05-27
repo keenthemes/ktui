@@ -537,17 +537,10 @@ export class KTSelect extends KTComponent {
 			this._handleDropdownOptionClick.bind(this),
 		);
 
-		// Only attach click handler to display element
-		// this._eventManager.addListener(
-		// 	this._wrapperElement,
-		// 	'click',
-		// 	this._handleDropdownClick.bind(this),
-		// );
-
-		// Attach centralized keyboard handler
-		const keyboardTarget = this._searchInputElement || this._wrapperElement;
-		if (keyboardTarget) {
-			keyboardTarget.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
+		// Attach centralized keyboard handler to the wrapper element.
+		// Events from focusable children like _displayElement or _searchInputElement (if present) will bubble up.
+		if (this._wrapperElement) {
+			this._wrapperElement.addEventListener('keydown', this._handleKeyboardEvent.bind(this));
 		}
 	}
 
@@ -1476,9 +1469,9 @@ export class KTSelect extends KTComponent {
 							// Update options in the dropdown
 							this._updateSearchResults(items);
 
-							// Refresh the search module's option cache if search is enabled
-							if (this._searchModule && this._config.enableSearch) {
-								this._searchModule.refreshOptionCache();
+							// Refresh the search module to update focus and cache
+							if (this._searchModule) {
+								this._searchModule.refreshAfterSearch();
 							}
 						})
 						.catch((error) => {
@@ -1611,15 +1604,38 @@ export class KTSelect extends KTComponent {
 		const focusManager = this._focusManager;
 		const buffer = this._typeToSearchBuffer;
 
-		// Ignore modifier keys
+		// If the event target is the search input, let it handle most typing keys naturally.
+		if (event.target === this._searchInputElement) {
+			// Allow navigation keys like ArrowDown, ArrowUp, Escape, Enter (for search/selection) to be handled by the logic below.
+			// For other keys (characters, space, backspace, delete), let the input field process them.
+			if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' &&
+			    event.key !== 'Escape' && event.key !== 'Enter' && event.key !== 'Tab' &&
+			    event.key !== 'Home' && event.key !== 'End') {
+				// If it's a character key and we are NOT type-to-searching (because search has focus)
+				// then let the input field handle it for its own value.
+				// The search module's 'input' event will handle filtering based on the input's value.
+				buffer.clear(); // Clear type-to-search buffer when typing in search field
+				return;
+			}
+			// For Enter specifically in search input, we might want to select the focused option or submit search.
+			// This is handled later in the switch.
+		}
+
+		// Ignore modifier keys (except for specific combinations if added later)
 		if (event.altKey || event.ctrlKey || event.metaKey) return;
 
-		// Type-to-search: only for single char keys
-		if (event.key.length === 1 && !event.repeat && !event.key.match(/\s/)) {
+		// Type-to-search: only for single char keys, when search input does not have focus
+		if (event.key.length === 1 && !event.repeat && !event.key.match(/\s/) && document.activeElement !== this._searchInputElement) {
 			buffer.push(event.key);
 			const str = buffer.getBuffer();
-			focusManager.focusByString(str);
-			return;
+			if (isOpen) {
+				focusManager.focusByString(str);
+			} else {
+				// If closed, type-to-search could potentially open and select.
+				// For now, let's assume it only works when open or opens it first.
+				// Or, we could find the matching option and set it directly without opening.
+			}
+			return; // Type-to-search handles the event
 		}
 
 		switch (event.key) {

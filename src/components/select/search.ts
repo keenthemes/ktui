@@ -165,46 +165,71 @@ export class KTSelectSearch {
 	private _cacheOriginalOptionContents() {
 		// Wait for options to be initialized
 		setTimeout(() => {
+			this._originalOptionContents.clear(); // Clear before re-caching
 			const options = Array.from(this._select.getOptionsElement());
 			options.forEach((option) => {
 				const value = option.getAttribute('data-value');
 				if (value) {
+					// Store the full innerHTML as the original content
 					this._originalOptionContents.set(value, option.innerHTML);
 				}
 			});
 		}, 0);
 	}
 
+	/**
+	 * Restores the innerHTML of all options from the cache if they have been modified.
+	 * This is typically called before applying new filters/highlights.
+	 */
+	private _restoreOptionContentsBeforeFilter(): void {
+		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		options.forEach(option => {
+			const value = option.getAttribute('data-value');
+			if (value && this._originalOptionContents.has(value)) {
+				const originalContent = this._originalOptionContents.get(value)!;
+				// Only restore if current content is different, to avoid unnecessary DOM manipulation
+				if (option.innerHTML !== originalContent) {
+					option.innerHTML = originalContent;
+				}
+			}
+		});
+	}
+
 	private _handleSearchInput(event: Event) {
-		const query = (event.target as HTMLInputElement).value.toLowerCase();
+		const query = (event.target as HTMLInputElement).value;
 		const config = this._select.getConfig();
 
 		// Reset focused option when search changes
 		this._focusManager.resetFocus();
 
-		// If search query is empty, clear all highlights
+		// Restore original content for all options before filtering/highlighting again
+		this._restoreOptionContentsBeforeFilter();
+
 		if (query.trim() === '') {
-			this.clearSearchHighlights();
+			this._resetAllOptions();
+			this._focusManager.focusFirst(); // Focus first option when search is cleared
+			return;
 		}
 
-		// For remote search, we don't filter locally
-		// The KTSelect component will handle the remote search
+		// For remote search, KTSelect component handles it.
+		// KTSelect will call refreshAfterSearch on this module when remote data is updated.
 		if (config.remote && config.searchParam) {
-			// If query is too short, reset all options to visible state
 			if (query.length < config.searchMinLength) {
 				this._resetAllOptions();
 				this._clearNoResultsMessage();
+				this._focusManager.focusFirst(); // Focus first if query too short
 			}
-			// Otherwise, let KTSelect handle remote search
 			return;
 		}
 
 		// For local search
 		if (query.length >= config.searchMinLength) {
 			this._filterOptions(query);
+			this._focusManager.focusFirst(); // Focus first visible option after local filtering
 		} else {
 			this._resetAllOptions();
 			this._clearNoResultsMessage();
+			this._focusManager.focusFirst(); // Focus first if query too short and not remote
 		}
 	}
 
@@ -247,40 +272,26 @@ export class KTSelectSearch {
 			this._select.getOptionsElement(),
 		) as HTMLElement[];
 
-		// Cache original option HTML if not already cached
+		// Ensure the cache is populated if it's somehow empty here
 		if (this._originalOptionContents.size === 0) {
 			this._cacheOriginalOptionContents();
 		}
 
 		options.forEach((option) => {
-			// Remove the hidden class
 			option.classList.remove('hidden');
+			if (option.style.display === 'none') option.style.display = ''; // Ensure visible
 
 			// Restore original HTML content (remove highlights)
 			const value = option.getAttribute('data-value');
 			if (value && this._originalOptionContents.has(value)) {
-				option.innerHTML = this._originalOptionContents.get(value);
-			}
-
-			// Remove any display styling
-			if (
-				option.hasAttribute('style') &&
-				option.getAttribute('style').includes('display:')
-			) {
-				const styleAttr = option.getAttribute('style');
-				if (
-					styleAttr.trim() === 'display: none;' ||
-					styleAttr.trim() === 'display: block;'
-				) {
-					option.removeAttribute('style');
-				} else {
-					option.setAttribute(
-						'style',
-						styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
-					);
+				const originalContent = this._originalOptionContents.get(value)!;
+				// Only update if different, to minimize DOM changes
+				if (option.innerHTML !== originalContent) {
+					option.innerHTML = originalContent;
 				}
 			}
 		});
+		this._clearNoResultsMessage(); // Ensure no results message is cleared when resetting
 	}
 
 	private _handleNoResults(visibleOptionsCount: number) {
@@ -321,18 +332,27 @@ export class KTSelectSearch {
 	 */
 	public clearSearchHighlights() {
 		// Restore original option content (removes highlighting)
-		const options = Array.from(
+		const optionsToClear = Array.from(
 			this._select.getOptionsElement(),
 		) as HTMLElement[];
 
-		options.forEach((option) => {
+		// Ensure cache is available
+		if (this._originalOptionContents.size === 0 && optionsToClear.length > 0) {
+			this._cacheOriginalOptionContents();
+		}
+
+		optionsToClear.forEach((option) => {
 			const value = option.getAttribute('data-value');
 			if (value && this._originalOptionContents.has(value)) {
-				option.innerHTML = this._originalOptionContents.get(value);
+				const originalContent = this._originalOptionContents.get(value)!;
+				// Only restore if different
+				if (option.innerHTML !== originalContent) {
+					option.innerHTML = originalContent;
+				}
 			}
 		});
 
-		// Also clear highlights from the display element
+		// Also clear highlights from the display element (if applicable)
 		this._clearDisplayHighlights();
 	}
 
@@ -358,16 +378,26 @@ export class KTSelectSearch {
 	public refreshOptionCache(): void {
 		// Re-cache all option contents
 		this._originalOptionContents.clear();
-		const options = Array.from(
+		const currentOptions = Array.from(
 			this._select.getOptionsElement(),
 		) as HTMLElement[];
 
-		options.forEach((option) => {
+		currentOptions.forEach((option) => {
 			const value = option.getAttribute('data-value');
 			if (value) {
 				this._originalOptionContents.set(value, option.innerHTML);
 			}
 		});
+	}
+
+	/**
+	 * Called after search (local or remote via KTSelect) to reset focus.
+	 */
+	public refreshAfterSearch(): void {
+		this._focusManager.resetFocus();
+		this._focusManager.focusFirst();
+		// Re-cache original contents as options might have changed (especially after remote search)
+		this.refreshOptionCache();
 	}
 
 	/**
