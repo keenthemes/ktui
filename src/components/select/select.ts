@@ -948,7 +948,12 @@ export class KTSelect extends KTComponent {
 	public updateSelectedOptionDisplay() {
 		const selectedOptions = this.getSelectedOptions();
 
-		// Tag mode: render tags if enabled
+		if (this._config.combobox && this._comboboxModule) {
+			this._comboboxModule.updateDisplay(selectedOptions); // Delegate to combobox module
+			return;
+		}
+
+		// Tag mode: render tags if enabled (and not a combobox, as combobox handles its own tags/display)
 		if (this._config.tags && this._tagsModule) {
 			this._tagsModule.updateTagsDisplay(selectedOptions);
 			return;
@@ -1722,5 +1727,9 @@ export class KTSelect extends KTComponent {
 			}).filter(Boolean)
 		));
 		return contentArray.join(displaySeparator);
+	}
+
+	public getDisplayElement(): HTMLElement {
+		return this._displayElement;
 	}
 }

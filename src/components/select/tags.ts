@@ -6,7 +6,7 @@
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
-import { EventManager, renderTemplateString } from './utils';
+import { EventManager } from './utils';
 
 /**
  * KTSelectTags - Handles tags-specific functionality for KTSelect
@@ -81,32 +81,6 @@ export class KTSelectTags {
 			// Insert tag before the display element
 			wrapper.insertBefore(tag, this._valueDisplayElement);
 		});
-	}
-
-	/**
-	 * Get the label/text for an option by its value
-	 */
-	private _getOptionLabel(optionValue: string): string {
-		// First look for an option element in the dropdown with matching value
-		const optionElements = this._select.getOptionsElement();
-		for (const option of Array.from(optionElements)) {
-			if ((option as HTMLElement).dataset.value === optionValue) {
-				return (option as HTMLElement).textContent?.trim() || optionValue;
-			}
-		}
-
-		// If not found in dropdown, look in original select element
-		const originalOptions = this._select
-			.getElement()
-			.querySelectorAll('option');
-		for (const option of Array.from(originalOptions)) {
-			if ((option as HTMLOptionElement).value === optionValue) {
-				return (option as HTMLOptionElement).textContent?.trim() || optionValue;
-			}
-		}
-
-		// If still not found, return the value itself
-		return optionValue;
 	}
 
 	/**

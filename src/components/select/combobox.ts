@@ -6,6 +6,7 @@
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { filterOptions, renderTemplateString, stringToElement } from './utils';
+import { defaultTemplates } from './templates';
 
 /**
  * KTSelectCombobox - Handles combobox-specific functionality for KTSelect
@@ -17,56 +18,35 @@ export class KTSelectCombobox {
 	private _clearButtonElement: HTMLElement | null;
 	private _boundInputHandler: (event: Event) => void;
 	private _boundClearHandler: (event: MouseEvent) => void;
-	private _valuesContainerElement: HTMLElement | null;
+	private _valuesContainerElement: HTMLElement | null; // For tags or displayTemplate output
 
 	constructor(select: KTSelect) {
 		this._select = select;
 		this._config = select.getConfig();
 
-		// Get the display element (could be the input directly or a parent div)
-		const displayElement = select.getValueDisplayElement();
+		const displayElement = select.getDisplayElement(); // KTSelect's main display element for combobox
 
-		// Find the input element - either it's the display element itself or a child
-		this._searchInputElement =
-			displayElement.tagName === 'INPUT'
-				? (displayElement as HTMLInputElement)
-				: displayElement.querySelector('input[data-kt-select-search]');
+		this._searchInputElement = displayElement.querySelector('input[data-kt-select-search]');
+		this._clearButtonElement = displayElement.querySelector('[data-kt-select-clear-button]');
+		this._valuesContainerElement = displayElement.querySelector('[data-kt-select-combobox-values]');
 
-		// Find the clear button robustly
-		let clearButtonContainer: HTMLElement | null = null;
-		if (displayElement.tagName === 'DIV') {
-			clearButtonContainer = displayElement;
-		} else if (displayElement.tagName === 'INPUT') {
-			clearButtonContainer = displayElement.parentElement as HTMLElement;
-		}
-
-		this._clearButtonElement = clearButtonContainer
-			? clearButtonContainer.querySelector('[data-kt-select-clear-button]')
-			: null;
-
-		this._valuesContainerElement = displayElement?.closest('[data-kt-select-combobox]')?.querySelector('[data-kt-select-combobox-values]');
-
-		// Create bound handler references to allow proper cleanup
 		this._boundInputHandler = this._handleComboboxInput.bind(this);
 		this._boundClearHandler = this._handleClearButtonClick.bind(this);
 
-		// Attach event listeners
 		this._attachEventListeners();
 
-		// Reset combobox search state when dropdown closes
 		this._select.getElement().addEventListener('dropdown.close', () => {
-			this._searchInputElement.value = '';
-			// this._toggleClearButtonVisibility('');
-			this._select.showAllOptions();
+			// When dropdown closes, if not multi-select and not using displayTemplate,
+			// ensure input shows the selected value or placeholder.
+			if (!this._config.multiple && !this._config.displayTemplate) {
+				this.updateDisplay(this._select.getSelectedOptions());
+			} else {
+				// For tags or displayTemplate, the input should be clear for typing.
+				this._searchInputElement.value = '';
+			}
+			this._toggleClearButtonVisibility(this._searchInputElement.value);
+			// this._select.showAllOptions(); // showAllOptions might be too broad, filtering is managed by typing.
 		});
-
-		// When selection changes, update the input value to the selected option's text
-		// this._select.getElement().addEventListener('change', () => {
-		// 	// Only update the input value, do not reset the filter or show all options
-		// 	const selectedValues = this._select.getSelectedOptions();
-		// 	const content = this._select.renderDisplayTemplateForSelected(selectedValues);
-		// 	this._valuesContainerElement?.append(stringToElement(content));
-		// });
 
 		if (this._config.debug) console.log('KTSelectCombobox initialized');
 	}
@@ -75,25 +55,13 @@ export class KTSelectCombobox {
 	 * Attach event listeners specific to combobox
 	 */
 	private _attachEventListeners(): void {
-		// First remove any existing listeners to prevent duplicates
 		this._removeEventListeners();
-
-		// Add input event handler to filter options as user types
-		this._searchInputElement.addEventListener('input', this._boundInputHandler);
-
-		// Add clear button click event listener
-		if (this._clearButtonElement) {
-			this._clearButtonElement.addEventListener(
-				'click',
-				this._boundClearHandler,
-			);
+		if (this._searchInputElement) { // Ensure element exists
+			this._searchInputElement.addEventListener('input', this._boundInputHandler);
 		}
-
-		if (this._config.debug)
-			console.log(
-				'Combobox event listeners attached to:',
-				this._searchInputElement,
-			);
+		if (this._clearButtonElement) {
+			this._clearButtonElement.addEventListener('click', this._boundClearHandler);
+		}
 	}
 
 	/**
@@ -101,17 +69,10 @@ export class KTSelectCombobox {
 	 */
 	private _removeEventListeners(): void {
 		if (this._searchInputElement) {
-			this._searchInputElement.removeEventListener(
-				'input',
-				this._boundInputHandler,
-			);
+			this._searchInputElement.removeEventListener('input', this._boundInputHandler);
 		}
-
 		if (this._clearButtonElement) {
-			this._clearButtonElement.removeEventListener(
-				'click',
-				this._boundClearHandler,
-			);
+			this._clearButtonElement.removeEventListener('click', this._boundClearHandler);
 		}
 	}
 
@@ -120,19 +81,23 @@ export class KTSelectCombobox {
 	 */
 	private _handleComboboxInput(event: Event): void {
 		const inputElement = event.target as HTMLInputElement;
-		const query = inputElement.value.toLowerCase();
+		const query = inputElement.value;
 
-		if (this._config.debug) console.log('Combobox input event, query:', query);
+		this._toggleClearButtonVisibility(query);
 
-		// Toggle clear button visibility based on input value
-		// this._toggleClearButtonVisibility(query);
-
-		// If dropdown isn't open, open it when user starts typing
-		if (!(this._select as any)._dropdownIsOpen) {
+		if (!(this._select as any).isDropdownOpen()) { // Use public getter
 			this._select.openDropdown();
 		}
+		// For single select without displayTemplate, if user types, they are essentially clearing the previous selection text
+		// The actual selection state isn't cleared until they pick a new option or clear explicitly.
+		// For multi-select or with displayTemplate, the input is purely for search.
+		if (this._config.multiple || this._config.displayTemplate) {
+			// Values are in _valuesContainerElement, input is for search
+		} else {
+			// Single select, no displayTemplate: If user types, it implies they might be changing selection.
+			// We don't clear the actual _select state here, just the visual in input.
+		}
 
-		// Filter options based on input
 		this._filterOptionsForCombobox(query);
 	}
 
@@ -143,35 +108,26 @@ export class KTSelectCombobox {
 		event.preventDefault();
 		event.stopPropagation();
 
-		// Clear the input
 		this._searchInputElement.value = '';
-
-		// Hide the clear button
-		// this._toggleClearButtonVisibility('');
-
-		// Show all options and open dropdown
-		this._select.showAllOptions();
-		this._select.openDropdown();
-
-		// Clear the current selection
-		this._select.clearSelection();
-
-		// Clear the combobox values container if present (for displayTemplate)
+		this._toggleClearButtonVisibility('');
 		if (this._valuesContainerElement) {
 			this._valuesContainerElement.innerHTML = '';
 		}
-
-		// Focus on the input
+		this._select.clearSelection(); // This will also trigger updateSelectedOptionDisplay
+		this._select.showAllOptions(); // Show all options after clearing
+		this._select.openDropdown();
 		this._searchInputElement.focus();
 	}
 
 	/**
-	 * Toggle clear button visibility based on input value
+	 * Toggle clear button visibility based on input value and selection state.
+	 * Clear button should be visible if there's text in input OR if there are selected items (for multi/displayTemplate modes).
 	 */
-	private _toggleClearButtonVisibility(value: string): void {
+	private _toggleClearButtonVisibility(inputValue: string): void {
 		if (!this._clearButtonElement) return;
+		const hasSelectedItems = this._select.getSelectedOptions().length > 0;
 
-		if (value.length > 0) {
+		if (inputValue.length > 0 || (hasSelectedItems && (this._config.multiple || this._config.displayTemplate))) {
 			this._clearButtonElement.classList.remove('hidden');
 		} else {
 			this._clearButtonElement.classList.add('hidden');
@@ -182,11 +138,66 @@ export class KTSelectCombobox {
 	 * Filter options for combobox based on input query
 	 */
 	private _filterOptionsForCombobox(query: string): void {
-		// Use the same filter logic as KTSelectSearch
 		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
 		filterOptions(options, query, config, dropdownElement);
+		// After filtering, focusManager in KTSelectSearch (if search is also enabled there)
+		// or the main FocusManager should adjust focus if needed.
+		// For combobox, this filtering is the primary search mechanism.
+		// We might need to tell select's focus manager to focus first option.
+		(this._select as any)._focusManager.focusFirst(); // Consider if this is always right
+	}
+
+	/**
+	 * Updates the combobox display (input field or values container) based on selection.
+	 */
+	public updateDisplay(selectedOptions: string[]): void {
+		if (!this._searchInputElement) return;
+
+		// Always clear the values container first if it exists
+		if (this._valuesContainerElement) {
+			this._valuesContainerElement.innerHTML = '';
+		}
+
+		if (this._config.tags && this._valuesContainerElement) { // Combobox + Tags
+			selectedOptions.forEach(value => {
+				// Ensure value is properly escaped for querySelector
+				const optionElement = this._select.getElement().querySelector(`option[value="${CSS.escape(value)}"]`) as HTMLOptionElement;
+				if (optionElement) {
+					const tagElement = defaultTemplates.tag(optionElement, this._config);
+					this._valuesContainerElement.appendChild(tagElement);
+				}
+			});
+			this._searchInputElement.value = ''; // Input field is for typing new searches
+			this._searchInputElement.placeholder = selectedOptions.length > 0 ? '' : (this._config.placeholder || 'Select...');
+
+		} else if (this._config.displayTemplate && this._valuesContainerElement) { // Combobox + DisplayTemplate (no tags)
+			this._valuesContainerElement.innerHTML = this._select.renderDisplayTemplateForSelected(selectedOptions);
+			this._searchInputElement.value = ''; // Input field is for typing new searches
+			this._searchInputElement.placeholder = selectedOptions.length > 0 ? '' : (this._config.placeholder || 'Select...');
+
+		} else if (this._config.multiple && this._valuesContainerElement) { // Combobox + Multiple (no tags, no display template)
+			// For simplicity, join text. A proper tag implementation would be more complex here.
+			this._valuesContainerElement.innerHTML = selectedOptions.map(value => {
+				const optionEl = this._select.getElement().querySelector(`option[value="${CSS.escape(value)}"]`);
+				return optionEl ? optionEl.textContent : '';
+			}).join(', '); // Basic comma separation
+			this._searchInputElement.value = '';
+			this._searchInputElement.placeholder = selectedOptions.length > 0 ? '' : (this._config.placeholder || 'Select...');
+
+		} else if (!this._config.multiple && selectedOptions.length > 0) { // Single select combobox: display selected option's text in the input
+			const selectedValue = selectedOptions[0];
+			const optionElement = this._select.getElement().querySelector(`option[value="${CSS.escape(selectedValue)}"]`);
+			this._searchInputElement.value = optionElement ? optionElement.textContent || '' : '';
+			// placeholder is implicitly handled by input value for single select
+
+		} else { // No selection or not fitting above categories (e.g. single select, no items)
+			this._searchInputElement.value = '';
+			this._searchInputElement.placeholder = this._config.placeholder || 'Select...';
+			// _valuesContainerElement is already cleared if it exists
+		}
+		this._toggleClearButtonVisibility(this._searchInputElement.value);
 	}
 
 	/**
