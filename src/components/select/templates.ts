@@ -310,12 +310,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			// renderTemplateString will replace {{key}} with values from optionData.
 			content = renderTemplateString(config.optionTemplate, optionData);
 		} else {
-			// If no custom template, the content might be just the text or based on other data.
-			// For basic default rendering, {{content}} in coreTemplateStrings.option will use this.
-			// If the optionData contains an explicit 'content' field from data-kt-select-option,
-			// it would have been part of optionData and could be used here if desired.
-			// For now, let's stick to `optionData.text` as the primary source for default `content`
-			// if no `config.optionTemplate` is given. The `coreTemplateStrings.option` uses `{{content}}`.
 			content = optionData.content || optionData.text; // Prefer explicit content, fallback to text
 		}
 
@@ -331,20 +325,15 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		// The actual display content (text or custom HTML) will be set on the inner span later.
 		const html = renderTemplateString(baseTemplate, {
 			...optionData, // Pass all data for {{value}}, {{text}}, {{selected}}, {{disabled}}, etc.
-			class: optionClasses || '',
+			class: optionClasses.join(' ').trim() || '',
 			selected: optionData.selected
 				? 'aria-selected="true"'
 				: 'aria-selected="false"',
 			disabled: optionData.disabled ? 'aria-disabled="true"' : '',
-			content: content,
+			content: content, // This is for the {{content}} placeholder within the option template string itself
 		});
 
 		const element = stringToElement(html);
-
-		// If a custom option template is provided, use it to render the content.
-		if (config.optionTemplate) {
-			element.innerHTML = content;
-		}
 
 		// Ensure data-text attribute is set to the original, clean text for searching/filtering
 		element.setAttribute('data-text', optionData?.text?.trim() || '');

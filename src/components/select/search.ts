@@ -3,6 +3,7 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
+import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
 import {
@@ -18,7 +19,7 @@ export class KTSelectSearch {
 	private _originalOptionContents = new Map<string, string>();
 	private _eventManager: EventManager;
 	private _focusManager: FocusManager;
-	private _config: import('./config').KTSelectConfigInterface;
+	private _config: KTSelectConfigInterface;
 
 	// Public handler for search input (made public for event binding)
 	public handleSearchInput: (...args: any[]) => void;
@@ -249,13 +250,6 @@ export class KTSelectSearch {
 		filterOptions(options, query, config, dropdownElement, (visibleCount) =>
 			this._handleNoResults(visibleCount),
 		);
-	}
-
-	/**
-	 * Apply highlighting to the display element for multi-select
-	 */
-	private _applyHighlightToDisplay(query: string) {
-		// Implementation for display highlighting
 	}
 
 	/**

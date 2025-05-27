@@ -944,39 +944,45 @@ export class KTSelect extends KTComponent {
 	 */
 	public updateSelectedOptionDisplay() {
 		const selectedOptions = this.getSelectedOptions();
+		const tagsEnabled = this._config.tags && this._tagsModule;
 
-		if (this._config.combobox && this._comboboxModule) {
-			this._comboboxModule.updateDisplay(selectedOptions); // Delegate to combobox module
-			return;
+		if (tagsEnabled) {
+			// Tags module will render tags if selectedOptions > 0, or clear them if selectedOptions === 0.
+			this._tagsModule.updateTagsDisplay(selectedOptions);
 		}
 
-		// Tag mode: render tags if enabled (and not a combobox, as combobox handles its own tags/display)
-		if (this._config.tags && this._tagsModule) {
-			this._tagsModule.updateTagsDisplay(selectedOptions);
-			return;
+		// Guard against _valueDisplayElement being null due to template modifications
+		if (!this._displayElement) {
+			if (this._config.debug) {
+				console.warn('KTSelect: _valueDisplayElement is null. Cannot update display or placeholder. Check template for [data-kt-select-value].');
+			}
+			return; // Nothing to display on if the element is missing
 		}
 
 		if (typeof this._config.renderSelected === 'function') {
-			// Use the custom renderSelected function if provided
 			this._displayElement.innerHTML = this._config.renderSelected(selectedOptions);
 		} else {
-
 			if (selectedOptions.length === 0) {
-				const placeholder = defaultTemplates.placeholder(this._config);
-				this._displayElement.replaceChildren(placeholder);
-
+				// No options selected: display placeholder.
+				// This runs if tags are off, OR if tags are on but no items are selected (tags module would have cleared tags).
+				const placeholderEl = defaultTemplates.placeholder(this._config);
+				this._displayElement.replaceChildren(placeholderEl);
 			} else {
-				let content = '';
-
-				if (this._config.displayTemplate) {
-					const selectedValues = this.getSelectedOptions();
-					content = this.renderDisplayTemplateForSelected(selectedValues);
+				// Options are selected.
+				if (tagsEnabled) {
+					// Tags are enabled AND options are selected: tags module has rendered them.
+					// Clear _valueDisplayElement as tags are the primary display.
+					this._displayElement.innerHTML = '';
 				} else {
-					// If no displayTemplate is provided, use the default comma-separated list of selected options
-					content = this.getSelectedOptionsText();
+					// Tags are not enabled AND options are selected: render normal text display.
+					let content = '';
+					if (this._config.displayTemplate) {
+						content = this.renderDisplayTemplateForSelected(this.getSelectedOptions());
+					} else {
+						content = this.getSelectedOptionsText();
+					}
+					this._displayElement.innerHTML = content;
 				}
-
-				this._displayElement.innerHTML = content;
 			}
 		}
 	}
