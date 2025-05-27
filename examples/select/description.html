@@ -16,48 +16,32 @@
 
 				<select
 					class="kt-select"
-					data-kt-select
-					data-kt-select-placeholder="Select with description..."
+					data-kt-select="true"
+					data-kt-select-placeholder="Select an option..."
 					data-kt-select-config='{
-					"displayTemplate": "<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900\">{{text}}</span><span class=\"text-xs text-gray-500\">Your selection</span></div>",
-					"optionTemplate": "<div class=\"flex flex-col\"><span class=\"font-semibold text-gray-900\">{{text}}</span><span class=\"text-xs text-gray-500\">{{desc}}</span></div>"
-				}'>
-					<option value="us"
-						data-kt-select-option='{"desc": "MySQL is a relational database management system"}'>
-						MySQL
+						"optionTemplate": "<div class=\"flex items-center grow gap-2\"><div class=\"flex flex-col gap-0.5\"><span class=\"font-semibold text-foreground\">{{text}}</span><span class=\"text-xs text-muted-foreground\">{{desc}}</span></div><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"size-3.5 ms-auto hidden text-primary kt-select-option-selected:block\"><path d=\"M20 6 9 17l-5-5\"/></svg></div>"
+					}'
+				>
+					<option value="full_access"
+						data-kt-select-option='{"desc": "Can modify and delete"}'>
+						Full access
 					</option>
-					<option value="postgres"
-						data-kt-select-option='{"desc": "PostgreSQL is a powerful object-relational database system"}'>
-						PostgreSQL
+					<option value="read_write"
+						data-kt-select-option='{"desc": "Can read and write"}'>
+						Read and write
 					</option>
-					<option value="mongodb"
-						data-kt-select-option='{"desc": "MongoDB is a NoSQL database that uses JSON-like documents with optional schemas"}'>
-						MongoDB
-					</option>
-					<option value="redis"
-						data-kt-select-option='{"desc": "Redis is an in-memory data structure store"}'>
-						Redis
-					</option>
-					<option value="sqlite"
-						data-kt-select-option='{"desc": "SQLite is a lightweight, disk-based database"}'>
-						SQLite
-					</option>
-					<option value="mariadb"
-						data-kt-select-option='{"desc": "MariaDB is a community-driven fork of MySQL"}'>
-						MariaDB
-					</option>
-					<option value="mssql"
-						data-kt-select-option='{"desc": "Microsoft SQL Server is a relational database management system"}'>
-						Microsoft SQL Server
-					</option>
-					<option value="oracle"
-						data-kt-select-option='{"desc": "Oracle is a powerful, object-oriented database management system"}'>
-						Oracle
-					</option>
-					<option value="db2"
-						data-kt-select-option='{"desc": "IBM DB2 is a relational database management system"}'>
-						IBM DB2
-					</option>
+					<option value="read_only" selected
+						data-kt-select-option='{"desc": "Can only read"}'>
+						Read only
+					</option>	
+					<option value="view_only"
+						data-kt-select-option='{"desc": "Can only view"}'>
+						View only
+					</option>	
+					<option value="no_access"
+						data-kt-select-option='{"desc": "No access"}'>
+						No access
+					</option>	
 				</select>
 
 			</div>

@@ -6,9 +6,10 @@
 /* Base Styles */
 @layer components {
 	.kt-select {
-		@apply py-0 appearance-none flex items-center gap-2 w-full bg-background border border-input shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground/80;
+		@apply cursor-pointer py-0 appearance-none flex items-center gap-2 w-full bg-background border border-input shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground/80;
 		@apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
-		@apply disabled:cursor-not-allowed disabled:opacity-50 [&[readonly]]:opacity-70 file:h-full [&[type=file]]:py-0;
+		@apply disabled:cursor-not-allowed disabled:opacity-60;
+		@apply [&[readonly]]:opacity-70;
 		@apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
 
 		background-repeat: no-repeat;
@@ -40,7 +41,7 @@
 		}
 
 		&.disabled {
-			@apply cursor-not-allowed opacity-50;
+			@apply cursor-not-allowed opacity-60;
 		}
 	}
 
@@ -56,17 +57,26 @@
 		@apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
 	}
 
-	.kt-select-option {
-		@apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md font-medium text-sm text-start cursor-pointer disabled:opacity-50 disabled:pointer-events-none;
-		@apply hover:bg-accent hover:text-accent-foreground;
+	.kt-select-options {
+		@apply p-1 space-y-0.5;
+	}
 
+	.kt-select-wrapper {
 		&.disabled {
 			@apply opacity-50 pointer-events-none;
 		}
+	}
 
-		&.selected {
-			@apply bg-accent text-accent-foreground;
+	.kt-select-option {
+		@apply w-full flex items-center gap-x-2.5 py-2 px-2.5 rounded-md text-sm text-start cursor-pointer;
+		@apply hover:bg-accent hover:text-accent-foreground;
+
+		&[aria-disabled=true],
+		&.disabled {
+			@apply opacity-60 pointer-events-none;
 		}
+
+		&.selected {}
 
 		&.highlighted {
 			@apply bg-accent text-accent-foreground;

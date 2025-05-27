@@ -7,7 +7,7 @@
 	:root {
 		--kt-scrollable-scrollbar-size: 5px;
 		--kt-scrollable-thumb-color: var(--color-accent);
-	}
+	}	
 
 	.kt-scrollable::-webkit-scrollbar {
 		width: var(--kt-scrollable-scrollbar-size);
@@ -20,10 +20,13 @@
 	.kt-scrollable::-webkit-scrollbar-thumb {
 		background: var(--kt-scrollable-thumb-color);
 		border-radius: var(--kt-scrollable-scrollbar-size);
-	}
+	}	
 
-	.kt-scrollable {
-		scrollbar-width: thin;
-		scrollbar-color: var(--kt-scrollable-thumb-color) transparent;
+	/* Firefox */
+	@-moz-document url-prefix() { 
+		.kt-scrollable {
+			scrollbar-width: thin;
+			scrollbar-color: var(--kt-scrollable-thumb-color) transparent;
+		}
 	}
 }
