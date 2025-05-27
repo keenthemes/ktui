@@ -167,21 +167,23 @@ export class KTSelect extends KTComponent {
 		);
 		if (!optionsContainer) return;
 
+		// Clear previous messages
+		optionsContainer.innerHTML = '';
+
 		switch (type) {
 			case 'error':
-				optionsContainer.innerHTML = defaultTemplates.error({
+				optionsContainer.appendChild(defaultTemplates.error({
 					...this._config,
 					errorMessage: message,
-				});
+				}));
 				break;
 			case 'loading':
-				optionsContainer.innerHTML = defaultTemplates.loading(
+				optionsContainer.appendChild(defaultTemplates.loading(
 					this._config,
 					message || 'Loading...',
-				).outerHTML;
+				));
 				break;
 			case 'empty':
-				optionsContainer.innerHTML = '';
 				optionsContainer.appendChild(defaultTemplates.empty(this._config));
 				break;
 		}

@@ -30,23 +30,25 @@
 				class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none"
 				aria-label="Close Modal">&times;</button>
 			<h2 class="text-lg font-semibold mb-4">Select a Field</h2>
-			<select class="w-full rounded border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
-				data-kt-select
-				data-kt-select-search="true"
-				data-kt-select-placeholder="Select a field type...">
-				<option value="name">Name</option>
-				<option value="email">Email Address</option>
-				<option value="phone">Phone Number</option>
-				<option value="address">Physical Address</option>
-				<option value="username">Username</option>
-				<option value="password">Password</option>
-				<option value="company">Company Name</option>
-				<option value="website">Website URL</option>
-				<option value="description">Description</option>
-				<option value="birthday">Date of Birth</option>
-				<option value="country">Country</option>
-				<option value="state">State/Province</option>
-				<option value="zipcode">Zip/Postal Code</option>
+			<select
+				class="kt-select"
+				data-kt-select="true"
+				data-kt-select-placeholder="Select a framework..."
+				data-kt-select-config='{
+					"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"
+				}'
+			>
+				<option value="react">React</option>
+				<option value="nextjs">Next.js</option>
+				<option value="angular">Angular</option>
+				<option value="vue">Vue</option>
+				<option value="svelte">Svelte</option>
+				<option value="ember">Ember</option>
+				<option value="nuxt">Nuxt.js</option>
+				<option value="remix">Remix</option>
+				<option value="svelte">Svelte</option>
+				<option value="ember">Ember</option>
+				<option value="nuxt">Nuxt.js</option>
 			</select>
 		</div>
 	</div>
