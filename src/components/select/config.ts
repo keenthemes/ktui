@@ -201,6 +201,7 @@ export class KTSelectState {
 		return {
 			...DefaultConfig,
 			...config,
+			...config.config,
 		};
 	}
 
