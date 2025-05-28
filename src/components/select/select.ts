@@ -426,7 +426,17 @@ export class KTSelect extends KTComponent {
 
 		// Move classes from original select to display element
 		if (this._element.classList.length > 0) {
-			wrapperElement.classList.add(...Array.from(this._element.classList));
+			// Exclude kt-select class from being added to the wrapper element
+			const classes = Array.from(this._element.classList).filter(
+				(className) => className !== 'kt-select',
+			);
+			wrapperElement.classList.add(...classes);
+
+			// If element has class kt-select, move it to display element
+			if (this._element.classList.contains('kt-select')) {
+				displayElement.classList.add('kt-select');
+			}
+
 			this._element.className = '';
 		}
 
