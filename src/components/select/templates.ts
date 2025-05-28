@@ -35,7 +35,7 @@ export const coreTemplateStrings = {
 	placeholder: `<div data-kt-select-placeholder class="kt-select-placeholder {{class}}"></div>`,
 	option: `
 		<li data-kt-select-option data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>
-			{{content}} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 ms-auto hidden text-primary kt-select-option-selected:block"><path d="M20 6 9 17l-5-5"/></svg>
+			{{text}} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 ms-auto hidden text-primary kt-select-option-selected:block"><path d="M20 6 9 17l-5-5"/></svg>
 		</li>
 	`,
 	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-input-ghost" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
@@ -310,7 +310,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			// renderTemplateString will replace {{key}} with values from optionData.
 			content = renderTemplateString(config.optionTemplate, optionData);
 		} else {
-			content = optionData.content || optionData.text; // Prefer explicit content, fallback to text
+			content = optionData.text || optionData.content; // Prefer explicit text, fallback to content
 		}
 
 		// Use the core option template string as the base structure.
