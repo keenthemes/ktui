@@ -69,8 +69,10 @@
 	}
 
 	.kt-select-wrapper {
+		@apply w-full;
+
 		&.disabled {
-			@apply opacity-50 pointer-events-none;
+			@apply opacity-60 pointer-events-none;
 		}
 	}
 
