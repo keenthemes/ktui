@@ -30,12 +30,12 @@ export const coreTemplateStrings = {
 	placeholder: `<div data-kt-select-placeholder class="kt-select-placeholder {{class}}"></div>`,
 	display: `
 		<div data-kt-select-display class="kt-select-display {{class}}" tabindex="{{tabindex}}" role="button" data-selected="0" aria-haspopup="listbox" aria-expanded="false" aria-label="{{label}}" {{disabled}}>
-			<div class="kt-select-option-text">{{text}}</div>
+			<div class="kt-select-option-text" data-kt-text-container="true">{{text}}</div>
 		</div>
 	`,
 	option: `
 		<li data-kt-select-option data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>
-			<div class="kt-select-option-text">{{text}}</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 ms-auto hidden text-primary kt-select-option-selected:block"><path d="M20 6 9 17l-5-5"/></svg>
+			<div class="kt-select-option-text" data-kt-text-container="true">{{text}}</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 ms-auto hidden text-primary kt-select-option-selected:block"><path d="M20 6 9 17l-5-5"/></svg>
 		</li>
 	`,
 	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-input-ghost" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,

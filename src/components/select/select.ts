@@ -923,30 +923,59 @@ export class KTSelect extends KTComponent {
 			return; // Nothing to display on if the element is missing
 		}
 
+		// 1. Custom render function takes highest precedence
 		if (typeof this._config.renderSelected === 'function') {
 			valueDisplayEl.innerHTML = this._config.renderSelected(selectedOptions);
-		} else {
-			if (selectedOptions.length === 0) {
-				// No options selected: display placeholder.
-				// This runs if tags are off, OR if tags are on but no items are selected (tags module would have cleared tags).
-				const placeholderEl = defaultTemplates.placeholder(this._config);
-				valueDisplayEl.replaceChildren(placeholderEl);
+			return;
+		}
+
+		// 2. Custom displayTemplate string
+		// Check if a custom display template string is provided directly in config or via config.templates
+		const customDisplayTemplateString = this._config.displayTemplate || (this._config.templates && this._config.templates.display);
+		if (customDisplayTemplateString) {
+			// If tags are enabled and items are selected, the tags module handles display, so clear the main display area.
+			if (tagsEnabled && selectedOptions.length > 0) {
+				valueDisplayEl.innerHTML = '';
 			} else {
-				// Options are selected.
-				if (tagsEnabled) {
-					// Tags are enabled AND options are selected: tags module has rendered them.
-					// Clear valueDisplayEl as tags are the primary display.
-					valueDisplayEl.innerHTML = '';
-				} else {
-					// Tags are not enabled AND options are selected: render normal text display.
-					let content = '';
-					if (this._config.displayTemplate) {
-						content = this.renderDisplayTemplateForSelected(this.getSelectedOptions());
-					} else {
-						content = this.getSelectedOptionsText();
-					}
-					valueDisplayEl.innerHTML = content;
-				}
+				// Otherwise, render the custom display template.
+				// If no options are selected, renderDisplayTemplateForSelected should handle showing a placeholder if the template supports it,
+				// or we might need a separate placeholder rendering for custom templates if they don't handle empty selection.
+				// For now, assume renderDisplayTemplateForSelected handles it or shows selected text.
+				valueDisplayEl.innerHTML = this.renderDisplayTemplateForSelected(selectedOptions);
+			}
+			return;
+		}
+
+		// 3. Default template behavior (no custom function or string template)
+		const textContainer = valueDisplayEl.querySelector('[data-kt-text-container="true"]') as HTMLElement;
+
+		if (tagsEnabled && selectedOptions.length > 0) {
+			// Tags are active and have content, clear the text container if it exists,
+			// or the whole display if it doesn't (though it should with default template).
+			if (textContainer) {
+				textContainer.innerHTML = '';
+			} else {
+				valueDisplayEl.innerHTML = ''; // Fallback: clear entire display area
+			}
+		} else if (selectedOptions.length === 0) {
+			// No options selected: display placeholder text in the text container.
+			const placeholderTemplate = defaultTemplates.placeholder(this._config);
+			const placeholderText = placeholderTemplate.textContent || ''; // Get text from placeholder element
+			if (textContainer) {
+				textContainer.innerHTML = placeholderText;
+			} else {
+				// Fallback: If no text container, replace children of valueDisplayEl with the placeholder element itself.
+				// This ensures the placeholder (which might have its own structure/classes) is displayed.
+				valueDisplayEl.replaceChildren(placeholderTemplate);
+			}
+		} else {
+			// Options are selected, and tags are not enabled (or no selected options for tags):
+			// Render normal selected text in the text container.
+			const content = this.getSelectedOptionsText();
+			if (textContainer) {
+				textContainer.innerHTML = content;
+			} else {
+				valueDisplayEl.innerHTML = content; // Fallback: set content on whole display area
 			}
 		}
 	}
