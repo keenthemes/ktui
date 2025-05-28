@@ -114,12 +114,7 @@ export class KTSelectSearch {
 					this.clearSearch();
 
 					// Close dropdown if configured to do so
-					if (
-						this._select.getConfig().closeOnSelect &&
-						!this._select.getConfig().multiple
-					) {
-						this._select.closeDropdown();
-					}
+					this._select.closeDropdown();
 				});
 
 				// Consolidated 'dropdown.show' event listener - ATTACH TO WRAPPER

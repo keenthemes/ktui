@@ -717,7 +717,6 @@ export class KTSelect extends KTComponent {
 	 * Open the dropdown
 	 */
 	public openDropdown() {
-		console.log('openDropdown called');
 		if (this._config.disabled) {
 			if (this._config.debug) console.log('openDropdown: select is disabled, not opening');
 			return;
@@ -1309,7 +1308,7 @@ export class KTSelect extends KTComponent {
 		// Get current selection state
 		const isSelected = this._state.isSelected(value);
 		if (this._config.debug)
-			console.log(`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}, closeOnSelect: ${this._config.closeOnSelect}`);
+			console.log(`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}`);
 
 		// If already selected in single select mode, do nothing (can't deselect in single select)
 		if (isSelected && !this._config.multiple) {
@@ -1353,14 +1352,13 @@ export class KTSelect extends KTComponent {
 		this._updateSelectedOptionClass();
 
 		// For single select mode, always close the dropdown after selection
-		// For multiple select mode, only close if closeOnSelect is true
 		if (!this._config.multiple) {
 			if (this._config.debug)
 				console.log('About to call closeDropdown() for single select mode - always close after selection');
 			this.closeDropdown();
-		} else if (this._config.closeOnSelect) {
+		} else {
 			if (this._config.debug)
-				console.log('About to call closeDropdown() for multiple select with closeOnSelect:true');
+				console.log('About to call closeDropdown() for multiple select');
 			this.closeDropdown();
 		}
 
@@ -1691,18 +1689,29 @@ export class KTSelect extends KTComponent {
 			case 'Enter':
 			case ' ': // Space
 				if (isOpen) {
-					const focused = focusManager.getFocusedOption();
-					if (focused) {
-						const value = focused.dataset.value;
-						if (value) {
-							this.toggleSelection(value);
-							if (!config.multiple && config.closeOnSelect) {
-								this.closeDropdown();
-							}
+					const focusedOptionEl = this._focusManager.getFocusedOption();
+					if (focusedOptionEl) {
+						const val = focusedOptionEl.dataset.value;
+						// If single select, and the item is already selected, just close.
+						if (val !== undefined && !this._config.multiple && this._state.isSelected(val)) {
+							if (this._config.debug) console.log('Enter on already selected item in single-select mode. Closing.');
+							this.closeDropdown();
+							event.preventDefault();
+							break;
 						}
 					}
-					// Prevent form submit
-					event.preventDefault();
+
+					// Proceed with selection if not handled above
+					this.selectFocusedOption();
+
+					// Close dropdown if configured to do so (for new selections)
+					if (!this._config.multiple) {
+						// This will also be true for the case handled above, but closeDropdown is idempotent.
+						// However, the break above prevents this from being reached for that specific case.
+						this.closeDropdown();
+					}
+					event.preventDefault(); // Prevent form submission or other default actions
+					break;
 				} else {
 					this.openDropdown();
 				}
