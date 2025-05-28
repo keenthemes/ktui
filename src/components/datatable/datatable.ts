@@ -1065,17 +1065,20 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			return _sizeElement;
 		}
 
-		// Create <option> elements for each page size option
-		const options = this._config.pageSizes.map((size: number) => {
-			const option = document.createElement('option') as HTMLOptionElement;
-			option.value = String(size);
-			option.text = String(size);
-			option.selected = this.getState().pageSize === size;
-			return option;
-		});
+		// Wait for the element to be attached to the DOM
+		setTimeout(() => {
+			// Create <option> elements for each page size option
+			const options = this._config.pageSizes.map((size: number) => {
+				const option = document.createElement('option') as HTMLOptionElement;
+				option.value = String(size);
+				option.text = String(size);
+				option.selected = this.getState().pageSize === size;
+				return option;
+			});
 
-		// Add the <option> elements to the provided element
-		_sizeElement.append(...options);
+			// Add the <option> elements to the provided element
+			_sizeElement.append(...options);
+		}, 100);
 
 		// Create an event listener for the "change" event on the element
 		const _pageSizeControlsEvent = (event: Event) => {
