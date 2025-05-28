@@ -410,13 +410,6 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
-	 * Initialize options HTML from data
-	 */
-	// private _initializeOptionsHtml() {
-	// 	this._generateOptionsHtml(this._element);
-	// }
-
-	/**
 	 * Creates the HTML structure for the select component
 	 */
 	private _createHtmlStructure() {
@@ -825,14 +818,14 @@ export class KTSelect extends KTComponent {
 		if (this._config.debug)
 			console.log('Closing dropdown via dropdownModule...');
 
-		// Clear search input and highlights if the dropdown is closing
+		// Clear search input if the dropdown is closing
 		if (this._searchModule && this._searchInputElement) {
 			// Clear search input if configured to do so
 			if (this._config.clearSearchOnClose) {
 				this._searchInputElement.value = '';
 			}
 
-			// Always clear the highlights when dropdown closes
+			// Clear search input when dropdown closes
 			this._searchModule.clearSearch();
 		}
 
@@ -1339,7 +1332,7 @@ export class KTSelect extends KTComponent {
 		if (this._config.debug)
 			console.log(`Toggling selection for option: ${value}, currently selected: ${isSelected}`);
 
-		// Ensure any search highlights are cleared when selection changes
+		// Ensure any search input is cleared when selection changes
 		if (this._searchModule) {
 			this._searchModule.clearSearch();
 		}
@@ -1636,6 +1629,12 @@ export class KTSelect extends KTComponent {
 	 * Centralized keyboard event handler for all select modes
 	 */
 	private _handleKeyboardEvent(event: KeyboardEvent) {
+		// If the event target is the search input and the event was already handled (defaultPrevented),
+		// then return early to avoid duplicate processing by this broader handler.
+		if (event.target === this._searchInputElement && event.defaultPrevented) {
+			return;
+		}
+
 		const isOpen = this._dropdownIsOpen;
 		const config = this._config;
 		const focusManager = this._focusManager;

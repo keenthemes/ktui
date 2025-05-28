@@ -14,7 +14,6 @@ export const coreTemplateStrings = {
 	dropdown: `<div data-kt-select-dropdown class="kt-select-dropdown hidden {{class}}" style="z-index: {{zindex}};"></div>`,
 	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options {{class}}" data-kt-select-options="true"></ul>`,
 	error: `<li class="kt-select-error" role="alert"></li>`,
-	highlight: `<span data-kt-select-highlight class="kt-select-highlight highlighted {{class}}">{{text}}</span>`,
 	wrapper: `<div data-kt-select-wrapper class="kt-select-wrapper {{class}}"></div>`,
 	combobox: `
 		<div data-kt-select-combobox data-kt-select-display class="kt-select-combobox {{class}}">
@@ -71,8 +70,6 @@ export interface KTSelectTemplateInterface {
 	 * Renders an error message in the dropdown
 	 */
 	error: (config: KTSelectConfigInterface & { errorMessage: string }) => HTMLElement;
-
-	highlight: (config: KTSelectConfigInterface, text: string) => HTMLElement;
 
 	// Main components
 	wrapper: (config: KTSelectConfigInterface) => HTMLElement;
@@ -148,17 +145,6 @@ export function getTemplateStrings(
  * Default templates for KTSelect component
  */
 export const defaultTemplates: KTSelectTemplateInterface = {
-	/**
-	 * Renders a highlighted text
-	 */
-	highlight: (config: KTSelectConfigInterface, text: string) => {
-		const template = getTemplateStrings(config).highlight;
-		const html = template
-			.replace('{{text}}', text)
-			.replace('{{class}}', config.highlightClass || '');
-		return stringToElement(html);
-	},
-
 	/**
 	 * Renders the dropdown content
 	 */

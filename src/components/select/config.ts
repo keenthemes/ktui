@@ -152,7 +152,6 @@ export interface KTSelectConfigInterface {
 	loadMoreClass?: string;
 	wrapperClass?: string;
 	errorClass?: string;
-	highlightClass?: string;
 
 	// New Config
 	tags?: boolean;

@@ -30,7 +30,7 @@ export function filterOptions(
 ): number {
 	let visibleOptionsCount = 0;
 
-	// For empty query, make all options visible and ensure no highlights.
+	// For empty query, make all options visible
 	// The KTSelectSearch class is now responsible for restoring original content before calling this.
 	if (!query || query.trim() === '') {
 		for (const option of options) {
@@ -39,7 +39,7 @@ export function filterOptions(
 			if (option.style.display === 'none') {
 				option.style.display = '';
 				}
-			// At this point, option.innerHTML should be its original, non-highlighted state.
+			// At this point, option.innerHTML should be its original.
 			visibleOptionsCount++;
 		}
 
@@ -77,68 +77,6 @@ export function filterOptions(
 
 	return visibleOptionsCount;
 }
-
-/**
- * Highlight text within an element by traversing its text nodes.
- * Preserves existing HTML structure, suitable for custom templates.
- */
-export function highlightTextInElement(
-	element: HTMLElement,
-	query: string,
-	config: KTSelectConfigInterface,
-): void {
-	if (!element || !query || query.trim() === '') return;
-
-	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	const regex = new RegExp(escapedQuery, 'gi');
-
-	// Ensure we don't highlight within existing highlight spans
-	const highlightSelector = `[data-kt-select-highlight]`;
-
-	function walk(node: Node) {
-		if (node.nodeType === Node.TEXT_NODE) {
-			// Do not touch text nodes that are children of an existing highlight span
-			if (node.parentElement && node.parentElement.closest(highlightSelector)) {
-		return;
-	}
-
-			const text = node.nodeValue || '';
-			let match;
-			let lastIndex = 0;
-			const fragment = document.createDocumentFragment();
-			let foundMatch = false;
-
-			while ((match = regex.exec(text)) !== null) {
-				foundMatch = true;
-				// Add text before the match
-				if (match.index > lastIndex) {
-					fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
-				}
-				// Add the highlighted match
-				const highlightedSpan = defaultTemplates.highlight(config, match[0]);
-				fragment.appendChild(highlightedSpan);
-				lastIndex = regex.lastIndex;
-	}
-
-			if (foundMatch) {
-				// Add any remaining text after the last match
-				if (lastIndex < text.length) {
-					fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
-				}
-				// Replace the original text node with the fragment
-				node.parentNode?.replaceChild(fragment, node);
-			}
-		} else if (node.nodeType === Node.ELEMENT_NODE && !(node as HTMLElement).matches(highlightSelector)) {
-			// Recursively walk child nodes for element nodes, but not if it's a highlight span itself
-			Array.from(node.childNodes).forEach(walk);
-		}
-	}
-
-	walk(element);
-}
-
-// Debounced version for performance
-export const highlightTextInElementDebounced = debounce(highlightTextInElement, 100);
 
 /**
  * Focus manager for keyboard navigation
