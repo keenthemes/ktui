@@ -162,13 +162,10 @@ export interface KTSelectConfigInterface {
 	placeholderTemplate?: string;
 	displaySeparator?: string;
 	displayTemplate?: string;
-	displayToggle?: boolean;
 	displayMaxSelected?: number;
 	optionTemplate?: string;
 	optionClass?: string;
 	tagTemplate?: string;
-	displayToggleClass?: string;
-	displayToggleTemplate?: string;
 
 	templates?: Partial<typeof coreTemplateStrings>;
 
