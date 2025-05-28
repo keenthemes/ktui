@@ -11,7 +11,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// General Display
 	debug: false,
 	placeholder: 'Select an option', // Default placeholder text when no option is selected
-	dropdownZindex: null, // Initial z-index value for the dropdown
 
 	// Data Handling
 	items: [], // Static list of options
@@ -66,6 +65,8 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	height: 250, // Maximum height of the dropdown menu in pixels (if exceeded, a scrollbar will appear)
 
 	// Dropdown Configuration
+	dropdownZindex: null, // Initial z-index value for the dropdown
+	dropdownContainer: null, // Container element for the dropdown
 	dropdownPlacement: null,
 	dropdownFlip: false,
 	dropdownPreventOverflow: false,
@@ -82,7 +83,6 @@ export interface KTSelectConfigInterface {
 	// General Display
 	debug?: boolean;
 	placeholder?: string;
-	dropdownZindex?: number | null;
 
 	// Selection Behavior
 	allowClear?: boolean;
@@ -135,6 +135,8 @@ export interface KTSelectConfigInterface {
 	paginationTotalParam?: string;
 
 	// Dropdown Configuration
+	dropdownZindex?: number | null;
+	dropdownContainer?: string | null;
 	dropdownPlacement?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
 	dropdownFlip?: boolean;
 	dropdownPreventOverflow?: boolean;
