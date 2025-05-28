@@ -49,10 +49,6 @@
 		@apply flex items-center truncate;
 	}
 
-	.kt-select-display {
-		@apply flex items-center truncate;
-	}
-
 	.kt-select-arrow {
 		@apply ms-auto;
 
@@ -94,6 +90,8 @@
 
 		&.selected {}
 
+		&.focused,
+		&.hover,
 		&.highlighted {
 			@apply bg-accent text-accent-foreground;
 		}
@@ -112,14 +110,26 @@
 @layer components {
 	.kt-select {
 		@apply h-8.5 gap-1 px-3 text-[0.8125rem] leading-(--text-sm--line-height) rounded-md;
+
+		&[data-multiple=true] {
+			@apply h-auto min-h-8.5 py-1 flex-wrap;
+		}
 	}
 
 	.kt-select-lg {
-		@apply h-10 gap-1.5 px-4 text-sm rounded-md;
+		@apply h-10 gap-1.5 px-4 py-1 text-sm rounded-md;
+
+		&[data-multiple=true] {
+			@apply h-auto min-h-10;
+		}
 	}
 
 	.kt-select-sm {
 		@apply h-7 gap-1 px-2.5 text-xs rounded-md;
+
+		&[data-multiple=true] {
+			@apply h-auto min-h-7;
+		}
 	}
 }
 
@@ -128,15 +138,6 @@
 	.dark .kt-input {
 		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
 	}
-}
-
-/* Temporary styles */
-.kt-select-option.focus {
-	@apply bg-accent text-accent-foreground;
-}
-
-.kt-select-option.hover {
-	@apply bg-accent text-accent-foreground;
 }
 
 /* Custom variants */
