@@ -475,7 +475,7 @@ export class KTSelect extends KTComponent {
 
 		// Insert after the original element
 		this._element.after(wrapperElement);
-		this._element.classList.add('hidden');
+		this._element.classList.add('kt-select-hidden');
 	}
 
 	/**
