@@ -220,6 +220,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		element.textContent = config.errorMessage || 'An error occurred';
 		return element;
 	},
+
 	/**
 	 * Renders the main container for the select component
 	 */

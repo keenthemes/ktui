@@ -40,6 +40,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	paginationTotalParam: 'total', // Parameter name for total items
 
 	// Selection Behavior
+	allowClear: false, // Allow clearing the selection (if true, an empty value can be set)
 	multiple: false, // Enable/disable multi-select
 	maxSelections: null, // Maximum number of selections allowed in multi-select mode (null for unlimited)
 	disabled: false, // Disable the select component
@@ -84,6 +85,7 @@ export interface KTSelectConfigInterface {
 	dropdownZindex?: number | null;
 
 	// Selection Behavior
+	allowClear?: boolean;
 	multiple?: boolean;
 	maxSelections?: number | null;
 	disabled?: boolean;
@@ -177,6 +179,7 @@ export interface KTSelectOption {
 	id: string;
 	title: string;
 	selected?: boolean;
+	disabled?: boolean;
 }
 
 export class KTSelectState {
@@ -266,11 +269,17 @@ export class KTSelectState {
 	}
 
 	public setItemsFromOptions(options: HTMLOptionElement[]): void {
-		this._config.items = options.map((option) => ({
-			id: option.value,
-			title: option.textContent || '',
-			// Add other properties from option element if needed
-		}));
+		this._config.items = options.map((option) => {
+			const item: KTSelectOption = {
+				id: option.value,
+				title: option.textContent || option.value, // Use value as fallback for title
+				// 'selected' property will be definitively set by _preSelectOptions
+				disabled: option.disabled,
+			};
+			return item;
+		});
+		// The 'selected' status of these items and the overall component selection state
+		// are now fully managed by _preSelectOptions in KTSelect during initialization.
 	}
 
 	public getConfig(): KTSelectConfigInterface {

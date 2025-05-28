@@ -51,6 +51,7 @@ export class KTSelect extends KTComponent {
 	private _focusManager: FocusManager;
 	private _eventManager: EventManager;
 	private _typeToSearchBuffer: TypeToSearchBuffer = new TypeToSearchBuffer();
+	private _mutationObserver: MutationObserver | null = null;
 
 	/**
 	 * Constructor: Initializes the select component
@@ -408,6 +409,8 @@ export class KTSelect extends KTComponent {
 
 		// Attach event listeners after all modules are initialized
 		this._attachEventListeners();
+
+		this._observeNativeSelect();
 	}
 
 	/**
@@ -1741,5 +1744,75 @@ export class KTSelect extends KTComponent {
 
 	public getDisplayElement(): HTMLElement {
 		return this._displayElement;
+	}
+
+	private _observeNativeSelect() {
+		if (this._mutationObserver) return; // Prevent double observers
+		this._mutationObserver = new MutationObserver((mutations) => {
+			let needsRebuild = false;
+			let needsSelectionSync = false;
+
+			for (const mutation of mutations) {
+				if (mutation.type === 'childList') {
+					// Option(s) added or removed
+					needsRebuild = true;
+				} else if (mutation.type === 'attributes' && mutation.target instanceof HTMLOptionElement) {
+					if (mutation.attributeName === 'selected') {
+						needsSelectionSync = true;
+					}
+				}
+			}
+
+			if (needsRebuild) {
+				// Rebuild the custom dropdown options
+				this._rebuildOptionsFromNative();
+			}
+			if (needsSelectionSync) {
+				this._syncSelectionFromNative();
+			}
+		});
+
+		this._mutationObserver.observe(this._element, {
+			childList: true,
+			attributes: true,
+			subtree: true,
+			attributeFilter: ['selected'],
+		});
+	}
+
+	private _rebuildOptionsFromNative() {
+		// Remove and rebuild the custom dropdown options from the native select
+		if (this._dropdownContentElement) {
+			const optionsContainer = this._dropdownContentElement.querySelector('[data-kt-select-options]');
+			if (optionsContainer) {
+				optionsContainer.innerHTML = '';
+				const options = Array.from(this._element.querySelectorAll('option'));
+				options.forEach((optionElement) => {
+					if (
+						optionElement.value === '' &&
+						optionElement.textContent.trim() === ''
+					) {
+						return;
+					}
+					const selectOption = new KTSelectOption(optionElement, this._config);
+					const renderedOption = selectOption.render();
+					optionsContainer.appendChild(renderedOption);
+				});
+				// Update internal references
+				this._options = this._wrapperElement.querySelectorAll('[data-kt-select-option]') as NodeListOf<HTMLElement>;
+			}
+		}
+		// Sync selection after rebuilding
+		this._syncSelectionFromNative();
+		this.updateSelectedOptionDisplay();
+		this._updateSelectedOptionClass();
+	}
+
+	private _syncSelectionFromNative() {
+		// Sync internal state from the native select's selected options
+		const selected = Array.from(this._element.querySelectorAll('option:checked')).map(opt => (opt as HTMLOptionElement).value);
+		this._state.setSelectedOptions(this._config.multiple ? selected : selected[0] || '');
+		this.updateSelectedOptionDisplay();
+		this._updateSelectedOptionClass();
 	}
 }

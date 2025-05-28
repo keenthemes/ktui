@@ -42,7 +42,7 @@ export class KTSelectCombobox {
 				this.updateDisplay(this._select.getSelectedOptions());
 			} else {
 				// For tags or displayTemplate, the input should be clear for typing.
-				this._searchInputElement.value = '';
+			this._searchInputElement.value = '';
 			}
 			this._toggleClearButtonVisibility(this._searchInputElement.value);
 			// this._select.showAllOptions(); // showAllOptions might be too broad, filtering is managed by typing.
