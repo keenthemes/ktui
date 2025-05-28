@@ -35,7 +35,7 @@ export class KTSelectCombobox {
 
 		this._attachEventListeners();
 
-		this._select.getElement().addEventListener('kt.select.dropdown.close', () => {
+		this._select.getElement().addEventListener('dropdown.close', () => {
 			// When dropdown closes, if not multi-select and not using displayTemplate,
 			// ensure input shows the selected value or placeholder.
 			if (!this._config.multiple && !this._config.displayTemplate) {

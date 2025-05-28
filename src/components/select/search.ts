@@ -96,7 +96,7 @@ export class KTSelectSearch {
 				}
 
 				// Listen for dropdown close to reset options - ATTACH TO WRAPPER
-				this._select.getWrapperElement().addEventListener('kt.select.dropdown.close', () => {
+				this._select.getWrapperElement().addEventListener('dropdown.close', () => {
 					this._focusManager.resetFocus();
 					// If clearSearchOnClose is false and there's a value, the search term and filtered state should persist.
 					// KTSelect's closeDropdown method already calls this._searchModule.clearSearch() (which clears highlights)
@@ -123,7 +123,7 @@ export class KTSelectSearch {
 				});
 
 				// Consolidated 'dropdown.show' event listener - ATTACH TO WRAPPER
-				this._select.getWrapperElement().addEventListener('kt.select.dropdown.show', () => {
+				this._select.getWrapperElement().addEventListener('dropdown.show', () => {
 					this._focusManager.resetFocus(); // Always clear previous focus state
 
 					if (this._searchInput?.value) {
