@@ -1248,6 +1248,13 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
+	 * Get wrapper element
+	 */
+	public getWrapperElement(): HTMLElement {
+		return this._wrapperElement;
+	}
+
+	/**
 	 * Show all options in the dropdown
 	 */
 	public showAllOptions() {

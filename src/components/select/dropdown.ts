@@ -353,7 +353,7 @@ export class KTSelectDropdown extends KTComponent {
 		}
 
 		// Fire before hide event
-		const beforeHideEvent = new CustomEvent('kt.select.dropdown.hide', {
+		const beforeHideEvent = new CustomEvent('kt.select.dropdown.close', {
 			bubbles: true,
 			cancelable: true,
 		});

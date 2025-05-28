@@ -95,16 +95,21 @@ export class KTSelectSearch {
 					});
 				}
 
-				// Listen for dropdown close to reset options if search is empty
-				this._select.getElement().addEventListener('dropdown.close', () => {
+				// Listen for dropdown close to reset options - ATTACH TO WRAPPER
+				this._select.getWrapperElement().addEventListener('kt.select.dropdown.close', () => {
 					this._focusManager.resetFocus();
-					this.clearSearch();
-					this._searchInput.value = '';
-					this._resetAllOptions();
-					this._clearNoResultsMessage();
+					// If clearSearchOnClose is false and there's a value, the search term and filtered state should persist.
+					// KTSelect's closeDropdown method already calls this._searchModule.clearSearch() (which clears highlights)
+					// and conditionally clears the input value based on KTSelect's config.clearSearchOnClose.
+					// This listener in search.ts seems to unconditionally clear everything.
+					// For now, keeping its original behavior:
+					this.clearSearch(); // Clears highlights from current options
+					this._searchInput.value = ''; // Clears the search input field
+					this._resetAllOptions(); // Shows all options, restores original text, removes highlights
+					this._clearNoResultsMessage(); // Clears any "no results" message
 				});
 
-				// Clear highlights when an option is selected
+				// Clear highlights when an option is selected - ATTACH TO ORIGINAL SELECT (standard 'change' event)
 				this._select.getElement().addEventListener('change', () => {
 					this.clearSearch();
 
@@ -117,21 +122,33 @@ export class KTSelectSearch {
 					}
 				});
 
-				// Autofocus on search input
-				if (this._select.getConfig().searchAutofocus) {
-					this._select.getElement().addEventListener('dropdown.show', () => {
-						setTimeout(() => {
-							// Add slight delay to ensure the dropdown and search input are visible
-							this._searchInput?.focus();
-						}, 50);
-					});
-				}
+				// Consolidated 'dropdown.show' event listener - ATTACH TO WRAPPER
+				this._select.getWrapperElement().addEventListener('kt.select.dropdown.show', () => {
+					this._focusManager.resetFocus(); // Always clear previous focus state
+					console.log('focusing first');
 
-				// Listen for explicit dropdown open event to clear highlights if needed
-				this._select.getElement().addEventListener('dropdown.show', () => {
-					// If search input is empty, ensure highlights are cleared on open
-					if (!this._searchInput?.value) {
-						this.clearSearch();
+					if (this._searchInput?.value) {
+						// If there's an existing search term:
+						// 1. Re-filter options. This ensures the display (hidden/visible) is correct
+						//    and "no results" message is handled if query yields nothing.
+						this._filterOptions(this._searchInput.value);
+						// 2. Attempt to focus the first available option in the filtered list.
+						this._focusManager.focusFirst();
+					} else {
+						// If search input is empty:
+						// 1. Reset all options to their full, unfiltered, original state.
+						this._resetAllOptions(); // Shows all, clears highlights from options, restores original text
+						// 2. Clear any "no results" message.
+						this._clearNoResultsMessage();
+						// 3. Attempt to focus the first available option in the full list.
+						this._focusManager.focusFirst();
+					}
+
+					// Handle autofocus for the search input (this was one of the original separate listeners)
+					if (this._select.getConfig().searchAutofocus) {
+						setTimeout(() => {
+							this._searchInput?.focus(); // Focus search input
+						}, 50); // Delay to ensure dropdown is visible
 					}
 				});
 			}
@@ -164,14 +181,15 @@ export class KTSelectSearch {
 				break;
 			case 'Enter':
 				event.preventDefault();
-				const focusedOption = this._focusManager.getFocusedOption();
-				if (focusedOption) {
-					const optionValue = focusedOption.getAttribute('data-value');
+				// Always attempt to select the first available option in the list.
+				// focusFirst() finds, focuses, and returns the first visible, non-disabled option.
+				const firstAvailableOption = this._focusManager.focusFirst();
+
+				if (firstAvailableOption) {
+					const optionValue = firstAvailableOption.getAttribute('data-value');
 					if (optionValue) {
 						this._select.toggleSelection(optionValue);
-						if (this._config.closeOnSelect && !this._config.multiple) {
-							this._select.closeDropdown();
-						}
+						// KTSelect.toggleSelection handles closing the dropdown based on config.closeOnSelect and config.multiple
 					}
 				}
 				break;
