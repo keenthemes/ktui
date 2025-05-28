@@ -7,7 +7,7 @@
  @layer components {
   /* Container */
   .kt-toast-container {
-    @apply fixed;
+    @apply fixed z-9999;
   }
 
   /* Toast */
