@@ -427,6 +427,11 @@ export class KTSelect extends KTComponent {
 
 		const displayElement = defaultTemplates.display(this._config);
 
+		// Add data-multiple attribute if in multiple select mode
+		if (this._config.multiple) {
+			displayElement.setAttribute('data-multiple', 'true');
+		}
+
 		// Add the display element to the wrapper
 		wrapperElement.appendChild(displayElement);
 
