@@ -37,6 +37,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		offset: '0px, 5px',
 		offsetRtl: '0px, 5px',
 		hiddenClass: 'hidden',
+		container: '',
 	};
 	protected override _config: KTDropdownConfigInterface = this._defaultConfig;
 	protected _disabled: boolean = false;
@@ -64,6 +65,19 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 
 		KTData.set(this._menuElement, 'dropdownElement', this._element);
 		this._setupNestedDropdowns();
+		this._handleContainer();
+	}
+
+	protected _handleContainer(): void {
+		if (this._getOption('container')) {
+			if (this._getOption('container') === 'body') {
+				document.body.appendChild(this._menuElement);
+			} else {
+				document
+					.querySelector(this._getOption('container') as string)
+					?.appendChild(this._menuElement);
+			}
+		}
 	}
 
 	protected _setupNestedDropdowns(): void {

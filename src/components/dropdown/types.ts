@@ -18,6 +18,7 @@ export interface KTDropdownConfigInterface {
 	offsetRtl: string;
 	trigger: KTDropdownTriggerType;
 	hiddenClass: string;
+	container: string;
 }
 
 export interface KTDropdownInterface {
