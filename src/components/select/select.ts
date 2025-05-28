@@ -37,7 +37,6 @@ export class KTSelect extends KTComponent {
 	private _displayElement: HTMLElement;
 	private _dropdownContentElement: HTMLElement;
 	private _searchInputElement: HTMLInputElement | null;
-	private _valueDisplayElement: HTMLElement;
 	private _options: NodeListOf<HTMLElement>;
 
 	// State
@@ -167,21 +166,23 @@ export class KTSelect extends KTComponent {
 		);
 		if (!optionsContainer) return;
 
+		// Clear previous messages
+		optionsContainer.innerHTML = '';
+
 		switch (type) {
 			case 'error':
-				optionsContainer.innerHTML = defaultTemplates.error({
+				optionsContainer.appendChild(defaultTemplates.error({
 					...this._config,
 					errorMessage: message,
-				});
+				}));
 				break;
 			case 'loading':
-				optionsContainer.innerHTML = defaultTemplates.loading(
+				optionsContainer.appendChild(defaultTemplates.loading(
 					this._config,
 					message || 'Loading...',
-				).outerHTML;
+				));
 				break;
 			case 'empty':
-				optionsContainer.innerHTML = '';
 				optionsContainer.appendChild(defaultTemplates.empty(this._config));
 				break;
 		}
@@ -514,10 +515,6 @@ export class KTSelect extends KTComponent {
 			this._searchInputElement = this._displayElement as HTMLInputElement;
 		}
 
-		this._valueDisplayElement = this._wrapperElement.querySelector(
-			`[data-kt-select-value]`,
-		) as HTMLElement;
-
 		this._options = this._wrapperElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
@@ -831,7 +828,7 @@ export class KTSelect extends KTComponent {
 			}
 
 			// Always clear the highlights when dropdown closes
-			this._searchModule.clearSearchHighlights();
+			this._searchModule.clearSearch();
 		}
 
 		// Set our internal flag to match what we're doing
@@ -947,36 +944,57 @@ export class KTSelect extends KTComponent {
 	 */
 	public updateSelectedOptionDisplay() {
 		const selectedOptions = this.getSelectedOptions();
+		const tagsEnabled = this._config.tags && this._tagsModule;
 
-		// Tag mode: render tags if enabled
-		if (this._config.tags && this._tagsModule) {
+		if (tagsEnabled) {
+			// Tags module will render tags if selectedOptions > 0, or clear them if selectedOptions === 0.
 			this._tagsModule.updateTagsDisplay(selectedOptions);
-			return;
+		}
+
+		// Guard against _valueDisplayElement being null due to template modifications
+		if (!this._displayElement) {
+			if (this._config.debug) {
+				console.warn('KTSelect: _valueDisplayElement is null. Cannot update display or placeholder. Check template for [data-kt-select-value].');
+			}
+			return; // Nothing to display on if the element is missing
 		}
 
 		if (typeof this._config.renderSelected === 'function') {
-			// Use the custom renderSelected function if provided
-			this._valueDisplayElement.innerHTML = this._config.renderSelected(selectedOptions);
+			this._displayElement.innerHTML = this._config.renderSelected(selectedOptions);
 		} else {
-
 			if (selectedOptions.length === 0) {
-				const placeholder = defaultTemplates.placeholder(this._config);
-				this._valueDisplayElement.replaceChildren(placeholder);
-
+				// No options selected: display placeholder.
+				// This runs if tags are off, OR if tags are on but no items are selected (tags module would have cleared tags).
+				const placeholderEl = defaultTemplates.placeholder(this._config);
+				this._displayElement.replaceChildren(placeholderEl);
 			} else {
-				let content = '';
-
-				if (this._config.displayTemplate) {
-					const selectedValues = this.getSelectedOptions();
-					content = this.renderDisplayTemplateForSelected(selectedValues);
+				// Options are selected.
+				if (tagsEnabled) {
+					// Tags are enabled AND options are selected: tags module has rendered them.
+					// Clear _valueDisplayElement as tags are the primary display.
+					this._displayElement.innerHTML = '';
 				} else {
-					// If no displayTemplate is provided, use the default comma-separated list of selected options
-					content = this.getSelectedOptionsText();
+					// Tags are not enabled AND options are selected: render normal text display.
+					let content = '';
+					if (this._config.displayTemplate) {
+						content = this.renderDisplayTemplateForSelected(this.getSelectedOptions());
+					} else {
+						content = this.getSelectedOptionsText();
+					}
+					this._displayElement.innerHTML = content;
 				}
-
-				this._valueDisplayElement.innerHTML = content;
 			}
 		}
+	}
+
+	/**
+	 * Check if an option was originally disabled in the HTML
+	 */
+	private _isOptionOriginallyDisabled(value: string): boolean {
+		const originalOption = Array.from(this._element.querySelectorAll('option')).find(
+			(opt) => opt.value === value
+		) as HTMLOptionElement;
+		return originalOption ? originalOption.disabled : false;
 	}
 
 	/**
@@ -1000,17 +1018,23 @@ export class KTSelect extends KTComponent {
 		allOptions.forEach((option) => {
 			const optionValue = option.getAttribute('data-value');
 			if (!optionValue) return;
+
 			const isSelected = selectedValues.includes(optionValue);
+			const isOriginallyDisabled = this._isOptionOriginallyDisabled(optionValue);
+
 			if (isSelected) {
 				option.classList.add('selected');
 				option.setAttribute('aria-selected', 'true');
+				// Selected options should not be visually hidden or disabled by maxSelections logic
 				option.classList.remove('hidden');
 				option.classList.remove('disabled');
 				option.removeAttribute('aria-disabled');
 			} else {
 				option.classList.remove('selected');
 				option.setAttribute('aria-selected', 'false');
-				if (maxReached) {
+
+				// An option should be disabled if it was originally disabled OR if maxSelections is reached
+				if (isOriginallyDisabled || maxReached) {
 					option.classList.add('disabled');
 					option.setAttribute('aria-disabled', 'true');
 				} else {
@@ -1214,7 +1238,7 @@ export class KTSelect extends KTComponent {
 	 * Get value display element
 	 */
 	public getValueDisplayElement() {
-		return this._valueDisplayElement;
+		return this._displayElement;
 	}
 
 	/**
@@ -1246,7 +1270,7 @@ export class KTSelect extends KTComponent {
 						// Otherwise, remove just the display property
 						option.setAttribute(
 							'style',
-							styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
+							styleAttr?.replace(/display:\s*[^;]+;?/gi, '')?.trim(),
 						);
 					}
 				}
@@ -1258,7 +1282,7 @@ export class KTSelect extends KTComponent {
 			this._searchInputElement.value = '';
 			// If we have a search module, clear any search filtering
 			if (this._searchModule) {
-				this._searchModule.clearSearchHighlights();
+				this._searchModule.clearSearch();
 			}
 		}
 	}
@@ -1304,7 +1328,7 @@ export class KTSelect extends KTComponent {
 
 		// Ensure any search highlights are cleared when selection changes
 		if (this._searchModule) {
-			this._searchModule.clearSearchHighlights();
+			this._searchModule.clearSearch();
 		}
 
 		// Toggle the selection in the state
@@ -1629,7 +1653,7 @@ export class KTSelect extends KTComponent {
 			buffer.push(event.key);
 			const str = buffer.getBuffer();
 			if (isOpen) {
-				focusManager.focusByString(str);
+			focusManager.focusByString(str);
 			} else {
 				// If closed, type-to-search could potentially open and select.
 				// For now, let's assume it only works when open or opens it first.
@@ -1722,5 +1746,9 @@ export class KTSelect extends KTComponent {
 			}).filter(Boolean)
 		));
 		return contentArray.join(displaySeparator);
+	}
+
+	public getDisplayElement(): HTMLElement {
+		return this._displayElement;
 	}
 }

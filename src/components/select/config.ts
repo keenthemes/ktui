@@ -53,7 +53,6 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	searchMinLength: 0, // Minimum characters required to trigger search
 	searchMaxItems: 50, // Maximum number of search results to display
 	searchNotFoundText: 'No results found', // Text to display when no search results are found
-	searchHighlight: true, // Highlight matching search terms within the options
 	clearSearchOnClose: true, // Clear search input when dropdown closes
 
 	// Multi-Select Display
@@ -99,7 +98,6 @@ export interface KTSelectConfigInterface {
 	searchMinLength?: number;
 	searchMaxItems?: number;
 	searchNotFoundText?: string;
-	searchHighlight?: boolean;
 	searchDebounce?: number;
 	searchParam?: string;
 	clearSearchOnClose?: boolean;
