@@ -11,6 +11,7 @@
 
 	.kt-scrollable::-webkit-scrollbar {
 		width: var(--kt-scrollable-scrollbar-size);
+		height: var(--kt-scrollable-scrollbar-size);
 	}
 
 	.kt-scrollable::-webkit-scrollbar-track {

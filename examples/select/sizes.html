@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Basic Usage</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Small</label>
+				<select
+					class="kt-select kt-select-sm"
+					multiple
+					data-kt-select="true"
+					data-kt-select-multiple="true"
+					data-kt-select-placeholder="Select a framework"
+					data-kt-select-config='{
+						"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"
+					}'
+				>
+					<option value="react">React</option>
+					<option value="nextjs">Next.js</option>
+					<option value="angular">Angular</option>
+					<option value="vue">Vue</option>
+					<option value="svelte">Svelte</option>
+					<option value="ember">Ember</option>
+					<option value="nuxt">Nuxt.js</option>
+					<option value="remix">Remix</option>
+					<option value="svelte">Svelte</option>
+					<option value="ember">Ember</option>
+					<option value="nuxt">Nuxt.js</option>
+				</select>
+			</div>
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Medium</label>
+				<select
+					class="kt-select"
+					multiple
+					data-kt-select="true"
+					data-kt-select-multiple="true"
+					data-kt-select-placeholder="Select a framework"
+					data-kt-select-config='{
+						"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"
+					}'
+				>
+					<option value="react">React</option>
+					<option value="nextjs">Next.js</option>
+					<option value="angular">Angular</option>
+					<option value="vue">Vue</option>
+					<option value="svelte">Svelte</option>
+					<option value="ember">Ember</option>
+					<option value="nuxt">Nuxt.js</option>
+					<option value="remix">Remix</option>
+					<option value="svelte">Svelte</option>
+					<option value="ember">Ember</option>
+					<option value="nuxt">Nuxt.js</option>
+				</select>
+			</div>
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Large</label>
+				<select
+					class="kt-select kt-select-lg"
+					multiple
+					data-kt-select="true"
+					data-kt-select-multiple="true"
+					data-kt-select-placeholder="Select a framework"
+					data-kt-select-config='{
+						"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"
+					}'
+				>
+					<option value="react">React</option>
+					<option value="nextjs">Next.js</option>
+					<option value="angular">Angular</option>
+					<option value="vue">Vue</option>
+					<option value="svelte">Svelte</option>
+					<option value="ember">Ember</option>
+					<option value="nuxt">Nuxt.js</option>
+					<option value="remix">Remix</option>
+					<option value="svelte">Svelte</option>
+					<option value="ember">Ember</option>
+					<option value="nuxt">Nuxt.js</option>
+				</select>
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>
