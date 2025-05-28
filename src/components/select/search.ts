@@ -52,11 +52,18 @@ export class KTSelectSearch {
 				// First remove any existing listeners to prevent duplicates
 				this._removeEventListeners();
 
-				// Add the event listener
+				// Add the input event listener for filtering
 				this._eventManager.addListener(
 					this._searchInput,
 					'input',
 					this.handleSearchInput,
+				);
+
+				// Add keydown event listener for navigation, selection, and escape
+				this._eventManager.addListener(
+					this._searchInput,
+					'keydown',
+					this._handleSearchKeyDown.bind(this)
 				);
 
 				// Add blur event listener to ensure highlights are cleared when focus is lost
@@ -141,21 +148,43 @@ export class KTSelectSearch {
 	}
 
 	/**
-	 * Select the currently focused option
+	 * Handles keydown events on the search input for navigation and actions.
 	 */
-	private _selectFocusedOption() {
-		const focusedOption = this._focusManager.getFocusedOption();
+	private _handleSearchKeyDown(event: KeyboardEvent): void {
+		const key = event.key;
 
-		if (focusedOption) {
-			const optionValue = focusedOption.getAttribute('data-value');
-
-			if (optionValue) {
-				// Ensure highlights are cleared before selection
+		switch (key) {
+			case 'ArrowDown':
+				event.preventDefault();
+				this._focusManager.focusNext();
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				this._focusManager.focusPrevious();
+				break;
+			case 'Enter':
+				event.preventDefault();
+				const focusedOption = this._focusManager.getFocusedOption();
+				if (focusedOption) {
+					const optionValue = focusedOption.getAttribute('data-value');
+					if (optionValue) {
+						this._select.toggleSelection(optionValue);
+						if (this._config.closeOnSelect && !this._config.multiple) {
+							this._select.closeDropdown();
+						}
+					}
+				}
+				break;
+			case 'Escape':
+				event.preventDefault();
+				this._searchInput.value = '';
 				this.clearSearch();
-
-				// Trigger the selection in the main select component
-				this._select['_selectOption'](optionValue);
-			}
+				this._resetAllOptions();
+				this._clearNoResultsMessage();
+				this._focusManager.focusFirst();
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -246,9 +275,11 @@ export class KTSelectSearch {
 			this._cacheOriginalOptionContents();
 		}
 
-		// Use the shared filterOptions utility
-		filterOptions(options, query, config, dropdownElement, (visibleCount) =>
-			this._handleNoResults(visibleCount),
+		// Restore original content before filtering, so highlighting is applied fresh.
+		this._restoreOptionContentsBeforeFilter();
+
+		const visibleCount = filterOptions(options, query, config, dropdownElement, (count) =>
+			this._handleNoResults(count),
 		);
 	}
 
@@ -341,25 +372,6 @@ export class KTSelectSearch {
 				}
 			}
 		});
-
-		// Also clear highlights from the display element (if applicable)
-		this._clearDisplayHighlights();
-	}
-
-	/**
-	 * Clear any highlights from the display element (selected values)
-	 */
-	private _clearDisplayHighlights() {
-		// Implementation for clearing display highlights
-		const options = Array.from(
-			this._select.getOptionsElement(),
-		) as HTMLElement[];
-
-		options.forEach((option) => {
-			if (option.dataset && !option.dataset.originalText) {
-				option.dataset.originalText = option.innerHTML;
-			}
-		});
 	}
 
 	/**
@@ -398,8 +410,9 @@ export class KTSelectSearch {
 		this._removeEventListeners();
 
 		// Clear all references
-		this._focusManager.dispose();
-		this._eventManager.removeAllListeners(null);
+		if (this._focusManager) {
+			this._focusManager.dispose();
+		}
 
 		// Clear cached content
 		this._originalOptionContents.clear();

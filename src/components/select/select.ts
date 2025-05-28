@@ -410,13 +410,6 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
-	 * Initialize options HTML from data
-	 */
-	// private _initializeOptionsHtml() {
-	// 	this._generateOptionsHtml(this._element);
-	// }
-
-	/**
 	 * Creates the HTML structure for the select component
 	 */
 	private _createHtmlStructure() {
@@ -426,6 +419,11 @@ export class KTSelect extends KTComponent {
 		const wrapperElement = defaultTemplates.wrapper(this._config);
 
 		const displayElement = defaultTemplates.display(this._config);
+
+		// Add data-multiple attribute if in multiple select mode
+		if (this._config.multiple) {
+			displayElement.setAttribute('data-multiple', 'true');
+		}
 
 		// Add the display element to the wrapper
 		wrapperElement.appendChild(displayElement);
@@ -820,14 +818,14 @@ export class KTSelect extends KTComponent {
 		if (this._config.debug)
 			console.log('Closing dropdown via dropdownModule...');
 
-		// Clear search input and highlights if the dropdown is closing
+		// Clear search input if the dropdown is closing
 		if (this._searchModule && this._searchInputElement) {
 			// Clear search input if configured to do so
 			if (this._config.clearSearchOnClose) {
 				this._searchInputElement.value = '';
 			}
 
-			// Always clear the highlights when dropdown closes
+			// Clear search input when dropdown closes
 			this._searchModule.clearSearch();
 		}
 
@@ -945,34 +943,35 @@ export class KTSelect extends KTComponent {
 	public updateSelectedOptionDisplay() {
 		const selectedOptions = this.getSelectedOptions();
 		const tagsEnabled = this._config.tags && this._tagsModule;
+		const valueDisplayEl = this.getValueDisplayElement();
 
 		if (tagsEnabled) {
 			// Tags module will render tags if selectedOptions > 0, or clear them if selectedOptions === 0.
 			this._tagsModule.updateTagsDisplay(selectedOptions);
 		}
 
-		// Guard against _valueDisplayElement being null due to template modifications
-		if (!this._displayElement) {
+		// Guard against valueDisplayEl being null due to template modifications
+		if (!valueDisplayEl) {
 			if (this._config.debug) {
-				console.warn('KTSelect: _valueDisplayElement is null. Cannot update display or placeholder. Check template for [data-kt-select-value].');
+				console.warn('KTSelect: Value display element is null. Cannot update display or placeholder. Check template for [data-kt-select-value].');
 			}
 			return; // Nothing to display on if the element is missing
 		}
 
 		if (typeof this._config.renderSelected === 'function') {
-			this._displayElement.innerHTML = this._config.renderSelected(selectedOptions);
+			valueDisplayEl.innerHTML = this._config.renderSelected(selectedOptions);
 		} else {
 			if (selectedOptions.length === 0) {
 				// No options selected: display placeholder.
 				// This runs if tags are off, OR if tags are on but no items are selected (tags module would have cleared tags).
 				const placeholderEl = defaultTemplates.placeholder(this._config);
-				this._displayElement.replaceChildren(placeholderEl);
+				valueDisplayEl.replaceChildren(placeholderEl);
 			} else {
 				// Options are selected.
 				if (tagsEnabled) {
 					// Tags are enabled AND options are selected: tags module has rendered them.
-					// Clear _valueDisplayElement as tags are the primary display.
-					this._displayElement.innerHTML = '';
+					// Clear valueDisplayEl as tags are the primary display.
+					valueDisplayEl.innerHTML = '';
 				} else {
 					// Tags are not enabled AND options are selected: render normal text display.
 					let content = '';
@@ -981,7 +980,7 @@ export class KTSelect extends KTComponent {
 					} else {
 						content = this.getSelectedOptionsText();
 					}
-					this._displayElement.innerHTML = content;
+					valueDisplayEl.innerHTML = content;
 				}
 			}
 		}
@@ -1162,6 +1161,13 @@ export class KTSelect extends KTComponent {
 
 		if (this._config.debug) console.log('Option clicked:', optionValue);
 
+		// If in single-select mode and the clicked option is already selected, just close the dropdown.
+		if (!this._config.multiple && this._state.isSelected(optionValue)) {
+			if (this._config.debug) console.log('Single select mode: clicked already selected option. Closing dropdown.');
+			this.closeDropdown();
+			return;
+		}
+
 		// Use toggleSelection instead of _selectOption to prevent re-rendering
 		this.toggleSelection(optionValue);
 	}
@@ -1326,7 +1332,7 @@ export class KTSelect extends KTComponent {
 		if (this._config.debug)
 			console.log(`Toggling selection for option: ${value}, currently selected: ${isSelected}`);
 
-		// Ensure any search highlights are cleared when selection changes
+		// Ensure any search input is cleared when selection changes
 		if (this._searchModule) {
 			this._searchModule.clearSearch();
 		}
@@ -1623,6 +1629,12 @@ export class KTSelect extends KTComponent {
 	 * Centralized keyboard event handler for all select modes
 	 */
 	private _handleKeyboardEvent(event: KeyboardEvent) {
+		// If the event target is the search input and the event was already handled (defaultPrevented),
+		// then return early to avoid duplicate processing by this broader handler.
+		if (event.target === this._searchInputElement && event.defaultPrevented) {
+			return;
+		}
+
 		const isOpen = this._dropdownIsOpen;
 		const config = this._config;
 		const focusManager = this._focusManager;

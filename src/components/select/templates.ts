@@ -14,7 +14,6 @@ export const coreTemplateStrings = {
 	dropdown: `<div data-kt-select-dropdown class="kt-select-dropdown hidden {{class}}" style="z-index: {{zindex}};"></div>`,
 	options: `<ul role="listbox" aria-label="{{label}}" class="kt-select-options {{class}}" data-kt-select-options="true"></ul>`,
 	error: `<li class="kt-select-error" role="alert"></li>`,
-	highlight: `<span data-kt-select-highlight class="kt-select-highlight highlighted {{class}}">{{text}}</span>`,
 	wrapper: `<div data-kt-select-wrapper class="kt-select-wrapper {{class}}"></div>`,
 	combobox: `
 		<div data-kt-select-combobox data-kt-select-display class="kt-select-combobox {{class}}">
@@ -35,7 +34,7 @@ export const coreTemplateStrings = {
 	placeholder: `<div data-kt-select-placeholder class="kt-select-placeholder {{class}}"></div>`,
 	option: `
 		<li data-kt-select-option data-value="{{value}}" data-text="{{text}}" class="kt-select-option {{class}}" role="option" {{selected}} {{disabled}}>
-			{{content}} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 ms-auto hidden text-primary kt-select-option-selected:block"><path d="M20 6 9 17l-5-5"/></svg>
+			{{text}} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 ms-auto hidden text-primary kt-select-option-selected:block"><path d="M20 6 9 17l-5-5"/></svg>
 		</li>
 	`,
 	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-input-ghost" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
@@ -71,8 +70,6 @@ export interface KTSelectTemplateInterface {
 	 * Renders an error message in the dropdown
 	 */
 	error: (config: KTSelectConfigInterface & { errorMessage: string }) => HTMLElement;
-
-	highlight: (config: KTSelectConfigInterface, text: string) => HTMLElement;
 
 	// Main components
 	wrapper: (config: KTSelectConfigInterface) => HTMLElement;
@@ -148,17 +145,6 @@ export function getTemplateStrings(
  * Default templates for KTSelect component
  */
 export const defaultTemplates: KTSelectTemplateInterface = {
-	/**
-	 * Renders a highlighted text
-	 */
-	highlight: (config: KTSelectConfigInterface, text: string) => {
-		const template = getTemplateStrings(config).highlight;
-		const html = template
-			.replace('{{text}}', text)
-			.replace('{{class}}', config.highlightClass || '');
-		return stringToElement(html);
-	},
-
 	/**
 	 * Renders the dropdown content
 	 */
@@ -310,7 +296,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			// renderTemplateString will replace {{key}} with values from optionData.
 			content = renderTemplateString(config.optionTemplate, optionData);
 		} else {
-			content = optionData.content || optionData.text; // Prefer explicit content, fallback to text
+			content = optionData.text || optionData.content; // Prefer explicit text, fallback to content
 		}
 
 		// Use the core option template string as the base structure.
