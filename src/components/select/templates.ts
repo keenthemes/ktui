@@ -241,28 +241,21 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	 * Renders the display element (trigger) for the select
 	 */
 	display: (config: KTSelectConfigInterface): HTMLElement => {
-		if (config.combobox) {
-			let html = getTemplateStrings(config)
-				.combobox.replace(/{{placeholder}}/g, config.placeholder || 'Select...')
-				.replace(
-					/{{label}}/g,
-					config.label || config.placeholder || 'Select...',
-				)
-				.replace('{{disabled}}', config.disabled ? 'disabled' : '')
-				.replace('{{class}}', config.displayClass || '');
-			return stringToElement(html);
-		}
-
-		// For non-combobox, the {{content}} in the core display template string for the label div is removed.
-		// The actual display content (placeholder or selected value) is set by updateSelectedOptionDisplay.
 		let html = getTemplateStrings(config)
 			.display.replace('{{tabindex}}', config.disabled ? '-1' : '0')
 			.replace('{{label}}', config.label || config.placeholder || 'Select...')
 			.replace('{{disabled}}', config.disabled ? 'aria-disabled="true"' : '')
 			.replace('{{placeholder}}', config.placeholder || 'Select...')
 			.replace('{{class}}', config.displayClass || '');
-		// No longer replacing '{{content}}' here as it's removed from the base template
-		return stringToElement(html);
+
+		const element = stringToElement(html);
+
+		// Add data-multiple attribute if in multiple select mode
+		if (config.multiple) {
+			element.setAttribute('data-multiple', 'true');
+		}
+
+		return element;
 	},
 
 	/**

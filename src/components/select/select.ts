@@ -398,6 +398,7 @@ export class KTSelect extends KTComponent {
 			this._displayElement,
 			this._dropdownContentElement,
 			this._config,
+			this, // Pass the KTSelect instance to KTSelectDropdown
 		);
 
 		// Update display and set ARIA attributes
@@ -419,11 +420,6 @@ export class KTSelect extends KTComponent {
 		const wrapperElement = defaultTemplates.wrapper(this._config);
 
 		const displayElement = defaultTemplates.display(this._config);
-
-		// Add data-multiple attribute if in multiple select mode
-		if (this._config.multiple) {
-			displayElement.setAttribute('data-multiple', 'true');
-		}
 
 		// Add the display element to the wrapper
 		wrapperElement.appendChild(displayElement);
@@ -718,31 +714,10 @@ export class KTSelect extends KTComponent {
 	 */
 
 	/**
-	 * Toggle dropdown visibility
-	 * @deprecated
-	 */
-	public toggleDropdown() {
-		if (this._config.disabled) {
-			if (this._config.debug) console.log('toggleDropdown: select is disabled, not opening');
-			return;
-		}
-		if (this._config.debug) console.log('toggleDropdown called');
-		if (this._dropdownModule) {
-			// Always use the dropdown module's state to determine whether to open or close
-			if (this._dropdownModule.isOpen()) {
-				if (this._config.debug) console.log('Dropdown is open, closing...');
-				this.closeDropdown();
-			} else {
-				if (this._config.debug) console.log('Dropdown is closed, opening...');
-				this.openDropdown();
-			}
-		}
-	}
-
-	/**
 	 * Open the dropdown
 	 */
 	public openDropdown() {
+		console.log('openDropdown called');
 		if (this._config.disabled) {
 			if (this._config.debug) console.log('openDropdown: select is disabled, not opening');
 			return;
@@ -778,17 +753,6 @@ export class KTSelect extends KTComponent {
 		// Dispatch custom event
 		this._dispatchEvent('show');
 		this._fireEvent('show');
-
-		// Focus search input if configured and exists
-		if (
-			this._config.enableSearch &&
-			this._config.searchAutofocus &&
-			this._searchInputElement
-		) {
-			setTimeout(() => {
-				this._searchInputElement.focus();
-			}, 50);
-		}
 
 		// Update ARIA states
 		this._setAriaAttributes();
@@ -866,11 +830,12 @@ export class KTSelect extends KTComponent {
 		const selectedOptions = this.getSelectedOptions();
 		if (selectedOptions.length === 0) return;
 
-		// Get the first selected option element
-		const firstSelectedValue = selectedOptions[0];
-
-		// Use the FocusManager to focus on the option
-		this._focusManager.focusOptionByValue(firstSelectedValue);
+		// Iterate through selected options and focus the first one that is visible
+		for (const value of selectedOptions) {
+			if (this._focusManager && this._focusManager.focusOptionByValue(value)) {
+				break; // Stop after focusing the first found selected and visible option
+			}
+		}
 	}
 
 	/**
@@ -1100,18 +1065,6 @@ export class KTSelect extends KTComponent {
 	 * EVENT HANDLERS
 	 * ========================================================================
 	 */
-
-	/**
-	 * Handle display element click
-	 * @deprecated
-	 */
-	private _handleDropdownClick(event: Event) {
-		if (this._config.debug)
-			console.log('Display element clicked', event.target);
-		event.preventDefault();
-		event.stopPropagation(); // Prevent event bubbling
-		this.toggleDropdown();
-	}
 
 	/**
 	 * Handle click within the dropdown

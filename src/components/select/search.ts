@@ -125,23 +125,18 @@ export class KTSelectSearch {
 				// Consolidated 'dropdown.show' event listener - ATTACH TO WRAPPER
 				this._select.getWrapperElement().addEventListener('kt.select.dropdown.show', () => {
 					this._focusManager.resetFocus(); // Always clear previous focus state
-					console.log('focusing first');
 
 					if (this._searchInput?.value) {
 						// If there's an existing search term:
 						// 1. Re-filter options. This ensures the display (hidden/visible) is correct
 						//    and "no results" message is handled if query yields nothing.
 						this._filterOptions(this._searchInput.value);
-						// 2. Attempt to focus the first available option in the filtered list.
-						this._focusManager.focusFirst();
 					} else {
 						// If search input is empty:
 						// 1. Reset all options to their full, unfiltered, original state.
 						this._resetAllOptions(); // Shows all, clears highlights from options, restores original text
 						// 2. Clear any "no results" message.
 						this._clearNoResultsMessage();
-						// 3. Attempt to focus the first available option in the full list.
-						this._focusManager.focusFirst();
 					}
 
 					// Handle autofocus for the search input (this was one of the original separate listeners)

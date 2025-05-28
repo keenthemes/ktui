@@ -13,6 +13,7 @@ import KTData from '../../helpers/data';
 import KTComponent from '../component';
 import { KTSelectConfigInterface } from './config';
 import { FocusManager, EventManager } from './utils';
+import { KTSelect } from './select'; // Added import
 
 /**
  * KTSelectDropdown
@@ -36,6 +37,7 @@ export class KTSelectDropdown extends KTComponent {
 	private _popperInstance: PopperInstance | null = null;
 	private _eventManager: EventManager;
 	private _focusManager: FocusManager;
+	private _ktSelectInstance: KTSelect; // Added instance variable
 
 	/**
 	 * Constructor
@@ -49,6 +51,7 @@ export class KTSelectDropdown extends KTComponent {
 		toggleElement: HTMLElement,
 		dropdownElement: HTMLElement,
 		config: KTSelectConfigInterface,
+		ktSelectInstance: KTSelect, // Added parameter
 	) {
 		super();
 
@@ -56,6 +59,7 @@ export class KTSelectDropdown extends KTComponent {
 		this._toggleElement = toggleElement;
 		this._dropdownElement = dropdownElement;
 		this._config = config;
+		this._ktSelectInstance = ktSelectInstance; // Assign instance
 		this._eventManager = new EventManager();
 		this._focusManager = new FocusManager(
 			dropdownElement,
@@ -92,7 +96,20 @@ export class KTSelectDropdown extends KTComponent {
 		event.preventDefault();
 		event.stopPropagation();
 
-		this.toggle();
+		if (this._config.disabled) {
+			if (this._config.debug)
+				console.log(
+					'KTSelectDropdown._handleToggleClick: select is disabled',
+				);
+			return;
+		}
+
+		// Call KTSelect's methods
+		if (this._ktSelectInstance.isDropdownOpen()) {
+			this._ktSelectInstance.closeDropdown();
+		} else {
+			this._ktSelectInstance.openDropdown();
+		}
 	}
 
 	/**
@@ -107,7 +124,8 @@ export class KTSelectDropdown extends KTComponent {
 			!this._element.contains(target) &&
 			!this._dropdownElement.contains(target)
 		) {
-			this.close();
+			// Call KTSelect's closeDropdown method
+			this._ktSelectInstance.closeDropdown();
 		}
 	}
 
@@ -220,80 +238,49 @@ export class KTSelectDropdown extends KTComponent {
 	}
 
 	/**
-	 * Toggle the dropdown
-	 */
-	public toggle(): void {
-		if (this._config.disabled) {
-			if (this._config.debug) console.log('KTSelectDropdown.toggle: select is disabled, not toggling');
-			return;
-		}
-		if (this._config.debug)
-			console.log('KTSelectDropdown.toggle called - isOpen:', this._isOpen);
-
-		if (this._isTransitioning) {
-			if (this._config.debug)
-				console.log('KTSelectDropdown.toggle - ignoring during transition');
-			return;
-		}
-
-		if (this._isOpen) {
-			this.close();
-		} else {
-			this.open();
-		}
-	}
-
-	/**
 	 * Open the dropdown
 	 */
 	public open(): void {
 		if (this._config.disabled) {
-			if (this._config.debug) console.log('KTSelectDropdown.open: select is disabled, not opening');
+			if (this._config.debug)
+				console.log(
+					'KTSelectDropdown.open: select is disabled, not opening',
+				);
 			return;
 		}
 		if (this._isOpen || this._isTransitioning) return;
 
-		// Fire before show event
-		const beforeShowEvent = new CustomEvent('kt.select.dropdown.show', {
-			bubbles: true,
-			cancelable: true,
-		});
-		this._element.dispatchEvent(beforeShowEvent);
-
-		if (beforeShowEvent.defaultPrevented) return;
-
 		// Begin opening transition
 		this._isTransitioning = true;
 
-		// Set initial styles - remove display: block and use class toggling instead
+		// Set initial styles
 		this._dropdownElement.classList.remove('hidden');
 		this._dropdownElement.style.opacity = '0';
 
 		// Set dropdown width
 		this._setDropdownWidth();
 
-		// Make sure the element is visible for transitioning
+		// Reflow
 		KTDom.reflow(this._dropdownElement);
 
-		// Apply z-index if configured
+		// Apply z-index
 		if (this._config.dropdownZindex) {
 			this._dropdownElement.style.zIndex =
 				this._config.dropdownZindex.toString();
 		} else {
-			// Auto-calculate z-index
 			const parentZindex = KTDom.getHighestZindex(this._element);
 			if (parentZindex) {
 				this._dropdownElement.style.zIndex = (parentZindex + 1).toString();
 			}
 		}
 
-		// Initialize popper for positioning
+		// Initialize popper
 		this._initPopper();
 
-		// Add active classes
+		// Add active classes for visual state
 		this._dropdownElement.classList.add('open');
 		this._toggleElement.classList.add('active');
-		this._toggleElement.setAttribute('aria-expanded', 'true');
+		// ARIA attributes will be handled by KTSelect
 
 		// Start transition
 		this._dropdownElement.style.opacity = '1';
@@ -302,34 +289,8 @@ export class KTSelectDropdown extends KTComponent {
 		KTDom.transitionEnd(this._dropdownElement, () => {
 			this._isTransitioning = false;
 			this._isOpen = true;
-
-			// Focus the first item if search is enabled
-			if (this._config.enableSearch) {
-				const searchInput = this._dropdownElement.querySelector(
-					'input[type="search"]',
-				);
-				if (searchInput) {
-					(searchInput as HTMLInputElement).focus();
-				}
-			}
-
-			// Fire after show event
-			const afterShowEvent = new CustomEvent('kt.select.dropdown.shown', {
-				bubbles: true,
-			});
-			this._element.dispatchEvent(afterShowEvent);
+			// Focus and events will be handled by KTSelect
 		});
-	}
-
-	/**
-	 * Focus the first option in the dropdown
-	 */
-	private _focusFirstOption(): void {
-		const firstOption = this._focusManager.getVisibleOptions()[0];
-		if (firstOption) {
-			this._focusManager.applyFocus(firstOption);
-			this._focusManager.scrollIntoView(firstOption);
-		}
 	}
 
 	/**
@@ -352,42 +313,23 @@ export class KTSelectDropdown extends KTComponent {
 			return;
 		}
 
-		// Fire before hide event
-		const beforeHideEvent = new CustomEvent('kt.select.dropdown.close', {
-			bubbles: true,
-			cancelable: true,
-		});
-		this._element.dispatchEvent(beforeHideEvent);
-
-		if (beforeHideEvent.defaultPrevented) {
-			if (this._config.debug)
-				console.log(
-					'KTSelectDropdown.close - canceling due to defaultPrevented on beforeHideEvent',
-				);
-			return;
-		}
+		// Events and ARIA will be handled by KTSelect
 
 		if (this._config.debug)
 			console.log('KTSelectDropdown.close - starting transition');
-		// Begin closing transition
 		this._isTransitioning = true;
 
-		// Start transition
 		this._dropdownElement.style.opacity = '0';
 
-		// Use a combination of transition end and a fallback timer
 		let transitionComplete = false;
-
-		// Set a fixed-duration fallback in case the transition event doesn't fire
 		const fallbackTimer = setTimeout(() => {
 			if (!transitionComplete) {
 				if (this._config.debug)
 					console.log('KTSelectDropdown.close - fallback timer triggered');
 				completeTransition();
 			}
-		}, 300); // 300ms should be enough for most transitions
+		}, 300);
 
-		// Setup the transition end function
 		const completeTransition = () => {
 			if (transitionComplete) return;
 			transitionComplete = true;
@@ -395,35 +337,28 @@ export class KTSelectDropdown extends KTComponent {
 
 			if (this._config.debug)
 				console.log('KTSelectDropdown.close - transition ended');
-			// Remove active classes
+
 			this._dropdownElement.classList.add('hidden');
 			this._dropdownElement.classList.remove('open');
 			this._toggleElement.classList.remove('active');
-			this._toggleElement.setAttribute('aria-expanded', 'false');
+			// ARIA attributes will be handled by KTSelect
 
-			// Reset styles - replace display: none with adding hidden class
-			this._dropdownElement.classList.add('hidden');
-			this._dropdownElement.style.opacity = '';
-			this._dropdownElement.style.zIndex = '';
-
-			// Destroy popper
 			this._destroyPopper();
 
-			// Update state
 			this._isTransitioning = false;
 			this._isOpen = false;
 
-			// Fire after hide event
-			const afterHideEvent = new CustomEvent('kt.select.dropdown.hidden', {
-				bubbles: true,
-			});
-			this._element.dispatchEvent(afterHideEvent);
+			// Events will be handled by KTSelect
+
 			if (this._config.debug)
-				console.log('KTSelectDropdown.close - complete, events fired');
+				console.log('KTSelectDropdown.close - visual part complete');
 		};
 
-		// Handle transition end via the utility but also have the fallback
 		KTDom.transitionEnd(this._dropdownElement, completeTransition);
+
+		if (KTDom.getCssProp(this._dropdownElement, 'transition-duration') === '0s') {
+			completeTransition();
+		}
 	}
 
 	/**

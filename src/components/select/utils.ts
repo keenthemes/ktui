@@ -195,6 +195,7 @@ export class FocusManager {
 				option.getAttribute('aria-disabled') !== 'true' &&
 				(option.textContent?.toLowerCase().startsWith(lowerStr) || option.dataset.value?.toLowerCase().startsWith(lowerStr))
 			) {
+				this.resetFocus();
 				this._focusedOptionIndex = idx;
 				this.applyFocus(option);
 				this.scrollIntoView(option);
@@ -253,12 +254,14 @@ export class FocusManager {
 	 */
 	public applyFocus(option: HTMLElement): void {
 		if (!option) return;
+		// Ensure it's not disabled
 		if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
 			return;
 		}
-		this.resetFocus();
+		// DO NOT CALL resetFocus() here. Caller's responsibility.
 		option.classList.add(this._focusClass);
 		option.classList.add(this._hoverClass);
+		// _triggerFocusChange needs _focusedOptionIndex to be set by the caller before this.
 		this._triggerFocusChange();
 	}
 
@@ -273,14 +276,7 @@ export class FocusManager {
 			element.classList.remove(this._focusClass, this._hoverClass);
 		});
 
-		// Reset index if visible options have changed
-		const visibleOptions = this.getVisibleOptions();
-		if (
-			this._focusedOptionIndex !== null &&
-			this._focusedOptionIndex >= visibleOptions.length
-		) {
-			this._focusedOptionIndex = null;
-		}
+		this._focusedOptionIndex = null; // Always reset the index
 	}
 
 	/**
@@ -315,10 +311,14 @@ export class FocusManager {
 		const index = options.findIndex((option) => option.dataset.value === value);
 
 		if (index >= 0) {
-			this._focusedOptionIndex = index;
-			this.applyFocus(options[index]);
-			this.scrollIntoView(options[index]);
-			return true;
+			const optionToFocus = options[index];
+			if (!optionToFocus.classList.contains('disabled') && optionToFocus.getAttribute('aria-disabled') !== 'true'){
+				this.resetFocus();
+				this._focusedOptionIndex = index;
+				this.applyFocus(optionToFocus);
+				this.scrollIntoView(optionToFocus);
+				return true;
+			}
 		}
 
 		return false;
