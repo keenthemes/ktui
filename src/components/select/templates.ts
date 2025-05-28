@@ -229,10 +229,6 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			config.wrapperClass || '',
 		);
 		const element = stringToElement(html);
-		element.setAttribute(
-			'data-kt-select-combobox',
-			config.combobox ? 'true' : 'false',
-		);
 		element.setAttribute('data-kt-select-tags', config.tags ? 'true' : 'false');
 		return element;
 	},

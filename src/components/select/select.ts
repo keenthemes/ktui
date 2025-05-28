@@ -426,7 +426,7 @@ export class KTSelect extends KTComponent {
 
 		// Move classes from original select to display element
 		if (this._element.classList.length > 0) {
-			displayElement.classList.add(...Array.from(this._element.classList));
+			wrapperElement.classList.add(...Array.from(this._element.classList));
 			this._element.className = '';
 		}
 
@@ -475,7 +475,7 @@ export class KTSelect extends KTComponent {
 
 		// Insert after the original element
 		this._element.after(wrapperElement);
-		this._element.style.display = 'none';
+		this._element.classList.add('hidden');
 	}
 
 	/**

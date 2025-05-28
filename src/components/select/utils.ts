@@ -38,7 +38,7 @@ export function filterOptions(
 			// Remove inline display style if it was used to hide
 			if (option.style.display === 'none') {
 				option.style.display = '';
-				}
+			}
 			// At this point, option.innerHTML should be its original.
 			visibleOptionsCount++;
 		}
