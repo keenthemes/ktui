@@ -31,6 +31,8 @@ export class KTSelectOption extends KTComponent {
 		if (this._globalConfig) {
 			this._globalConfig.optionsConfig = this._globalConfig.optionsConfig || {};
 			this._globalConfig.optionsConfig[(element as HTMLInputElement).value] = this._config;
+			// console.log('[KTSelectOption] Populating _globalConfig.optionsConfig for value', (element as HTMLInputElement).value, 'with:', JSON.parse(JSON.stringify(this._config)));
+			// console.log('[KTSelectOption] _globalConfig.optionsConfig is now:', JSON.parse(JSON.stringify(this._globalConfig.optionsConfig)));
 		} else {
 			// Handle case where _globalConfig might be undefined, though constructor expects it.
 			// This might indicate a need to ensure config is always passed or has a default.

@@ -335,7 +335,7 @@ export class KTSelectSearch {
 		this._clearNoResultsMessage();
 
 		const config = this._select.getConfig();
-		this._noResultsElement = defaultTemplates.empty(config);
+		this._noResultsElement = defaultTemplates.noresults(config);
 
 		const dropdownElement = this._select.getDropdownElement();
 		const optionsContainer = dropdownElement.querySelector(

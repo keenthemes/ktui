@@ -39,7 +39,7 @@ export const coreTemplateStrings = {
 		</li>
 	`,
 	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-input-ghost" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
-	empty: `<li data-kt-select-empty class="kt-select-no-result {{class}}" role="status"></li>`,
+	searchEmpty: `<div data-kt-select-search-empty class="kt-select-search-empty {{class}}"></div>`,
 	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite"></li>`,
 	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}"></div>`,
 	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true"></li>`,
@@ -86,7 +86,7 @@ export interface KTSelectTemplateInterface {
 
 	// Search and empty states
 	search: (config: KTSelectConfigInterface) => HTMLElement;
-	empty: (config: KTSelectConfigInterface) => HTMLElement;
+	noresults: (config: KTSelectConfigInterface) => HTMLElement;
 	loading: (
 		config: KTSelectConfigInterface,
 		loadingMessage: string,
@@ -286,7 +286,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			).getOptionDataForTemplate();
 		}
 
-		let content = optionData.text; // Default content to option's text
+		let content = optionData?.text?.trim(); // Default content to option's text
 
 		if (config.optionTemplate) {
 			// Use the user-provided template string, rendering with the full optionData.
@@ -345,14 +345,26 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the no results message
 	 */
-	empty: (config: KTSelectConfigInterface): HTMLElement => {
-		let html = getTemplateStrings(config).empty.replace(
+	noresults: (config: KTSelectConfigInterface): HTMLElement => {
+		let html = getTemplateStrings(config).searchEmpty.replace(
 			'{{class}}',
-			config.emptyClass || '',
+			config.noresultsClass || '',
 		);
-		const element = stringToElement(html);
-		element.textContent = config.searchNotFoundText || 'No results found';
-		return element;
+
+		let content = config.noresults || 'No results';
+
+		if (config.noresultsTemplate) {
+			content = renderTemplateString(config.noresultsTemplate, {
+				class: config.noresultsClass || '',
+			});
+			const element = stringToElement(html);
+			element.innerHTML = content; // For templates, content can be HTML
+			return element;
+		} else {
+			const element = stringToElement(html);
+			element.textContent = content; // For simple text, use textContent
+			return element;
+		}
 	},
 
 	/**

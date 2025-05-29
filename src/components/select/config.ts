@@ -51,7 +51,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	searchAutofocus: true, // Autofocus on search input when dropdown opens
 	searchMinLength: 0, // Minimum characters required to trigger search
 	searchMaxItems: 50, // Maximum number of search results to display
-	searchNotFoundText: 'No results found', // Text to display when no search results are found
+	noresults: 'No results found', // Text to display when no search results are found
 	clearSearchOnClose: true, // Clear search input when dropdown closes
 
 	// Multi-Select Display
@@ -93,11 +93,11 @@ export interface KTSelectConfigInterface {
 
 	// Search Functionality
 	enableSearch?: boolean;
+	noresults?: string;
 	searchPlaceholder?: string;
 	searchAutofocus?: boolean;
 	searchMinLength?: number;
 	searchMaxItems?: number;
-	searchNotFoundText?: string;
 	searchDebounce?: number;
 	searchParam?: string;
 	clearSearchOnClose?: boolean;
@@ -148,7 +148,7 @@ export interface KTSelectConfigInterface {
 	displayClass?: string;
 	optionsClass?: string;
 	searchClass?: string;
-	emptyClass?: string;
+	noresultsClass?: string;
 	loadingClass?: string;
 	tagClass?: string;
 	loadMoreClass?: string;
@@ -168,6 +168,7 @@ export interface KTSelectConfigInterface {
 	optionClass?: string;
 	tagTemplate?: string;
 	dropdownTemplate?: string;
+	noresultsTemplate?: string;
 
 	templates?: Partial<typeof coreTemplateStrings>;
 
