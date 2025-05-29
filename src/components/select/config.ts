@@ -51,7 +51,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	searchAutofocus: true, // Autofocus on search input when dropdown opens
 	searchMinLength: 0, // Minimum characters required to trigger search
 	searchMaxItems: 50, // Maximum number of search results to display
-	noresults: 'No results found', // Text to display when no search results are found
+	noresults: 'No results', // Text to display when no search results are found
 	clearSearchOnClose: true, // Clear search input when dropdown closes
 
 	// Multi-Select Display
