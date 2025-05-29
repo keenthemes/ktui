@@ -86,7 +86,7 @@ export interface KTSelectTemplateInterface {
 
 	// Search and empty states
 	search: (config: KTSelectConfigInterface) => HTMLElement;
-	noresults: (config: KTSelectConfigInterface) => HTMLElement;
+	searchEmpty: (config: KTSelectConfigInterface) => HTMLElement;
 	loading: (
 		config: KTSelectConfigInterface,
 		loadingMessage: string,
@@ -345,17 +345,17 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	/**
 	 * Renders the no results message
 	 */
-	noresults: (config: KTSelectConfigInterface): HTMLElement => {
+	searchEmpty: (config: KTSelectConfigInterface): HTMLElement => {
 		let html = getTemplateStrings(config).searchEmpty.replace(
 			'{{class}}',
-			config.noresultsClass || '',
+			config.searchEmptyClass || '',
 		);
 
-		let content = config.noresults || 'No results';
+		let content = config.searchEmpty || 'No results';
 
-		if (config.noresultsTemplate) {
-			content = renderTemplateString(config.noresultsTemplate, {
-				class: config.noresultsClass || '',
+		if (config.searchEmptyTemplate) {
+			content = renderTemplateString(config.searchEmptyTemplate, {
+				class: config.searchEmptyClass || '',
 			});
 			const element = stringToElement(html);
 			element.innerHTML = content; // For templates, content can be HTML

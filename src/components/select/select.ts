@@ -184,7 +184,7 @@ export class KTSelect extends KTComponent {
 				));
 				break;
 			case 'empty':
-				optionsContainer.appendChild(defaultTemplates.noresults(this._config));
+				optionsContainer.appendChild(defaultTemplates.searchEmpty(this._config));
 				break;
 		}
 	}
@@ -1521,7 +1521,7 @@ export class KTSelect extends KTComponent {
 
 		if (items.length === 0) {
 			// Show no results message using template for consistency and customization
-			const noResultsElement = defaultTemplates.noresults(this._config);
+			const noResultsElement = defaultTemplates.searchEmpty(this._config);
 			optionsContainer.appendChild(noResultsElement);
 			return;
 		}
