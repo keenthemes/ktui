@@ -107,7 +107,7 @@
 	}
 
 	.kt-select-placeholder {
-		@apply overflow-ellipsis truncate;
+		@apply text-muted-foreground overflow-ellipsis truncate;
 	}
 
 	.kt-select-display:not([data-multiple=true]) {
