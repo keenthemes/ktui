@@ -60,7 +60,7 @@
 		}
 	}
 
-	.kt-input-search-emtpy {
+	.kt-select-search-empty  {
 		@apply px-3.5 py-1 text-sm text-muted-foreground;
 	}
 
