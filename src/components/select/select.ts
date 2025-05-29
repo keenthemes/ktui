@@ -362,10 +362,8 @@ export class KTSelect extends KTComponent {
 		// Setup HTML structure
 		this._createHtmlStructure();
 		this._setupElementReferences();
-		this._initZIndex();
 
 		// Initialize options
-		// this._initializeOptionsHtml();
 		this._preSelectOptions(this._element);
 
 		// Apply disabled state if needed
@@ -457,9 +455,6 @@ export class KTSelect extends KTComponent {
 
 		// Create options container using template
 		const optionsContainer = defaultTemplates.options(this._config);
-
-		// Clear the options container
-		optionsContainer.innerHTML = '';
 
 		// Add each option directly to the container
 		options.forEach((optionElement) => {
@@ -699,25 +694,6 @@ export class KTSelect extends KTComponent {
 				}
 			});
 		}
-	}
-
-	/**
-	 * Set appropriate z-index for dropdown
-	 */
-	private _initZIndex() {
-		let zindex: number = this._config.dropdownZindex as number;
-		if (
-			parseInt(KTDom.getCssProp(this._dropdownContentElement, 'z-index')) >
-			zindex
-		) {
-			zindex = parseInt(
-				KTDom.getCssProp(this._dropdownContentElement, 'z-index'),
-			);
-		}
-		if (KTDom.getHighestZindex(this._wrapperElement) > zindex) {
-			zindex = KTDom.getHighestZindex(this._wrapperElement) + 1;
-		}
-		this._dropdownContentElement.style.zIndex = String(zindex);
 	}
 
 	/**

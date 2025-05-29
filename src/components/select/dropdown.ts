@@ -60,6 +60,14 @@ export class KTSelectDropdown extends KTComponent {
 		this._dropdownElement = dropdownElement;
 		this._config = config;
 		this._ktSelectInstance = ktSelectInstance; // Assign instance
+
+		const container = this._resolveDropdownContainer();
+		if (container) {
+			if (container !== this._dropdownElement.parentElement) {
+				container.appendChild(this._dropdownElement);
+			}
+		}
+
 		this._eventManager = new EventManager();
 		this._focusManager = new FocusManager(
 			dropdownElement,
@@ -264,14 +272,29 @@ export class KTSelectDropdown extends KTComponent {
 		KTDom.reflow(this._dropdownElement);
 
 		// Apply z-index
+		let zIndexToApply: number | null = null;
+
 		if (this._config.dropdownZindex) {
-			this._dropdownElement.style.zIndex =
-				this._config.dropdownZindex.toString();
-		} else {
-			const parentZindex = KTDom.getHighestZindex(this._element);
-			if (parentZindex) {
-				this._dropdownElement.style.zIndex = (parentZindex + 1).toString();
+			zIndexToApply = this._config.dropdownZindex;
+		}
+
+		// Consider the dropdown's current z-index if it's already set and higher
+		const currentDropdownZIndexStr = KTDom.getCssProp(this._dropdownElement, 'z-index');
+		if (currentDropdownZIndexStr && currentDropdownZIndexStr !== 'auto') {
+			const currentDropdownZIndex = parseInt(currentDropdownZIndexStr);
+			if (!isNaN(currentDropdownZIndex) && currentDropdownZIndex > (zIndexToApply || 0)) {
+				zIndexToApply = currentDropdownZIndex;
 			}
+		}
+
+		// Ensure dropdown is above elements within its original toggle's parent context
+		const toggleParentContextZindex = KTDom.getHighestZindex(this._element); // _element is the select wrapper
+		if (toggleParentContextZindex !== null && toggleParentContextZindex >= (zIndexToApply || 0)) {
+			zIndexToApply = toggleParentContextZindex + 1;
+		}
+
+		if (zIndexToApply !== null) {
+			this._dropdownElement.style.zIndex = zIndexToApply.toString();
 		}
 
 		// Initialize popper
@@ -394,5 +417,21 @@ export class KTSelectDropdown extends KTComponent {
 
 		// Remove data reference
 		KTData.remove(this._element, this._name);
+	}
+
+	private _resolveDropdownContainer(): HTMLElement | null {
+		const containerSelector = this._config.dropdownContainer;
+		if (containerSelector && containerSelector !== 'body') {
+			const containerElement = document.querySelector(containerSelector) as HTMLElement | null;
+			if (!containerElement && this._config.debug) {
+				console.warn(
+					`KTSelectDropdown: dropdownContainer selector "${containerSelector}" not found. Dropdown will remain in its default position.`,
+				);
+			}
+			return containerElement;
+		} else if (containerSelector === 'body') {
+			return document.body;
+		}
+		return null;
 	}
 }
