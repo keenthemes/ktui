@@ -65,7 +65,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	height: 250, // Maximum height of the dropdown menu in pixels (if exceeded, a scrollbar will appear)
 
 	// Dropdown Configuration
-	dropdownZindex: null, // Initial z-index value for the dropdown
+	dropdownZindex: 105, // Initial z-index value for the dropdown
 	dropdownContainer: null, // Container element for the dropdown
 	dropdownPlacement: null,
 	dropdownFlip: false,
@@ -167,10 +167,9 @@ export interface KTSelectConfigInterface {
 	optionTemplate?: string;
 	optionClass?: string;
 	tagTemplate?: string;
+	dropdownTemplate?: string;
 
 	templates?: Partial<typeof coreTemplateStrings>;
-
-	dropdownTemplate?: string;
 
 	// Option Configuration
 	config?: KTSelectConfigInterface; // config from data-kt-select-config attribute
