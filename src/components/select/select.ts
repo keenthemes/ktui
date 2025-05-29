@@ -425,20 +425,27 @@ export class KTSelect extends KTComponent {
 		// Add the display element to the wrapper
 		wrapperElement.appendChild(displayElement);
 
-		// Move classes from original select to display element
+		// Move classes from original select to wrapper and display elements
 		if (this._element.classList.length > 0) {
-			// Exclude kt-select class from being added to the wrapper element
-			const classes = Array.from(this._element.classList).filter(
-				(className) => className !== 'kt-select',
-			);
-			wrapperElement.classList.add(...classes);
+			const originalClasses = Array.from(this._element.classList);
+			const displaySpecificClasses = ['kt-select', 'kt-select-sm', 'kt-select-lg'];
 
-			// If element has class kt-select, move it to display element
-			if (this._element.classList.contains('kt-select')) {
-				displayElement.classList.add('kt-select');
+			const classesForWrapper = originalClasses.filter(
+				(className) => !displaySpecificClasses.includes(className)
+			);
+			if (classesForWrapper.length > 0) {
+				wrapperElement.classList.add(...classesForWrapper);
 			}
 
-			this._element.className = '';
+			// Move display-specific classes to display element
+			const classesForDisplay = originalClasses.filter(
+				(className) => displaySpecificClasses.includes(className)
+			);
+			if (classesForDisplay.length > 0) {
+				displayElement.classList.add(...classesForDisplay);
+			}
+
+			this._element.className = ''; // Clear classes from original select element
 		}
 
 		// Create an empty dropdown first (without options) using template
