@@ -515,10 +515,19 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	/**
 	 * Close and remove all active toasts.
 	 */
-	static clearAll() {
+	static clearAll(clearContainers: boolean = false) {
 		for (const id of Array.from(this.toasts.keys())) {
 			console.log('clearAll:', id);
 			this.close(id);
+		}
+		if (clearContainers) {
+			// Remove all containers from the DOM.
+			this.containerMap.forEach((container, position) => {
+				container.remove();
+				console.log('clearAll: removed container for position', position);
+			});
+			// Clear containerMap to prevent stale references.
+			this.containerMap.clear();
 		}
 	}
 
