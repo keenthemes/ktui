@@ -1319,14 +1319,15 @@ export class KTSelect extends KTComponent {
 		this._updateSelectedOptionClass();
 
 		// For single select mode, always close the dropdown after selection
+		// For multiple select mode, keep the dropdown open to allow multiple selections
 		if (!this._config.multiple) {
 			if (this._config.debug)
 				console.log('About to call closeDropdown() for single select mode - always close after selection');
 			this.closeDropdown();
 		} else {
 			if (this._config.debug)
-				console.log('About to call closeDropdown() for multiple select');
-			this.closeDropdown();
+				console.log('Multiple select mode - keeping dropdown open for additional selections');
+			// Don't close dropdown in multiple select mode to allow multiple selections
 		}
 
 		// Dispatch custom change event with additional data
@@ -1671,7 +1672,8 @@ export class KTSelect extends KTComponent {
 					// Proceed with selection if not handled above
 					this.selectFocusedOption();
 
-					// Close dropdown if configured to do so (for new selections)
+					// Close dropdown only for single select mode (for new selections)
+					// Keep dropdown open for multiple select mode to allow additional selections
 					if (!this._config.multiple) {
 						// This will also be true for the case handled above, but closeDropdown is idempotent.
 						// However, the break above prevents this from being reached for that specific case.

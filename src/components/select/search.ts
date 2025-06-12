@@ -113,8 +113,11 @@ export class KTSelectSearch {
 				this._select.getElement().addEventListener('change', () => {
 					this.clearSearch();
 
-					// Close dropdown if configured to do so
-					this._select.closeDropdown();
+					// Close dropdown only for single select mode
+					// Keep dropdown open for multiple select mode to allow additional selections
+					if (!this._select.getConfig().multiple) {
+						this._select.closeDropdown();
+					}
 				});
 
 				// Consolidated 'dropdown.show' event listener - ATTACH TO WRAPPER
