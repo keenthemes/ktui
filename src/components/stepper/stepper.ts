@@ -131,12 +131,12 @@ export class KTStepper extends KTComponent implements KTStepperInterface {
 		return elements;
 	}
 
-	protected _go(step: number): void {
+	protected async _go(step: number): Promise<void> {
 		if (step === this._activeStep || step > this._getTotalSteps() || step < 0)
 			return;
 
 		const payload = { step: step, cancel: false };
-		this._fireEvent('change', payload);
+		await this._fireEvent('change', payload);
 		this._dispatchEvent('change', payload);
 		if (payload.cancel === true) {
 			return;
