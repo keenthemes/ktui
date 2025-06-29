@@ -90,7 +90,7 @@ export interface KTDataTableConfigInterface {
 				item: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string,
 				data: KTDataTableDataInterface,
 				context: KTDataTableInterface,
-			) => string;
+			) => string | HTMLElement | DocumentFragment;
 			checkbox?: boolean;
 			createdCell?: (
 				cell: HTMLTableCellElement,
@@ -192,9 +192,13 @@ export interface KTDataTableCheckConfigInterface {
 
 export interface KTDataTableCheckInterface {
 	toggle(): void;
+
 	check(): void;
+
 	uncheck(): void;
+
 	isChecked(): boolean;
+
 	getChecked(): string[];
 }
 
