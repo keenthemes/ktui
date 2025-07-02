@@ -48,6 +48,8 @@ export class KTSelect extends KTComponent {
 	private _tagsModule: KTSelectTags | null = null;
 	private _dropdownModule: KTSelectDropdown | null = null;
 	private _loadMoreIndicator: HTMLElement | null = null;
+	private _selectAllButton: HTMLElement | null = null;
+	private _selectAllButtonToggle: HTMLButtonElement | null = null;
 	private _focusManager: FocusManager;
 	private _eventManager: EventManager;
 	private _typeToSearchBuffer: TypeToSearchBuffer = new TypeToSearchBuffer();
@@ -405,6 +407,12 @@ export class KTSelect extends KTComponent {
 		this.updateSelectedOptionDisplay();
 		this._setAriaAttributes();
 
+		// Update select all button state
+		this.updateSelectAllButtonState();
+
+		// Focus the first selected option or first option if nothing selected
+		this._focusSelectedOption();
+
 		// Attach event listeners after all modules are initialized
 		this._attachEventListeners();
 
@@ -458,6 +466,12 @@ export class KTSelect extends KTComponent {
 		if (this._config.enableSearch) {
 			const searchElement = defaultTemplates.search(this._config);
 			dropdownElement.appendChild(searchElement);
+		}
+
+		// Add select all button if needed
+		if (this._config.multiple && this._config.enableSelectAll) {
+			const selectAllElement = defaultTemplates.selectAll(this._config);
+			dropdownElement.appendChild(selectAllElement);
 		}
 
 		// Create options container using template
@@ -524,6 +538,10 @@ export class KTSelect extends KTComponent {
 			this._searchInputElement = this._displayElement as HTMLInputElement;
 		}
 
+		this._selectAllButton = this._wrapperElement.querySelector(
+			'[data-kt-select-select-all]',
+		) as HTMLElement;
+
 		this._options = this._wrapperElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
@@ -542,6 +560,17 @@ export class KTSelect extends KTComponent {
 			'click',
 			this._handleDropdownOptionClick.bind(this),
 		);
+
+		if (this._selectAllButton) {
+			this._selectAllButtonToggle = this._selectAllButton.querySelector('button');
+			if (this._selectAllButtonToggle) {
+				this._eventManager.addListener(
+					this._selectAllButtonToggle,
+					'click',
+					this._handleSelectAllClick.bind(this),
+				);
+			}
+		}
 
 		// Attach centralized keyboard handler to the wrapper element.
 		// Events from focusable children like _displayElement or _searchInputElement (if present) will bubble up.
@@ -751,6 +780,9 @@ export class KTSelect extends KTComponent {
 
 		// Update ARIA states
 		this._setAriaAttributes();
+
+		// Update select all button state
+		this.updateSelectAllButtonState();
 
 		// Focus the first selected option or first option if nothing selected
 		this._focusSelectedOption();
@@ -1012,6 +1044,9 @@ export class KTSelect extends KTComponent {
 		this._state.setSelectedOptions([]);
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
+
+		// Update select all button state
+		this.updateSelectAllButtonState();
 
 		// Dispatch change event
 		this._dispatchEvent('change');
@@ -1328,6 +1363,7 @@ export class KTSelect extends KTComponent {
 			if (this._config.debug)
 				console.log('Multiple select mode - keeping dropdown open for additional selections');
 			// Don't close dropdown in multiple select mode to allow multiple selections
+			this.updateSelectAllButtonState();
 		}
 
 		// Dispatch custom change event with additional data
@@ -1458,6 +1494,7 @@ export class KTSelect extends KTComponent {
 							if (this._searchModule) {
 								this._searchModule.refreshAfterSearch();
 							}
+							this.updateSelectAllButtonState();
 						})
 						.catch((error) => {
 							console.error('Error updating search results:', error);
@@ -1799,5 +1836,70 @@ export class KTSelect extends KTComponent {
 		this._state.setSelectedOptions(this._config.multiple ? selected : selected[0] || '');
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
+		this.updateSelectAllButtonState();
+	}
+
+	private _handleSelectAllClick(event: Event): void {
+		event.preventDefault();
+		event.stopPropagation();
+
+		const visibleOptions = this._focusManager
+			.getVisibleOptions()
+			.filter((opt) => opt.getAttribute('aria-disabled') !== 'true');
+		if (visibleOptions.length === 0) return;
+
+		const visibleValues = visibleOptions.map(
+			(opt) => opt.dataset.value as string,
+		);
+		const selectedValues = new Set(this.getSelectedOptions());
+		const isAllSelected = visibleOptions.every((opt) =>
+			selectedValues.has(opt.dataset.value as string),
+		);
+
+		if (isAllSelected) {
+			// Deselect all visible
+			visibleValues.forEach((value) => selectedValues.delete(value));
+		} else {
+			// Select all visible
+			visibleValues.forEach((value) => selectedValues.add(value));
+		}
+
+		this._state.setSelectedOptions(Array.from(selectedValues));
+		this.updateSelectedOptionDisplay();
+		this._updateSelectedOptionClass();
+		this.updateSelectAllButtonState();
+
+		this._dispatchEvent('change');
+		this._fireEvent('change');
+	}
+
+	public updateSelectAllButtonState(): void {
+		if (
+			!this._config.multiple ||
+			!this._config.enableSelectAll ||
+			!this._selectAllButtonToggle
+		) {
+			return;
+		}
+
+		const visibleOptions = this._focusManager
+			.getVisibleOptions()
+			.filter((opt) => opt.getAttribute('aria-disabled') !== 'true');
+
+		if (visibleOptions.length === 0) {
+			this._selectAllButton.style.display = 'none';
+			return;
+		}
+
+		this._selectAllButton.style.display = '';
+
+		const selectedValues = new Set(this.getSelectedOptions());
+		const isAllSelected = visibleOptions.every((opt) =>
+			selectedValues.has(opt.dataset.value as string),
+		);
+
+		this._selectAllButtonToggle.textContent = isAllSelected
+			? this._config.clearAllText
+			: this._config.selectAllText;
 	}
 }

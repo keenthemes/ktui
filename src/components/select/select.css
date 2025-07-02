@@ -29,7 +29,7 @@
 		&:-moz-focusring {
 			color: transparent;
 			text-shadow: none;
-		}	
+		}
 
 		&.active {
 			@apply ring-ring/30 border-ring outline-none ring-[3px];
@@ -54,7 +54,7 @@
 
 	.kt-select-search {
 		@apply px-4 py-1 border-b border-border;
-		
+
 		.kt-input {
 			@apply text-sm;
 		}
@@ -66,6 +66,14 @@
 
 	.kt-select-dropdown {
 		@apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
+	}
+
+	.kt-select-select-all {
+		@apply px-2 py-1 border-b border-border;
+	}
+
+	.kt-select-select-all-button {
+		@apply w-full text-start p-1.5 rounded-md text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer;
 	}
 
 	.kt-select-options {
@@ -98,7 +106,7 @@
 		}
 	}
 
-	.kt-select-option-text {	
+	.kt-select-option-text {
 		@apply overflow-ellipsis truncate;
 	}
 
@@ -153,7 +161,7 @@
 }
 
 /* RTL */
-@layer components {	
+@layer components {
 	[dir='rtl'] {
 		.kt-select {
 			background-position: left 0.5rem center;
@@ -162,7 +170,7 @@
 				background-position: left 0.5rem top 0.675rem;
 			}
 		}
-	
+
 		.kt-select-sm {
 			background-position: left 0.5rem center;
 
@@ -171,7 +179,7 @@
 			}
 		}
 
-		.kt-select-lg {	
+		.kt-select-lg {
 			background-position: left 0.75rem center;
 
 			&[data-multiple=true] {

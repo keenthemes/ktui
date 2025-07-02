@@ -143,6 +143,7 @@ export class KTSelectSearch {
 							this._searchInput?.focus(); // Focus search input
 						}, 50); // Delay to ensure dropdown is visible
 					}
+					this._select.updateSelectAllButtonState();
 				});
 			}
 		}
@@ -292,6 +293,8 @@ export class KTSelectSearch {
 		const visibleCount = filterOptions(options, query, config, dropdownElement, (count) =>
 			this._handleNoResults(count),
 		);
+
+		this._select.updateSelectAllButtonState();
 	}
 
 	/**
@@ -324,6 +327,7 @@ export class KTSelectSearch {
 		});
 
 		this._clearNoResultsMessage(); // Ensure no results message is cleared when resetting
+		this._select.updateSelectAllButtonState();
 	}
 
 	private _handleNoResults(visibleOptionsCount: number) {

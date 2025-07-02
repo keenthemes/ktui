@@ -43,6 +43,7 @@ export const coreTemplateStrings = {
 	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite"></li>`,
 	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}"></div>`,
 	loadMore: `<li class="kt-select-load-more {{class}}" data-kt-select-load-more="true"></li>`,
+	selectAll: `<div data-kt-select-select-all class="kt-select-select-all"><button type="button" class="kt-select-select-all-button">{{text}}</button></div>`,
 	tagRemoveButton: `<button type="button" data-kt-select-remove-button class="kt-select-tag-remove" aria-label="Remove tag" tabindex="0"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg></button>`,
 };
 
@@ -99,6 +100,7 @@ export interface KTSelectTemplateInterface {
 	) => HTMLElement;
 
 	placeholder: (config: KTSelectConfigInterface) => HTMLElement;
+	selectAll: (config: KTSelectConfigInterface) => HTMLElement;
 }
 
 /**
@@ -461,5 +463,16 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			element.textContent = content; // For simple text, use textContent
 			return element;
 		}
+	},
+
+	selectAll: (config: KTSelectConfigInterface): HTMLElement => {
+		const template = getTemplateStrings(config).selectAll;
+		const element = stringToElement(
+			template.replace(
+				'{{text}}',
+				config.selectAllText || 'Select All',
+			),
+		);
+		return element;
 	},
 };
