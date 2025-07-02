@@ -25,13 +25,13 @@ const KTDom = {
 		}
 	},
 
-	getElement(element: HTMLElement | string): HTMLElement {
-		if (this.isElement(element)) {
+	getElement(element: HTMLElement | string): HTMLElement | null {
+		if (this.isElement(element as HTMLElement)) {
 			return element as HTMLElement;
 		}
 
-		if (element && (element as string).length > 0) {
-			return document.querySelector(KTUtils.parseSelector(element as string));
+		if (typeof element === 'string' && element.length > 0) {
+			return document.querySelector(KTUtils.parseSelector(element));
 		}
 
 		return null;
@@ -151,9 +151,12 @@ const KTDom = {
 		return Array.from(parent.children).filter((child) => child !== element);
 	},
 
-	children(element: HTMLElement, selector: string): Array<HTMLElement> {
+	children(
+		element: HTMLElement | null,
+		selector: string,
+	): Array<HTMLElement> {
 		if (!element || !element.childNodes) {
-			return null;
+			return [];
 		}
 
 		const result: Array<HTMLElement> = [];
@@ -172,7 +175,7 @@ const KTDom = {
 		return result;
 	},
 
-	child(element: HTMLElement, selector: string): HTMLElement {
+	child(element: HTMLElement, selector: string): HTMLElement | null {
 		const children = KTDom.children(element, selector);
 
 		return children ? children[0] : null;
@@ -384,7 +387,7 @@ const KTDom = {
 			let normalizedKey = key.replace(prefix, '');
 			normalizedKey = KTUtils.uncapitalize(normalizedKey);
 			attributes[normalizedKey] = KTUtils.parseDataAttribute(
-				element.dataset[key],
+				element.dataset[key] || null,
 			);
 		}
 

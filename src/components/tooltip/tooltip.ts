@@ -30,7 +30,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 		trigger: 'hover',
 		placement: 'top',
 		placementRtl: 'top',
-		container: '',
+		container: null,
 		strategy: 'fixed',
 		offset: '0, 5px',
 		offsetRtl: '0, 5px',
@@ -41,10 +41,10 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	};
 	protected override _config: KTTooltipConfigInterface = this._defaultConfig;
 	protected _isOpen: boolean = false;
-	protected _targetElement: HTMLElement;
-	protected _popper!: Instance;
+	protected _targetElement: HTMLElement | null = null;
+	protected _popper: Instance | null = null;
 	protected _transitioning: boolean = false;
-	protected _timeout!: ReturnType<typeof setTimeout>;
+	protected _timeout: ReturnType<typeof setTimeout> | null = null;
 
 	constructor(
 		element: HTMLElement,
@@ -66,12 +66,14 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	}
 
 	private _getTargetElement(): HTMLElement | null {
+		const targetAttr = this._element.getAttribute('data-kt-tooltip');
+		const query =
+			targetAttr ||
+			this._getOption('target')?.toString() ||
+			'[data-kt-tooltip-content]';
+
 		return (
-			KTDom.getElement(
-				this._element.getAttribute('data-kt-tooltip') as string,
-			) ||
-			this._element.querySelector('[data-kt-tooltip-content]') ||
-			KTDom.getElement(this._getOption('target') as string)
+			KTDom.getElement(query) || this._element.querySelector(query)
 		);
 	}
 
@@ -96,6 +98,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	protected _show(): void {
 		if (this._timeout) {
 			clearTimeout(this._timeout);
+			this._timeout = null;
 		}
 
 		if (this._isOpen) return;
@@ -109,10 +112,9 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 					return;
 				}
 
-				if (!this._targetElement) {
+				if (!this._targetElement || !this._element) {
 					return;
 				}
-				if (!this._element) return;
 
 				this._createPopper();
 				this._handleContainer();
@@ -129,7 +131,9 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 				this._isOpen = true;
 
 				KTDom.transitionEnd(this._targetElement, () => {
-					this._targetElement.style.opacity = '';
+					if (this._targetElement) {
+						this._targetElement.style.opacity = '';
+					}
 					this._transitioning = false;
 					this._fireEvent('shown');
 					this._dispatchEvent('shown');
@@ -142,6 +146,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	protected _hide(): void {
 		if (this._timeout) {
 			clearTimeout(this._timeout);
+			this._timeout = null;
 		}
 
 		if (!this._isOpen) return;
@@ -166,12 +171,19 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 				this._isOpen = false;
 
 				KTDom.transitionEnd(this._targetElement, () => {
-					this._popper.destroy();
-					this._targetElement.classList.remove('show');
-					this._targetElement.classList.add(
-						this._getOption('hiddenClass') as string,
-					);
-					this._targetElement.style.opacity = '';
+					if (this._popper) {
+						this._popper.destroy();
+						this._popper = null;
+					}
+
+					if (this._targetElement) {
+						this._targetElement.classList.remove('show');
+						this._targetElement.classList.add(
+							this._getOption('hiddenClass') as string,
+						);
+						this._targetElement.style.opacity = '';
+					}
+
 					this._transitioning = false;
 					this._fireEvent('hidden');
 					this._dispatchEvent('hidden');
@@ -197,7 +209,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	}
 
 	protected _createPopper(): void {
-		if (!this._element) return;
+		if (!this._element || !this._targetElement) return;
 
 		const isRtl = KTDom.isRTL();
 
@@ -238,26 +250,35 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	}
 
 	protected _handleContainer(): void {
-		if (this._getOption('container')) {
-			if (this._getOption('container') === 'body') {
-				document.body.appendChild(this._targetElement);
+		const container = this._getOption('container');
+
+		if (container) {
+			if (container === 'body') {
+				if (this._targetElement) {
+					document.body.appendChild(this._targetElement);
+				}
 			} else {
-				document
-					.querySelector(this._getOption('container') as string)
-					?.appendChild(this._targetElement);
+				const containerElement = KTDom.getElement(container as string);
+				if (containerElement && this._targetElement) {
+					containerElement.appendChild(this._targetElement);
+				}
 			}
 		}
 	}
 
 	protected _setZindex(): void {
+		if (!this._element || !this._targetElement) return;
+
 		let zindex: number = parseInt(this._getOption('zindex') as string);
 
-		if (parseInt(KTDom.getCssProp(this._element, 'z-index')) > zindex) {
-			zindex = parseInt(KTDom.getCssProp(this._element, 'z-index'));
+		const elementZindex = KTDom.getCssProp(this._element, 'z-index');
+		if (elementZindex && parseInt(elementZindex) > zindex) {
+			zindex = parseInt(elementZindex);
 		}
 
-		if (KTDom.getHighestZindex(this._element) > zindex) {
-			zindex = KTDom.getHighestZindex(this._element) + 1;
+		const highestZindex = KTDom.getHighestZindex(this._element);
+		if (highestZindex && highestZindex > zindex) {
+			zindex = highestZindex + 1;
 		}
 
 		this._targetElement.style.zIndex = String(zindex);
@@ -311,7 +332,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 								contentElement.contains(event.target as HTMLElement))
 						) {
 							return;
-						} else {
+						} else if (tooltip) {
 							tooltip.hide();
 						}
 					}
@@ -319,23 +340,17 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 		});
 	}
 
-	public static getInstance(element: HTMLElement): KTTooltip {
-		if (!element) return null;
-
+	public static getInstance(element: HTMLElement): KTTooltip | null {
 		if (KTData.has(element, 'tooltip')) {
 			return KTData.get(element, 'tooltip') as KTTooltip;
+		} else {
+			return null;
 		}
-
-		if (element.getAttribute('data-kt-tooltip')) {
-			return new KTTooltip(element);
-		}
-
-		return null;
 	}
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTTooltipConfigInterface,
+		config?: KTTooltipConfigInterface | null,
 	): KTTooltip {
 		return this.getInstance(element) || new KTTooltip(element, config);
 	}

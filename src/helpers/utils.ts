@@ -22,7 +22,7 @@ const KTUtils = {
 		return hex;
 	},
 
-	parseDataAttribute(value: string): KTOptionType {
+	parseDataAttribute(value: KTOptionType): KTOptionType {
 		if (value === 'true') {
 			return true;
 		}
@@ -35,7 +35,7 @@ const KTUtils = {
 			return Number(value);
 		}
 
-		if (value === '' || value === 'null') {
+		if (value === '' || value === 'null' || value === null) {
 			return null;
 		}
 
@@ -50,7 +50,7 @@ const KTUtils = {
 		}
 	},
 
-	parseJson(value: string): JSON {
+	parseJson(value: string | null): JSON | null {
 		return value && value.length > 0
 			? JSON.parse(decodeURIComponent(value))
 			: null;

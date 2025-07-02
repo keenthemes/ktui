@@ -9,7 +9,7 @@ export interface KTTooltipConfigInterface {
 	hiddenClass: string;
 	target: string;
 	trigger: string;
-	container: string;
+	container: string | null;
 	placement: string;
 	placementRtl: string;
 	strategy: string;
