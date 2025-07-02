@@ -165,6 +165,11 @@ export class KTSelectSearch {
 		const key = event.key;
 
 		switch (key) {
+			case ' ': // Spacebar
+				// Do nothing, allow space to be typed into the input
+				// Stop propagation to prevent parent handlers from processing this event
+				event.stopPropagation();
+				break;
 			case 'ArrowDown':
 				event.preventDefault();
 				this._focusManager.focusNext();
