@@ -134,6 +134,10 @@ const KTUtils = {
 	},
 
 	stringToObject: <T>(value: KTOptionType): T | null => {
+		if (value === null || value === undefined) {
+			return null;
+		}
+
 		try {
 			const parsed = JSON.parse(value.toString() as string);
 			if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {

@@ -283,7 +283,7 @@ const KTDom = {
 		return 1;
 	},
 
-	isParentOrElementHidden(element: HTMLElement): boolean {
+	isParentOrElementHidden(element: HTMLElement | null): boolean {
 		if (!element) {
 			return false;
 		}
@@ -294,7 +294,11 @@ const KTDom = {
 			return true;
 		}
 
-		return this.isParentOrElementHidden(element.parentElement);
+		if (element.parentElement) {
+			return this.isParentOrElementHidden(element.parentElement);
+		}
+
+		return false;
 	},
 
 	getViewPort(): KTViewPortType {

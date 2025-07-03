@@ -43,6 +43,7 @@ export { KTSticky } from './components/sticky';
 export { KTReparent } from './components/reparent';
 export { KTToggle } from './components/toggle';
 export { KTTooltip } from './components/tooltip';
+export type { KTTooltipConfigInterface, KTTooltipInterface } from './components/tooltip';
 export { KTStepper } from './components/stepper';
 export { KTThemeSwitch } from './components/theme-switch';
 export { KTImageInput } from './components/image-input';

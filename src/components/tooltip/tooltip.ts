@@ -55,7 +55,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 		if (KTData.has(element as HTMLElement, this._name)) return;
 
 		this._init(element);
-		this._buildConfig(config);
+		this._buildConfig(config || {});
 
 		this._targetElement = this._getTargetElement();
 		if (!this._targetElement) {
@@ -66,6 +66,8 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	}
 
 	private _getTargetElement(): HTMLElement | null {
+		if (!this._element) return null;
+
 		const targetAttr = this._element.getAttribute('data-kt-tooltip');
 		const query =
 			targetAttr ||

@@ -20,14 +20,18 @@ import { KTOptionType } from '../types';
 
 export default class KTComponent {
 	protected _dataOptionPrefix: string = 'kt-';
-	protected _name: string;
-	protected _defaultConfig: object;
-	protected _config: object;
-	protected _events: Map<string, Map<string, CallableFunction>>;
+	protected _name!: string;
+	protected _defaultConfig!: object;
+	protected _config!: object;
+	protected _events!: Map<string, Map<string, CallableFunction>>;
 	protected _uid: string | null = null;
 	protected _element: HTMLElement | null = null;
 
 	protected _init(element: HTMLElement | null) {
+		if (!element) {
+			return;
+		}
+
 		element = KTDom.getElement(element);
 
 		if (!element) {
@@ -43,7 +47,7 @@ export default class KTComponent {
 		KTData.set(this._element, this._name, this);
 	}
 
-	protected async _fireEvent(eventType: string, payload: object = null): Promise<void> {
+	protected async _fireEvent(eventType: string, payload: object | null = null): Promise<void> {
 		const callbacks = this._events.get(eventType);
 
 		if ((callbacks instanceof Map) == false) {
@@ -63,7 +67,7 @@ export default class KTComponent {
 		);
 	}
 
-	protected _dispatchEvent(eventType: string, payload: object = null): void {
+	protected _dispatchEvent(eventType: string, payload: object | null = null): void {
 		const event = new CustomEvent(eventType, {
 			detail: { payload },
 			bubbles: true,
@@ -77,10 +81,10 @@ export default class KTComponent {
 
 	protected _getOption(name: string): KTOptionType {
 		const value = this._config[name as keyof object];
-		const reponsiveValue = KTDom.getCssProp(
+		const reponsiveValue = this._element ? KTDom.getCssProp(
 			this._element,
 			`--kt-${this._name}-${KTUtils.camelReverseCase(name)}`,
-		);
+		) : '';
 
 		return reponsiveValue || value;
 	}
@@ -126,7 +130,10 @@ export default class KTComponent {
 			this._events.set(eventType, new Map());
 		}
 
-		this._events.get(eventType).set(eventId, callback);
+		const eventMap = this._events.get(eventType);
+		if (eventMap) {
+			eventMap.set(eventId, callback);
+		}
 
 		return eventId;
 	}
@@ -139,7 +146,7 @@ export default class KTComponent {
 		return this._getOption(name as keyof object);
 	}
 
-	public getElement(): HTMLElement {
+	public getElement(): HTMLElement | null {
 		if (!this._element) return null;
 		return this._element;
 	}
