@@ -30,28 +30,48 @@ import { KTSelect } from './components/select';
 import { KTToast } from './components/toast';
 
 export { KTDropdown } from './components/dropdown';
+export type { KTDropdownConfigInterface, KTDropdownInterface } from './components/dropdown';
 export { KTModal } from './components/modal';
+export type { KTModalConfigInterface, KTModalInterface } from './components/modal';
 export { KTDrawer } from './components/drawer';
+export type { KTDrawerConfigInterface, KTDrawerInterface } from './components/drawer';
 export { KTCollapse } from './components/collapse';
+export type { KTCollapseConfigInterface, KTCollapseInterface } from './components/collapse';
 export { KTDismiss } from './components/dismiss';
+export type { KTDismissConfigInterface, KTDismissInterface } from './components/dismiss';
 export { KTTabs } from './components/tabs';
+export type { KTTabsConfigInterface, KTTabsInterface } from './components/tabs';
 export { KTAccordion } from './components/accordion';
+export type { KTAccordionConfigInterface, KTAccordionInterface } from './components/accordion';
 export { KTScrollspy } from './components/scrollspy';
+export type { KTScrollspyConfigInterface, KTScrollspyInterface } from './components/scrollspy';
 export { KTScrollable } from './components/scrollable';
+export type { KTScrollableConfigInterface, KTScrollableInterface } from './components/scrollable';
 export { KTScrollto } from './components/scrollto';
+export type { KTScrolltoConfigInterface, KTScrolltoInterface } from './components/scrollto';
 export { KTSticky } from './components/sticky';
+export type { KTStickyConfigInterface, KTStickyInterface } from './components/sticky';
 export { KTReparent } from './components/reparent';
+export type { KTReparentConfigInterface, KTReparentInterface } from './components/reparent';
 export { KTToggle } from './components/toggle';
+export type { KTToggleConfigInterface, KTToggleInterface } from './components/toggle';
 export { KTTooltip } from './components/tooltip';
 export type { KTTooltipConfigInterface, KTTooltipInterface } from './components/tooltip';
 export { KTStepper } from './components/stepper';
+export type { KTStepperConfigInterface, KTStepperInterface } from './components/stepper';
 export { KTThemeSwitch } from './components/theme-switch';
+export type { KTThemeSwitchConfigInterface, KTThemeSwitchInterface } from './components/theme-switch';
 export { KTImageInput } from './components/image-input';
+export type { KTImageInputConfigInterface, KTImageInputInterface } from './components/image-input';
 export { KTTogglePassword } from './components/toggle-password';
+export type { KTTogglePasswordConfigInterface, KTTogglePasswordInterface } from './components/toggle-password';
 export { KTDataTable } from './components/datatable';
+export type { KTDataTableConfigInterface, KTDataTableInterface } from './components/datatable';
 export { KTDatepicker } from './components/datepicker';
 export { KTSelect } from './components/select';
+export type { KTSelectConfigInterface } from './components/select';
 export { KTToast } from './components/toast';
+export type { KTToastConfigInterface, KTToastInterface } from './components/toast';
 
 const KTComponents = {
 	init(): void {
