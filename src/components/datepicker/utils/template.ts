@@ -1,9 +1,9 @@
 /*
- * template-utils.ts - Template utilities for KTDatepicker (revamp)
+ * template.ts - Template utilities for KTDatepicker (revamp)
  * Provides merging and rendering utilities for template customization.
  */
 
-import { KTDatepickerTemplateStrings } from './types';
+import { KTDatepickerTemplateStrings } from '../types';
 
 /**
  * Merges default templates with user overrides.

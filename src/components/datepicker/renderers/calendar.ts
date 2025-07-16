@@ -1,0 +1,63 @@
+/*
+ * calendar.ts - Calendar renderer for KTDatepicker
+ * Renders the calendar grid (days) using provided template and data.
+ */
+
+import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../utils/template';
+import { defaultTemplates } from '../templates';
+
+/**
+ * Renders the datepicker calendar and returns an HTMLElement.
+ * @param tpl - The template string or function for the day cell
+ * @param days - Array of Date objects for the calendar grid
+ * @param currentDate - The current month being viewed
+ * @param selectedDate - The currently selected date
+ * @param onDayClick - Callback for day cell click, receives the Date
+ */
+export function renderCalendar(
+  tpl: string | ((data: any) => string),
+  days: Date[],
+  currentDate: Date,
+  selectedDate: Date | null,
+  onDayClick: (date: Date) => void
+): HTMLElement {
+  const rows = [];
+  for (let i = 0; i < days.length; i += 7) {
+    const week = days.slice(i, i + 7);
+    const tds = week.map((day, j) => {
+      const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+      const isToday = isSameDay(day, new Date());
+      const isSelected = selectedDate && isSameDay(day, selectedDate);
+      const attributes = [
+        isSelected ? 'class="active" aria-selected="true"' : '',
+        isToday ? 'data-today="true"' : '',
+        isCurrentMonth ? '' : 'data-outside="true"',
+      ].filter(Boolean).join(' ');
+      const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, attributes };
+      return isTemplateFunction(tpl)
+        ? tpl(data)
+        : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.dayCell === 'string' ? defaultTemplates.dayCell : ''), data);
+    }).join('');
+    rows.push(`<tr>${tds}</tr>`);
+  }
+  const calendarHtml = `<table data-kt-datepicker-calendar-table><tbody>${rows.join('')}</tbody></table>`;
+  const calendarFrag = renderTemplateToDOM(calendarHtml);
+  const calendar = calendarFrag.firstElementChild as HTMLElement;
+  // Add day cell click listeners
+  calendar.querySelectorAll('td[data-kt-datepicker-day]').forEach((td, i) => {
+    td.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const day = days[i];
+      if (day.getMonth() === currentDate.getMonth()) {
+        onDayClick(day);
+      }
+    });
+  });
+  return calendar;
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}

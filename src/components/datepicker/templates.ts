@@ -4,7 +4,7 @@
  */
 
 import { KTDatepickerConfig, KTDatepickerTemplateStrings } from './types';
-import { mergeTemplates } from './template-utils';
+import { mergeTemplates } from './utils/template';
 
 // Default template strings for all UI fragments
 export const defaultTemplates: KTDatepickerTemplateStrings = {

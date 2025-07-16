@@ -6,9 +6,14 @@
 import KTComponent from '../component';
 import { KTDatepickerConfig, KTDatepickerState, KTDatepickerTemplateStrings } from './types';
 import { getTemplateStrings, defaultTemplates } from './templates';
-import { renderTemplateString, isTemplateFunction, renderTemplateToDOM } from './template-utils';
+import { getMergedTemplates } from './template-manager';
+import { renderTemplateString, isTemplateFunction, renderTemplateToDOM } from './utils/template';
 import { defaultDatepickerConfig } from './config';
 import { SegmentManager } from './segment-manager';
+import { renderHeader } from './renderers/header';
+import { renderCalendar } from './renderers/calendar';
+import { renderFooter } from './renderers/footer';
+import { getInitialState } from './state';
 
 /**
  * KTDatepicker - Template-driven, modular datepicker component
@@ -35,7 +40,7 @@ export class KTDatepicker extends KTComponent {
     this._init(element);
     this._buildConfig(config);
     this._templateSet = getTemplateStrings(this._config);
-    this._state = this._getInitialState();
+    this._state = getInitialState();
     // Initialize SegmentManager with format and initial value
     const format = (this._config.format && typeof this._config.format === 'string') ? this._config.format : 'MM/DD/YYYY';
     const initialValue = this._input ? this._input.value : '';
@@ -49,12 +54,10 @@ export class KTDatepicker extends KTComponent {
    */
   protected override _buildConfig(config?: KTDatepickerConfig) {
     // Merge templates separately to ensure correct type
-    const mergedTemplates = Object.assign(
-      {},
-      (defaultDatepickerConfig.templates || {}),
+    const mergedTemplates = getMergedTemplates(
       (config && config.templates) || {},
       this._userTemplates || {}
-    ) as Record<string, string | ((data: any) => string)>;
+    );
     this._config = {
       ...defaultDatepickerConfig,
       ...(config || {}),
@@ -63,38 +66,12 @@ export class KTDatepicker extends KTComponent {
   }
 
   /**
-   * Get initial state for the datepicker
-   */
-  private _getInitialState(): KTDatepickerState {
-    return {
-      currentDate: new Date(),
-      selectedDate: null,
-      selectedRange: null,
-      selectedDates: [],
-      viewMode: 'days',
-      isOpen: false,
-      isFocused: false,
-    };
-  }
-
-  /**
    * Public method to set/override templates at runtime (supports string or function)
    */
   public setTemplates(templates: Record<string, string | ((data: any) => string)>) {
     this._userTemplates = { ...this._userTemplates, ...templates };
-    this._templateSet = this._getMergedTemplates();
+    this._templateSet = getTemplateStrings(this._config);
     this._render();
-  }
-
-  /**
-   * Merge default, config, and user templates (string or function)
-   */
-  private _getMergedTemplates(): Record<string, string | ((data: any) => string)> {
-    return {
-      ...(defaultTemplates as Record<string, string | ((data: any) => string)>),
-      ...(this._config.templates || {}),
-      ...this._userTemplates,
-    };
   }
 
   /**
@@ -123,13 +100,21 @@ export class KTDatepicker extends KTComponent {
     if (existingWrapper && existingWrapper.parentNode) {
       existingWrapper.parentNode.removeChild(existingWrapper);
     }
+    // Render calendar button from template
+    const calendarButtonTpl = this._templateSet.calendarButton || defaultTemplates.calendarButton;
+    let calendarButtonHtml: string;
+    if (typeof calendarButtonTpl === 'function') {
+      calendarButtonHtml = calendarButtonTpl({ ariaLabel: this._config.calendarButtonAriaLabel || 'Open calendar' });
+    } else {
+      calendarButtonHtml = calendarButtonTpl.replace(/{{ariaLabel}}/g, this._config.calendarButtonAriaLabel || 'Open calendar');
+    }
     // Render input wrapper and calendar button from template
     const inputWrapperTpl = this._templateSet.inputWrapper || defaultTemplates.inputWrapper;
     let inputWrapperHtml: string;
     if (typeof inputWrapperTpl === 'function') {
-      inputWrapperHtml = inputWrapperTpl({ input: this._input ? this._input.outerHTML : '', icon: '' });
+      inputWrapperHtml = inputWrapperTpl({ input: this._input ? this._input.outerHTML : '', icon: calendarButtonHtml });
     } else {
-      inputWrapperHtml = inputWrapperTpl;
+      inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, this._input ? this._input.outerHTML : '');
     }
     const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
     const inputWrapperEl = inputWrapperFrag.firstElementChild as HTMLElement;
@@ -180,70 +165,40 @@ export class KTDatepicker extends KTComponent {
       dropdownEl.classList.add('hidden');
     }
     // Render header, calendar, footer into dropdown
-    this._renderHeaderTo(dropdownEl);
-    this._renderCalendarTo(dropdownEl);
-    this._renderFooterTo(dropdownEl);
+    const header = renderHeader(
+      this._templateSet.header,
+      {
+        month: this._state.currentDate.toLocaleString('default', { month: 'long' }),
+        year: this._state.currentDate.getFullYear(),
+        prevButton: '<button type="button" data-kt-datepicker-prev>&lt;</button>',
+        nextButton: '<button type="button" data-kt-datepicker-next>&gt;</button>',
+      },
+      (e) => { e.stopPropagation(); this._changeMonth(-1); },
+      (e) => { e.stopPropagation(); this._changeMonth(1); }
+    );
+    dropdownEl.appendChild(header);
+
+    const calendar = renderCalendar(
+      this._templateSet.dayCell,
+      this._getCalendarDays(this._state.currentDate),
+      this._state.currentDate,
+      this._state.selectedDate,
+      (day) => { this.setDate(day); this.close(); }
+    );
+    dropdownEl.appendChild(calendar);
+
+    const footer = renderFooter(
+      this._templateSet.footer,
+      { todayButton: 'Today', clearButton: 'Clear', applyButton: 'Apply' }
+      // Callbacks for today, clear, apply can be added here if needed
+    );
+    dropdownEl.appendChild(footer);
     // Attach dropdown after the input wrapper
     if (inputWrapperEl.nextSibling) {
       this._element.insertBefore(dropdownEl, inputWrapperEl.nextSibling);
     } else {
       this._element.appendChild(dropdownEl);
     }
-  }
-
-  private _renderHeaderTo(target: HTMLElement) {
-    const tpl = this._templateSet.header;
-    const data = {
-      month: this._state.currentDate.toLocaleString('default', { month: 'long' }),
-      year: this._state.currentDate.getFullYear(),
-      prevButton: '<button type="button" data-kt-datepicker-prev>&lt;</button>',
-      nextButton: '<button type="button" data-kt-datepicker-next>&gt;</button>',
-    };
-    const headerHtml = isTemplateFunction(tpl)
-      ? tpl(data)
-      : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.header === 'string' ? defaultTemplates.header : ''), data);
-    const headerFrag = renderTemplateToDOM(headerHtml);
-    const header = headerFrag.firstElementChild as HTMLElement;
-    target.appendChild(header);
-    // Add navigation event listeners
-    const prevBtn = header.querySelector('[data-kt-datepicker-prev]');
-    const nextBtn = header.querySelector('[data-kt-datepicker-next]');
-    if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this._changeMonth(-1); });
-    if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); this._changeMonth(1); });
-  }
-
-  private _renderCalendarTo(target: HTMLElement) {
-    const days = this._getCalendarDays(this._state.currentDate);
-    const rows = [];
-    for (let i = 0; i < days.length; i += 7) {
-      const week = days.slice(i, i + 7);
-      const tds = week.map(day => {
-        const isCurrentMonth = day.getMonth() === this._state.currentDate.getMonth();
-        const isToday = this._isSameDay(day, new Date());
-        const isSelected = this._state.selectedDate && this._isSameDay(day, this._state.selectedDate);
-        const tpl = this._templateSet.dayCell;
-        const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected };
-        return isTemplateFunction(tpl)
-          ? tpl(data)
-          : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.dayCell === 'string' ? defaultTemplates.dayCell : ''), data);
-      }).join('');
-      rows.push(`<tr>${tds}</tr>`);
-    }
-    const calendarHtml = `<table data-kt-datepicker-calendar-table><tbody>${rows.join('')}</tbody></table>`;
-    const calendarFrag = renderTemplateToDOM(calendarHtml);
-    const calendar = calendarFrag.firstElementChild as HTMLElement;
-    target.appendChild(calendar);
-    // Add day cell click listeners
-    calendar.querySelectorAll('td[data-kt-datepicker-day]').forEach((td, i) => {
-      td.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const day = days[i];
-        if (day.getMonth() === this._state.currentDate.getMonth()) {
-          this.setDate(day);
-          this.close();
-        }
-      });
-    });
   }
 
   private _getCalendarDays(date: Date): Date[] {
@@ -275,17 +230,6 @@ export class KTDatepicker extends KTComponent {
     d.setMonth(d.getMonth() + offset);
     this._state.currentDate = d;
     this._render();
-  }
-
-  private _renderFooterTo(target: HTMLElement) {
-    const tpl = this._templateSet.footer;
-    const data = { todayButton: 'Today', clearButton: 'Clear', applyButton: 'Apply' };
-    const footerHtml = isTemplateFunction(tpl)
-      ? tpl(data)
-      : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.footer === 'string' ? defaultTemplates.footer : ''), data);
-    const footerFrag = renderTemplateToDOM(footerHtml);
-    const footer = footerFrag.firstElementChild as HTMLElement;
-    target.appendChild(footer);
   }
 
   /**

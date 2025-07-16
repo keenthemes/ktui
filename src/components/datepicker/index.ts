@@ -5,5 +5,4 @@ import { KTDatepicker, initDatepickers } from './datepicker';
 
 export { KTDatepicker };
 export * from './templates';
-export * from './template-utils';
 export * from './types';
