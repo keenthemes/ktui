@@ -1,7 +1,38 @@
-/**
- * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
- * Copyright 2025 by Keenthemes Inc
+/*
+ * datepicker.css - Minimal utility styles for KTDatepicker (revamp)
+ * Use with Tailwind or extend as needed.
  */
 
-@layer components {
+.kt-datepicker-root {
+  position: relative;
+  display: inline-block;
+}
+
+.kt-datepicker-header {
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.kt-datepicker-calendar {
+  padding: 1rem;
+  background: #fff;
+}
+
+.kt-datepicker-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.kt-datepicker-root .open {
+  display: block;
+}
+
+.kt-datepicker-root .hidden {
+  display: none;
 }

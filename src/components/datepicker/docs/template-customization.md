@@ -1,7 +1,7 @@
-# KTDatepicker Template Customization
+# KTDatepicker Template Customization (2025 Revamp)
 
 ## Overview
-KTDatepicker offers a powerful template customization system, allowing users to override the appearance and structure of all major UI fragments. This system is inspired by the select component’s template merging logic for consistency and flexibility.
+KTDatepicker is now a fully modular, template-driven component. All UI fragments are customizable via config or `data-kt-datepicker-config` attributes. The system is inspired by the select component’s template merging logic for consistency and flexibility.
 
 ## 1. Template Keys
 The following template keys can be overridden via config:
@@ -24,7 +24,7 @@ The following template keys can be overridden via config:
 - `emptyState`: Empty state message
 
 ## 2. Overriding Templates
-Override any template by providing a matching key in the `data-kt-datepicker-config` JSON attribute:
+Override any template by providing a matching key in the `data-kt-datepicker-config` JSON attribute or via the JS config:
 ```html
 <div
   data-kt-datepicker="true"
@@ -50,7 +50,7 @@ Each template supports specific placeholders. Common examples include:
 - `{{input}}`, `{{icon}}`, `{{segments}}`, `{{start}}`, `{{end}}`, `{{separator}}`, `{{placeholder}}`, `{{value}}`
 - `{{hours}}`, `{{minutes}}`, `{{seconds}}`, `{{amPm}}`, `{{date}}`, `{{removeButton}}`, `{{message}}`
 
-> **Note:** The PRD and code should document which placeholders are available for each template key.
+> **Note:** The codebase is now fully modular and template-driven. All UI fragments are rendered via templates and can be customized.
 
 ## 5. Granular Customization
 - Per-segment and per-cell customization is supported (e.g., `dayCell`, `monthCell`, `yearCell`).

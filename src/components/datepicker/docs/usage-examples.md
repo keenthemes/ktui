@@ -87,3 +87,17 @@ This document provides a variety of usage examples for KTDatepicker, demonstrati
 - See [selection-types.md](./selection-types.md) for feature details.
 - See [configuration.md](./configuration.md) for config options.
 - See [template-customization.md](./template-customization.md) for template overrides.
+
+---
+
+## Production Build
+
+To generate a production-ready, minified bundle of KTUI (including the datepicker), run:
+
+```bash
+npm run build:prod
+```
+
+This will output optimized files in the `dist/` directory, including both `ktui.js` and `ktui.min.js`.
+
+---

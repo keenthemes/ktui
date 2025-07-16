@@ -73,7 +73,7 @@ const KTComponents = {
 		KTImageInput.init();
 		KTTogglePassword.init();
 		KTDataTable.init();
-		KTDatepicker.init();
+		(KTDatepicker as any).init();
 		KTSelect.init();
 		KTToast.init();
 	},
@@ -111,6 +111,8 @@ declare global {
 }
 
 export default KTComponents;
+
+window.KTDatepicker = KTDatepicker;
 
 KTDom.ready(() => {
 	KTComponents.init();
