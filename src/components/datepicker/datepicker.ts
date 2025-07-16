@@ -36,8 +36,9 @@ export class KTDatepicker extends KTComponent {
    */
   constructor(element: HTMLElement, config?: KTDatepickerConfig) {
     super();
-    console.log('KTDatepicker initialized', element); // DEBUG
+    console.log('🗓️ [KTDatepicker] Constructor: element:', element);
     this._init(element);
+    console.log('🗓️ [KTDatepicker] After _init, this._input:', this._input);
     this._buildConfig(config);
     this._templateSet = getTemplateStrings(this._config);
     this._state = getInitialState();
@@ -47,6 +48,21 @@ export class KTDatepicker extends KTComponent {
     this._segmentManager = new SegmentManager(format, initialValue);
     (element as any).instance = this;
     this._render();
+  }
+
+  protected _init(element: HTMLElement) {
+    this._element = element;
+    // Find or assign the input
+    this._input = this._element.querySelector('input[data-kt-datepicker-input]');
+    if (!this._input) {
+      // Fallback: find the first input and add the attribute
+      const firstInput = this._element.querySelector('input');
+      if (firstInput) {
+        firstInput.setAttribute('data-kt-datepicker-input', '');
+        this._input = firstInput;
+        console.log('🗓️ [KTDatepicker] Auto-added data-kt-datepicker-input to input:', this._input);
+      }
+    }
   }
 
   /**
@@ -224,6 +240,8 @@ export class KTDatepicker extends KTComponent {
     } else {
       this._element.appendChild(dropdownEl);
     }
+    console.log('🗓️ [KTDatepicker] _render: this._input:', this._input);
+    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._isOpen, 'selectedDate:', this._state.selectedDate);
   }
 
   private _getCalendarDays(date: Date): Date[] {
@@ -261,24 +279,19 @@ export class KTDatepicker extends KTComponent {
    * Set the selected date
    */
   public setDate(date: Date) {
+    console.log('🗓️ [KTDatepicker] setDate called with:', date);
     this._state.selectedDate = date;
     this._state.currentDate = date;
-    // Update input value using SegmentManager if available
+    // Update input value using format only (bypass segment manager for MVP)
     if (this._input) {
       let value = '';
       if (this._config.format && typeof this._config.format === 'string') {
-        // Use SegmentManager to format value
-        if (this._segmentManager) {
-          // Optionally: update segments from date
-          // (not implemented in this MVP step)
-          value = this._segmentManager.formatValue();
-        } else {
-          value = this._formatDate(date, this._config.format);
-        }
+        value = this._formatDate(date, this._config.format);
       } else {
         value = date.toLocaleDateString();
       }
       this._input.value = value;
+      console.log('🗓️ [KTDatepicker] Input value set to:', value);
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }

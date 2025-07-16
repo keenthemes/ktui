@@ -64,13 +64,15 @@ export function renderCalendar(
     if (button) {
       button.addEventListener('click', (e) => {
         e.stopPropagation();
-        const day = days[i];
-        if (day.getMonth() === currentDate.getMonth()) {
-          onDayClick(day);
+        console.log('🗓️ [KTDatepicker] Day button clicked:', days[i]);
+        const dayObj = days[i];
+        if (dayObj.getMonth() === currentDate.getMonth()) {
+          onDayClick(dayObj);
         }
       });
     }
   });
+  console.log('🗓️ [KTDatepicker] Calendar rendered:', calendar);
   return calendar;
 }
 
