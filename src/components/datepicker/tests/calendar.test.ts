@@ -23,13 +23,13 @@ describe('renderCalendar', () => {
     const days = [new Date(2024, 4, 1)];
     const onDayClick = vi.fn();
     const el = renderCalendar(
-      (data) => `<td data-kt-datepicker-day>${data.day}</td>`,
+      (data) => `<td data-kt-datepicker-day><button type="button" data-day="${data.day}">${data.day}</button></td>`,
       days,
       new Date(2024, 4, 1),
       null,
       onDayClick
     );
-    el.querySelector('td[data-kt-datepicker-day]')?.dispatchEvent(new Event('click'));
+    el.querySelector('button[data-day]')?.dispatchEvent(new Event('click', { bubbles: true }));
     expect(onDayClick).toHaveBeenCalledWith(days[0]);
   });
 });

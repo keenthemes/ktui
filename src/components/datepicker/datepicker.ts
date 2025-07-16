@@ -165,13 +165,28 @@ export class KTDatepicker extends KTComponent {
       dropdownEl.classList.add('hidden');
     }
     // Render header, calendar, footer into dropdown
+    // Use template-driven navigation buttons
+    let prevButtonHtml: string;
+    let nextButtonHtml: string;
+    const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
+    const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
+    if (typeof prevButtonTpl === 'function') {
+      prevButtonHtml = prevButtonTpl({});
+    } else {
+      prevButtonHtml = prevButtonTpl;
+    }
+    if (typeof nextButtonTpl === 'function') {
+      nextButtonHtml = nextButtonTpl({});
+    } else {
+      nextButtonHtml = nextButtonTpl;
+    }
     const header = renderHeader(
       this._templateSet.header,
       {
         month: this._state.currentDate.toLocaleString('default', { month: 'long' }),
         year: this._state.currentDate.getFullYear(),
-        prevButton: '<button type="button" data-kt-datepicker-prev>&lt;</button>',
-        nextButton: '<button type="button" data-kt-datepicker-next>&gt;</button>',
+        prevButton: prevButtonHtml,
+        nextButton: nextButtonHtml,
       },
       (e) => { e.stopPropagation(); this._changeMonth(-1); },
       (e) => { e.stopPropagation(); this._changeMonth(1); }
@@ -187,9 +202,19 @@ export class KTDatepicker extends KTComponent {
     );
     dropdownEl.appendChild(calendar);
 
+    // Render footer using template-driven buttons
+    let todayButtonHtml: string;
+    let clearButtonHtml: string;
+    let applyButtonHtml: string;
+    const todayButtonTpl = this._templateSet.todayButton || defaultTemplates.todayButton;
+    const clearButtonTpl = this._templateSet.clearButton || defaultTemplates.clearButton;
+    const applyButtonTpl = this._templateSet.applyButton || defaultTemplates.applyButton;
+    todayButtonHtml = typeof todayButtonTpl === 'function' ? todayButtonTpl({}) : todayButtonTpl;
+    clearButtonHtml = typeof clearButtonTpl === 'function' ? clearButtonTpl({}) : clearButtonTpl;
+    applyButtonHtml = typeof applyButtonTpl === 'function' ? applyButtonTpl({}) : applyButtonTpl;
     const footer = renderFooter(
       this._templateSet.footer,
-      { todayButton: 'Today', clearButton: 'Clear', applyButton: 'Apply' }
+      { todayButton: todayButtonHtml, clearButton: clearButtonHtml, applyButton: applyButtonHtml }
       // Callbacks for today, clear, apply can be added here if needed
     );
     dropdownEl.appendChild(footer);

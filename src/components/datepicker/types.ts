@@ -23,7 +23,15 @@ export type KTDatepickerTemplateKey =
   | 'multiDateTag'
   | 'emptyState'
   | 'calendarButton'
-  | 'dropdown';
+  | 'dropdown'
+  | 'prevButton'
+  | 'nextButton'
+  | 'calendarTable'
+  | 'calendarRow'
+  | 'calendarBody'
+  | 'todayButton'
+  | 'clearButton'
+  | 'applyButton';
 
 // Template string map
 export type KTDatepickerTemplateStrings = {

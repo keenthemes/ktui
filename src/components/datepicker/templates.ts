@@ -12,7 +12,7 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   header: `<div data-kt-datepicker-header>{{month}} {{year}}</div>`,
   footer: `<div data-kt-datepicker-footer>{{todayButton}} {{clearButton}} {{applyButton}}</div>`,
   calendarGrid: `<table data-kt-datepicker-calendar-grid>{{calendar}}</table>`,
-  dayCell: `<td data-kt-datepicker-day {{attributes}}>{{day}}</td>`,
+  dayCell: `<td data-kt-datepicker-day {{attributes}}><button type="button" data-day="{{day}}" aria-label="Select {{day}}" tabindex="-1">{{day}}</button></td>`,
   monthYearSelect: `<div data-kt-datepicker-monthyear-select>{{monthSelect}} {{yearSelect}}</div>`,
   monthSelection: `<div data-kt-datepicker-month-selection>{{months}}</div>`,
   yearSelection: `<div data-kt-datepicker-year-selection>{{years}}</div>`,
@@ -32,6 +32,14 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
     </svg>
   </button>`,
   dropdown: `<div data-kt-datepicker-dropdown></div>`,
+  prevButton: `<button type="button" data-kt-datepicker-prev aria-label="Previous month">&lt;</button>`,
+  nextButton: `<button type="button" data-kt-datepicker-next aria-label="Next month">&gt;</button>`,
+  calendarTable: `<table data-kt-datepicker-calendar-table>{{body}}</table>`,
+  calendarBody: `<tbody>{{rows}}</tbody>`,
+  calendarRow: `<tr>{{cells}}</tr>`,
+  todayButton: `<button type="button" data-kt-datepicker-today>Today</button>`,
+  clearButton: `<button type="button" data-kt-datepicker-clear>Clear</button>`,
+  applyButton: `<button type="button" data-kt-datepicker-apply>Apply</button>`,
 };
 
 /**

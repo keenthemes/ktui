@@ -6,14 +6,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('KTDatepicker Integration: basic-usage.html', () => {
   test('should open the datepicker and select a date', async ({ page }) => {
-    await page.goto('/basic-usage.html');
+    await page.goto('examples/datepicker/basic-usage.html');
 
     // Find the input and click to open the datepicker
-    const input = await page.locator('input[type="text"]');
+    const input = await page.locator('#datepicker-basic');
     await input.click();
 
     // Wait for the calendar popup to appear
-    const calendar = page.locator('.kt-datepicker-calendar');
+    const calendar = page.locator('[data-kt-datepicker-calendar-table]');
     await expect(calendar).toBeVisible();
 
     // Click the first available day button

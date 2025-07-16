@@ -21,6 +21,10 @@ export function renderCalendar(
   selectedDate: Date | null,
   onDayClick: (date: Date) => void
 ): HTMLElement {
+  // Use template system for table, tbody, tr, td
+  const tableTpl = defaultTemplates.calendarTable;
+  const bodyTpl = defaultTemplates.calendarBody;
+  const rowTpl = defaultTemplates.calendarRow;
   const rows = [];
   for (let i = 0; i < days.length; i += 7) {
     const week = days.slice(i, i + 7);
@@ -38,20 +42,34 @@ export function renderCalendar(
         ? tpl(data)
         : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.dayCell === 'string' ? defaultTemplates.dayCell : ''), data);
     }).join('');
-    rows.push(`<tr>${tds}</tr>`);
+    // Use row template
+    const rowHtml = isTemplateFunction(rowTpl)
+      ? rowTpl({ cells: tds })
+      : (rowTpl as string).replace(/{{cells}}/g, tds);
+    rows.push(rowHtml);
   }
-  const calendarHtml = `<table data-kt-datepicker-calendar-table><tbody>${rows.join('')}</tbody></table>`;
-  const calendarFrag = renderTemplateToDOM(calendarHtml);
+  // Use body template
+  const bodyHtml = isTemplateFunction(bodyTpl)
+    ? bodyTpl({ rows: rows.join('') })
+    : (bodyTpl as string).replace(/{{rows}}/g, rows.join(''));
+  // Use table template
+  const tableHtml = isTemplateFunction(tableTpl)
+    ? tableTpl({ body: bodyHtml })
+    : (tableTpl as string).replace(/{{body}}/g, bodyHtml);
+  const calendarFrag = renderTemplateToDOM(tableHtml);
   const calendar = calendarFrag.firstElementChild as HTMLElement;
-  // Add day cell click listeners
+  // Add day cell click listeners (attach to button for accessibility)
   calendar.querySelectorAll('td[data-kt-datepicker-day]').forEach((td, i) => {
-    td.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const day = days[i];
-      if (day.getMonth() === currentDate.getMonth()) {
-        onDayClick(day);
-      }
-    });
+    const button = td.querySelector('button[data-day]');
+    if (button) {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const day = days[i];
+        if (day.getMonth() === currentDate.getMonth()) {
+          onDayClick(day);
+        }
+      });
+    }
   });
   return calendar;
 }
