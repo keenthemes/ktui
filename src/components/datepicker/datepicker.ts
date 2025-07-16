@@ -45,6 +45,134 @@ export class KTDatepicker extends KTComponent {
   private _isOpen: boolean = false;
   private _segmentManager: SegmentManager | null = null;
 
+  // --- Mode-specific helpers ---
+  /** Initialize single date from config */
+  private _initSingleDateFromConfig() {
+    if (this._config.value) {
+      const date = new Date(this._config.value);
+      this._state.selectedDate = date;
+      this._state.currentDate = date;
+      if (this._input) {
+        this._input.value = this._formatSingleDate(date);
+      }
+    }
+  }
+
+  /** Initialize range from config */
+  private _initRangeFromConfig() {
+    if (this._config.valueRange) {
+      const start = this._config.valueRange.start ? new Date(this._config.valueRange.start) : null;
+      const end = this._config.valueRange.end ? new Date(this._config.valueRange.end) : null;
+      this._state.selectedRange = { start, end };
+      if (this._input) {
+        this._input.value = this._formatRange(start, end);
+      }
+    }
+  }
+
+  /** Initialize multi-date from config */
+  private _initMultiDateFromConfig() {
+    if (Array.isArray(this._config.values)) {
+      this._state.selectedDates = this._config.values.map((v: any) => new Date(v));
+      if (this._input) {
+        this._input.value = this._formatMultiDate(this._state.selectedDates);
+      }
+    }
+  }
+
+  /** Format single date for input */
+  private _formatSingleDate(date: Date): string {
+    if (!date) return '';
+    if (this._config.format && typeof this._config.format === 'string') {
+      return this._formatDate(date, this._config.format);
+    } else if (this._config.locale) {
+      return date.toLocaleDateString(this._config.locale);
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
+
+  /** Format range for input */
+  private _formatRange(start: Date | null, end: Date | null): string {
+    if (start && end) {
+      return `${this._formatSingleDate(start)} – ${this._formatSingleDate(end)}`;
+    } else if (start) {
+      return this._formatSingleDate(start);
+    }
+    return '';
+  }
+
+  /** Format multi-date for input */
+  private _formatMultiDate(dates: Date[]): string {
+    return dates.map((d) => this._formatSingleDate(d)).join(', ');
+  }
+
+  /** Select a single date */
+  private _selectSingleDate(date: Date) {
+    this._state.selectedDate = date;
+    this._state.currentDate = date;
+    if (this._input) {
+      this._input.value = this._formatSingleDate(date);
+      const evt = new Event('change', { bubbles: true });
+      this._input.dispatchEvent(evt);
+    }
+    if (this._config.closeOnSelect) {
+      this.close();
+    }
+    this._render();
+  }
+
+  /** Select a range date */
+  private _selectRangeDate(date: Date) {
+    if (!this._state.selectedRange || (!this._state.selectedRange.start && !this._state.selectedRange.end)) {
+      this._state.selectedRange = { start: date, end: null };
+    } else if (this._state.selectedRange.start && !this._state.selectedRange.end) {
+      if (date >= this._state.selectedRange.start) {
+        this._state.selectedRange.end = date;
+      } else {
+        this._state.selectedRange = { start: date, end: null };
+      }
+    } else {
+      this._state.selectedRange = { start: date, end: null };
+    }
+    if (this._input) {
+      const { start, end } = this._state.selectedRange;
+      this._input.value = this._formatRange(start, end);
+      const evt = new Event('change', { bubbles: true });
+      this._input.dispatchEvent(evt);
+    }
+    // Only close if both start and end are selected and closeOnSelect is true
+    if (this._config.closeOnSelect && this._state.selectedRange?.start && this._state.selectedRange?.end) {
+      this.close();
+    }
+    this._render();
+  }
+
+  /** Select a multi-date */
+  private _selectMultiDate(date: Date) {
+    if (!this._state.selectedDates) this._state.selectedDates = [];
+    const exists = this._state.selectedDates.some((d) => d.getTime() === date.getTime());
+    if (exists) {
+      this._state.selectedDates = this._state.selectedDates.filter((d) => d.getTime() !== date.getTime());
+    } else {
+      this._state.selectedDates.push(date);
+    }
+    if (this._input) {
+      this._input.value = this._formatMultiDate(this._state.selectedDates);
+      const evt = new Event('change', { bubbles: true });
+      this._input.dispatchEvent(evt);
+    }
+    // Do not close on select for multi-date; close only on Apply if closeOnSelect is true
+    this._render();
+  }
+
+  /** Handler for Apply button in multi-date mode */
+  private _onApplyMultiDate = (e: Event) => {
+    if (this._config.closeOnSelect) {
+      this.close();
+    }
+  };
+
   /**
    * Constructor: Initializes the datepicker component
    */
@@ -53,7 +181,17 @@ export class KTDatepicker extends KTComponent {
     console.log('🗓️ [KTDatepicker] Constructor: element:', element);
     this._init(element);
     console.log('🗓️ [KTDatepicker] After _init, this._input:', this._input);
-    this._buildConfig(config);
+    // --- Data attribute overrides for showOnFocus and closeOnSelect ---
+    const showOnFocusAttr = element.getAttribute('data-kt-datepicker-show-on-focus');
+    const closeOnSelectAttr = element.getAttribute('data-kt-datepicker-close-on-select');
+    let configWithAttrs = { ...(config || {}) };
+    if (showOnFocusAttr !== null) {
+      configWithAttrs.showOnFocus = showOnFocusAttr === 'true' || showOnFocusAttr === '';
+    }
+    if (closeOnSelectAttr !== null) {
+      configWithAttrs.closeOnSelect = closeOnSelectAttr === 'true' || closeOnSelectAttr === '';
+    }
+    this._buildConfig(configWithAttrs);
     this._templateSet = getTemplateStrings(this._config);
     this._state = getInitialState();
     // Set placeholder from config if available
@@ -70,9 +208,32 @@ export class KTDatepicker extends KTComponent {
     const format = (this._config.format && typeof this._config.format === 'string') ? this._config.format : 'MM/DD/YYYY';
     const initialValue = this._input ? this._input.value : '';
     this._segmentManager = new SegmentManager(format, initialValue);
+    // --- Mode-specific initialization ---
+    if (this._config.range && this._config.valueRange) {
+      this._initRangeFromConfig();
+    } else if (this._config.multiDate && Array.isArray(this._config.values)) {
+      this._initMultiDateFromConfig();
+    } else if (this._config.value) {
+      this._initSingleDateFromConfig();
+    }
+    // --- Input focus event for showOnFocus ---
+    if (this._input) {
+      this._input.addEventListener('focus', this._onInputFocus);
+    }
     (element as any).instance = this;
     this._render();
   }
+
+  /**
+   * Handler for input focus event, opens the datepicker if showOnFocus is true and input is not disabled/readonly
+   */
+  private _onInputFocus = (e: FocusEvent) => {
+    if (!this._input) return;
+    if (this._input.hasAttribute('disabled') || this._input.hasAttribute('readonly')) return;
+    if (this._config.showOnFocus) {
+      this.open();
+    }
+  };
 
   protected _init(element: HTMLElement) {
     this._element = element;
@@ -105,10 +266,22 @@ export class KTDatepicker extends KTComponent {
       (config && config.templates) || {},
       this._userTemplates || {}
     );
+    // Determine closeOnSelect default based on mode if not explicitly set
+    let closeOnSelect: boolean;
+    if (typeof (config && config.closeOnSelect) !== 'undefined') {
+      closeOnSelect = config!.closeOnSelect!;
+    } else if (config?.range) {
+      closeOnSelect = false;
+    } else if (config?.multiDate) {
+      closeOnSelect = false;
+    } else {
+      closeOnSelect = true;
+    }
     this._config = {
       ...defaultDatepickerConfig,
       ...(config || {}),
       templates: mergedTemplates,
+      closeOnSelect,
     };
   }
 
@@ -254,8 +427,10 @@ export class KTDatepicker extends KTComponent {
     applyButtonHtml = typeof applyButtonTpl === 'function' ? applyButtonTpl({}) : applyButtonTpl;
     const footer = renderFooter(
       this._templateSet.footer,
-      { todayButton: todayButtonHtml, clearButton: clearButtonHtml, applyButton: applyButtonHtml }
-      // Callbacks for today, clear, apply can be added here if needed
+      { todayButton: todayButtonHtml, clearButton: clearButtonHtml, applyButton: applyButtonHtml },
+      undefined,
+      undefined,
+      this._config.multiDate ? this._onApplyMultiDate : undefined
     );
     dropdownEl.appendChild(footer);
   }
@@ -349,7 +524,7 @@ export class KTDatepicker extends KTComponent {
   }
 
   /**
-   * Set the selected date
+   * Set the selected date (single, range, or multi-date)
    */
   public setDate(date: Date) {
     console.log('🗓️ [KTDatepicker] setDate called with:', date);
@@ -362,68 +537,15 @@ export class KTDatepicker extends KTComponent {
       console.log('🗓️ [KTDatepicker] setDate blocked: date is after maxDate');
       return;
     }
-    if (this._config.range) {
-      // Range selection logic
-      if (!this._state.selectedRange || (!this._state.selectedRange.start && !this._state.selectedRange.end)) {
-        this._state.selectedRange = { start: date, end: null };
-      } else if (this._state.selectedRange.start && !this._state.selectedRange.end) {
-        if (date >= this._state.selectedRange.start) {
-          this._state.selectedRange.end = date;
-        } else {
-          // If clicked before start, treat as new start
-          this._state.selectedRange = { start: date, end: null };
-        }
-      } else {
-        // Reset range
-        this._state.selectedRange = { start: date, end: null };
-      }
-      // Update input value for range
-      if (this._input) {
-        let value = '';
-        const { start, end } = this._state.selectedRange;
-        if (start && end) {
-          if (this._config.format && typeof this._config.format === 'string') {
-            value = `${this._formatDate(start, this._config.format)} – ${this._formatDate(end, this._config.format)}`;
-          } else if (this._config.locale) {
-            value = `${start.toLocaleDateString(this._config.locale)} – ${end.toLocaleDateString(this._config.locale)}`;
-          } else {
-            value = `${start.toLocaleDateString()} – ${end.toLocaleDateString()}`;
-          }
-        } else if (start) {
-          if (this._config.format && typeof this._config.format === 'string') {
-            value = this._formatDate(start, this._config.format);
-          } else if (this._config.locale) {
-            value = start.toLocaleDateString(this._config.locale);
-          } else {
-            value = start.toLocaleDateString();
-          }
-        }
-        this._input.value = value;
-        console.log('🗓️ [KTDatepicker] Input value set to (range):', value);
-        const evt = new Event('change', { bubbles: true });
-        this._input.dispatchEvent(evt);
-      }
-      this._render();
+    if (this._config.multiDate) {
+      this._selectMultiDate(date);
       return;
     }
-    this._state.selectedDate = date;
-    this._state.currentDate = date;
-    // Update input value using locale if provided
-    if (this._input) {
-      let value = '';
-      if (this._config.format && typeof this._config.format === 'string') {
-        value = this._formatDate(date, this._config.format);
-      } else if (this._config.locale) {
-        value = date.toLocaleDateString(this._config.locale);
-      } else {
-        value = date.toLocaleDateString();
-      }
-      this._input.value = value;
-      console.log('🗓️ [KTDatepicker] Input value set to:', value);
-      const evt = new Event('change', { bubbles: true });
-      this._input.dispatchEvent(evt);
+    if (this._config.range) {
+      this._selectRangeDate(date);
+      return;
     }
-    this._render();
+    this._selectSingleDate(date);
   }
 
   private _formatDate(date: Date, format: string): string {
@@ -456,7 +578,7 @@ export class KTDatepicker extends KTComponent {
       this._container.parentNode.removeChild(this._container);
     }
     if (this._input) {
-      this._input.removeEventListener('focus', () => this.open());
+      this._input.removeEventListener('focus', this._onInputFocus);
     }
     (this._element as any).instance = null;
   }

@@ -16,7 +16,6 @@ export const defaultDatepickerConfig: KTDatepickerConfig = {
   value: undefined,
   valueRange: undefined,
   values: undefined,
-  className: '',
   showOnFocus: true,
   closeOnSelect: true,
 };

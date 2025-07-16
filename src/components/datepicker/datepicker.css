@@ -1,38 +1,41 @@
+@layer components {
 /*
- * datepicker.css - Minimal utility styles for KTDatepicker (revamp)
+ * datepicker.css - Tailwind-based utility styles for KTDatepicker (revamp)
  * Use with Tailwind or extend as needed.
+ *
+ * All styles use @apply for Tailwind utilities. For open/hidden states, use Tailwind's 'block' and 'hidden' classes directly in markup or JS.
  */
 
+/**
+ * Root container for the datepicker popup
+ */
 [data-kt-datepicker-root] {
-  position: relative;
-  display: inline-block;
+  @apply relative inline-block;
 }
 
+/**
+ * Header section (month/year, navigation)
+ */
 [data-kt-datepicker-header] {
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  @apply font-semibold px-4 py-2 bg-gray-50 border-b border-gray-200;
 }
 
+/**
+ * Calendar grid container
+ */
 [data-kt-datepicker-calendar] {
-  padding: 1rem;
-  background: #fff;
+  @apply p-4 bg-white;
 }
 
+/**
+ * Footer section (actions, buttons)
+ */
 [data-kt-datepicker-footer] {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  @apply flex justify-end gap-2 px-4 py-2 bg-gray-50 border-t border-gray-200;
 }
 
-.open {
-  display: block;
-}
-
-.hidden {
-  display: none;
+/*
+ * For open/hidden states, use Tailwind's 'block' and 'hidden' classes directly in your markup or JS.
+ * Example: <div class="block"> ... </div> or <div class="hidden"> ... </div>
+ */
 }

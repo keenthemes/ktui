@@ -1,0 +1,25 @@
+<!--
+Example: KTDatepicker multi-date mode, calendar closes only on Apply
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datepicker Multi-Date Apply</title>
+  <link rel="stylesheet" href="../../dist/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+    <form class="flex flex-col gap-6">
+      <div>
+        <label class="block mb-2 font-medium text-gray-700" for="datepicker-multidate-apply">Multi-Date (Apply to close)</label>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-multidate="true">
+          <input id="datepicker-multidate-apply" placeholder="Select dates" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <script src="../../dist/ktui.js"></script>
+</body>
+</html>

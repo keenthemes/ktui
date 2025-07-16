@@ -82,4 +82,113 @@ describe('KTDatepicker', () => {
     expect(btn.hasAttribute('disabled')).toBe(true);
     expect(td.getAttribute('data-out-of-range')).toBe('true');
   });
+
+  it('should initialize with a date range when range and valueRange are set', () => {
+    const container = document.createElement('div');
+    container.setAttribute('data-kt-datepicker', 'true');
+    document.body.appendChild(container);
+    const dp = new KTDatepicker(container, {
+      range: true,
+      valueRange: { start: '2024-01-01', end: '2024-01-10' },
+      format: 'yyyy-mm-dd',
+    });
+    const state = (dp as any)._state;
+    expect(state.selectedRange.start).toEqual(new Date('2024-01-01'));
+    expect(state.selectedRange.end).toEqual(new Date('2024-01-10'));
+    expect((dp as any)._input.value).toBe('2024-01-01 – 2024-01-10');
+  });
+
+  it('should initialize with multiple dates when multiDate and values are set', () => {
+    const container = document.createElement('div');
+    container.setAttribute('data-kt-datepicker', 'true');
+    document.body.appendChild(container);
+    const dp = new KTDatepicker(container, {
+      multiDate: true,
+      values: ['2024-01-01', '2024-01-10'],
+      format: 'yyyy-mm-dd',
+    });
+    const state = (dp as any)._state;
+    expect(state.selectedDates.length).toBe(2);
+    expect(state.selectedDates[0]).toEqual(new Date('2024-01-01'));
+    expect(state.selectedDates[1]).toEqual(new Date('2024-01-10'));
+    expect((dp as any)._input.value).toBe('2024-01-01, 2024-01-10');
+  });
+
+  it('should add and remove dates in multi-date mode', () => {
+    const container = document.createElement('div');
+    container.setAttribute('data-kt-datepicker', 'true');
+    document.body.appendChild(container);
+    const dp = new KTDatepicker(container, {
+      multiDate: true,
+      format: 'yyyy-mm-dd',
+    });
+    (dp as any).setDate(new Date('2024-01-01'));
+    (dp as any).setDate(new Date('2024-01-10'));
+    let state = (dp as any)._state;
+    expect(state.selectedDates.length).toBe(2);
+    expect((dp as any)._input.value).toBe('2024-01-01, 2024-01-10');
+    // Deselect one date
+    (dp as any).setDate(new Date('2024-01-01'));
+    state = (dp as any)._state;
+    expect(state.selectedDates.length).toBe(1);
+    expect((dp as any)._input.value).toBe('2024-01-10');
+  });
+});
+
+describe('showOnFocus and closeOnSelect behaviors', () => {
+  let container: HTMLElement;
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    container = document.createElement('div');
+    container.setAttribute('data-kt-datepicker', 'true');
+    document.body.appendChild(container);
+  });
+
+  it('should open calendar on input focus if showOnFocus is true', () => {
+    const dp = new KTDatepicker(container, { showOnFocus: true });
+    const input = (dp as any)._input;
+    input.dispatchEvent(new FocusEvent('focus'));
+    expect((dp as any)._isOpen).toBe(true);
+  });
+
+  it('should NOT open calendar on input focus if showOnFocus is false', () => {
+    const dp = new KTDatepicker(container, { showOnFocus: false });
+    const input = (dp as any)._input;
+    input.dispatchEvent(new FocusEvent('focus'));
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('should close calendar after selection if closeOnSelect is true (single-date)', () => {
+    const dp = new KTDatepicker(container, { closeOnSelect: true });
+    (dp as any).open();
+    (dp as any).setDate(new Date('2024-01-01'));
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('should keep calendar open after selection if closeOnSelect is false (single-date)', () => {
+    const dp = new KTDatepicker(container, { closeOnSelect: false });
+    (dp as any).open();
+    (dp as any).setDate(new Date('2024-01-01'));
+    expect((dp as any)._isOpen).toBe(true);
+  });
+
+  it('should close calendar only on Apply in multi-date mode (closeOnSelect true)', () => {
+    const dp = new KTDatepicker(container, { multiDate: true, closeOnSelect: true });
+    (dp as any).open();
+    // Simulate Apply button click
+    const footer = document.createElement('div');
+    const applyBtn = document.createElement('button');
+    applyBtn.setAttribute('data-kt-datepicker-apply', '');
+    footer.appendChild(applyBtn);
+    document.body.appendChild(footer);
+    (dp as any)._onApplyMultiDate({} as Event);
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('should keep calendar open after Apply in multi-date mode if closeOnSelect is false', () => {
+    const dp = new KTDatepicker(container, { multiDate: true, closeOnSelect: false });
+    (dp as any).open();
+    (dp as any)._onApplyMultiDate({} as Event);
+    expect((dp as any)._isOpen).toBe(true);
+  });
 });
