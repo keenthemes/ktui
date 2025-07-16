@@ -57,7 +57,8 @@
 	"module": "lib/esm/index.js",
 	"license": "MIT",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"build": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
 		"build:webpack": "webpack --mode=development",
 		"build:webpack:watch": "webpack --mode=development --watch",
