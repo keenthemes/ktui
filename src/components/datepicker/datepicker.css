@@ -3,24 +3,24 @@
  * Use with Tailwind or extend as needed.
  */
 
-.kt-datepicker-root {
+[data-kt-datepicker-root] {
   position: relative;
   display: inline-block;
 }
 
-.kt-datepicker-header {
+[data-kt-datepicker-header] {
   font-weight: 600;
   padding: 0.5rem 1rem;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
 }
 
-.kt-datepicker-calendar {
+[data-kt-datepicker-calendar] {
   padding: 1rem;
   background: #fff;
 }
 
-.kt-datepicker-footer {
+[data-kt-datepicker-footer] {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
@@ -29,10 +29,10 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.kt-datepicker-root .open {
+.open {
   display: block;
 }
 
-.kt-datepicker-root .hidden {
+.hidden {
   display: none;
 }

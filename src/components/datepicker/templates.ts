@@ -8,23 +8,30 @@ import { mergeTemplates } from './template-utils';
 
 // Default template strings for all UI fragments
 export const defaultTemplates: KTDatepickerTemplateStrings = {
-  container: `<div class="kt-datepicker-container"></div>`,
-  header: `<div class="kt-datepicker-header">{{month}} {{year}}</div>`,
-  footer: `<div class="kt-datepicker-footer">{{todayButton}} {{clearButton}} {{applyButton}}</div>`,
-  calendarGrid: `<table class="kt-datepicker-calendar-grid">{{calendar}}</table>`,
-  dayCell: `<td class="kt-datepicker-day {{classes}}">{{day}}</td>`,
-  monthYearSelect: `<div class="kt-datepicker-monthyear-select">{{monthSelect}} {{yearSelect}}</div>`,
-  monthSelection: `<div class="kt-datepicker-month-selection">{{months}}</div>`,
-  yearSelection: `<div class="kt-datepicker-year-selection">{{years}}</div>`,
-  inputWrapper: `<div class="kt-datepicker-input-wrapper">{{input}} {{icon}}</div>`,
-  segmentedDateInput: `<div class="kt-datepicker-segmented-input">{{segments}}</div>`,
-  segmentedDateRangeInput: `<div class="kt-datepicker-segmented-range-input">{{start}} {{separator}} {{end}}</div>`,
-  placeholder: `<span class="kt-datepicker-placeholder">{{placeholder}}</span>`,
-  displayWrapper: `<div class="kt-datepicker-display-wrapper">{{value}}</div>`,
-  displayElement: `<span class="kt-datepicker-display-element">{{value}}</span>`,
-  timePanel: `<div class="kt-datepicker-time-panel">{{hours}}:{{minutes}}:{{seconds}} {{amPm}}</div>`,
-  multiDateTag: `<span class="kt-datepicker-multidate-tag">{{date}} <button>{{removeButton}}</button></span>`,
-  emptyState: `<div class="kt-datepicker-empty">{{message}}</div>`,
+  container: `<div data-kt-datepicker-container></div>`,
+  header: `<div data-kt-datepicker-header>{{month}} {{year}}</div>`,
+  footer: `<div data-kt-datepicker-footer>{{todayButton}} {{clearButton}} {{applyButton}}</div>`,
+  calendarGrid: `<table data-kt-datepicker-calendar-grid>{{calendar}}</table>`,
+  dayCell: `<td data-kt-datepicker-day {{attributes}}>{{day}}</td>`,
+  monthYearSelect: `<div data-kt-datepicker-monthyear-select>{{monthSelect}} {{yearSelect}}</div>`,
+  monthSelection: `<div data-kt-datepicker-month-selection>{{months}}</div>`,
+  yearSelection: `<div data-kt-datepicker-year-selection>{{years}}</div>`,
+  inputWrapper: `<div data-kt-datepicker-input-wrapper>{{input}} {{icon}}</div>`,
+  segmentedDateInput: `<div data-kt-datepicker-segmented-input>{{segments}}</div>`,
+  segmentedDateRangeInput: `<div data-kt-datepicker-segmented-range-input>{{start}} {{separator}} {{end}}</div>`,
+  placeholder: `<span data-kt-datepicker-placeholder>{{placeholder}}</span>`,
+  displayWrapper: `<div data-kt-datepicker-display-wrapper>{{value}}</div>`,
+  displayElement: `<span data-kt-datepicker-display-element>{{value}}</span>`,
+  timePanel: `<div data-kt-datepicker-time-panel>{{hours}}:{{minutes}}:{{seconds}} {{amPm}}</div>`,
+  multiDateTag: `<span data-kt-datepicker-multidate-tag>{{date}} <button>{{removeButton}}</button></span>`,
+  emptyState: `<div data-kt-datepicker-empty>{{message}}</div>`,
+  calendarButton: `<button type="button" data-kt-datepicker-calendar-btn aria-label="Open calendar">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <path d="M16 2v4M8 2v4M3 10h18"/>
+    </svg>
+  </button>`,
+  dropdown: `<div data-kt-datepicker-dropdown></div>`,
 };
 
 /**

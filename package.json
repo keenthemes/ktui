@@ -59,7 +59,7 @@
 	"scripts": {
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"start": "npx serve ./examples -l 50505",
+		"start": "npx serve ./ -l 50505",
 		"build": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
 		"build:webpack": "webpack --mode=development",
 		"build:webpack:watch": "webpack --mode=development --watch",

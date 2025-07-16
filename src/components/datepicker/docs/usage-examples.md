@@ -83,6 +83,42 @@ This document provides a variety of usage examples for KTDatepicker, demonstrati
 
 ---
 
+## Segmented Input & Advanced Features Examples
+
+### 9. Segmented Input with Custom Segment Highlighting
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-config='{"segmentOverlay": "<span class=\"absolute inset-0 bg-yellow-200 opacity-40 pointer-events-none rounded\"></span>"}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+```
+
+---
+
+### 10. Segmented Input with Time Segments
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-enable-time="true" data-kt-datepicker-config='{"dateSegment": "<span class=\"segment {{isActive}}\">{{segmentValue}}</span>"}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+```
+
+---
+
+### 11. Segmented Input with Advanced Keyboard Navigation
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-config='{"dateSegment": "<span class=\"segment {{isActive}}\">{{segmentValue}}</span>"}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+<!--
+  Keyboard navigation:
+  - Arrow Left/Right: Move between segments
+  - Arrow Up/Down: Increment/decrement segment value
+  - Typing: Overwrite active segment, auto-advance
+  - Home/End: Jump to first/last segment
+-->
+```
+
+---
+
 ## References
 - See [selection-types.md](./selection-types.md) for feature details.
 - See [configuration.md](./configuration.md) for config options.

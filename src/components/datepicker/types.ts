@@ -21,7 +21,9 @@ export type KTDatepickerTemplateKey =
   | 'displayElement'
   | 'timePanel'
   | 'multiDateTag'
-  | 'emptyState';
+  | 'emptyState'
+  | 'calendarButton'
+  | 'dropdown';
 
 // Template string map
 export type KTDatepickerTemplateStrings = {

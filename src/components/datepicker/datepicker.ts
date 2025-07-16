@@ -6,9 +6,9 @@
 import KTComponent from '../component';
 import { KTDatepickerConfig, KTDatepickerState, KTDatepickerTemplateStrings } from './types';
 import { getTemplateStrings, defaultTemplates } from './templates';
-import { renderTemplateString, isTemplateFunction } from './template-utils';
-import { KTDatepickerDropdown } from './dropdown';
+import { renderTemplateString, isTemplateFunction, renderTemplateToDOM } from './template-utils';
 import { defaultDatepickerConfig } from './config';
+import { SegmentManager } from './segment-manager';
 
 /**
  * KTDatepicker - Template-driven, modular datepicker component
@@ -24,20 +24,24 @@ export class KTDatepicker extends KTComponent {
   private _container: HTMLElement;
   private _input: HTMLInputElement | null = null;
   private _isOpen: boolean = false;
-  private _dropdown: KTDatepickerDropdown | null = null;
+  private _segmentManager: SegmentManager | null = null;
 
   /**
    * Constructor: Initializes the datepicker component
    */
   constructor(element: HTMLElement, config?: KTDatepickerConfig) {
     super();
+    console.log('KTDatepicker initialized', element); // DEBUG
     this._init(element);
     this._buildConfig(config);
     this._templateSet = getTemplateStrings(this._config);
     this._state = this._getInitialState();
+    // Initialize SegmentManager with format and initial value
+    const format = (this._config.format && typeof this._config.format === 'string') ? this._config.format : 'MM/DD/YYYY';
+    const initialValue = this._input ? this._input.value : '';
+    this._segmentManager = new SegmentManager(format, initialValue);
     (element as any).instance = this;
     this._render();
-    this._attachEventListeners();
   }
 
   /**
@@ -101,7 +105,7 @@ export class KTDatepicker extends KTComponent {
     if (this._container && this._container.parentNode) {
       this._container.parentNode.removeChild(this._container);
     }
-    // Render main container
+    // Render main container from template
     const tpl = this._templateSet.container || defaultTemplates.container;
     let html: string;
     if (isTemplateFunction(tpl)) {
@@ -109,35 +113,81 @@ export class KTDatepicker extends KTComponent {
     } else {
       html = tpl as string;
     }
-    this._container = document.createElement('div');
-    this._container.innerHTML = html;
-    this._container.classList.add('kt-datepicker-root');
-    // Find or create input
-    this._input = this._element.querySelector('input[data-kt-datepicker-input]') as HTMLInputElement;
-    if (!this._input) {
-      this._input = document.createElement('input');
-      this._input.type = 'text';
-      this._input.setAttribute('data-kt-datepicker-input', '');
-      this._element.appendChild(this._input);
+    // Use template utility to create DOM
+    const containerFrag = renderTemplateToDOM(html);
+    // Find the root container element
+    const containerEl = (containerFrag.firstElementChild || containerFrag.firstChild) as HTMLElement;
+    this._container = containerEl;
+    // Remove any previous input wrapper
+    const existingWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]');
+    if (existingWrapper && existingWrapper.parentNode) {
+      existingWrapper.parentNode.removeChild(existingWrapper);
     }
-    // Insert container after input
-    this._input.after(this._container);
-    // Create dropdown element for calendar UI
-    let dropdownEl = this._container.querySelector('.kt-datepicker-dropdown') as HTMLElement;
-    if (!dropdownEl) {
-      dropdownEl = document.createElement('div');
-      dropdownEl.className = 'kt-datepicker-dropdown hidden';
-      this._container.appendChild(dropdownEl);
+    // Render input wrapper and calendar button from template
+    const inputWrapperTpl = this._templateSet.inputWrapper || defaultTemplates.inputWrapper;
+    let inputWrapperHtml: string;
+    if (typeof inputWrapperTpl === 'function') {
+      inputWrapperHtml = inputWrapperTpl({ input: this._input ? this._input.outerHTML : '', icon: '' });
     } else {
-      dropdownEl.innerHTML = '';
+      inputWrapperHtml = inputWrapperTpl;
     }
-    // Render header, calendar, footer inside dropdown
+    const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
+    const inputWrapperEl = inputWrapperFrag.firstElementChild as HTMLElement;
+    // Move or create input (do not create input in code, just move existing)
+    if (this._input && inputWrapperEl) {
+      const inputEl = inputWrapperEl.querySelector('input[data-kt-datepicker-input]');
+      if (inputEl && this._input !== inputEl) {
+        inputEl.replaceWith(this._input);
+      } else if (!inputEl) {
+        inputWrapperEl.appendChild(this._input);
+      }
+    }
+    // Attach calendar button event listener
+    const buttonEl = inputWrapperEl.querySelector('button[data-kt-datepicker-calendar-btn]');
+    if (buttonEl && buttonEl instanceof HTMLButtonElement) {
+      buttonEl.type = 'button';
+      buttonEl.tabIndex = 0;
+      buttonEl.setAttribute('aria-label', this._config.calendarButtonAriaLabel || 'Open calendar');
+      buttonEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggle();
+      });
+    }
+    // Insert wrapper at the start of the element
+    this._element.insertBefore(inputWrapperEl, this._element.firstChild);
+    // --- Dropdown rendering and attachment ---
+    // Remove any previous dropdown
+    const existingDropdown = this._element.querySelector('[data-kt-datepicker-dropdown]');
+    if (existingDropdown && existingDropdown.parentNode) {
+      existingDropdown.parentNode.removeChild(existingDropdown);
+    }
+    // Render dropdown from template
+    let dropdownHtml: string;
+    // There is no 'dropdown' key in the template set, so use a local default
+    const defaultDropdownTpl = '<div data-kt-datepicker-dropdown></div>';
+    // If a user adds a dropdown template in the future, support it as a string or function
+    const dropdownTpl = (this._templateSet as any).dropdown || defaultDropdownTpl;
+    if (typeof dropdownTpl === 'function') {
+      dropdownHtml = dropdownTpl({});
+    } else {
+      dropdownHtml = dropdownTpl;
+    }
+    const dropdownFrag = renderTemplateToDOM(dropdownHtml);
+    const dropdownEl = dropdownFrag.firstElementChild as HTMLElement;
+    dropdownEl.setAttribute('data-kt-datepicker-dropdown', '');
+    if (!this._isOpen) {
+      dropdownEl.classList.add('hidden');
+    }
+    // Render header, calendar, footer into dropdown
     this._renderHeaderTo(dropdownEl);
     this._renderCalendarTo(dropdownEl);
     this._renderFooterTo(dropdownEl);
-    // Setup dropdown logic
-    if (!this._dropdown) {
-      this._dropdown = new KTDatepickerDropdown(this._container, this._input, dropdownEl, this._config);
+    // Attach dropdown after the input wrapper
+    if (inputWrapperEl.nextSibling) {
+      this._element.insertBefore(dropdownEl, inputWrapperEl.nextSibling);
+    } else {
+      this._element.appendChild(dropdownEl);
     }
   }
 
@@ -146,19 +196,18 @@ export class KTDatepicker extends KTComponent {
     const data = {
       month: this._state.currentDate.toLocaleString('default', { month: 'long' }),
       year: this._state.currentDate.getFullYear(),
-      prevButton: '<button type="button" class="kt-datepicker-prev">&lt;</button>',
-      nextButton: '<button type="button" class="kt-datepicker-next">&gt;</button>',
+      prevButton: '<button type="button" data-kt-datepicker-prev>&lt;</button>',
+      nextButton: '<button type="button" data-kt-datepicker-next>&gt;</button>',
     };
     const headerHtml = isTemplateFunction(tpl)
       ? tpl(data)
       : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.header === 'string' ? defaultTemplates.header : ''), data);
-    const header = document.createElement('div');
-    header.innerHTML = headerHtml;
-    header.classList.add('kt-datepicker-header');
+    const headerFrag = renderTemplateToDOM(headerHtml);
+    const header = headerFrag.firstElementChild as HTMLElement;
     target.appendChild(header);
     // Add navigation event listeners
-    const prevBtn = header.querySelector('.kt-datepicker-prev');
-    const nextBtn = header.querySelector('.kt-datepicker-next');
+    const prevBtn = header.querySelector('[data-kt-datepicker-prev]');
+    const nextBtn = header.querySelector('[data-kt-datepicker-next]');
     if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); this._changeMonth(-1); });
     if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); this._changeMonth(1); });
   }
@@ -180,13 +229,12 @@ export class KTDatepicker extends KTComponent {
       }).join('');
       rows.push(`<tr>${tds}</tr>`);
     }
-    const calendarHtml = `<table class="kt-datepicker-calendar-table"><tbody>${rows.join('')}</tbody></table>`;
-    const calendar = document.createElement('div');
-    calendar.innerHTML = calendarHtml;
-    calendar.classList.add('kt-datepicker-calendar');
+    const calendarHtml = `<table data-kt-datepicker-calendar-table><tbody>${rows.join('')}</tbody></table>`;
+    const calendarFrag = renderTemplateToDOM(calendarHtml);
+    const calendar = calendarFrag.firstElementChild as HTMLElement;
     target.appendChild(calendar);
     // Add day cell click listeners
-    calendar.querySelectorAll('td').forEach((td, i) => {
+    calendar.querySelectorAll('td[data-kt-datepicker-day]').forEach((td, i) => {
       td.addEventListener('click', (e) => {
         e.stopPropagation();
         const day = days[i];
@@ -235,36 +283,9 @@ export class KTDatepicker extends KTComponent {
     const footerHtml = isTemplateFunction(tpl)
       ? tpl(data)
       : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.footer === 'string' ? defaultTemplates.footer : ''), data);
-    const footer = document.createElement('div');
-    footer.innerHTML = footerHtml;
-    footer.classList.add('kt-datepicker-footer');
+    const footerFrag = renderTemplateToDOM(footerHtml);
+    const footer = footerFrag.firstElementChild as HTMLElement;
     target.appendChild(footer);
-  }
-
-  /**
-   * Attach event listeners (MVP: open/close, input focus, etc.)
-   */
-  private _attachEventListeners() {
-    if (this._input) {
-      this._input.addEventListener('focus', () => this.open());
-    }
-    // Remove mousedown prevention (handled by dropdown)
-  }
-
-  /**
-   * Open the datepicker
-   */
-  public open() {
-    this._isOpen = true;
-    if (this._dropdown) this._dropdown.open();
-  }
-
-  /**
-   * Close the datepicker
-   */
-  public close() {
-    this._isOpen = false;
-    if (this._dropdown) this._dropdown.close();
   }
 
   /**
@@ -273,18 +294,22 @@ export class KTDatepicker extends KTComponent {
   public setDate(date: Date) {
     this._state.selectedDate = date;
     this._state.currentDate = date;
-    // Update input value
+    // Update input value using SegmentManager if available
     if (this._input) {
-      // Use config.format or fallback to yyyy-mm-dd
       let value = '';
       if (this._config.format && typeof this._config.format === 'string') {
-        // Simple format support: yyyy-mm-dd, dd/mm/yyyy, etc.
-        value = this._formatDate(date, this._config.format);
+        // Use SegmentManager to format value
+        if (this._segmentManager) {
+          // Optionally: update segments from date
+          // (not implemented in this MVP step)
+          value = this._segmentManager.formatValue();
+        } else {
+          value = this._formatDate(date, this._config.format);
+        }
       } else {
         value = date.toLocaleDateString();
       }
       this._input.value = value;
-      // Fire change event
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
@@ -324,6 +349,33 @@ export class KTDatepicker extends KTComponent {
       this._input.removeEventListener('focus', () => this.open());
     }
     (this._element as any).instance = null;
+  }
+
+  private _updateInputValue() {
+    if (this._input && this._segmentManager) {
+      this._input.value = this._segmentManager.formatValue();
+    }
+  }
+
+  // Ensure open() and close() methods are present and correct
+  public open() {
+    if (this._isOpen) return;
+    this._isOpen = true;
+    this._render();
+  }
+
+  public close() {
+    if (!this._isOpen) return;
+    this._isOpen = false;
+    this._render();
+  }
+
+  public toggle() {
+    if (this._isOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
   }
 }
 

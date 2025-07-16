@@ -13,17 +13,21 @@
 		<form class="flex flex-col gap-6">
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="datepicker-disabled">Disable Datepicker</label>
-				<input
-					id="datepicker-disabled"
-					class="kt-datepicker"
-					data-kt-datepicker="true"
-					disabled
-					placeholder="Datepicker disabled..."
-				/>
-			</div>
+				<!--
+  Correct usage: The datepicker must be initialized on a container element (e.g., <div data-kt-datepicker="true">),
+  with the <input> as a child. Do NOT put data-kt-datepicker on the input itself.
+  For advanced config, see configuration.md.
+-->
+<div class="kt-datepicker" data-kt-datepicker="true">
+  <input
+    id="datepicker-disabled"
+    disabled
+    placeholder="Datepicker disabled..."
+  />
+</div>
+<script src="../../dist/ktui.js"></script>
 		</form>
 	</div>
-	<script src="../../dist/ktui.js"></script>
 </body>
 
 </html>
