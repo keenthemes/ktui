@@ -1,5 +1,5 @@
 <!--
-To view this example, start your dev server and open http://localhost:50505/examples/datepicker/disable-datepicker.html
+To view this example, start your dev server and open http://localhost:50505/examples/datepicker/range-datepicker.html
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -7,7 +7,7 @@ To view this example, start your dev server and open http://localhost:50505/exam
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Datepicker Disabled State</title>
+	<title>Datepicker Range Selection</title>
 	<link rel="stylesheet" href="../../dist/styles.css">
 </head>
 
@@ -15,9 +15,9 @@ To view this example, start your dev server and open http://localhost:50505/exam
 	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
 		<form class="flex flex-col gap-6">
 			<div>
-				<label class="block mb-2 font-medium text-gray-700" for="datepicker-disabled">Disabled State</label>
-				<div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"disabled":true}'>
-					<input id="datepicker-disabled" placeholder="Datepicker is disabled" />
+				<label class="block mb-2 font-medium text-gray-700" for="datepicker-range">Range Selection</label>
+				<div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"range":true}'>
+					<input id="datepicker-range" placeholder="Select a date range" />
 				</div>
 			</div>
 			<script src="../../dist/ktui.js"></script>

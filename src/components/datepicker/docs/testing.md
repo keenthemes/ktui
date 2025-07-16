@@ -3,6 +3,14 @@
 ## Overview
 Automated tests are required to ensure the reliability and maintainability of KTDatepicker. This document outlines the required test coverage, structure, and example scenarios.
 
+## Modular Testing Approach (2025+)
+- The KTDatepicker codebase is now highly modular, with each major UI fragment and state update handled by a dedicated private method.
+- **Best Practice:** Write unit tests for each modular method (e.g., `_renderContainer`, `_renderInputWrapper`, `_updatePlaceholder`, etc.) to ensure isolated, focused coverage.
+- Modularization enables:
+  - Easier mocking and setup for each test
+  - Clear separation of concerns in test files
+  - Faster identification of regressions and bugs
+
 ## 1. Test Coverage
 - **Core Features:**
   - Single date selection

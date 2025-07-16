@@ -19,7 +19,8 @@ export function renderCalendar(
   days: Date[],
   currentDate: Date,
   selectedDate: Date | null,
-  onDayClick: (date: Date) => void
+  onDayClick: (date: Date) => void,
+  selectedRange?: { start: Date | null; end: Date | null }
 ): HTMLElement {
   // Use template system for table, tbody, tr, td
   const tableTpl = defaultTemplates.calendarTable;
@@ -32,12 +33,17 @@ export function renderCalendar(
       const isCurrentMonth = day.getMonth() === currentDate.getMonth();
       const isToday = isSameDay(day, new Date());
       const isSelected = selectedDate && isSameDay(day, selectedDate);
+      let inRange = false;
+      if (selectedRange && selectedRange.start && selectedRange.end) {
+        inRange = day >= selectedRange.start && day <= selectedRange.end;
+      }
       const attributes = [
         isSelected ? 'class="active" aria-selected="true"' : '',
         isToday ? 'data-today="true"' : '',
         isCurrentMonth ? '' : 'data-outside="true"',
+        inRange ? 'data-in-range="true"' : '',
       ].filter(Boolean).join(' ');
-      const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, attributes };
+      const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, inRange, attributes };
       return isTemplateFunction(tpl)
         ? tpl(data)
         : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.dayCell === 'string' ? defaultTemplates.dayCell : ''), data);

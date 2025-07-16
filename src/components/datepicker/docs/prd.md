@@ -3,6 +3,25 @@
 ## Overview
 KTDatepicker is a customizable, framework-agnostic date and time selection component written in TypeScript. It enhances standard HTML form inputs with a rich calendar interface, supporting single date, date range, multi-date, and time selection. The MVP now features a HeroUI-style segmented input field with advanced keyboard navigation, real-time validation, and a fully extensible template/config system. The focus is on accessibility, internationalization, and ease of integration.
 
+## Modular Code Structure (2025+)
+KTDatepicker is architected with a strict modular approach:
+- All major UI fragments and state updates are handled by dedicated, single-responsibility private methods in the main class (see `datepicker.ts`).
+- Example modular methods:
+  - `_renderContainer()`: Renders the main container
+  - `_renderInputWrapper()`: Renders the input wrapper and calendar button
+  - `_bindCalendarButtonEvent()`: Binds event to the calendar button
+  - `_renderDropdown()`: Renders the dropdown container
+  - `_renderDropdownContent()`: Renders header, calendar, and footer into the dropdown
+  - `_attachDropdown()`: Attaches the dropdown to the DOM
+  - `_updatePlaceholder()`: Updates the input placeholder
+  - `_updateDisabledState()`: Updates the disabled state of input and button
+  - `_enforceMinMaxDates()`: Disables day buttons outside min/max range
+- This modular structure ensures:
+  - High maintainability and readability
+  - Easy extensibility for new features
+  - Improved testability and isolation of logic
+  - Clean separation of concerns, following best practices
+
 ## MVP Focus
 - HeroUI-style segmented input for date (and time) with segment navigation and editing
 - Core features for date and time selection

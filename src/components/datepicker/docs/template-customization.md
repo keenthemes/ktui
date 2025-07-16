@@ -3,6 +3,8 @@
 ## Overview
 KTDatepicker is now a fully modular, template-driven component. All UI fragments are customizable via config or `data-kt-datepicker-config` attributes. The system is inspired by the select component’s template merging logic for consistency and flexibility.
 
+> **Modular Rendering:** Each template key is rendered by a dedicated, single-responsibility private method in the main class (see `datepicker.ts`). This ensures maintainability, testability, and a clean separation of concerns.
+
 > **Note:** All internal templates must use `data-kt-datepicker-*` attributes for targeting and styling. Do not use custom classes (e.g., `kt-datepicker-*`) for internal logic or styling. Only general classes (`active`, `disabled`, `focus`) are allowed for state.
 >
 > **Architectural Rule:** If a UI fragment is rendered and there is no template key for it, a new key must be added to `templates.ts` and documented here. The template system must always be the single source of truth for all UI markup.

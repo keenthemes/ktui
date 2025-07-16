@@ -1,6 +1,20 @@
 /*
  * datepicker.ts - Main entry point for KTDatepicker (revamp)
  * Follows KTSelect pattern: extends KTComponent, uses template system, modular, extensible.
+ *
+ * Modular Structure (2025+):
+ * - All major UI fragments and state updates are handled by dedicated private methods:
+ *   - _renderContainer(): Renders the main container
+ *   - _renderInputWrapper(): Renders the input wrapper and calendar button
+ *   - _bindCalendarButtonEvent(): Binds event to the calendar button
+ *   - _renderDropdown(): Renders the dropdown container
+ *   - _renderDropdownContent(): Renders header, calendar, and footer into the dropdown
+ *   - _attachDropdown(): Attaches the dropdown to the DOM
+ *   - _updatePlaceholder(): Updates the input placeholder
+ *   - _updateDisabledState(): Updates the disabled state of input and button
+ *   - _enforceMinMaxDates(): Disables day buttons outside min/max range
+ *
+ * This modular approach improves maintainability, readability, and testability.
  */
 
 import KTComponent from '../component';
@@ -42,6 +56,16 @@ export class KTDatepicker extends KTComponent {
     this._buildConfig(config);
     this._templateSet = getTemplateStrings(this._config);
     this._state = getInitialState();
+    // Set placeholder from config if available
+    if (this._input && this._config.placeholder) {
+      this._input.setAttribute('placeholder', this._config.placeholder);
+      console.log('🗓️ [KTDatepicker] Placeholder set to:', this._config.placeholder);
+    }
+    // Set disabled state from config if available
+    if (this._input && this._config.disabled) {
+      this._input.setAttribute('disabled', 'true');
+      console.log('🗓️ [KTDatepicker] Input disabled from config');
+    }
     // Initialize SegmentManager with format and initial value
     const format = (this._config.format && typeof this._config.format === 'string') ? this._config.format : 'MM/DD/YYYY';
     const initialValue = this._input ? this._input.value : '';
@@ -61,6 +85,13 @@ export class KTDatepicker extends KTComponent {
         firstInput.setAttribute('data-kt-datepicker-input', '');
         this._input = firstInput;
         console.log('🗓️ [KTDatepicker] Auto-added data-kt-datepicker-input to input:', this._input);
+      } else {
+        // If no input exists, create one and append
+        const newInput = document.createElement('input');
+        newInput.setAttribute('data-kt-datepicker-input', '');
+        this._element.appendChild(newInput);
+        this._input = newInput;
+        console.log('🗓️ [KTDatepicker] Created and appended new input:', this._input);
       }
     }
   }
@@ -91,14 +122,9 @@ export class KTDatepicker extends KTComponent {
   }
 
   /**
-   * Render the datepicker UI using templates
+   * Render the main container and set this._container
    */
-  private _render() {
-    // Remove any previous container
-    if (this._container && this._container.parentNode) {
-      this._container.parentNode.removeChild(this._container);
-    }
-    // Render main container from template
+  private _renderContainer(): HTMLElement {
     const tpl = this._templateSet.container || defaultTemplates.container;
     let html: string;
     if (isTemplateFunction(tpl)) {
@@ -106,25 +132,16 @@ export class KTDatepicker extends KTComponent {
     } else {
       html = tpl as string;
     }
-    // Use template utility to create DOM
     const containerFrag = renderTemplateToDOM(html);
-    // Find the root container element
     const containerEl = (containerFrag.firstElementChild || containerFrag.firstChild) as HTMLElement;
     this._container = containerEl;
-    // Remove any previous input wrapper
-    const existingWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]');
-    if (existingWrapper && existingWrapper.parentNode) {
-      existingWrapper.parentNode.removeChild(existingWrapper);
-    }
-    // Render calendar button from template
-    const calendarButtonTpl = this._templateSet.calendarButton || defaultTemplates.calendarButton;
-    let calendarButtonHtml: string;
-    if (typeof calendarButtonTpl === 'function') {
-      calendarButtonHtml = calendarButtonTpl({ ariaLabel: this._config.calendarButtonAriaLabel || 'Open calendar' });
-    } else {
-      calendarButtonHtml = calendarButtonTpl.replace(/{{ariaLabel}}/g, this._config.calendarButtonAriaLabel || 'Open calendar');
-    }
-    // Render input wrapper and calendar button from template
+    return containerEl;
+  }
+
+  /**
+   * Render the input wrapper and calendar button, move/create input element
+   */
+  private _renderInputWrapper(calendarButtonHtml: string): HTMLElement {
     const inputWrapperTpl = this._templateSet.inputWrapper || defaultTemplates.inputWrapper;
     let inputWrapperHtml: string;
     if (typeof inputWrapperTpl === 'function') {
@@ -143,7 +160,13 @@ export class KTDatepicker extends KTComponent {
         inputWrapperEl.appendChild(this._input);
       }
     }
-    // Attach calendar button event listener
+    return inputWrapperEl;
+  }
+
+  /**
+   * Bind event listener to the calendar button in the input wrapper
+   */
+  private _bindCalendarButtonEvent(inputWrapperEl: HTMLElement) {
     const buttonEl = inputWrapperEl.querySelector('button[data-kt-datepicker-calendar-btn]');
     if (buttonEl && buttonEl instanceof HTMLButtonElement) {
       buttonEl.type = 'button';
@@ -155,20 +178,14 @@ export class KTDatepicker extends KTComponent {
         this.toggle();
       });
     }
-    // Insert wrapper at the start of the element
-    this._element.insertBefore(inputWrapperEl, this._element.firstChild);
-    // --- Dropdown rendering and attachment ---
-    // Remove any previous dropdown
-    const existingDropdown = this._element.querySelector('[data-kt-datepicker-dropdown]');
-    if (existingDropdown && existingDropdown.parentNode) {
-      existingDropdown.parentNode.removeChild(existingDropdown);
-    }
-    // Render dropdown from template
+  }
+
+  /**
+   * Render the dropdown container from template
+   */
+  private _renderDropdown(): HTMLElement {
+    const dropdownTpl = this._templateSet.dropdown || defaultTemplates.dropdown;
     let dropdownHtml: string;
-    // There is no 'dropdown' key in the template set, so use a local default
-    const defaultDropdownTpl = '<div data-kt-datepicker-dropdown></div>';
-    // If a user adds a dropdown template in the future, support it as a string or function
-    const dropdownTpl = (this._templateSet as any).dropdown || defaultDropdownTpl;
     if (typeof dropdownTpl === 'function') {
       dropdownHtml = dropdownTpl({});
     } else {
@@ -180,7 +197,13 @@ export class KTDatepicker extends KTComponent {
     if (!this._isOpen) {
       dropdownEl.classList.add('hidden');
     }
-    // Render header, calendar, footer into dropdown
+    return dropdownEl;
+  }
+
+  /**
+   * Render header, calendar, and footer into the dropdown element
+   */
+  private _renderDropdownContent(dropdownEl: HTMLElement) {
     // Use template-driven navigation buttons
     let prevButtonHtml: string;
     let nextButtonHtml: string;
@@ -199,7 +222,7 @@ export class KTDatepicker extends KTComponent {
     const header = renderHeader(
       this._templateSet.header,
       {
-        month: this._state.currentDate.toLocaleString('default', { month: 'long' }),
+        month: this._state.currentDate.toLocaleString(this._config.locale, { month: 'long' }),
         year: this._state.currentDate.getFullYear(),
         prevButton: prevButtonHtml,
         nextButton: nextButtonHtml,
@@ -214,7 +237,8 @@ export class KTDatepicker extends KTComponent {
       this._getCalendarDays(this._state.currentDate),
       this._state.currentDate,
       this._state.selectedDate,
-      (day) => { this.setDate(day); this.close(); }
+      (day) => { this.setDate(day); this.close(); },
+      this._config.range ? this._state.selectedRange : undefined
     );
     dropdownEl.appendChild(calendar);
 
@@ -234,14 +258,63 @@ export class KTDatepicker extends KTComponent {
       // Callbacks for today, clear, apply can be added here if needed
     );
     dropdownEl.appendChild(footer);
-    // Attach dropdown after the input wrapper
+  }
+
+  /**
+   * Render the datepicker UI using templates
+   */
+  private _render() {
+    // Remove any previous container
+    if (this._container && this._container.parentNode) {
+      this._container.parentNode.removeChild(this._container);
+    }
+    // Render main container from template
+    const containerEl = this._renderContainer();
+    // Remove any previous input wrapper
+    const existingWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]');
+    if (existingWrapper && existingWrapper.parentNode) {
+      existingWrapper.parentNode.removeChild(existingWrapper);
+    }
+    // Render calendar button from template
+    const calendarButtonTpl = this._templateSet.calendarButton || defaultTemplates.calendarButton;
+    let calendarButtonHtml: string;
+    if (typeof calendarButtonTpl === 'function') {
+      calendarButtonHtml = calendarButtonTpl({ ariaLabel: this._config.calendarButtonAriaLabel || 'Open calendar' });
+    } else {
+      calendarButtonHtml = calendarButtonTpl.replace(/{{ariaLabel}}/g, this._config.calendarButtonAriaLabel || 'Open calendar');
+    }
+    // Render input wrapper and calendar button from template
+    const inputWrapperEl = this._renderInputWrapper(calendarButtonHtml);
+    // Attach calendar button event listener
+    this._bindCalendarButtonEvent(inputWrapperEl);
+    // Insert wrapper at the start of the element
+    this._element.insertBefore(inputWrapperEl, this._element.firstChild);
+    // --- Dropdown rendering and attachment ---
+    // Remove any previous dropdown
+    const existingDropdown = this._element.querySelector('[data-kt-datepicker-dropdown]');
+    if (existingDropdown && existingDropdown.parentNode) {
+      existingDropdown.parentNode.removeChild(existingDropdown);
+    }
+    // Render dropdown from template system (never inline)
+    const dropdownEl = this._renderDropdown();
+    this._renderDropdownContent(dropdownEl);
+    this._attachDropdown(inputWrapperEl, dropdownEl);
+    this._updatePlaceholder();
+    this._updateDisabledState();
+    this._enforceMinMaxDates();
+    console.log('🗓️ [KTDatepicker] _render: this._input:', this._input);
+    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._isOpen, 'selectedDate:', this._state.selectedDate);
+  }
+
+  /**
+   * Attach the dropdown after the input wrapper
+   */
+  private _attachDropdown(inputWrapperEl: HTMLElement, dropdownEl: HTMLElement) {
     if (inputWrapperEl.nextSibling) {
       this._element.insertBefore(dropdownEl, inputWrapperEl.nextSibling);
     } else {
       this._element.appendChild(dropdownEl);
     }
-    console.log('🗓️ [KTDatepicker] _render: this._input:', this._input);
-    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._isOpen, 'selectedDate:', this._state.selectedDate);
   }
 
   private _getCalendarDays(date: Date): Date[] {
@@ -280,13 +353,68 @@ export class KTDatepicker extends KTComponent {
    */
   public setDate(date: Date) {
     console.log('🗓️ [KTDatepicker] setDate called with:', date);
+    // Prevent selection if date is outside min/max
+    if (this._config.minDate && date < new Date(this._config.minDate)) {
+      console.log('🗓️ [KTDatepicker] setDate blocked: date is before minDate');
+      return;
+    }
+    if (this._config.maxDate && date > new Date(this._config.maxDate)) {
+      console.log('🗓️ [KTDatepicker] setDate blocked: date is after maxDate');
+      return;
+    }
+    if (this._config.range) {
+      // Range selection logic
+      if (!this._state.selectedRange || (!this._state.selectedRange.start && !this._state.selectedRange.end)) {
+        this._state.selectedRange = { start: date, end: null };
+      } else if (this._state.selectedRange.start && !this._state.selectedRange.end) {
+        if (date >= this._state.selectedRange.start) {
+          this._state.selectedRange.end = date;
+        } else {
+          // If clicked before start, treat as new start
+          this._state.selectedRange = { start: date, end: null };
+        }
+      } else {
+        // Reset range
+        this._state.selectedRange = { start: date, end: null };
+      }
+      // Update input value for range
+      if (this._input) {
+        let value = '';
+        const { start, end } = this._state.selectedRange;
+        if (start && end) {
+          if (this._config.format && typeof this._config.format === 'string') {
+            value = `${this._formatDate(start, this._config.format)} – ${this._formatDate(end, this._config.format)}`;
+          } else if (this._config.locale) {
+            value = `${start.toLocaleDateString(this._config.locale)} – ${end.toLocaleDateString(this._config.locale)}`;
+          } else {
+            value = `${start.toLocaleDateString()} – ${end.toLocaleDateString()}`;
+          }
+        } else if (start) {
+          if (this._config.format && typeof this._config.format === 'string') {
+            value = this._formatDate(start, this._config.format);
+          } else if (this._config.locale) {
+            value = start.toLocaleDateString(this._config.locale);
+          } else {
+            value = start.toLocaleDateString();
+          }
+        }
+        this._input.value = value;
+        console.log('🗓️ [KTDatepicker] Input value set to (range):', value);
+        const evt = new Event('change', { bubbles: true });
+        this._input.dispatchEvent(evt);
+      }
+      this._render();
+      return;
+    }
     this._state.selectedDate = date;
     this._state.currentDate = date;
-    // Update input value using format only (bypass segment manager for MVP)
+    // Update input value using locale if provided
     if (this._input) {
       let value = '';
       if (this._config.format && typeof this._config.format === 'string') {
         value = this._formatDate(date, this._config.format);
+      } else if (this._config.locale) {
+        value = date.toLocaleDateString(this._config.locale);
       } else {
         value = date.toLocaleDateString();
       }
@@ -339,9 +467,68 @@ export class KTDatepicker extends KTComponent {
     }
   }
 
+  /**
+   * Update the input placeholder if no date is selected
+   */
+  private _updatePlaceholder() {
+    if (this._input && !this._state.selectedDate && this._config.placeholder) {
+      this._input.setAttribute('placeholder', this._config.placeholder);
+      console.log('🗓️ [KTDatepicker] _render: Placeholder set to:', this._config.placeholder);
+    }
+  }
+
+  /**
+   * Update the disabled state of the input and calendar button
+   */
+  private _updateDisabledState() {
+    const calendarButton = this._element.querySelector('button[data-kt-datepicker-calendar-btn]');
+    if (this._input && this._config.disabled) {
+      this._input.setAttribute('disabled', 'true');
+      if (calendarButton) calendarButton.setAttribute('disabled', 'true');
+      console.log('🗓️ [KTDatepicker] _render: Input and calendar button disabled');
+    } else if (this._input) {
+      this._input.removeAttribute('disabled');
+      if (calendarButton) calendarButton.removeAttribute('disabled');
+    }
+  }
+
+  /**
+   * Disable day buttons outside min/max date range
+   */
+  private _enforceMinMaxDates() {
+    if (this._config.minDate || this._config.maxDate) {
+      const minDate = this._config.minDate ? new Date(this._config.minDate) : null;
+      const maxDate = this._config.maxDate ? new Date(this._config.maxDate) : null;
+      const dayButtons = this._element.querySelectorAll('button[data-day]');
+      dayButtons.forEach((btn) => {
+        const day = parseInt(btn.getAttribute('data-day'), 10);
+        const td = btn.closest('td[data-kt-datepicker-day]');
+        if (!td) return;
+        // Get the date for this cell
+        const year = this._state.currentDate.getFullYear();
+        const month = this._state.currentDate.getMonth();
+        const date = new Date(year, month, day);
+        let disabled = false;
+        if (minDate && date < minDate) disabled = true;
+        if (maxDate && date > maxDate) disabled = true;
+        if (disabled) {
+          btn.setAttribute('disabled', 'true');
+          td.setAttribute('data-out-of-range', 'true');
+        } else {
+          btn.removeAttribute('disabled');
+          td.removeAttribute('data-out-of-range');
+        }
+      });
+    }
+  }
+
   // Ensure open() and close() methods are present and correct
   public open() {
     if (this._isOpen) return;
+    if (this._config.disabled) {
+      console.log('🗓️ [KTDatepicker] open() blocked: datepicker is disabled');
+      return;
+    }
     this._isOpen = true;
     this._render();
   }
