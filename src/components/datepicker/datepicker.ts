@@ -107,6 +107,39 @@ export class KTDatepicker extends KTComponent {
     return dates.map((d) => this._formatSingleDate(d)).join(', ');
   }
 
+  /**
+   * Helper to decide if dropdown should close after selection
+   */
+  private _maybeCloseDropdownOnSelect(mode: 'single' | 'range' | 'multi' | 'other' = 'other') {
+    if (mode === 'single') {
+      if (this._config.closeOnSelect) {
+        console.log('[KTDatepicker] Closing dropdown after single date select');
+        this.close();
+      } else {
+        console.log('[KTDatepicker] Not closing dropdown after single date select (closeOnSelect is false)');
+      }
+    } else if (mode === 'range') {
+      const { start, end } = this._state.selectedRange || {};
+      console.log('[KTDatepicker] maybeCloseDropdownOnSelect (range): start:', start, 'end:', end, 'closeOnSelect:', this._config.closeOnSelect);
+      if (this._config.closeOnSelect && start && end) {
+        console.log('[KTDatepicker] Closing dropdown after range select (both dates selected)');
+        this.close();
+      } else {
+        console.log('[KTDatepicker] Not closing dropdown after range select (waiting for both dates)');
+      }
+    } else if (mode === 'multi') {
+      // Only close on Apply, not on each selection
+      console.log('[KTDatepicker] Not closing dropdown after multi-date select (only closes on Apply)');
+    } else {
+      if (this._config.closeOnSelect) {
+        console.log('[KTDatepicker] Closing dropdown (other action)');
+        this.close();
+      } else {
+        console.log('[KTDatepicker] Not closing dropdown (other action, closeOnSelect is false)');
+      }
+    }
+  }
+
   /** Select a single date */
   private _selectSingleDate(date: Date) {
     this._state.selectedDate = date;
@@ -116,9 +149,8 @@ export class KTDatepicker extends KTComponent {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
-    if (this._config.closeOnSelect) {
-      this.close();
-    }
+    console.log('[KTDatepicker] Single date selected:', date);
+    this._maybeCloseDropdownOnSelect('single');
     this._render();
   }
 
@@ -141,10 +173,8 @@ export class KTDatepicker extends KTComponent {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
-    // Only close if both start and end are selected and closeOnSelect is true
-    if (this._config.closeOnSelect && this._state.selectedRange?.start && this._state.selectedRange?.end) {
-      this.close();
-    }
+    console.log('[KTDatepicker] Range date selected:', this._state.selectedRange);
+    this._maybeCloseDropdownOnSelect('range');
     this._render();
   }
 
@@ -162,24 +192,23 @@ export class KTDatepicker extends KTComponent {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
-    // Do not close on select for multi-date; close only on Apply if closeOnSelect is true
+    console.log('[KTDatepicker] Multi-date selected:', this._state.selectedDates);
+    this._maybeCloseDropdownOnSelect('multi');
     this._render();
   }
 
   /** Handler for Apply button in multi-date mode */
   private _onApplyMultiDate = (e: Event) => {
-    if (this._config.closeOnSelect) {
-      this.close();
-    }
+    console.log('[KTDatepicker] Apply button clicked in multi-date mode (should close if closeOnSelect is true)');
+    this._maybeCloseDropdownOnSelect('other');
   };
 
   private _onToday = (e: Event) => {
     e.preventDefault();
     const today = new Date();
     this.setDate(today);
-    if (this._config.closeOnSelect) {
-      this.close();
-    }
+    console.log('[KTDatepicker] Today button clicked');
+    this._maybeCloseDropdownOnSelect('other');
   };
 
   // Stub for _onClear (to be implemented next)
@@ -195,16 +224,16 @@ export class KTDatepicker extends KTComponent {
       this._input.dispatchEvent(evt);
     }
     this._render();
-    if (this._config.closeOnSelect) {
-      this.close();
-    }
+    console.log('[KTDatepicker] Clear button clicked');
+    this._maybeCloseDropdownOnSelect('other');
   };
 
   // Stub for _onApply (to be implemented next)
   private _onApply = (e: Event) => {
     e.preventDefault();
     // For multi-date, update input value (already handled by selection logic)
-    this.close();
+    console.log('[KTDatepicker] Apply button clicked');
+    this._maybeCloseDropdownOnSelect('other');
   };
 
   /**
@@ -315,7 +344,7 @@ export class KTDatepicker extends KTComponent {
     if (typeof (config && config.closeOnSelect) !== 'undefined') {
       closeOnSelect = config!.closeOnSelect!;
     } else if (config?.range) {
-      closeOnSelect = false;
+      closeOnSelect = true; // changed from false to true for range mode
     } else if (config?.multiDate) {
       closeOnSelect = false;
     } else {
@@ -427,6 +456,17 @@ export class KTDatepicker extends KTComponent {
     if (!this._isOpen) {
       dropdownEl.classList.add('hidden');
     }
+    // --- Debug event listeners for close tracing ---
+    ['focusout', 'blur', 'mousedown'].forEach((evt) => {
+      dropdownEl.addEventListener(evt, (e) => {
+        console.log(`[KTDatepicker] Dropdown event: ${evt}`, {
+          event: e,
+          target: e.target,
+          currentTarget: e.currentTarget,
+          stack: new Error().stack
+        });
+      });
+    });
     return dropdownEl;
   }
 
@@ -501,7 +541,7 @@ export class KTDatepicker extends KTComponent {
           this._getCalendarDays(monthDate),
           monthDate,
           this._state.selectedDate,
-          (day) => { console.log('[KTDatepicker] Day clicked:', day); this.setDate(day); this.close(); },
+          (day) => { console.log('[KTDatepicker] Day clicked:', day); this.setDate(day); },
           this._config.range ? this._state.selectedRange : undefined
         );
         console.log('[KTDatepicker] Calendar DOM:', calendar);
@@ -754,6 +794,8 @@ export class KTDatepicker extends KTComponent {
 
   public close() {
     if (!this._isOpen) return;
+    // Debug log with stack trace
+    console.log('[KTDatepicker] close() called. Dropdown will close. Stack trace:', new Error().stack);
     this._isOpen = false;
     this._render();
   }

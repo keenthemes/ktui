@@ -101,6 +101,12 @@ KTDatepicker provides fine-grained control over dropdown behavior with the follo
 - **Range:** Opens on focus by default, closes only after both start and end are selected.
 - **Multi-Date:** Opens on focus by default, closes only when the Apply button is clicked.
 
+### Range Mode Dropdown Close Behavior
+
+- When `range: true` is enabled, the dropdown **remains open after selecting the start date** and **closes automatically after selecting the end date** (when both start and end are set).
+- This matches best-practice UX for date range pickers (see Airbnb, Google Flights, etc.).
+- `closeOnSelect` is now **true by default** for range mode, so you do not need to set it explicitly unless you want to override this behavior.
+
 ### Accessibility & Best Practices
 - The calendar will not open on focus if the input is disabled or readonly.
 - Always ensure the Apply button is accessible via keyboard in multi-date mode.
