@@ -16,6 +16,15 @@ declare global {
 	}
 }
 
+/**
+ * KSticky is a utility for making elements sticky (fixed) on scroll.
+ * It supports dynamic offset, release/activate triggers, and responsive updates.
+ *
+ * Key methods:
+ * - _getOffset: Calculates the offset for sticky activation, considering config and activate element.
+ * - _process: Handles scroll logic and toggles sticky state.
+ * - update/refresh: Public method to recalculate offset and update sticky state (call after DOM/layout changes).
+ */
 export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected override _name: string = 'sticky';
 	protected override _defaultConfig: KTStickyConfigInterface = {
@@ -41,6 +50,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected _releaseElement: HTMLElement;
 	protected _activateElement: HTMLElement;
 	protected _wrapperElement: HTMLElement;
+	private _mutationObserver: MutationObserver | null = null;
 
 	constructor(
 		element: HTMLElement,
@@ -75,6 +85,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		this._handlers();
 		this._process();
 		this._update();
+		this._initMutationObserver();
 	}
 
 	private _getTarget(): string {
@@ -194,17 +205,25 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		}
 	}
 
-	protected _getOffset(): number {
+	/**
+	 * Calculates the offset for sticky activation.
+	 * Considers the configured offset and the position of the activate element (if any).
+	 * @returns {number} The computed offset in pixels.
+	 */
+	protected _calculateOffset(): number {
 		let offset = parseInt(this._getOption('offset') as string);
 		const activateElement = KTDom.getElement(
 			this._getOption('activate') as string,
 		);
-
 		if (activateElement) {
 			offset = Math.abs(offset - activateElement.offsetTop);
 		}
-
 		return offset;
+	}
+
+	protected _getOffset(): number {
+		// Deprecated: use _calculateOffset instead
+		return this._calculateOffset();
 	}
 
 	protected _enable(): boolean {
@@ -340,6 +359,47 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 	public isActive(): boolean {
 		return this._isActive();
+	}
+
+	/**
+	 * Public method to refresh sticky offset and state.
+	 * Call this after dynamic DOM/layout changes.
+	 */
+	public refresh(): void {
+		this._update();
+	}
+
+	/**
+	 * Initializes a MutationObserver to watch for DOM changes that may affect sticky layout.
+	 */
+	private _initMutationObserver(): void {
+		if (typeof MutationObserver === 'undefined') return;
+		// Observe the parent node or body for subtree modifications
+		const observeTarget = this._element.parentElement || document.body;
+		this._mutationObserver = new MutationObserver(() => {
+			this.refresh();
+		});
+		this._mutationObserver.observe(observeTarget, {
+			childList: true,
+			subtree: true,
+			attributes: true,
+			characterData: false,
+		});
+	}
+
+	/**
+	 * Disconnects the MutationObserver when the sticky instance is destroyed.
+	 */
+	private _disconnectMutationObserver(): void {
+		if (this._mutationObserver) {
+			this._mutationObserver.disconnect();
+			this._mutationObserver = null;
+		}
+	}
+
+	public override dispose(): void {
+		this._disconnectMutationObserver();
+		super.dispose();
 	}
 
 	public static getInstance(element: HTMLElement): KTSticky {

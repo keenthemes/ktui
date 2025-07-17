@@ -20,4 +20,8 @@ export interface KTStickyConfigInterface {
 
 export interface KTStickyInterface {
 	update(): void;
+	/**
+	 * Recalculates offset and updates sticky state. Call after DOM/layout changes.
+	 */
+	refresh(): void;
 }
