@@ -173,6 +173,40 @@ export class KTDatepicker extends KTComponent {
     }
   };
 
+  private _onToday = (e: Event) => {
+    e.preventDefault();
+    const today = new Date();
+    this.setDate(today);
+    if (this._config.closeOnSelect) {
+      this.close();
+    }
+  };
+
+  // Stub for _onClear (to be implemented next)
+  private _onClear = (e: Event) => {
+    e.preventDefault();
+    // Clear all selection states
+    this._state.selectedDate = null;
+    this._state.selectedRange = { start: null, end: null };
+    this._state.selectedDates = [];
+    if (this._input) {
+      this._input.value = '';
+      const evt = new Event('change', { bubbles: true });
+      this._input.dispatchEvent(evt);
+    }
+    this._render();
+    if (this._config.closeOnSelect) {
+      this.close();
+    }
+  };
+
+  // Stub for _onApply (to be implemented next)
+  private _onApply = (e: Event) => {
+    e.preventDefault();
+    // For multi-date, update input value (already handled by selection logic)
+    this.close();
+  };
+
   /**
    * Constructor: Initializes the datepicker component
    */
@@ -428,9 +462,9 @@ export class KTDatepicker extends KTComponent {
     const footer = renderFooter(
       this._templateSet.footer,
       { todayButton: todayButtonHtml, clearButton: clearButtonHtml, applyButton: applyButtonHtml },
-      undefined,
-      undefined,
-      this._config.multiDate ? this._onApplyMultiDate : undefined
+      this._onToday,
+      this._onClear,
+      this._onApply
     );
     dropdownEl.appendChild(footer);
   }

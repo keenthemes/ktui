@@ -1,41 +1,62 @@
 @layer components {
 /*
  * datepicker.css - Tailwind-based utility styles for KTDatepicker (revamp)
- * Use with Tailwind or extend as needed.
- *
- * All styles use @apply for Tailwind utilities. For open/hidden states, use Tailwind's 'block' and 'hidden' classes directly in markup or JS.
+ * Calendar grid redesign inspired by HeroUI DatePicker
+ * Only CSS, no class/template changes
  */
 
-/**
- * Root container for the datepicker popup
- */
-[data-kt-datepicker-root] {
-  @apply relative inline-block;
-}
-
-/**
- * Header section (month/year, navigation)
- */
-[data-kt-datepicker-header] {
-  @apply font-semibold px-4 py-2 bg-gray-50 border-b border-gray-200;
-}
-
-/**
- * Calendar grid container
- */
 [data-kt-datepicker-calendar] {
-  @apply p-4 bg-white;
+  @apply p-4 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-xs mx-auto;
 }
 
-/**
- * Footer section (actions, buttons)
- */
-[data-kt-datepicker-footer] {
-  @apply flex justify-end gap-2 px-4 py-2 bg-gray-50 border-t border-gray-200;
+[data-kt-datepicker-calendar-table] {
+  @apply w-full border-collapse table-fixed select-none;
 }
 
-/*
- * For open/hidden states, use Tailwind's 'block' and 'hidden' classes directly in your markup or JS.
- * Example: <div class="block"> ... </div> or <div class="hidden"> ... </div>
- */
+[data-kt-datepicker-calendar-table] thead tr {
+  @apply text-xs font-semibold text-gray-500 dark:text-gray-400;
+}
+
+[data-kt-datepicker-calendar-table] th {
+  @apply py-1 px-0.5 text-center font-medium tracking-wide;
+}
+
+[data-kt-datepicker-calendar-table] tbody tr {
+  @apply h-10;
+}
+
+[data-kt-datepicker-day] {
+  @apply text-center align-middle relative;
+}
+
+[data-kt-datepicker-day] button[data-day] {
+  @apply w-9 h-9 flex items-center justify-center rounded-lg transition-colors duration-150 outline-none border-0 bg-transparent text-base font-normal text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:z-10 cursor-pointer;
+}
+
+[data-kt-datepicker-day][data-today] button[data-day] {
+  @apply border border-primary-400 dark:border-primary-500 bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 font-semibold;
+}
+
+[data-kt-datepicker-day][data-selected] button[data-day] {
+  @apply bg-primary-600 text-white dark:bg-primary-500 dark:text-white font-bold shadow-md;
+}
+
+[data-kt-datepicker-day][data-out-of-range] button[data-day],
+[data-kt-datepicker-day] button[data-day][disabled] {
+  @apply text-gray-300 dark:text-gray-600 bg-transparent cursor-not-allowed opacity-60 pointer-events-none;
+}
+
+[data-kt-datepicker-day]:not([data-out-of-range]):not([data-selected]):not([data-today]) button[data-day]:hover {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100;
+}
+
+/* Add smooth focus ring for accessibility */
+[data-kt-datepicker-day] button[data-day]:focus-visible {
+  @apply ring-2 ring-primary-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+}
+
+/* Remove default button styles for day buttons */
+[data-kt-datepicker-day] button[data-day] {
+  @apply appearance-none;
+}
 }
