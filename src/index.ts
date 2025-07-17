@@ -78,7 +78,6 @@ const KTComponents = {
 		(KTDatepicker as any).init();
 		KTSelect.init();
 		KTToast.init();
-		KTAlert.init();
 	},
 };
 

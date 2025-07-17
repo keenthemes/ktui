@@ -61,15 +61,15 @@
    * - Consistent size for touch targets
    * - Centered, rounded, interactive
    */
-  @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-150 outline-none border-0 bg-transparent text-base font-normal text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:z-10 cursor-pointer appearance-none;
+  @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-150 outline-none border-0 bg-transparent text-base font-normal text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:z-10 cursor-pointer appearance-none;
 }
 
 [data-kt-datepicker-day][data-today] button[data-day] {
-  @apply border border-primary-400 dark:border-primary-500 bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 font-semibold;
+  @apply border border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-semibold;
 }
 
 [data-kt-datepicker-day][data-selected] button[data-day] {
-  @apply bg-primary-600 text-white dark:bg-primary-500 dark:text-white font-bold shadow-md;
+  @apply bg-blue-600 text-white dark:bg-blue-500 dark:text-white font-bold shadow-md;
 }
 
 [data-kt-datepicker-day][data-out-of-range] button[data-day],
@@ -83,7 +83,7 @@
 
 /* Add smooth focus ring for accessibility */
 [data-kt-datepicker-day] button[data-day]:focus-visible {
-  @apply ring-2 ring-primary-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+  @apply ring-2 ring-blue-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
 }
 
 /* Remove default button styles for day buttons */

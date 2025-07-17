@@ -46,8 +46,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
   // --- Get templates ---
   // Use a minimal config to get templates; in real usage, pass full config if available
   const templates = getTemplateStrings({} as KTDatepickerConfig);
-  const segmentTpl = templates.dateSegment as string;
-  const separatorTpl = templates.segmentSeparator as string;
+  const segmentTpl = templates.dateSegment as string | ((data: any) => string) | undefined;
+  const separatorTpl = templates.segmentSeparator as string | ((data: any) => string) | undefined;
 
   // --- Utility: get segment value as string ---
   function getSegmentValue(segment: string, date: Date): string {
@@ -220,11 +220,12 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     });
     // Wrap in segmentedDateInput template
     let segmentedInputHtml = segmentsHtml;
-    if (templates.segmentedDateInput) {
-      if (typeof templates.segmentedDateInput === 'function') {
-        segmentedInputHtml = templates.segmentedDateInput({ segments: segmentsHtml });
-      } else if (typeof templates.segmentedDateInput === 'string') {
-        segmentedInputHtml = templates.segmentedDateInput.replace(/{{segments}}/g, segmentsHtml);
+    const segmentedDateInputTpl = templates.segmentedDateInput as string | ((data: any) => string) | undefined;
+    if (segmentedDateInputTpl) {
+      if (typeof segmentedDateInputTpl === 'function') {
+        segmentedInputHtml = segmentedDateInputTpl({ segments: segmentsHtml });
+      } else if (typeof segmentedDateInputTpl === 'string') {
+        segmentedInputHtml = segmentedDateInputTpl.replace(/{{segments}}/g, segmentsHtml);
       } else {
         segmentedInputHtml = segmentsHtml;
       }
