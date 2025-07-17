@@ -27,6 +27,15 @@ export function renderCalendar(
   const bodyTpl = defaultTemplates.calendarBody;
   const rowTpl = defaultTemplates.calendarRow;
   const rows = [];
+  // Determine which day should be tabbable (selected, or today if none)
+  let tabbableIndex = -1;
+  if (selectedDate) {
+    tabbableIndex = days.findIndex(d => isSameDay(d, selectedDate));
+  }
+  if (tabbableIndex === -1) {
+    const today = new Date();
+    tabbableIndex = days.findIndex(d => isSameDay(d, today));
+  }
   for (let i = 0; i < days.length; i += 7) {
     const week = days.slice(i, i + 7);
     const tds = week.map((day, j) => {
@@ -37,11 +46,13 @@ export function renderCalendar(
       if (selectedRange && selectedRange.start && selectedRange.end) {
         inRange = day >= selectedRange.start && day <= selectedRange.end;
       }
+      const dayIndex = i + j;
       const attributes = [
         isSelected ? 'class="active" aria-selected="true"' : '',
         isToday ? 'data-today="true"' : '',
         isCurrentMonth ? '' : 'data-outside="true"',
         inRange ? 'data-in-range="true"' : '',
+        `tabindex=\"${dayIndex === tabbableIndex ? '0' : '-1'}\"`
       ].filter(Boolean).join(' ');
       const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, inRange, attributes };
       return isTemplateFunction(tpl)

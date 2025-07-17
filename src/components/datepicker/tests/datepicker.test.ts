@@ -3,6 +3,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { KTDatepicker } from '../datepicker';
 import { getTemplateStrings, defaultTemplates } from '../templates';
+import { parseDateFromFormat } from '../date-utils';
 
 describe('KTDatepicker', () => {
   let container: HTMLElement;
@@ -92,7 +93,7 @@ describe('KTDatepicker', () => {
     const dp = new KTDatepicker(container, {
       range: true,
       valueRange: { start: '2024-01-01', end: '2024-01-10' },
-      format: 'yyyy-mm-dd',
+      format: 'yyyy-MM-dd', // Use MM for month
     });
     const state = (dp as any)._state;
     expect(state.selectedRange.start).toEqual(new Date('2024-01-01'));
@@ -107,7 +108,7 @@ describe('KTDatepicker', () => {
     const dp = new KTDatepicker(container, {
       multiDate: true,
       values: ['2024-01-01', '2024-01-10'],
-      format: 'yyyy-mm-dd',
+      format: 'yyyy-MM-dd', // Use MM for month
     });
     const state = (dp as any)._state;
     expect(state.selectedDates.length).toBe(2);
@@ -122,7 +123,7 @@ describe('KTDatepicker', () => {
     document.body.appendChild(container);
     const dp = new KTDatepicker(container, {
       multiDate: true,
-      format: 'yyyy-mm-dd',
+      format: 'yyyy-MM-dd', // Use MM for month
     });
     (dp as any).setDate(new Date('2024-01-01'));
     (dp as any).setDate(new Date('2024-01-10'));
@@ -347,5 +348,36 @@ describe('outside click close behavior', () => {
       calendarBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     }
     expect((dp as any)._isOpen).toBe(true);
+  });
+});
+
+describe('parseDateFromFormat utility', () => {
+  it('parses yyyy-MM-dd', () => {
+    const d = parseDateFromFormat('2024-07-16', 'yyyy-MM-dd');
+    expect(d).toEqual(new Date(2024, 6, 16));
+  });
+  it('parses dd/MM/yyyy', () => {
+    const d = parseDateFromFormat('16/07/2024', 'dd/MM/yyyy');
+    expect(d).toEqual(new Date(2024, 6, 16));
+  });
+  it('parses MM.dd.yyyy', () => {
+    const d = parseDateFromFormat('07.16.2024', 'MM.dd.yyyy');
+    expect(d).toEqual(new Date(2024, 6, 16));
+  });
+  it('parses d/M/yy', () => {
+    const d = parseDateFromFormat('5/7/24', 'd/M/yy');
+    expect(d).toEqual(new Date(2024, 6, 5));
+  });
+  it('returns null for invalid string', () => {
+    const d = parseDateFromFormat('not-a-date', 'yyyy-MM-dd');
+    expect(d).toBeNull();
+  });
+  it('returns null for mismatched format', () => {
+    const d = parseDateFromFormat('2024/07/16', 'yyyy-MM-dd');
+    expect(d).toBeNull();
+  });
+  it('parses with extra separators', () => {
+    const d = parseDateFromFormat('2024--07--16', 'yyyy--MM--dd');
+    expect(d).toEqual(new Date(2024, 6, 16));
   });
 });

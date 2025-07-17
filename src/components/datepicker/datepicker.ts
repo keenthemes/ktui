@@ -23,11 +23,12 @@ import { getTemplateStrings, defaultTemplates } from './templates';
 import { getMergedTemplates } from './template-manager';
 import { renderTemplateString, isTemplateFunction, renderTemplateToDOM } from './utils/template';
 import { defaultDatepickerConfig } from './config';
-import { SegmentManager } from './segment-manager';
 import { renderHeader } from './renderers/header';
 import { renderCalendar } from './renderers/calendar';
 import { renderFooter } from './renderers/footer';
 import { getInitialState } from './state';
+import { SegmentedInput, SegmentedInputOptions } from './segmented-input';
+import { parseDateFromFormat } from './date-utils';
 
 /**
  * KTDatepicker
@@ -54,7 +55,6 @@ export class KTDatepicker extends KTComponent {
   private _container: HTMLElement;
   private _input: HTMLInputElement | null = null;
   private _isOpen: boolean = false;
-  private _segmentManager: SegmentManager | null = null;
 
   // --- Mode-specific helpers ---
   /** Initialize single date from config */
@@ -165,22 +165,28 @@ export class KTDatepicker extends KTComponent {
     this._render();
   }
 
-  /** Select a range date */
+  /**
+   * Select a range date (calendar click or segmented input change)
+   * Updates both segmented inputs and internal state.
+   */
   private _selectRangeDate(date: Date) {
+    // If neither start nor end is set, set start
     if (!this._state.selectedRange || (!this._state.selectedRange.start && !this._state.selectedRange.end)) {
       this._state.selectedRange = { start: date, end: null };
     } else if (this._state.selectedRange.start && !this._state.selectedRange.end) {
+      // If start is set and end is not, set end (if after start), else reset start
       if (date >= this._state.selectedRange.start) {
         this._state.selectedRange.end = date;
       } else {
         this._state.selectedRange = { start: date, end: null };
       }
     } else {
+      // If both are set, start a new range
       this._state.selectedRange = { start: date, end: null };
     }
+    // No direct input.value update here; _render will update segmented inputs
+    // Dispatch change event for integration
     if (this._input) {
-      const { start, end } = this._state.selectedRange;
-      this._input.value = this._formatRange(start, end);
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
@@ -248,6 +254,104 @@ export class KTDatepicker extends KTComponent {
   };
 
   /**
+   * Centralized keyboard event handler for all datepicker keyboard interactions.
+   * Handles navigation, selection, and closing for input, calendar, and popover.
+   * Covers: Tab, Shift+Tab, Arrow keys, Enter, Space, Escape, Home, End, PageUp, PageDown.
+   */
+  private _onKeyDown = (e: KeyboardEvent) => {
+    if (!this._isOpen) return;
+    const target = e.target as HTMLElement;
+    // Handle Escape: close dropdown
+    if (e.key === 'Escape') {
+      this.close();
+      e.preventDefault();
+      return;
+    }
+    // Handle Tab/Shift+Tab: allow normal tabbing, but trap focus within dropdown if needed
+    if (e.key === 'Tab') {
+      // Optionally implement focus trap if required
+      return;
+    }
+    // Handle Arrow keys, Home/End, PageUp/PageDown for calendar grid navigation
+    const isCalendarGrid = target.closest('[data-kt-datepicker-calendar-grid]');
+    if (isCalendarGrid) {
+      // Find all day buttons
+      const dayButtons = Array.from(isCalendarGrid.querySelectorAll('button[data-day]')) as HTMLButtonElement[];
+      const currentIndex = dayButtons.findIndex(btn => btn === target);
+      let nextIndex = currentIndex;
+      if (e.key === 'ArrowRight') nextIndex = Math.min(dayButtons.length - 1, currentIndex + 1);
+      if (e.key === 'ArrowLeft') nextIndex = Math.max(0, currentIndex - 1);
+      if (e.key === 'ArrowDown') nextIndex = Math.min(dayButtons.length - 1, currentIndex + 7);
+      if (e.key === 'ArrowUp') nextIndex = Math.max(0, currentIndex - 7);
+      if (e.key === 'Home') nextIndex = Math.floor(currentIndex / 7) * 7;
+      if (e.key === 'End') nextIndex = Math.min(dayButtons.length - 1, Math.floor(currentIndex / 7) * 7 + 6);
+      if (e.key === 'PageUp' || e.key === 'PageDown') {
+        // Change month and focus first day
+        this._changeMonth(e.key === 'PageUp' ? -1 : 1);
+        setTimeout(() => {
+          const newGrid = this._element.querySelector('[data-kt-datepicker-calendar-grid]');
+          if (newGrid) {
+            const newButtons = Array.from(newGrid.querySelectorAll('button[data-day]')) as HTMLButtonElement[];
+            if (newButtons.length > 0) {
+              // Set roving tabindex
+              newButtons.forEach((btn, idx) => btn.tabIndex = idx === 0 ? 0 : -1);
+              newButtons[0].focus();
+            }
+          }
+        }, 0);
+        e.preventDefault();
+        return;
+      }
+      if (nextIndex !== currentIndex && dayButtons[nextIndex]) {
+        // Set roving tabindex
+        dayButtons.forEach((btn, idx) => btn.tabIndex = idx === nextIndex ? 0 : -1);
+        dayButtons[nextIndex].focus();
+        e.preventDefault();
+        return;
+      }
+      // Enter/Space: select date
+      if (e.key === 'Enter' || e.key === ' ') {
+        dayButtons[currentIndex]?.click();
+        // Optionally announce selection to screen reader
+        const liveRegion = this._element.querySelector('[data-kt-datepicker-live]');
+        if (liveRegion && dayButtons[currentIndex]) {
+          liveRegion.textContent = `Selected ${dayButtons[currentIndex].getAttribute('aria-label')}`;
+        }
+        e.preventDefault();
+        return;
+      }
+    }
+    // Handle navigation for header buttons (prev/next month)
+    if (target.hasAttribute('data-kt-datepicker-prev') || target.hasAttribute('data-kt-datepicker-next')) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        // Optionally announce navigation to screen reader
+        const liveRegion = this._element.querySelector('[data-kt-datepicker-live]');
+        if (liveRegion) {
+          liveRegion.textContent = target.hasAttribute('data-kt-datepicker-prev') ? 'Previous month' : 'Next month';
+        }
+        e.preventDefault();
+        return;
+      }
+    }
+    // Handle footer buttons (today, clear, apply)
+    if (target.hasAttribute('data-kt-datepicker-today') || target.hasAttribute('data-kt-datepicker-clear') || target.hasAttribute('data-kt-datepicker-apply')) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        target.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        // Optionally announce action to screen reader
+        const liveRegion = this._element.querySelector('[data-kt-datepicker-live]');
+        if (liveRegion) {
+          if (target.hasAttribute('data-kt-datepicker-today')) liveRegion.textContent = 'Today selected';
+          if (target.hasAttribute('data-kt-datepicker-clear')) liveRegion.textContent = 'Selection cleared';
+          if (target.hasAttribute('data-kt-datepicker-apply')) liveRegion.textContent = 'Selection applied';
+        }
+        e.preventDefault();
+        return;
+      }
+    }
+  };
+
+  /**
    * Constructor: Initializes the datepicker component
    */
   constructor(element: HTMLElement, config?: KTDatepickerConfig) {
@@ -288,10 +392,6 @@ export class KTDatepicker extends KTComponent {
       this._input.setAttribute('disabled', 'true');
       console.log('🗓️ [KTDatepicker] Input disabled from config');
     }
-    // Initialize SegmentManager with format and initial value
-    const format = (this._config.format && typeof this._config.format === 'string') ? this._config.format : 'MM/DD/YYYY';
-    const initialValue = this._input ? this._input.value : '';
-    this._segmentManager = new SegmentManager(format, initialValue);
     // --- Mode-specific initialization ---
     if (this._config.range && this._config.valueRange) {
       this._initRangeFromConfig();
@@ -397,39 +497,131 @@ export class KTDatepicker extends KTComponent {
 
   /**
    * Render the input wrapper and calendar button, move/create input element
+   * In range mode, renders two segmented inputs (start/end) using the segmentedDateRangeInput template.
    */
   private _renderInputWrapper(calendarButtonHtml: string): HTMLElement {
     const inputWrapperTpl = this._templateSet.inputWrapper || defaultTemplates.inputWrapper;
     let inputWrapperHtml: string;
     if (typeof inputWrapperTpl === 'function') {
-      inputWrapperHtml = inputWrapperTpl({ input: this._input ? this._input.outerHTML : '', icon: calendarButtonHtml });
+      inputWrapperHtml = inputWrapperTpl({ input: '', icon: calendarButtonHtml });
     } else {
-      inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, this._input ? this._input.outerHTML : '');
+      inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, '');
     }
     const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
     const inputWrapperEl = inputWrapperFrag.firstElementChild as HTMLElement;
-    // Move or create input (do not create input in code, just move existing)
-    if (this._input && inputWrapperEl) {
-      const inputEl = inputWrapperEl.querySelector('input[data-kt-datepicker-input]');
-      if (inputEl && this._input !== inputEl) {
-        inputEl.replaceWith(this._input);
-      } else if (!inputEl) {
-        inputWrapperEl.appendChild(this._input);
-      }
+    // Remove old input if present
+    if (this._input && this._input.parentNode) {
+      this._input.parentNode.removeChild(this._input);
     }
-    // Enforce disabled state on calendar button
-    const calendarBtn = inputWrapperEl.querySelector('button[data-kt-datepicker-calendar-btn]');
-    if (calendarBtn && calendarBtn instanceof HTMLButtonElement) {
-      if (this._config.disabled) {
-        calendarBtn.setAttribute('disabled', 'true');
-        calendarBtn.setAttribute('tabindex', '-1');
-        calendarBtn.setAttribute('aria-disabled', 'true');
+    // --- Range mode: render two segmented inputs ---
+    if (this._config.range) {
+      // Use segmentedDateRangeInput template
+      const rangeTpl = this._templateSet.segmentedDateRangeInput || defaultTemplates.segmentedDateRangeInput;
+      // Create containers for start and end segmented inputs
+      const startContainer = document.createElement('div');
+      startContainer.className = 'ktui-segmented-input-start flex items-center gap-1';
+      startContainer.setAttribute('aria-label', 'Start date');
+      startContainer.setAttribute('role', 'group');
+      const endContainer = document.createElement('div');
+      endContainer.className = 'ktui-segmented-input-end flex items-center gap-1';
+      endContainer.setAttribute('aria-label', 'End date');
+      endContainer.setAttribute('role', 'group');
+      // Optionally, add visually hidden labels for screen readers
+      const startLabel = document.createElement('span');
+      startLabel.textContent = 'Start date';
+      startLabel.id = 'ktui-datepicker-start-label';
+      startLabel.className = 'sr-only';
+      startContainer.prepend(startLabel);
+      startContainer.setAttribute('aria-labelledby', 'ktui-datepicker-start-label');
+      const endLabel = document.createElement('span');
+      endLabel.textContent = 'End date';
+      endLabel.id = 'ktui-datepicker-end-label';
+      endLabel.className = 'sr-only';
+      endContainer.prepend(endLabel);
+      endContainer.setAttribute('aria-labelledby', 'ktui-datepicker-end-label');
+      // Render template with placeholders
+      const separator = '–';
+      let rangeHtml: string;
+      if (typeof rangeTpl === 'function') {
+        rangeHtml = rangeTpl({
+          start: '<div data-kt-datepicker-segmented-start></div>',
+          separator,
+          end: '<div data-kt-datepicker-segmented-end></div>',
+        });
       } else {
-        calendarBtn.removeAttribute('disabled');
-        calendarBtn.setAttribute('tabindex', '0');
-        calendarBtn.setAttribute('aria-disabled', 'false');
+        rangeHtml = rangeTpl
+          .replace(/{{start}}/g, '<div data-kt-datepicker-segmented-start></div>')
+          .replace(/{{separator}}/g, separator)
+          .replace(/{{end}}/g, '<div data-kt-datepicker-segmented-end></div>');
       }
+      const rangeFrag = renderTemplateToDOM(rangeHtml);
+      // Find mount points
+      const startMount = rangeFrag.querySelector('[data-kt-datepicker-segmented-start]') as HTMLElement;
+      const endMount = rangeFrag.querySelector('[data-kt-datepicker-segmented-end]') as HTMLElement;
+      if (startMount) startMount.replaceWith(startContainer);
+      if (endMount) endMount.replaceWith(endContainer);
+      // Insert the range input UI at the start of the wrapper
+      inputWrapperEl.insertBefore(rangeFrag.firstElementChild!, inputWrapperEl.firstChild);
+      // Instantiate SegmentedInput for start
+      SegmentedInput(startContainer, {
+        value: this._state.selectedRange?.start || new Date(),
+        segments: ['month', 'day', 'year'],
+        disabled: !!this._config.disabled,
+        required: !!this._config.required,
+        readOnly: !!this._config.readOnly,
+        locale: this._config.locale,
+        onChange: (date) => {
+          const end = this._state.selectedRange?.end || null;
+          // If end is set and new start is after end, reset end
+          let newEnd = end;
+          if (end && date > end) newEnd = null;
+          this._state.selectedRange = {
+            start: date,
+            end: newEnd,
+          };
+          this._render();
+        },
+      });
+      // Instantiate SegmentedInput for end
+      SegmentedInput(endContainer, {
+        value: this._state.selectedRange?.end || new Date(),
+        segments: ['month', 'day', 'year'],
+        disabled: !!this._config.disabled,
+        required: !!this._config.required,
+        readOnly: !!this._config.readOnly,
+        locale: this._config.locale,
+        onChange: (date) => {
+          const start = this._state.selectedRange?.start || null;
+          // If start is set and new end is before start, reset start
+          let newStart = start;
+          if (start && date < start) newStart = null;
+          this._state.selectedRange = {
+            start: newStart,
+            end: date,
+          };
+          this._render();
+        },
+      });
+      return inputWrapperEl;
     }
+    // --- Single-date mode: render single segmented input ---
+    let segmentedInputContainer = inputWrapperEl.querySelector('.ktui-segmented-input');
+    if (!segmentedInputContainer) {
+      segmentedInputContainer = document.createElement('div');
+      segmentedInputContainer.className = 'ktui-segmented-input flex items-center gap-1';
+      inputWrapperEl.insertBefore(segmentedInputContainer, inputWrapperEl.firstChild);
+    }
+    SegmentedInput(segmentedInputContainer as HTMLElement, {
+      value: this._state.selectedDate || this._state.currentDate || new Date(),
+      segments: ['month', 'day', 'year'],
+      disabled: !!this._config.disabled,
+      required: !!this._config.required,
+      readOnly: !!this._config.readOnly,
+      locale: this._config.locale,
+      onChange: (date) => {
+        this.setDate(date);
+      },
+    });
     return inputWrapperEl;
   }
 
@@ -506,12 +698,20 @@ export class KTDatepicker extends KTComponent {
         (e) => { e.stopPropagation(); this._changeMonth(1); }
       );
       dropdownEl.appendChild(header);
+      // --- FIX: Only close dropdown after day click in single mode ---
+      const dayClickHandler = (day: Date) => {
+        this.setDate(day);
+        if (!this._config.range && !this._config.multiDate) {
+          this.close();
+        }
+        // In range mode, dropdown remains open until both dates are selected (handled by _maybeCloseDropdownOnSelect)
+      };
       const calendar = renderCalendar(
         this._templateSet.dayCell,
         this._getCalendarDays(this._state.currentDate),
         this._state.currentDate,
         this._state.selectedDate,
-        (day) => { this.setDate(day); this.close(); },
+        dayClickHandler,
         this._config.range ? this._state.selectedRange : undefined
       );
       dropdownEl.appendChild(calendar);
@@ -641,6 +841,24 @@ export class KTDatepicker extends KTComponent {
     this._enforceMinMaxDates();
     console.log('🗓️ [KTDatepicker] _render: this._input:', this._input);
     console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._isOpen, 'selectedDate:', this._state.selectedDate);
+    // Attach keyboard event listeners
+    if (this._input) {
+      this._input.removeEventListener('keydown', this._onKeyDown);
+      this._input.addEventListener('keydown', this._onKeyDown);
+    }
+    if (dropdownEl) {
+      dropdownEl.removeEventListener('keydown', this._onKeyDown);
+      dropdownEl.addEventListener('keydown', this._onKeyDown);
+    }
+    // Ensure live region exists
+    let liveRegion = this._element.querySelector('[data-kt-datepicker-live]');
+    if (!liveRegion) {
+      liveRegion = document.createElement('div');
+      liveRegion.setAttribute('data-kt-datepicker-live', '');
+      liveRegion.setAttribute('aria-live', 'polite');
+      liveRegion.setAttribute('style', 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;');
+      this._element.appendChild(liveRegion);
+    }
   }
 
   /**
@@ -711,11 +929,28 @@ export class KTDatepicker extends KTComponent {
   }
 
   private _formatDate(date: Date, format: string): string {
-    // Very basic formatter: supports yyyy, mm, dd
+    /**
+     * Formats a Date object according to the provided format string.
+     * Supported tokens:
+     *   yyyy - 4-digit year
+     *   yy   - 2-digit year
+     *   MM   - 2-digit month (01-12)
+     *   M    - 1/2-digit month (1-12)
+     *   dd   - 2-digit day (01-31)
+     *   d    - 1/2-digit day (1-31)
+     *   (Extendable for more tokens)
+     * @param date Date to format
+     * @param format Format string
+     * @returns Formatted date string
+     */
+    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
     return format
       .replace(/yyyy/g, date.getFullYear().toString())
-      .replace(/mm/g, String(date.getMonth() + 1).padStart(2, '0'))
-      .replace(/dd/g, String(date.getDate()).padStart(2, '0'));
+      .replace(/yy/g, date.getFullYear().toString().slice(-2))
+      .replace(/MM/g, String(date.getMonth() + 1).padStart(2, '0'))
+      .replace(/M(?![a-zA-Z])/g, String(date.getMonth() + 1))
+      .replace(/dd/g, String(date.getDate()).padStart(2, '0'))
+      .replace(/d(?![a-zA-Z])/g, String(date.getDate()));
   }
 
   /**
@@ -748,8 +983,8 @@ export class KTDatepicker extends KTComponent {
   }
 
   private _updateInputValue() {
-    if (this._input && this._segmentManager) {
-      this._input.value = this._segmentManager.formatValue();
+    if (this._input) {
+      this._input.value = this._state.selectedDate ? this._formatSingleDate(this._state.selectedDate) : '';
     }
   }
 
