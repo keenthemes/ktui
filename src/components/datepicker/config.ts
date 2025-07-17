@@ -18,4 +18,6 @@ export const defaultDatepickerConfig: KTDatepickerConfig = {
   values: undefined,
   showOnFocus: true,
   closeOnSelect: true,
+  // Number of calendar months to display side-by-side (horizontal). Default: 1.
+  visibleMonths: 1,
 };

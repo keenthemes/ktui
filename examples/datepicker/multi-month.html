@@ -1,0 +1,29 @@
+<!--
+To view this example, start your dev server and open http://localhost:50505/examples/datepicker/multi-month.html
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Datepicker Multi-Month Example</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-xl mt-10 mx-auto">
+		<p class="mb-4 text-gray-700">This example demonstrates the <strong>multi-month</strong> feature of KTDatepicker. Two months are displayed side by side, and you can select a date range across both months. Navigation moves the visible window by one month.</p>
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="datepicker-multi-month">Multi-Month Range</label>
+				<div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"visibleMonths":2,"range":true}'>
+					<input id="datepicker-multi-month" placeholder="Select a date range" />
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>

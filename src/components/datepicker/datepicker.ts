@@ -215,10 +215,20 @@ export class KTDatepicker extends KTComponent {
     console.log('🗓️ [KTDatepicker] Constructor: element:', element);
     this._init(element);
     console.log('🗓️ [KTDatepicker] After _init, this._input:', this._input);
+    // --- Data attribute config parsing ---
+    let configFromAttr: Partial<KTDatepickerConfig> = {};
+    const configAttr = element.getAttribute('data-kt-datepicker-config');
+    if (configAttr) {
+      try {
+        configFromAttr = JSON.parse(configAttr);
+      } catch (err) {
+        console.warn('[KTDatepicker] Failed to parse data-kt-datepicker-config:', err);
+      }
+    }
     // --- Data attribute overrides for showOnFocus and closeOnSelect ---
     const showOnFocusAttr = element.getAttribute('data-kt-datepicker-show-on-focus');
     const closeOnSelectAttr = element.getAttribute('data-kt-datepicker-close-on-select');
-    let configWithAttrs = { ...(config || {}) };
+    let configWithAttrs = { ...configFromAttr, ...(config || {}) };
     if (showOnFocusAttr !== null) {
       configWithAttrs.showOnFocus = showOnFocusAttr === 'true' || showOnFocusAttr === '';
     }
@@ -367,6 +377,19 @@ export class KTDatepicker extends KTComponent {
         inputWrapperEl.appendChild(this._input);
       }
     }
+    // Enforce disabled state on calendar button
+    const calendarBtn = inputWrapperEl.querySelector('button[data-kt-datepicker-calendar-btn]');
+    if (calendarBtn && calendarBtn instanceof HTMLButtonElement) {
+      if (this._config.disabled) {
+        calendarBtn.setAttribute('disabled', 'true');
+        calendarBtn.setAttribute('tabindex', '-1');
+        calendarBtn.setAttribute('aria-disabled', 'true');
+      } else {
+        calendarBtn.removeAttribute('disabled');
+        calendarBtn.setAttribute('tabindex', '0');
+        calendarBtn.setAttribute('aria-disabled', 'false');
+      }
+    }
     return inputWrapperEl;
   }
 
@@ -377,11 +400,11 @@ export class KTDatepicker extends KTComponent {
     const buttonEl = inputWrapperEl.querySelector('button[data-kt-datepicker-calendar-btn]');
     if (buttonEl && buttonEl instanceof HTMLButtonElement) {
       buttonEl.type = 'button';
-      buttonEl.tabIndex = 0;
       buttonEl.setAttribute('aria-label', this._config.calendarButtonAriaLabel || 'Open calendar');
       buttonEl.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (this._config.disabled || buttonEl.hasAttribute('disabled')) return;
         this.toggle();
       });
     }
@@ -411,45 +434,85 @@ export class KTDatepicker extends KTComponent {
    * Render header, calendar, and footer into the dropdown element
    */
   private _renderDropdownContent(dropdownEl: HTMLElement) {
-    // Use template-driven navigation buttons
-    let prevButtonHtml: string;
-    let nextButtonHtml: string;
-    const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
-    const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
-    if (typeof prevButtonTpl === 'function') {
-      prevButtonHtml = prevButtonTpl({});
+    const visibleMonths = this._config.visibleMonths ?? 1;
+    if (visibleMonths === 1) {
+      // Single month (existing logic)
+      let prevButtonHtml: string;
+      let nextButtonHtml: string;
+      const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
+      const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
+      prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
+      nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
+      const header = renderHeader(
+        this._templateSet.header,
+        {
+          month: this._state.currentDate.toLocaleString(this._config.locale, { month: 'long' }),
+          year: this._state.currentDate.getFullYear(),
+          prevButton: prevButtonHtml,
+          nextButton: nextButtonHtml,
+        },
+        (e) => { e.stopPropagation(); this._changeMonth(-1); },
+        (e) => { e.stopPropagation(); this._changeMonth(1); }
+      );
+      dropdownEl.appendChild(header);
+      const calendar = renderCalendar(
+        this._templateSet.dayCell,
+        this._getCalendarDays(this._state.currentDate),
+        this._state.currentDate,
+        this._state.selectedDate,
+        (day) => { this.setDate(day); this.close(); },
+        this._config.range ? this._state.selectedRange : undefined
+      );
+      dropdownEl.appendChild(calendar);
     } else {
-      prevButtonHtml = prevButtonTpl;
+      // Multi-month rendering (DOM node-based)
+      const baseDate = new Date(this._state.currentDate);
+      const multiMonthContainer = document.createElement('div');
+      multiMonthContainer.setAttribute('data-kt-datepicker-multimonth-container', '');
+      multiMonthContainer.className = 'flex flex-row gap-4';
+      for (let i = 0; i < visibleMonths; i++) {
+        const monthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+        // Navigation buttons: only first gets prev, only last gets next
+        let prevButtonHtml = '';
+        let nextButtonHtml = '';
+        if (i === 0) {
+          const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
+          prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
+        }
+        if (i === visibleMonths - 1) {
+          const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
+          nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
+        }
+        console.log(`[KTDatepicker] Rendering month ${i + 1}/${visibleMonths}:`, monthDate.toLocaleString(this._config.locale, { month: 'long', year: 'numeric' }));
+        const header = renderHeader(
+          this._templateSet.header,
+          {
+            month: monthDate.toLocaleString(this._config.locale, { month: 'long' }),
+            year: monthDate.getFullYear(),
+            prevButton: prevButtonHtml,
+            nextButton: nextButtonHtml,
+          },
+          (e) => { console.log('[KTDatepicker] Prev button clicked for', monthDate); e.stopPropagation(); this._changeMonth(-1); },
+          (e) => { console.log('[KTDatepicker] Next button clicked for', monthDate); e.stopPropagation(); this._changeMonth(1); }
+        );
+        console.log('[KTDatepicker] Header DOM:', header);
+        const calendar = renderCalendar(
+          this._templateSet.dayCell,
+          this._getCalendarDays(monthDate),
+          monthDate,
+          this._state.selectedDate,
+          (day) => { console.log('[KTDatepicker] Day clicked:', day); this.setDate(day); this.close(); },
+          this._config.range ? this._state.selectedRange : undefined
+        );
+        console.log('[KTDatepicker] Calendar DOM:', calendar);
+        // Append header and calendar nodes
+        multiMonthContainer.appendChild(header);
+        multiMonthContainer.appendChild(calendar);
+      }
+      console.log('[KTDatepicker] Multi-month container structure:', multiMonthContainer);
+      dropdownEl.appendChild(multiMonthContainer);
     }
-    if (typeof nextButtonTpl === 'function') {
-      nextButtonHtml = nextButtonTpl({});
-    } else {
-      nextButtonHtml = nextButtonTpl;
-    }
-    const header = renderHeader(
-      this._templateSet.header,
-      {
-        month: this._state.currentDate.toLocaleString(this._config.locale, { month: 'long' }),
-        year: this._state.currentDate.getFullYear(),
-        prevButton: prevButtonHtml,
-        nextButton: nextButtonHtml,
-      },
-      (e) => { e.stopPropagation(); this._changeMonth(-1); },
-      (e) => { e.stopPropagation(); this._changeMonth(1); }
-    );
-    dropdownEl.appendChild(header);
-
-    const calendar = renderCalendar(
-      this._templateSet.dayCell,
-      this._getCalendarDays(this._state.currentDate),
-      this._state.currentDate,
-      this._state.selectedDate,
-      (day) => { this.setDate(day); this.close(); },
-      this._config.range ? this._state.selectedRange : undefined
-    );
-    dropdownEl.appendChild(calendar);
-
-    // Render footer using template-driven buttons
+    // Render footer using template-driven buttons (always one footer)
     let todayButtonHtml: string;
     let clearButtonHtml: string;
     let applyButtonHtml: string;

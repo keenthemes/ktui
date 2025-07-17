@@ -31,6 +31,7 @@ The following template keys can be overridden via config:
 - `multiDateTag`: Tag for each selected date (multi-date) (**must use `data-kt-datepicker-multidate-tag`**)
 - `emptyState`: Empty state message (**must use `data-kt-datepicker-empty`**)
 - `calendarButton`: Button to open the calendar dropdown (customizable icon, ARIA label) (**must use `data-kt-datepicker-calendar-btn`**)
+- `multiMonthContainer`: Container for multiple calendar months (horizontal multi-month view) (**must use `data-kt-datepicker-multimonth-container`**)
 
 ## 2. Overriding Templates
 Override any template by providing a matching key in the `data-kt-datepicker-config` JSON attribute or via the JS config:
@@ -103,6 +104,48 @@ Each template supports specific placeholders. Common examples include:
 
 ## 7. Consistency with Select
 - The template customization and merging logic follows the same pattern as the select component. See the select component’s templates for reference.
+
+## 8. Multi-Month Display
+
+KTDatepicker supports displaying multiple months side by side using the `visibleMonths` config option (default: 1). When set to 2 or more, the datepicker will render that many consecutive months horizontally in the dropdown, wrapped in the `multiMonthContainer` template.
+
+**Config Example:**
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-config='{"visibleMonths": 2}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+```
+
+**Customizing the Multi-Month Container:**
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-config='{"visibleMonths": 2, "multiMonthContainer": "<div class=\"flex flex-row gap-2 border\">{{calendars}}</div>"}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+```
+
+- Navigation (next/prev) moves the visible window by one month.
+- Range selection works across all visible months.
+- The multi-month view is always horizontal by default.
+
+## 9. Multi-Month Rendering: Event Listeners & Debugging
+
+### Real DOM Node Rendering
+For multi-month mode, KTDatepicker now renders each month (header and calendar) as real DOM nodes and appends them to the multi-month container. **Do not use `.outerHTML` or string concatenation for interactive fragments.**
+
+- **Why:** If you use `.outerHTML` or build the multi-month container as a string, all event listeners attached to navigation and day buttons will be lost when the HTML is parsed into DOM. This will break navigation and date selection.
+- **How it works now:** The implementation appends the actual DOM nodes returned by `renderHeader` and `renderCalendar` to the container, preserving all event listeners and interactivity.
+
+### Debug Logging for Troubleshooting
+KTDatepicker now includes detailed `console.log` statements at key points:
+- When each month is rendered (with month/year info)
+- When each header and calendar DOM node is created
+- When navigation and day button event listeners are attached
+- When navigation or day button is clicked (with context)
+- The structure of the multi-month container after rendering
+
+**Tip:** Use your browser's DevTools console to trace rendering and event flow, especially when debugging multi-month or custom template issues.
+
+---
 
 ## References
 - See [configuration.md](./configuration.md) for config options.

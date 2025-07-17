@@ -31,7 +31,8 @@ export type KTDatepickerTemplateKey =
   | 'calendarBody'
   | 'todayButton'
   | 'clearButton'
-  | 'applyButton';
+  | 'applyButton'
+  | 'multiMonthContainer';
 
 // Template string map
 export type KTDatepickerTemplateStrings = {
@@ -72,6 +73,10 @@ export interface KTDatepickerConfig {
   showOnFocus?: boolean;
   /** Whether to close the calendar on date selection (default: true) */
   closeOnSelect?: boolean;
+  /**
+   * Number of calendar months to display side-by-side (horizontal). Default: 1.
+   */
+  visibleMonths?: number;
   /** Any additional custom config options */
   [key: string]: any;
 }

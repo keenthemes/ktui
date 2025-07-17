@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+/// <reference types="vitest/globals" />
 import { describe, it, expect, beforeEach } from 'vitest';
 import { KTDatepicker } from '../datepicker';
 import { getTemplateStrings, defaultTemplates } from '../templates';
@@ -132,6 +134,101 @@ describe('KTDatepicker', () => {
     state = (dp as any)._state;
     expect(state.selectedDates.length).toBe(1);
     expect((dp as any)._input.value).toBe('2024-01-10');
+  });
+
+  it('should disable both input and calendar button when disabled', () => {
+    const dp = new KTDatepicker(container, { disabled: true });
+    (dp as any)._render();
+    const input = (dp as any)._input;
+    const calendarButton = container.querySelector('button[data-kt-datepicker-calendar-btn]');
+    expect(input.hasAttribute('disabled')).toBe(true);
+    expect(calendarButton).not.toBeNull();
+    expect(calendarButton?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('should NOT open calendar via button when disabled', () => {
+    const dp = new KTDatepicker(container, { disabled: true });
+    (dp as any)._render();
+    const calendarButton = container.querySelector('button[data-kt-datepicker-calendar-btn]');
+    expect(calendarButton).not.toBeNull();
+    if (calendarButton) {
+      calendarButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    }
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('should NOT open calendar via input focus when disabled', () => {
+    const dp = new KTDatepicker(container, { disabled: true });
+    (dp as any)._render();
+    const input = (dp as any)._input;
+    input.dispatchEvent(new FocusEvent('focus'));
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('should NOT open calendar via API when disabled', () => {
+    const dp = new KTDatepicker(container, { disabled: true });
+    (dp as any).open();
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('should not focus or activate calendar button when disabled (real user interaction)', () => {
+    const dp = new KTDatepicker(container, { disabled: true });
+    (dp as any)._render();
+    const calendarButton = container.querySelector('button[data-kt-datepicker-calendar-btn]');
+    expect(calendarButton).not.toBeNull();
+    if (calendarButton) {
+      (calendarButton as HTMLButtonElement).focus();
+      expect(document.activeElement).not.toBe(calendarButton);
+      calendarButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect((dp as any)._isOpen).toBe(false);
+    }
+  });
+
+  it('should not focus or activate input when disabled (real user interaction)', () => {
+    const dp = new KTDatepicker(container, { disabled: true });
+    (dp as any)._render();
+    const input = (dp as any)._input;
+    input.focus();
+    expect(document.activeElement).not.toBe(input);
+    input.dispatchEvent(new FocusEvent('focus'));
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('renders two months side by side when visibleMonths is 2', () => {
+    const dp = new KTDatepicker(container, { visibleMonths: 2 });
+    dp.open();
+    // Should render the multiMonthContainer
+    const multiMonth = container.querySelector('[data-kt-datepicker-multimonth-container]');
+    expect(multiMonth).toBeInstanceOf(HTMLElement);
+    // Should contain two headers and two calendar tables
+    const headers = multiMonth?.querySelectorAll('[data-kt-datepicker-header]');
+    const calendars = multiMonth?.querySelectorAll('[data-kt-datepicker-calendar-table]');
+    expect(headers?.length).toBe(2);
+    expect(calendars?.length).toBe(2);
+    // Navigation: next button should be in the last header only
+    const lastHeader = headers?.[1];
+    expect(lastHeader).toBeInstanceOf(HTMLElement);
+    const nextBtn = lastHeader?.querySelector('[data-kt-datepicker-next]') as HTMLButtonElement;
+    expect(nextBtn).toBeInstanceOf(HTMLButtonElement);
+    if (nextBtn) {
+      nextBtn.click();
+      // After navigation, the first header should now be one month later
+      const newHeaders = multiMonth.querySelectorAll('[data-kt-datepicker-header]');
+      const firstMonth = newHeaders[0].textContent;
+      const expectedMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1).toLocaleString('en-US', { month: 'long' });
+      expect(firstMonth).toContain(expectedMonth);
+    }
+  });
+
+  it('debug: log last header innerHTML for multi-month', () => {
+    const dp = new KTDatepicker(container, { visibleMonths: 2 });
+    dp.open();
+    const multiMonth = container.querySelector('[data-kt-datepicker-multimonth-container]');
+    const headers = multiMonth?.querySelectorAll('[data-kt-datepicker-header]');
+    const lastHeader = headers?.[1];
+    // eslint-disable-next-line no-console
+    console.log('DEBUG lastHeader.innerHTML:', lastHeader?.innerHTML);
+    expect(lastHeader).toBeInstanceOf(HTMLElement);
   });
 });
 

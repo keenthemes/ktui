@@ -9,7 +9,7 @@ import { mergeTemplates } from './utils/template';
 // Default template strings for all UI fragments
 export const defaultTemplates: KTDatepickerTemplateStrings = {
   container: `<div data-kt-datepicker-container></div>`,
-  header: `<div data-kt-datepicker-header>{{month}} {{year}}</div>`,
+  header: `<div data-kt-datepicker-header>{{prevButton}}{{month}} {{year}}{{nextButton}}</div>`,
   footer: `<div data-kt-datepicker-footer>{{todayButton}} {{clearButton}} {{applyButton}}</div>`,
   calendarGrid: `<table data-kt-datepicker-calendar-grid>{{calendar}}</table>`,
   dayCell: `<td data-kt-datepicker-day {{attributes}}><button type="button" data-day="{{day}}" aria-label="Select {{day}}" tabindex="-1">{{day}}</button></td>`,
@@ -40,6 +40,10 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   todayButton: `<button type="button" data-kt-datepicker-today>Today</button>`,
   clearButton: `<button type="button" data-kt-datepicker-clear>Clear</button>`,
   applyButton: `<button type="button" data-kt-datepicker-apply>Apply</button>`,
+  /**
+   * Container for multiple calendar months (horizontal multi-month view)
+   */
+  multiMonthContainer: `<div data-kt-datepicker-multimonth-container class="flex flex-row gap-4">{{calendars}}</div>`,
 };
 
 /**
