@@ -23,6 +23,16 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   inputWrapper: `<div data-kt-datepicker-input-wrapper>{{input}} {{icon}}</div>`,
   segmentedDateInput: `<div data-kt-datepicker-segmented-input>{{segments}}</div>`,
   segmentedDateRangeInput: `<div data-kt-datepicker-segmented-range-input>{{start}} {{separator}} {{end}}</div>`,
+  /**
+   * Template for a single date segment (e.g., day, month, year)
+   * Placeholders: segmentType, segmentValue, ariaLabel, ariaValueNow, ariaValueText, ariaValueMin, ariaValueMax, tabindex, contenteditable
+   */
+  dateSegment: `<span data-segment="{{segmentType}}" role="spinbutton" aria-label="{{ariaLabel}}" aria-valuenow="{{ariaValueNow}}" aria-valuetext="{{ariaValueText}}" aria-valuemin="{{ariaValueMin}}" aria-valuemax="{{ariaValueMax}}" tabindex="{{tabindex}}" contenteditable="{{contenteditable}}">{{segmentValue}}</span>`,
+  /**
+   * Template for a segment separator (e.g., / or space)
+   * Placeholders: separator
+   */
+  segmentSeparator: `<span data-segment-separator>{{separator}}</span>`,
   placeholder: `<span data-kt-datepicker-placeholder>{{placeholder}}</span>`,
   displayWrapper: `<div data-kt-datepicker-display-wrapper>{{value}}</div>`,
   displayElement: `<span data-kt-datepicker-display-element>{{value}}</span>`,

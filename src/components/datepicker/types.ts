@@ -32,7 +32,9 @@ export type KTDatepickerTemplateKey =
   | 'todayButton'
   | 'clearButton'
   | 'applyButton'
-  | 'multiMonthContainer';
+  | 'multiMonthContainer'
+  | 'dateSegment'
+  | 'segmentSeparator';
 
 // Template string map
 export type KTDatepickerTemplateStrings = {

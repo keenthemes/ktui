@@ -12,6 +12,8 @@
  */
 
 import { parseDateFromFormat } from './date-utils';
+import { getTemplateStrings } from './templates';
+import { KTDatepickerConfig } from './types';
 
 /**
  * SegmentedInputOptions defines the configuration for the segmented input.
@@ -40,6 +42,12 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
   let currentValue = new Date(options.value);
   const segments = options.segments || ['month', 'day', 'year'];
   const locale = options.locale || 'default';
+
+  // --- Get templates ---
+  // Use a minimal config to get templates; in real usage, pass full config if available
+  const templates = getTemplateStrings({} as KTDatepickerConfig);
+  const segmentTpl = templates.dateSegment as string;
+  const separatorTpl = templates.segmentSeparator as string;
 
   // --- Utility: get segment value as string ---
   function getSegmentValue(segment: string, date: Date): string {
@@ -116,7 +124,36 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
   // --- Track caret position (offset) ---
   let caretOffset: number | null = null;
 
-  // --- Render segments ---
+  // --- Focus a segment by index and restore caret position ---
+  /**
+   * Restores focus to the segment at the given index and restores caret position if available.
+   * @param idx - Index of the segment to focus
+   * @param caret - Caret offset to restore (null for end)
+   */
+  function restoreFocus(idx: number, caret: number | null = null) {
+    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+    if (segs[idx]) {
+      segs.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
+      segs[idx].focus();
+      // Restore caret position (at end if null)
+      if (segs[idx].isContentEditable) {
+        const range = document.createRange();
+        range.selectNodeContents(segs[idx]);
+        range.collapse(false); // place at end
+        if (caret !== null && segs[idx].firstChild) {
+          range.setStart(segs[idx].firstChild, Math.min(caret, segs[idx].textContent?.length || 0));
+          range.collapse(true);
+        }
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      }
+    }
+  }
+
+  // --- Render segments using templates ---
   function render() {
     // Capture caret position before DOM update
     const prevSegs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
@@ -134,20 +171,69 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     container.setAttribute('role', 'group');
     container.setAttribute('aria-label', 'Date input');
     container.tabIndex = -1;
+
+    // Build segments HTML using templates
+    let segmentsHtml = '';
     segments.forEach((segment, idx) => {
-      const span = document.createElement('span');
-      span.setAttribute('data-segment', segment);
-      span.setAttribute('tabindex', idx === focusedIdx ? '0' : '-1');
-      span.setAttribute('role', 'spinbutton');
-      span.setAttribute('aria-label', segment.charAt(0).toUpperCase() + segment.slice(1));
-      span.setAttribute('aria-valuenow', getSegmentValue(segment, currentValue));
-      span.setAttribute('aria-valuetext', getSegmentValue(segment, currentValue));
-      span.setAttribute('aria-valuemin', getSegmentMin(segment, currentValue)?.toString() ?? '');
-      span.setAttribute('aria-valuemax', getSegmentMax(segment, currentValue)?.toString() ?? '');
-      span.setAttribute('contenteditable', (!options.disabled && !options.readOnly).toString());
-      span.className = 'ktui-segmented-input-segment px-1 outline-none focus:ring-2 focus:ring-primary-500 rounded';
-      span.textContent = getSegmentValue(segment, currentValue);
-      // Keyboard navigation
+      const segmentValue = getSegmentValue(segment, currentValue);
+      const segmentData = {
+        segmentType: segment,
+        segmentValue,
+        ariaLabel: segment.charAt(0).toUpperCase() + segment.slice(1),
+        ariaValueNow: segmentValue,
+        ariaValueText: segmentValue,
+        ariaValueMin: getSegmentMin(segment, currentValue)?.toString() ?? '',
+        ariaValueMax: getSegmentMax(segment, currentValue)?.toString() ?? '',
+        tabindex: idx === focusedIdx ? '0' : '-1',
+        contenteditable: (!options.disabled && !options.readOnly).toString(),
+      };
+      let segmentHtml = '';
+      if (typeof segmentTpl === 'function') {
+        segmentHtml = segmentTpl(segmentData);
+      } else if (typeof segmentTpl === 'string') {
+        segmentHtml = segmentTpl
+          .replace(/{{segmentType}}/g, segmentData.segmentType)
+          .replace(/{{segmentValue}}/g, segmentData.segmentValue)
+          .replace(/{{ariaLabel}}/g, segmentData.ariaLabel)
+          .replace(/{{ariaValueNow}}/g, segmentData.ariaValueNow)
+          .replace(/{{ariaValueText}}/g, segmentData.ariaValueText)
+          .replace(/{{ariaValueMin}}/g, segmentData.ariaValueMin)
+          .replace(/{{ariaValueMax}}/g, segmentData.ariaValueMax)
+          .replace(/{{tabindex}}/g, segmentData.tabindex)
+          .replace(/{{contenteditable}}/g, segmentData.contenteditable);
+      } else {
+        segmentHtml = '';
+      }
+      segmentsHtml += segmentHtml;
+      if (idx < segments.length - 1) {
+        const sep = segment === 'year' ? ' ' : '/';
+        let sepHtml = '';
+        if (typeof separatorTpl === 'function') {
+          sepHtml = separatorTpl({ separator: sep });
+        } else if (typeof separatorTpl === 'string') {
+          sepHtml = separatorTpl.replace(/{{separator}}/g, sep);
+        } else {
+          sepHtml = '';
+        }
+        segmentsHtml += sepHtml;
+      }
+    });
+    // Wrap in segmentedDateInput template
+    let segmentedInputHtml = segmentsHtml;
+    if (templates.segmentedDateInput) {
+      if (typeof templates.segmentedDateInput === 'function') {
+        segmentedInputHtml = templates.segmentedDateInput({ segments: segmentsHtml });
+      } else if (typeof templates.segmentedDateInput === 'string') {
+        segmentedInputHtml = templates.segmentedDateInput.replace(/{{segments}}/g, segmentsHtml);
+      } else {
+        segmentedInputHtml = segmentsHtml;
+      }
+    }
+    container.innerHTML = segmentedInputHtml;
+
+    // Re-bind events to all segments
+    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+    segs.forEach((span, idx) => {
       span.addEventListener('keydown', (e) => {
         if (options.disabled || options.readOnly) return;
         // Wrapping navigation
@@ -156,63 +242,66 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           focusedIdx = (idx + 1) % segments.length;
           caretOffset = null;
           render();
+          restoreFocus(focusedIdx, caretOffset);
         } else if (e.key === 'ArrowLeft' || (e.key === 'Tab' && e.shiftKey)) {
           e.preventDefault();
           focusedIdx = (idx - 1 + segments.length) % segments.length;
           caretOffset = null;
           render();
+          restoreFocus(focusedIdx, caretOffset);
         } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
           // Increment/decrement value
           e.preventDefault();
-          const min = getSegmentMin(segment, currentValue) ?? 0;
-          const max = getSegmentMax(segment, currentValue) ?? 9999;
+          const min = getSegmentMin(segments[idx], currentValue) ?? 0;
+          const max = getSegmentMax(segments[idx], currentValue) ?? 9999;
           let current = Number(span.textContent) || min;
           if (e.key === 'ArrowUp') {
             current = Math.min(max, current + 1);
           } else if (e.key === 'ArrowDown') {
             current = Math.max(min, current - 1);
           }
-          if (segment === 'year') {
-            span.textContent = current.toString().padStart(4, '0');
+          let newValue = current.toString();
+          if (segments[idx] === 'year') {
+            newValue = newValue.padStart(4, '0');
           } else {
-            span.textContent = current.toString().padStart(2, '0');
+            newValue = newValue.padStart(2, '0');
           }
-          currentValue = setSegmentValue(segment, span.textContent || '', currentValue);
+          span.textContent = newValue;
+          currentValue = setSegmentValue(segments[idx], newValue, currentValue);
           if (options.onChange) options.onChange(currentValue);
           caretOffset = null;
           render();
+          restoreFocus(focusedIdx, caretOffset);
         } else if (/^[0-9]$/.test(e.key)) {
           // Direct typing, enforce min/max
           let newValue;
-          if (segment === 'year') {
+          if (segments[idx] === 'year') {
             newValue = (span.textContent?.length === 4 ? e.key : (span.textContent || '') + e.key).slice(-4);
           } else {
             newValue = (span.textContent?.length === 2 ? e.key : (span.textContent || '') + e.key).slice(-2);
           }
-          const min = getSegmentMin(segment, currentValue) ?? 0;
-          const max = getSegmentMax(segment, currentValue) ?? (segment === 'year' ? 9999 : 99);
+          const min = getSegmentMin(segments[idx], currentValue) ?? 0;
+          const max = getSegmentMax(segments[idx], currentValue) ?? (segments[idx] === 'year' ? 9999 : 99);
           let num = Math.max(min, Math.min(max, Number(newValue)));
           if (isNaN(num)) num = min;
-          if (segment === 'year') {
+          if (segments[idx] === 'year') {
             span.textContent = num.toString().padStart(4, '0');
           } else {
             span.textContent = num.toString().padStart(2, '0');
           }
-          currentValue = setSegmentValue(segment, span.textContent || '', currentValue);
+          currentValue = setSegmentValue(segments[idx], span.textContent || '', currentValue);
           if (options.onChange) options.onChange(currentValue);
-          // Place caret at end after typing
           caretOffset = null;
           render();
+          restoreFocus(focusedIdx, caretOffset);
         }
       });
-      // Focus/blur styling
+      // Focus/blur styling (no classes, just ARIA/tabindex)
       span.addEventListener('focus', () => {
-        span.classList.add('ring', 'ring-primary-500');
         span.setAttribute('tabindex', '0');
         focusedIdx = idx;
       });
       span.addEventListener('blur', () => {
-        span.classList.remove('ring', 'ring-primary-500');
         span.setAttribute('tabindex', '-1');
       });
       // Mouse click focuses segment
@@ -221,45 +310,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         focusedIdx = idx;
         caretOffset = null;
         render();
+        restoreFocus(focusedIdx, caretOffset);
       });
-      container.appendChild(span);
-      // Add separator if needed
-      if (idx < segments.length - 1) {
-        const sep = document.createElement('span');
-        sep.textContent = segment === 'year' ? ' ' : '/';
-        sep.className = 'ktui-segmented-input-separator';
-        container.appendChild(sep);
-      }
     });
-    // After rendering, focus the correct segment and restore caret
-    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
-    if (segs[focusedIdx]) {
-      segs[focusedIdx].focus();
-      // Restore caret position (at end if null)
-      if (segs[focusedIdx].isContentEditable) {
-        const range = document.createRange();
-        range.selectNodeContents(segs[focusedIdx]);
-        range.collapse(false); // place at end
-        if (caretOffset !== null && segs[focusedIdx].firstChild) {
-          range.setStart(segs[focusedIdx].firstChild, Math.min(caretOffset, segs[focusedIdx].textContent?.length || 0));
-          range.collapse(true);
-        }
-        const sel = window.getSelection();
-        if (sel) {
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-      }
-    }
-  }
-
-  // --- Focus a segment by index ---
-  function focusSegment(idx: number) {
-    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
-    if (idx >= 0 && idx < segs.length) {
-      segs.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
-      segs[idx].focus();
-    }
+    // After rendering, restore focus to the correct segment and caret
+    restoreFocus(focusedIdx, caretOffset);
   }
 
   // --- Initial render ---
