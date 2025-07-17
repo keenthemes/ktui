@@ -1,8 +1,8 @@
 <!--
-  KTUI Alert Examples (No Custom JS)
-  - All alerts are configured via data attributes.
-  - No custom JavaScript is required; KTUI auto-initializes alerts on page load.
-  - Pattern matches Toast examples for consistency.
+  KTUI Alert Examples (JS API Only)
+  - All alerts are triggered via KTAlert.show({...})
+  - No data-kt-alert attributes or auto-init
+  - Pattern matches Toast examples for consistency
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -20,11 +20,11 @@
     <div class="mb-6">
       <h3 class="font-semibold mb-2">Alert Types</h3>
       <div class="flex flex-col gap-4">
-        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Info" data-kt-alert-message="This is an info alert." class="kt-btn w-full">Show Info Alert</button>
-        <button data-kt-alert data-kt-alert-type="success" data-kt-alert-title="Success" data-kt-alert-message="Action completed successfully!" class="kt-btn w-full">Show Success Alert</button>
-        <button data-kt-alert data-kt-alert-type="error" data-kt-alert-title="Error" data-kt-alert-message="Something went wrong." class="kt-btn w-full">Show Error Alert</button>
-        <button data-kt-alert data-kt-alert-type="warning" data-kt-alert-title="Warning" data-kt-alert-message="Please check your input." class="kt-btn w-full">Show Warning Alert</button>
-        <button data-kt-alert data-kt-alert-type="question" data-kt-alert-title="Are you sure?" data-kt-alert-message="Do you want to proceed?" class="kt-btn w-full">Show Question Alert</button>
+        <button id="alert-info" class="kt-btn w-full">Show Info Alert</button>
+        <button id="alert-success" class="kt-btn w-full">Show Success Alert</button>
+        <button id="alert-error" class="kt-btn w-full">Show Error Alert</button>
+        <button id="alert-warning" class="kt-btn w-full">Show Warning Alert</button>
+        <button id="alert-question" class="kt-btn w-full">Show Question Alert</button>
       </div>
     </div>
 
@@ -32,8 +32,8 @@
     <div class="mb-6">
       <h3 class="font-semibold mb-2">Modal & Non-Modal</h3>
       <div class="flex flex-col gap-4">
-        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Modal Alert" data-kt-alert-message="This is a modal alert." data-kt-alert-modal="true" class="kt-btn w-full">Show Modal Alert</button>
-        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Non-Modal Alert" data-kt-alert-message="This is a non-modal alert." data-kt-alert-modal="false" class="kt-btn w-full">Show Non-Modal Alert</button>
+        <button id="alert-modal" class="kt-btn w-full">Show Modal Alert</button>
+        <button id="alert-nonmodal" class="kt-btn w-full">Show Non-Modal Alert</button>
       </div>
     </div>
 
@@ -41,8 +41,8 @@
     <div class="mb-6">
       <h3 class="font-semibold mb-2">Confirmation & Input</h3>
       <div class="flex flex-col gap-4">
-        <button data-kt-alert data-kt-alert-type="question" data-kt-alert-title="Confirm Action" data-kt-alert-message="Are you sure you want to continue?" data-kt-alert-confirm-text="Yes" data-kt-alert-cancel-text="No" data-kt-alert-modal="true" data-kt-alert-dismissible="true" class="kt-btn w-full">Show Confirmation Dialog</button>
-        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Enter Your Name" data-kt-alert-message="Please provide your name below:" data-kt-alert-input="true" data-kt-alert-confirm-text="Submit" data-kt-alert-cancel-text="Cancel" data-kt-alert-modal="true" data-kt-alert-dismissible="true" class="kt-btn w-full">Show Prompt/Input Alert</button>
+        <button id="alert-confirm" class="kt-btn w-full">Show Confirmation Dialog</button>
+        <button id="alert-input" class="kt-btn w-full">Show Prompt/Input Alert</button>
       </div>
     </div>
 
@@ -50,16 +50,32 @@
     <div class="mb-6">
       <h3 class="font-semibold mb-2">Custom & Dismissible</h3>
       <div class="flex flex-col gap-4">
-        <button data-kt-alert data-kt-alert-type="success" data-kt-alert-title="Custom Content" data-kt-alert-custom-content='<img src="https://placekitten.com/80/80" alt="Kitten" class="rounded-full mx-auto mb-2" /> <div class="text-center">Here is a custom image!</div>' data-kt-alert-modal="true" data-kt-alert-dismissible="true" class="kt-btn w-full">Show Custom Content Alert</button>
-        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Dismissible" data-kt-alert-message="You can close this alert." data-kt-alert-dismissible="true" class="kt-btn w-full">Show Dismissible Alert</button>
+        <button id="alert-custom" class="kt-btn w-full">Show Custom Content Alert</button>
+        <button id="alert-dismissible" class="kt-btn w-full">Show Dismissible Alert</button>
       </div>
     </div>
 
-    <!-- Accessibility Note -->
-    <div class="mb-6 text-xs text-gray-500">
-      All alerts are fully accessible: ARIA roles, keyboard navigation, and focus management are supported.
-    </div>
   </div>
   <script src="../../dist/ktui.js"></script>
+  <script>
+    // Alert Types
+    document.getElementById('alert-info').onclick = () => KTAlert.show({ type: 'info', title: 'Info', message: 'This is an info alert.' });
+    document.getElementById('alert-success').onclick = () => KTAlert.show({ type: 'success', title: 'Success', message: 'Action completed successfully!' });
+    document.getElementById('alert-error').onclick = () => KTAlert.show({ type: 'error', title: 'Error', message: 'Something went wrong.' });
+    document.getElementById('alert-warning').onclick = () => KTAlert.show({ type: 'warning', title: 'Warning', message: 'Please check your input.' });
+    document.getElementById('alert-question').onclick = () => KTAlert.show({ type: 'question', title: 'Are you sure?', message: 'Do you want to proceed?' });
+
+    // Modal & Non-Modal
+    document.getElementById('alert-modal').onclick = () => KTAlert.show({ type: 'info', title: 'Modal Alert', message: 'This is a modal alert.', modal: true });
+    document.getElementById('alert-nonmodal').onclick = () => KTAlert.show({ type: 'info', title: 'Non-Modal Alert', message: 'This is a non-modal alert.', modal: false });
+
+    // Confirmation & Input
+    document.getElementById('alert-confirm').onclick = () => KTAlert.show({ type: 'question', title: 'Confirm Action', message: 'Are you sure you want to continue?', confirmText: 'Yes', cancelText: 'No', modal: true, dismissible: true });
+    document.getElementById('alert-input').onclick = () => KTAlert.show({ type: 'info', title: 'Enter Your Name', message: 'Please provide your name below:', input: true, confirmText: 'Submit', cancelText: 'Cancel', modal: true, dismissible: true });
+
+    // Custom Content & Dismissible
+    document.getElementById('alert-custom').onclick = () => KTAlert.show({ type: 'success', title: 'Custom Content', customContent: '<img src="https://placekitten.com/80/80" alt="Kitten" class="rounded-full mx-auto mb-2" /> <div class="text-center">Here is a custom image!</div>', modal: true, dismissible: true });
+    document.getElementById('alert-dismissible').onclick = () => KTAlert.show({ type: 'info', title: 'Dismissible', message: 'You can close this alert.', dismissible: true });
+  </script>
 </body>
 </html>

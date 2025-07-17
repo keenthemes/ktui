@@ -415,66 +415,120 @@ export class KTAlert extends KTComponent {
   }
 
   /**
-   * Auto-initializes all KTAlert components in the DOM.
-   * Scans for elements with [data-kt-alert] and instantiates KTAlert for each.
-   * Matches the pattern of other KTUI components (e.g., KTDatepicker).
-   * @param selector - Optional CSS selector to scope initialization (default: [data-kt-alert])
+   * Show an alert as a modal overlay (SweetAlert2-style JS API).
+   * Creates and manages its own overlay/modal DOM. Returns a Promise that resolves with the user's action/result.
+   * @param config - KTAlertConfig for the alert
    */
-  static init(selector: string = '[data-kt-alert]'): void {
-    const elements = document.querySelectorAll<HTMLElement>(selector);
-    elements.forEach((el) => {
-      const anyEl = el as any;
-      // Avoid double-initialization
-      if (anyEl.__kt_alert_instance__) return;
-      // If the element is a button or has role="button", treat as trigger
-      const isButton = el.tagName === 'BUTTON' || el.getAttribute('role') === 'button' || el.tagName === 'A';
-      if (isButton) {
-        el.addEventListener('click', (e) => {
-          e.preventDefault();
-          // Create a temporary container for the alert (modal style)
-          let alertOverlay = document.createElement('div');
-          alertOverlay.style.position = 'fixed';
-          alertOverlay.style.top = '0';
-          alertOverlay.style.left = '0';
-          alertOverlay.style.width = '100vw';
-          alertOverlay.style.height = '100vh';
-          alertOverlay.style.zIndex = '9999';
-          alertOverlay.style.display = 'flex';
-          alertOverlay.style.alignItems = 'center';
-          alertOverlay.style.justifyContent = 'center';
-          alertOverlay.style.background = 'rgba(0,0,0,0.2)';
-          document.body.appendChild(alertOverlay);
-          // Pass the button as the config source
-          const alertInstance = new KTAlert(alertOverlay, undefined);
-          // Copy data attributes from button to overlay for config
-          Array.from(el.attributes).forEach(attr => {
-            if (attr.name.startsWith('data-kt-alert-')) {
-              alertOverlay.setAttribute(attr.name, attr.value);
-            }
-          });
-          // Rebuild config and re-render
-          (alertInstance as any)._buildConfig();
-          (alertInstance as any)._render();
-          // Remove overlay on dismiss
-          const removeOverlay = () => {
-            if (alertOverlay.parentNode) alertOverlay.parentNode.removeChild(alertOverlay);
-          };
-          alertOverlay.addEventListener('dismiss', removeOverlay);
-          // Also listen for custom event from KTAlert
-          alertOverlay.addEventListener('kt-alert-dismiss', removeOverlay);
-          // Fallback: remove overlay when alert is removed from DOM
-          const observer = new MutationObserver(() => {
-            if (!alertOverlay.contains(alertOverlay.firstChild)) {
-              removeOverlay();
-              observer.disconnect();
-            }
-          });
-          observer.observe(alertOverlay, { childList: true });
-        });
-        anyEl.__kt_alert_instance__ = true; // Mark as initialized
-      } else {
-        anyEl.__kt_alert_instance__ = new KTAlert(el);
-      }
+  static show(config: KTAlertConfig): Promise<{ action: 'confirm' | 'cancel' | 'dismiss', inputValue?: string }> {
+    // Remove any existing overlay
+    const existing = document.getElementById('kt-alert-overlay');
+    if (existing) existing.parentNode?.removeChild(existing);
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'kt-alert-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.zIndex = '9999';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.background = 'rgba(0,0,0,0.2)';
+    document.body.appendChild(overlay);
+    // Render alert in overlay
+    const alertInstance = new KTAlert(overlay, config);
+    // Promise for result
+    return new Promise((resolve) => {
+      // Helper to clean up overlay
+      const cleanup = () => {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      };
+      // Listen for confirm, cancel, dismiss
+      overlay.addEventListener('click', (e) => {
+        // Prevent overlay click from closing unless explicitly allowed (optional: config.closeOnClickOutside)
+        if (e.target === overlay && config.closeOnClickOutside) {
+          cleanup();
+          resolve({ action: 'dismiss' });
+        }
+      });
+      // Listen for alert actions
+      const observer = new MutationObserver(() => {
+        if (!overlay.contains(overlay.firstChild)) {
+          cleanup();
+          observer.disconnect();
+        }
+      });
+      observer.observe(overlay, { childList: true });
+      // Patch KTAlert to fire custom events for confirm/cancel/dismiss
+      const origFireEvent = (alertInstance as any)._fireEvent;
+      (alertInstance as any)._fireEvent = function(type: string, payload: any) {
+        origFireEvent.call(this, type, payload);
+        if (type === 'confirm') {
+          cleanup();
+          resolve({ action: 'confirm', inputValue: payload?.inputValue });
+        } else if (type === 'cancel') {
+          cleanup();
+          resolve({ action: 'cancel' });
+        } else if (type === 'dismiss') {
+          cleanup();
+          resolve({ action: 'dismiss' });
+        }
+      };
     });
   }
+
+  /**
+   * [DEPRECATED] Auto-initializes all KTAlert components in the DOM.
+   * Declarative [data-kt-alert] usage is no longer supported. Use KTAlert.show(config) instead.
+   */
+  // static init(selector: string = '[data-kt-alert]'): void {
+  //   const elements = document.querySelectorAll<HTMLElement>(selector);
+  //   elements.forEach((el) => {
+  //     const anyEl = el as any;
+  //     if (anyEl.__kt_alert_instance__) return;
+  //     const isButton = el.tagName === 'BUTTON' || el.getAttribute('role') === 'button' || el.tagName === 'A';
+  //     if (isButton) {
+  //       el.addEventListener('click', (e) => {
+  //         e.preventDefault();
+  //         let alertOverlay = document.createElement('div');
+  //         alertOverlay.style.position = 'fixed';
+  //         alertOverlay.style.top = '0';
+  //         alertOverlay.style.left = '0';
+  //         alertOverlay.style.width = '100vw';
+  //         alertOverlay.style.height = '100vh';
+  //         alertOverlay.style.zIndex = '9999';
+  //         alertOverlay.style.display = 'flex';
+  //         alertOverlay.style.alignItems = 'center';
+  //         alertOverlay.style.justifyContent = 'center';
+  //         alertOverlay.style.background = 'rgba(0,0,0,0.2)';
+  //         document.body.appendChild(alertOverlay);
+  //         const alertInstance = new KTAlert(alertOverlay, undefined);
+  //         Array.from(el.attributes).forEach(attr => {
+  //           if (attr.name.startsWith('data-kt-alert-')) {
+  //             alertOverlay.setAttribute(attr.name, attr.value);
+  //           }
+  //         });
+  //         (alertInstance as any)._buildConfig();
+  //         (alertInstance as any)._render();
+  //         const removeOverlay = () => {
+  //           if (alertOverlay.parentNode) alertOverlay.parentNode.removeChild(alertOverlay);
+  //         };
+  //         alertOverlay.addEventListener('dismiss', removeOverlay);
+  //         alertOverlay.addEventListener('kt-alert-dismiss', removeOverlay);
+  //         const observer = new MutationObserver(() => {
+  //           if (!alertOverlay.contains(alertOverlay.firstChild)) {
+  //             removeOverlay();
+  //             observer.disconnect();
+  //           }
+  //         });
+  //         observer.observe(alertOverlay, { childList: true });
+  //       });
+  //       anyEl.__kt_alert_instance__ = true;
+  //     } else {
+  //       anyEl.__kt_alert_instance__ = new KTAlert(el);
+  //     }
+  //   });
+  // }
 }

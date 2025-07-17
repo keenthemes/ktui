@@ -1,69 +1,43 @@
-# Alert Usage Examples
+# KTAlert Usage Examples
 
-## Overview
-This document provides a variety of usage examples for the Alert component, demonstrating different features and configuration methods. Each example is a standalone HTML snippet.
+> **Note:** KTAlert is now JS-driven only. All alerts are triggered programmatically using the `KTAlert.show({...})` API. Declarative `[data-kt-alert]` usage is no longer supported.
 
----
+## Basic Example
 
-### 1. Minimal Example (Info Alert)
-```html
-<div data-kt-alert="true" data-kt-alert-type="info"></div>
+```js
+KTAlert.show({
+  title: 'Success!',
+  text: 'Your work has been saved.',
+  icon: 'success',
+  confirmButtonText: 'OK'
+});
 ```
 
----
+## Triggering from a Button
 
-### 2. Success Alert
 ```html
-<div data-kt-alert="true" data-kt-alert-type="success"></div>
+<button id="show-alert" class="kt-btn">Show Alert</button>
+<script>
+  document.getElementById('show-alert').addEventListener('click', () => {
+    KTAlert.show({
+      title: 'Hello!',
+      text: 'This is a JS-driven alert.',
+      icon: 'info',
+      confirmButtonText: 'OK'
+    });
+  });
+</script>
 ```
 
----
+## Custom Content
 
-### 3. Error Alert
-```html
-<div data-kt-alert="true" data-kt-alert-type="error"></div>
-```
-
----
-
-### 4. Warning Alert
-```html
-<div data-kt-alert="true" data-kt-alert-type="warning"></div>
-```
-
----
-
-### 5. Question/Confirmation Dialog
-```html
-<div data-kt-alert="true" data-kt-alert-type="question" data-kt-alert-confirm="true"></div>
-```
-
----
-
-### 6. Custom Content Example
-```html
-<div data-kt-alert="true" data-kt-alert-config='{"customContent": "<img src=\"/path/to/image.png\" alt=\"Custom\" />"}'></div>
-```
-
----
-
-### 7. Template Customization Example
-```html
-<div data-kt-alert="true" data-kt-alert-config='{"title": "<h2 class=\"custom-title\">{{title}}</h2>"}'></div>
-```
-
----
-
-### 8. Dismissible Alert
-```html
-<div data-kt-alert="true" data-kt-alert-dismissible="true"></div>
-```
-
----
-
-### 9. Alert with Input Field
-```html
-<div data-kt-alert="true" data-kt-alert-input="true"></div>
+```js
+KTAlert.show({
+  title: 'Custom',
+  html: '<b>Custom HTML content</b>',
+  icon: 'warning',
+  showCancelButton: true
+});
 ```
 
 ---
