@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { renderFooter } from '../renderers/footer';
+import { renderFooter } from '../../renderers/footer';
 
 describe('renderFooter', () => {
   it('renders footer with correct buttons', () => {

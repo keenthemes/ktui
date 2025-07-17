@@ -1,20 +1,7 @@
 /*
- * datepicker.ts - Main entry point for KTDatepicker (revamp)
- * Follows KTSelect pattern: extends KTComponent, uses template system, modular, extensible.
- *
- * Modular Structure (2025+):
- * - All major UI fragments and state updates are handled by dedicated private methods:
- *   - _renderContainer(): Renders the main container
- *   - _renderInputWrapper(): Renders the input wrapper and calendar button
- *   - _bindCalendarButtonEvent(): Binds event to the calendar button
- *   - _renderDropdown(): Renders the dropdown container
- *   - _renderDropdownContent(): Renders header, calendar, and footer into the dropdown
- *   - _attachDropdown(): Attaches the dropdown to the DOM
- *   - _updatePlaceholder(): Updates the input placeholder
- *   - _updateDisabledState(): Updates the disabled state of input and button
- *   - _enforceMinMaxDates(): Disables day buttons outside min/max range
- *
- * This modular approach improves maintainability, readability, and testability.
+ * datepicker.ts - Main implementation for KTDatepicker component
+ * Provides single, range, and multi-date selection with segmented input UI.
+ * Modular rendering and state helpers are imported from datepicker-helpers.ts.
  */
 
 import KTComponent from '../component';
@@ -29,6 +16,13 @@ import { renderFooter } from './renderers/footer';
 import { getInitialState } from './state';
 import { SegmentedInput, SegmentedInputOptions } from './segmented-input';
 import { parseDateFromFormat } from './date-utils';
+import {
+  renderSingleSegmentedInputUI,
+  renderRangeSegmentedInputUI,
+  instantiateSingleSegmentedInput,
+  instantiateRangeSegmentedInputs,
+  updateRangeSelection
+} from './datepicker-helpers';
 
 /**
  * KTDatepicker
@@ -170,22 +164,7 @@ export class KTDatepicker extends KTComponent {
    * Updates both segmented inputs and internal state.
    */
   private _selectRangeDate(date: Date) {
-    // If neither start nor end is set, set start
-    if (!this._state.selectedRange || (!this._state.selectedRange.start && !this._state.selectedRange.end)) {
-      this._state.selectedRange = { start: date, end: null };
-    } else if (this._state.selectedRange.start && !this._state.selectedRange.end) {
-      // If start is set and end is not, set end (if after start), else reset start
-      if (date >= this._state.selectedRange.start) {
-        this._state.selectedRange.end = date;
-      } else {
-        this._state.selectedRange = { start: date, end: null };
-      }
-    } else {
-      // If both are set, start a new range
-      this._state.selectedRange = { start: date, end: null };
-    }
-    // No direct input.value update here; _render will update segmented inputs
-    // Dispatch change event for integration
+    this._state.selectedRange = updateRangeSelection(this._state.selectedRange, date);
     if (this._input) {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
@@ -501,126 +480,44 @@ export class KTDatepicker extends KTComponent {
    */
   private _renderInputWrapper(calendarButtonHtml: string): HTMLElement {
     const inputWrapperTpl = this._templateSet.inputWrapper || defaultTemplates.inputWrapper;
-    let inputWrapperHtml: string;
-    if (typeof inputWrapperTpl === 'function') {
-      inputWrapperHtml = inputWrapperTpl({ input: '', icon: calendarButtonHtml });
-    } else {
-      inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, '');
-    }
-    const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
-    const inputWrapperEl = inputWrapperFrag.firstElementChild as HTMLElement;
-    // Remove old input if present
     if (this._input && this._input.parentNode) {
       this._input.parentNode.removeChild(this._input);
     }
-    // --- Range mode: render two segmented inputs ---
     if (this._config.range) {
-      // Use segmentedDateRangeInput template
       const rangeTpl = this._templateSet.segmentedDateRangeInput || defaultTemplates.segmentedDateRangeInput;
-      // Create containers for start and end segmented inputs
-      const startContainer = document.createElement('div');
-      startContainer.className = 'ktui-segmented-input-start flex items-center gap-1';
-      startContainer.setAttribute('aria-label', 'Start date');
-      startContainer.setAttribute('role', 'group');
-      const endContainer = document.createElement('div');
-      endContainer.className = 'ktui-segmented-input-end flex items-center gap-1';
-      endContainer.setAttribute('aria-label', 'End date');
-      endContainer.setAttribute('role', 'group');
-      // Optionally, add visually hidden labels for screen readers
-      const startLabel = document.createElement('span');
-      startLabel.textContent = 'Start date';
-      startLabel.id = 'ktui-datepicker-start-label';
-      startLabel.className = 'sr-only';
-      startContainer.prepend(startLabel);
-      startContainer.setAttribute('aria-labelledby', 'ktui-datepicker-start-label');
-      const endLabel = document.createElement('span');
-      endLabel.textContent = 'End date';
-      endLabel.id = 'ktui-datepicker-end-label';
-      endLabel.className = 'sr-only';
-      endContainer.prepend(endLabel);
-      endContainer.setAttribute('aria-labelledby', 'ktui-datepicker-end-label');
-      // Render template with placeholders
-      const separator = '–';
-      let rangeHtml: string;
-      if (typeof rangeTpl === 'function') {
-        rangeHtml = rangeTpl({
-          start: '<div data-kt-datepicker-segmented-start></div>',
-          separator,
-          end: '<div data-kt-datepicker-segmented-end></div>',
-        });
-      } else {
-        rangeHtml = rangeTpl
-          .replace(/{{start}}/g, '<div data-kt-datepicker-segmented-start></div>')
-          .replace(/{{separator}}/g, separator)
-          .replace(/{{end}}/g, '<div data-kt-datepicker-segmented-end></div>');
-      }
-      const rangeFrag = renderTemplateToDOM(rangeHtml);
-      // Find mount points
-      const startMount = rangeFrag.querySelector('[data-kt-datepicker-segmented-start]') as HTMLElement;
-      const endMount = rangeFrag.querySelector('[data-kt-datepicker-segmented-end]') as HTMLElement;
-      if (startMount) startMount.replaceWith(startContainer);
-      if (endMount) endMount.replaceWith(endContainer);
-      // Insert the range input UI at the start of the wrapper
-      inputWrapperEl.insertBefore(rangeFrag.firstElementChild!, inputWrapperEl.firstChild);
-      // Instantiate SegmentedInput for start
-      SegmentedInput(startContainer, {
-        value: this._state.selectedRange?.start || new Date(),
-        segments: ['month', 'day', 'year'],
-        disabled: !!this._config.disabled,
-        required: !!this._config.required,
-        readOnly: !!this._config.readOnly,
-        locale: this._config.locale,
-        onChange: (date) => {
+      const { inputWrapperEl, startContainer, endContainer } = renderRangeSegmentedInputUI(inputWrapperTpl, rangeTpl, calendarButtonHtml);
+      instantiateRangeSegmentedInputs(
+        startContainer,
+        endContainer,
+        this._state,
+        this._config,
+        (date: Date) => {
           const end = this._state.selectedRange?.end || null;
-          // If end is set and new start is after end, reset end
           let newEnd = end;
           if (end && date > end) newEnd = null;
-          this._state.selectedRange = {
-            start: date,
-            end: newEnd,
-          };
+          this._state.selectedRange = { start: date, end: newEnd };
           this._render();
         },
-      });
-      // Instantiate SegmentedInput for end
-      SegmentedInput(endContainer, {
-        value: this._state.selectedRange?.end || new Date(),
-        segments: ['month', 'day', 'year'],
-        disabled: !!this._config.disabled,
-        required: !!this._config.required,
-        readOnly: !!this._config.readOnly,
-        locale: this._config.locale,
-        onChange: (date) => {
+        (date: Date) => {
           const start = this._state.selectedRange?.start || null;
-          // If start is set and new end is before start, reset start
           let newStart = start;
           if (start && date < start) newStart = null;
-          this._state.selectedRange = {
-            start: newStart,
-            end: date,
-          };
+          this._state.selectedRange = { start: newStart, end: date };
           this._render();
-        },
-      });
+        }
+      );
       return inputWrapperEl;
     }
-    // --- Single-date mode: render single segmented input ---
+    // Single-date mode
+    const inputWrapperEl = renderSingleSegmentedInputUI(inputWrapperTpl, calendarButtonHtml);
     let segmentedInputContainer = inputWrapperEl.querySelector('.ktui-segmented-input');
     if (!segmentedInputContainer) {
       segmentedInputContainer = document.createElement('div');
       segmentedInputContainer.className = 'ktui-segmented-input flex items-center gap-1';
       inputWrapperEl.insertBefore(segmentedInputContainer, inputWrapperEl.firstChild);
     }
-    SegmentedInput(segmentedInputContainer as HTMLElement, {
-      value: this._state.selectedDate || this._state.currentDate || new Date(),
-      segments: ['month', 'day', 'year'],
-      disabled: !!this._config.disabled,
-      required: !!this._config.required,
-      readOnly: !!this._config.readOnly,
-      locale: this._config.locale,
-      onChange: (date) => {
-        this.setDate(date);
-      },
+    instantiateSingleSegmentedInput(segmentedInputContainer as HTMLElement, this._state, this._config, (date: Date) => {
+      this.setDate(date);
     });
     return inputWrapperEl;
   }
@@ -905,6 +802,7 @@ export class KTDatepicker extends KTComponent {
 
   /**
    * Set the selected date (single, range, or multi-date)
+   * @param date - The date to select
    */
   public setDate(date: Date) {
     console.log('🗓️ [KTDatepicker] setDate called with:', date);
@@ -1000,16 +898,38 @@ export class KTDatepicker extends KTComponent {
 
   /**
    * Update the disabled state of the input and calendar button
+   *
+   * Accessibility rationale:
+   * - When disabling the calendar button, set:
+   *   - disabled attribute (removes from tab order, blocks interaction)
+   *   - aria-disabled="true" (announces as disabled to screen readers)
+   *   - tabindex="-1" (removes from tab order for extra safety)
+   * - When enabling, remove these attributes.
+   * This matches accessibility best practices and ensures the button is properly announced and not focusable when disabled.
    */
   private _updateDisabledState() {
     const calendarButton = this._element.querySelector('button[data-kt-datepicker-calendar-btn]');
     if (this._input && this._config.disabled) {
       this._input.setAttribute('disabled', 'true');
-      if (calendarButton) calendarButton.setAttribute('disabled', 'true');
+      if (calendarButton) {
+        // Set disabled attribute
+        calendarButton.setAttribute('disabled', 'true');
+        // Set aria-disabled for screen readers
+        calendarButton.setAttribute('aria-disabled', 'true');
+        // Remove from tab order
+        calendarButton.setAttribute('tabindex', '-1');
+      }
       console.log('🗓️ [KTDatepicker] _render: Input and calendar button disabled');
     } else if (this._input) {
       this._input.removeAttribute('disabled');
-      if (calendarButton) calendarButton.removeAttribute('disabled');
+      if (calendarButton) {
+        // Remove disabled attribute
+        calendarButton.removeAttribute('disabled');
+        // Remove aria-disabled attribute
+        calendarButton.removeAttribute('aria-disabled');
+        // Restore tab order (remove tabindex)
+        calendarButton.removeAttribute('tabindex');
+      }
     }
   }
 

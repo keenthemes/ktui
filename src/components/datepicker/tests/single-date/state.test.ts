@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getInitialState } from '../state';
+import { getInitialState } from '../../state';
 
 describe('getInitialState', () => {
   it('returns the correct initial state shape and values', () => {

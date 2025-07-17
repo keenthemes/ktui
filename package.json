@@ -82,6 +82,7 @@
 		"clean-webpack-plugin": "^4.0.0",
 		"concurrently": "^9.1.2",
 		"eslint": "^9.27.0",
+		"jsdom": "^26.1.0",
 		"mini-svg-data-uri": "^1.4.4",
 		"playwright": "^1.54.1",
 		"prettier": "^3.5.3",
@@ -91,6 +92,7 @@
 		"terser-webpack-plugin": "^5.3.14",
 		"ts-loader": "^9.5.2",
 		"typescript": "^5.8.3",
+		"vitest": "^3.2.4",
 		"webpack": "^5.99.9",
 		"webpack-cli": "^6.0.1",
 		"webpack-merge-and-include-globally": "^2.3.4"

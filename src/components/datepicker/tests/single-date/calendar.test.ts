@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { renderCalendar } from '../renderers/calendar';
+import { renderCalendar } from '../../renderers/calendar';
 
 describe('renderCalendar', () => {
   it('renders calendar with correct number of days', () => {

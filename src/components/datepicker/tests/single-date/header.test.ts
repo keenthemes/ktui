@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { renderHeader } from '../renderers/header';
+import { renderHeader } from '../../renderers/header';
 
 describe('renderHeader', () => {
   it('renders header with correct month and year', () => {

@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 /// <reference types="vitest/globals" />
 import { describe, it, expect, beforeEach } from 'vitest';
-import { KTDatepicker } from '../datepicker';
-import { getTemplateStrings, defaultTemplates } from '../templates';
-import { parseDateFromFormat } from '../date-utils';
+import { KTDatepicker } from '../../datepicker';
+import { getTemplateStrings, defaultTemplates } from '../../templates';
+import { parseDateFromFormat } from '../../date-utils';
 
 describe('KTDatepicker', () => {
   let container: HTMLElement;

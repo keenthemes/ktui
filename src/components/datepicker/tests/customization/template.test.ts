@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { mergeTemplates, renderTemplateString, isTemplateFunction, renderTemplateToDOM } from '../utils/template';
+import { mergeTemplates, renderTemplateString, isTemplateFunction, renderTemplateToDOM } from '../../utils/template';
 
 describe('mergeTemplates', () => {
   it('merges defaults and overrides, with overrides taking precedence', () => {
