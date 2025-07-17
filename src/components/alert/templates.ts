@@ -9,17 +9,31 @@ import { KTAlertConfig, KTAlertTemplateStrings } from './types';
 
 // Default template strings for all UI fragments
 export const defaultTemplates: KTAlertTemplateStrings = {
-  // Container: role=alertdialog for modal, role=alert for non-modal
-  container: `<div data-kt-alert-container role="alertdialog" aria-modal="true" aria-label="Alert Dialog">{{content}}</div>`,
+  // Overlay: wraps the modal for modal alerts
+  overlay: `<div data-kt-alert-overlay aria-hidden="false">{{modal}}</div>`,
+  // Modal container: role=alertdialog for modal, role=alert for non-modal
+  modal: `<div data-kt-alert data-kt-alert-type="{{type}}" data-kt-alert-variant="{{variant}}" aria-modal="{{ariaModal}}" role="{{role}}" aria-label="Alert Dialog" class="{{customClass}}" data-kt-alert-position="{{position}}">{{content}}</div>`,
+  // Fallback container (non-modal, or if no template provided)
+  container: `<div>{{content}}</div>`,
   icon: `<span data-kt-alert-icon aria-hidden="true">{{icon}}</span>`,
   title: `<h2 data-kt-alert-title id="kt-alert-title">{{title}}</h2>`,
   message: `<div data-kt-alert-message id="kt-alert-message">{{message}}</div>`,
   actions: `<div data-kt-alert-actions>{{confirmButton}} {{cancelButton}}</div>`,
+  // Confirm/cancel buttons (default, can be overridden with custom class)
   confirmButton: `<button type="button" data-kt-alert-confirm aria-label="Confirm" tabindex="0">{{confirmText}}</button>`,
   cancelButton: `<button type="button" data-kt-alert-cancel aria-label="Cancel" tabindex="0">{{cancelText}}</button>`,
-  input: `<input data-kt-alert-input type="text" aria-label="Prompt input" tabindex="0" />`,
+  // Confirm/cancel buttons with custom class (for per-type theming)
+  confirmButtonCustomClass: `<button type="button" data-kt-alert-confirm aria-label="Confirm" tabindex="0" class="{{confirmButtonClass}}">{{confirmText}}</button>`,
+  cancelButtonCustomClass: `<button type="button" data-kt-alert-cancel aria-label="Cancel" tabindex="0" class="{{cancelButtonClass}}">{{cancelText}}</button>`,
+  // Input templates for each type
+  inputText: `<label data-kt-alert-input-label>{{inputLabel}}<input data-kt-alert-input type="{{inputType}}" placeholder="{{inputPlaceholder}}" value="{{inputValue}}" {{attrs}} aria-label="Prompt input" tabindex="0" /></label>`,
+  inputTextarea: `<label data-kt-alert-input-label>{{inputLabel}}<textarea data-kt-alert-input placeholder="{{inputPlaceholder}}" {{attrs}} aria-label="Prompt input" tabindex="0">{{inputValue}}</textarea></label>`,
+  inputSelect: `<label data-kt-alert-input-label>{{inputLabel}}<select data-kt-alert-input {{attrs}} aria-label="Prompt input" tabindex="0">{{optionsHtml}}</select></label>`,
+  inputRadio: `<fieldset data-kt-alert-input-label><legend>{{inputLabel}}</legend>{{optionsHtml}}</fieldset>`,
+  inputCheckbox: `<fieldset data-kt-alert-input-label><legend>{{inputLabel}}</legend>{{optionsHtml}}</fieldset>`,
   closeButton: `<button type="button" data-kt-alert-close aria-label="Close alert" tabindex="0">&times;</button>`,
   customContent: `<div data-kt-alert-custom-content>{{customContent}}</div>`,
+  loaderHtml: `<span data-kt-alert-loader>{{loaderHtml}}</span>`,
 };
 
 /**

@@ -59,23 +59,23 @@
   <script src="../../dist/ktui.js"></script>
   <script>
     // Alert Types
-    document.getElementById('alert-info').onclick = () => KTAlert.show({ type: 'info', title: 'Info', message: 'This is an info alert.' });
-    document.getElementById('alert-success').onclick = () => KTAlert.show({ type: 'success', title: 'Success', message: 'Action completed successfully!' });
-    document.getElementById('alert-error').onclick = () => KTAlert.show({ type: 'error', title: 'Error', message: 'Something went wrong.' });
-    document.getElementById('alert-warning').onclick = () => KTAlert.show({ type: 'warning', title: 'Warning', message: 'Please check your input.' });
-    document.getElementById('alert-question').onclick = () => KTAlert.show({ type: 'question', title: 'Are you sure?', message: 'Do you want to proceed?' });
+    document.getElementById('alert-info').onclick = () => KTAlert.fire({ type: 'info', title: 'Info', message: 'This is an info alert.' });
+    document.getElementById('alert-success').onclick = () => KTAlert.fire({ type: 'success', title: 'Success', message: 'Action completed successfully!' });
+    document.getElementById('alert-error').onclick = () => KTAlert.fire({ type: 'error', title: 'Error', message: 'Something went wrong.' });
+    document.getElementById('alert-warning').onclick = () => KTAlert.fire({ type: 'warning', title: 'Warning', message: 'Please check your input.' });
+    document.getElementById('alert-question').onclick = () => KTAlert.fire({ type: 'question', title: 'Are you sure?', message: 'Do you want to proceed?' });
 
     // Modal & Non-Modal
-    document.getElementById('alert-modal').onclick = () => KTAlert.show({ type: 'info', title: 'Modal Alert', message: 'This is a modal alert.', modal: true });
-    document.getElementById('alert-nonmodal').onclick = () => KTAlert.show({ type: 'info', title: 'Non-Modal Alert', message: 'This is a non-modal alert.', modal: false });
+    document.getElementById('alert-modal').onclick = () => KTAlert.fire({ type: 'info', title: 'Modal Alert', message: 'This is a modal alert.', modal: true });
+    document.getElementById('alert-nonmodal').onclick = () => KTAlert.fire({ type: 'info', title: 'Non-Modal Alert', message: 'This is a non-modal alert.', modal: false });
 
     // Confirmation & Input
-    document.getElementById('alert-confirm').onclick = () => KTAlert.show({ type: 'question', title: 'Confirm Action', message: 'Are you sure you want to continue?', confirmText: 'Yes', cancelText: 'No', modal: true, dismissible: true });
-    document.getElementById('alert-input').onclick = () => KTAlert.show({ type: 'info', title: 'Enter Your Name', message: 'Please provide your name below:', input: true, confirmText: 'Submit', cancelText: 'Cancel', modal: true, dismissible: true });
+    document.getElementById('alert-confirm').onclick = () => KTAlert.fire({ type: 'question', title: 'Confirm Action', message: 'Are you sure you want to continue?', confirmText: 'Yes', cancelText: 'No', modal: true, dismissible: true });
+    document.getElementById('alert-input').onclick = () => KTAlert.fire({ type: 'info', title: 'Enter Your Name', message: 'Please provide your name below:', input: true, confirmText: 'Submit', cancelText: 'Cancel', modal: true, dismissible: true });
 
     // Custom Content & Dismissible
-    document.getElementById('alert-custom').onclick = () => KTAlert.show({ type: 'success', title: 'Custom Content', customContent: '<img src="https://placekitten.com/80/80" alt="Kitten" class="rounded-full mx-auto mb-2" /> <div class="text-center">Here is a custom image!</div>', modal: true, dismissible: true });
-    document.getElementById('alert-dismissible').onclick = () => KTAlert.show({ type: 'info', title: 'Dismissible', message: 'You can close this alert.', dismissible: true });
+    document.getElementById('alert-custom').onclick = () => KTAlert.fire({ type: 'success', title: 'Custom Content', customContent: '<img src="https://placekitten.com/80/80" alt="Kitten" class="rounded-full mx-auto mb-2" /> <div class="text-center">Here is a custom image!</div>', modal: true, dismissible: true });
+    document.getElementById('alert-dismissible').onclick = () => KTAlert.fire({ type: 'info', title: 'Dismissible', message: 'You can close this alert.', dismissible: true });
   </script>
 </body>
 </html>

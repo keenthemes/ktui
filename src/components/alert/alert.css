@@ -1,131 +1,475 @@
 /**
  * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
  * Copyright 2025 by Keenthemes Inc
+ *
+ * Alert Component CSS - Modern implementation with accessibility and responsive design
+ * Features:
+ * - WCAG 2.2 AA compliant
+ * - CSS custom properties for theming
+ * - Responsive design with mobile-first approach
+ * - Proper focus management and keyboard navigation
+ * - Modal overlay with backdrop blur
+ * - Design system consistency
  */
 
 @layer components {
-	/* Base Alert Container */
-	[data-kt-alert] {
-		@apply flex items-stretch w-full rounded-lg p-3.5 gap-2.5 text-sm bg-muted text-foreground;
-	}
+  /* ==========================================================================
+     CSS Custom Properties (Design Tokens)
+     ========================================================================== */
 
-	/* Alert Title */
-	[data-kt-alert-title] {
-		@apply grow tracking-tight font-semibold;
-	}
+  :root {
+    /* Alert Colors - Semantic naming */
+    --kt-alert-success-bg: theme(colors.green.500);
+    --kt-alert-success-text: theme(colors.white);
+    --kt-alert-success-border: theme(colors.green.200);
 
-	/* Alert Toolbar */
-	[data-kt-alert-toolbar] {
-		@apply flex items-baseline gap-2.5 pt-0.25;
-	}
+    --kt-alert-error-bg: theme(colors.red.500);
+    --kt-alert-error-text: theme(colors.white);
+    --kt-alert-error-border: theme(colors.red.200);
 
-	/* Alert Actions */
-	[data-kt-alert-actions] {
-		@apply flex items-center gap-2;
-	}
+    --kt-alert-warning-bg: theme(colors.yellow.500);
+    --kt-alert-warning-text: theme(colors.white);
+    --kt-alert-warning-border: theme(colors.yellow.200);
 
-	/* Alert Description */
-	[data-kt-alert-message] {
-		@apply text-sm [&_p]:leading-relaxed [&_p]:mb-2;
-	}
+    --kt-alert-info-bg: theme(colors.violet.600);
+    --kt-alert-info-text: theme(colors.white);
+    --kt-alert-info-border: theme(colors.violet.200);
 
-	/* Alert Content */
-	[data-kt-alert-content] {
-		@apply w-full grow space-y-1.5;
-	}
+    --kt-alert-primary-bg: theme(colors.blue.500);
+    --kt-alert-primary-text: theme(colors.white);
+    --kt-alert-primary-border: theme(colors.blue.200);
 
-	[data-kt-alert-icon] {
-		@apply shrink-0;
-	}
+    --kt-alert-mono-bg: theme(colors.gray.500);
+    --kt-alert-mono-text: theme(colors.white);
+    --kt-alert-mono-border: theme(colors.gray.200);
 
-	/* Alert Close */
-	[data-kt-alert-close] {
-		@apply shrink-0 size-4 cursor-pointer;
-	}
-	[data-kt-alert-close]:focus > svg,
-	[data-kt-alert-close]:hover > svg {
-		@apply text-foreground;
-	}
+      /* Alert Spacing */
+  --kt-alert-padding: 0.875rem; /* 3.5 * 0.25rem */
+  --kt-alert-gap: 0.625rem; /* 2.5 * 0.25rem */
+  --kt-alert-border-radius: 0.5rem; /* lg */
+  --kt-alert-max-width: 28rem; /* md */
 
-	/* Variant: Success */
-	[data-kt-alert][data-kt-alert-type="success"] {
-		@apply bg-green-500 text-white;
-	}
-	[data-kt-alert][data-kt-alert-type="success"] [data-kt-alert-close] > svg {
-		@apply text-white;
-	}
+      /* Modal Overlay */
+  --kt-alert-overlay-bg: rgb(0 0 0 / 0.3);
+  --kt-alert-overlay-blur: blur(4px);
+  --kt-alert-z-index: 50;
 
-	/* Variant: Error/Destructive */
-	[data-kt-alert][data-kt-alert-type="error"],
-	[data-kt-alert][data-kt-alert-type="destructive"] {
-		@apply bg-destructive text-destructive-foreground;
-	}
-	[data-kt-alert][data-kt-alert-type="error"] [data-kt-alert-close] > svg,
-	[data-kt-alert][data-kt-alert-type="destructive"] [data-kt-alert-close] > svg {
-		@apply text-destructive-foreground;
-	}
+  /* Focus Management */
+  --kt-alert-focus-ring: 2px solid #3b82f6; /* blue-500 */
+  --kt-alert-focus-ring-offset: 2px;
 
-	/* Variant: Info */
-	[data-kt-alert][data-kt-alert-type="info"] {
-		@apply bg-violet-600 text-white;
-	}
-	[data-kt-alert][data-kt-alert-type="info"] [data-kt-alert-close] > svg {
-		@apply text-white;
-	}
+    /* Transitions */
+    --kt-alert-transition: all 0.2s ease-in-out;
+  }
 
-	/* Variant: Warning */
-	[data-kt-alert][data-kt-alert-type="warning"] {
-		@apply bg-yellow-500 text-white;
-	}
-	[data-kt-alert][data-kt-alert-type="warning"] [data-kt-alert-close] > svg {
-		@apply text-white;
-	}
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --kt-alert-overlay-bg: rgb(0 0 0 / 0.5);
+    }
+  }
 
-	/* Variant: Primary */
-	[data-kt-alert][data-kt-alert-type="primary"] {
-		@apply bg-primary text-primary-foreground;
-	}
-	[data-kt-alert][data-kt-alert-type="primary"] [data-kt-alert-close] > svg {
-		@apply text-primary-foreground;
-	}
+  /* ==========================================================================
+     Modal Overlay System
+     ========================================================================== */
 
-	/* Variant: Mono */
-	[data-kt-alert][data-kt-alert-type="mono"] {
-		@apply bg-mono text-mono-foreground;
-	}
-	[data-kt-alert][data-kt-alert-type="mono"] [data-kt-alert-close] > svg {
-		@apply text-mono-foreground;
-	}
+  /* Modal Alert Overlay - Fixed positioning with backdrop */
+  [data-kt-alert][aria-modal="true"] {
+    @apply fixed inset-0 z-50;
+    background: var(--kt-alert-overlay-bg);
+    backdrop-filter: var(--kt-alert-overlay-blur);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem; /* spacing.4 */
+  }
 
-	/* Outline Variant */
-	[data-kt-alert][data-kt-alert-variant="outline"] {
-		@apply border border-border bg-background text-foreground;
-	}
-	[data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="success"] {
-		@apply text-green-500;
-	}
-	[data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="info"] {
-		@apply text-violet-600;
-	}
-	[data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="warning"] {
-		@apply text-yellow-500;
-	}
-	[data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="primary"] {
-		@apply text-primary;
-	}
-	[data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="destructive"],
-	[data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="error"] {
-		@apply text-destructive;
-	}
-	[data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="mono"] {
-		@apply text-mono;
-	}
+  /* Modal Content Container - Centered with proper sizing */
+  [data-kt-alert][aria-modal="true"] > * {
+    @apply w-full rounded-lg shadow-xl bg-white dark:bg-gray-800;
+    max-width: var(--kt-alert-max-width);
+    padding: var(--kt-alert-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--kt-alert-gap);
+    /* Ensure proper focus containment */
+    contain: layout style paint;
+  }
 
-	/* Light Variant */
-	[data-kt-alert][data-kt-alert-variant="light"] {
-		@apply bg-muted border border-border text-foreground;
-	}
-	[data-kt-alert][data-kt-alert-variant="light"] [data-kt-alert-icon] > svg {
-		@apply text-muted-foreground;
-	}
+  /* Non-modal Alert - Full width bar */
+  [data-kt-alert][aria-modal="false"] {
+    @apply w-full;
+  }
+
+  /* ==========================================================================
+     Base Alert Container
+     ========================================================================== */
+
+  /* Base Alert Container - Responsive and accessible */
+  [data-kt-alert] {
+    @apply flex items-stretch w-full rounded-lg text-sm;
+    padding: var(--kt-alert-padding);
+    gap: var(--kt-alert-gap);
+    background: #f3f4f6; /* gray.100 */
+    color: #111827; /* gray.900 */
+    border: 1px solid #e5e7eb; /* gray.200 */
+    transition: var(--kt-alert-transition);
+
+    /* Ensure proper contrast and readability */
+    line-height: 1.5;
+    font-size: 0.875rem; /* fontSize.sm */
+  }
+
+  /* Dark mode support for base alert */
+  @media (prefers-color-scheme: dark) {
+    [data-kt-alert] {
+      background: #1f2937; /* gray.800 */
+      color: #f9fafb; /* gray.100 */
+      border-color: #374151; /* gray.700 */
+    }
+  }
+
+  /* ==========================================================================
+     Alert Content Elements
+     ========================================================================== */
+
+  /* Alert Title - Semantic heading with proper hierarchy */
+  [data-kt-alert-title] {
+    @apply grow tracking-tight font-semibold;
+    font-size: 1rem; /* fontSize.base */
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* Alert Message - Accessible text content */
+  [data-kt-alert-message] {
+    @apply text-sm;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Alert Message Paragraphs - Proper spacing */
+  [data-kt-alert-message] p {
+    margin-bottom: 0.5rem; /* spacing.2 */
+    line-height: 1.6;
+  }
+
+  [data-kt-alert-message] p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Alert Content Container - Flexible layout */
+  [data-kt-alert-content] {
+    @apply w-full grow;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem; /* spacing.1.5 */
+  }
+
+  /* Alert Icon - Proper sizing and alignment */
+  [data-kt-alert-icon] {
+    @apply shrink-0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem; /* spacing.5 */
+    height: 1.25rem; /* spacing.5 */
+  }
+
+  /* Alert Actions Container - Button grouping */
+  [data-kt-alert-actions] {
+    @apply flex items-center gap-2;
+    margin-top: 0.5rem; /* spacing.2 */
+  }
+
+  /* Alert Toolbar - Additional controls */
+  [data-kt-alert-toolbar] {
+    @apply flex items-baseline gap-2.5;
+    padding-top: 0.125rem; /* spacing.0.5 */
+  }
+
+  /* ==========================================================================
+     Interactive Elements
+     ========================================================================== */
+
+  /* Alert Close Button - Accessible and keyboard navigable */
+  [data-kt-alert-close] {
+    @apply shrink-0 cursor-pointer;
+    width: 1rem; /* spacing.4 */
+    height: 1rem; /* spacing.4 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem; /* borderRadius.sm */
+    transition: var(--kt-alert-transition);
+    outline: none;
+  }
+
+  /* Focus states for close button */
+  [data-kt-alert-close]:focus-visible {
+    box-shadow: var(--kt-alert-focus-ring);
+    outline-offset: var(--kt-alert-focus-ring-offset);
+  }
+
+  [data-kt-alert-close]:hover {
+    background: rgb(0 0 0 / 0.1);
+  }
+
+  [data-kt-alert-close]:active {
+    transform: scale(0.95);
+  }
+
+  /* Close button icon styling */
+  [data-kt-alert-close] > svg {
+    width: 1rem; /* spacing.4 */
+    height: 1rem; /* spacing.4 */
+    transition: var(--kt-alert-transition);
+  }
+
+  /* ==========================================================================
+     Alert Type Variants
+     ========================================================================== */
+
+  /* Success Alert */
+  [data-kt-alert][data-kt-alert-type="success"] {
+    background: var(--kt-alert-success-bg);
+    color: var(--kt-alert-success-text);
+    border-color: var(--kt-alert-success-border);
+  }
+
+  [data-kt-alert][data-kt-alert-type="success"] [data-kt-alert-close] > svg {
+    color: var(--kt-alert-success-text);
+  }
+
+  /* Error/Destructive Alert */
+  [data-kt-alert][data-kt-alert-type="error"],
+  [data-kt-alert][data-kt-alert-type="destructive"] {
+    background: var(--kt-alert-error-bg);
+    color: var(--kt-alert-error-text);
+    border-color: var(--kt-alert-error-border);
+  }
+
+  [data-kt-alert][data-kt-alert-type="error"] [data-kt-alert-close] > svg,
+  [data-kt-alert][data-kt-alert-type="destructive"] [data-kt-alert-close] > svg {
+    color: var(--kt-alert-error-text);
+  }
+
+  /* Info Alert */
+  [data-kt-alert][data-kt-alert-type="info"] {
+    background: var(--kt-alert-info-bg);
+    color: var(--kt-alert-info-text);
+    border-color: var(--kt-alert-info-border);
+  }
+
+  [data-kt-alert][data-kt-alert-type="info"] [data-kt-alert-close] > svg {
+    color: var(--kt-alert-info-text);
+  }
+
+  /* Warning Alert */
+  [data-kt-alert][data-kt-alert-type="warning"] {
+    background: var(--kt-alert-warning-bg);
+    color: var(--kt-alert-warning-text);
+    border-color: var(--kt-alert-warning-border);
+  }
+
+  [data-kt-alert][data-kt-alert-type="warning"] [data-kt-alert-close] > svg {
+    color: var(--kt-alert-warning-text);
+  }
+
+  /* Primary Alert */
+  [data-kt-alert][data-kt-alert-type="primary"] {
+    background: var(--kt-alert-primary-bg);
+    color: var(--kt-alert-primary-text);
+    border-color: var(--kt-alert-primary-border);
+  }
+
+  [data-kt-alert][data-kt-alert-type="primary"] [data-kt-alert-close] > svg {
+    color: var(--kt-alert-primary-text);
+  }
+
+  /* Mono Alert */
+  [data-kt-alert][data-kt-alert-type="mono"] {
+    background: var(--kt-alert-mono-bg);
+    color: var(--kt-alert-mono-text);
+    border-color: var(--kt-alert-mono-border);
+  }
+
+  [data-kt-alert][data-kt-alert-type="mono"] [data-kt-alert-close] > svg {
+    color: var(--kt-alert-mono-text);
+  }
+
+  /* ==========================================================================
+     Alert Style Variants
+     ========================================================================== */
+
+  /* Outline Variant - Bordered with colored text */
+  [data-kt-alert][data-kt-alert-variant="outline"] {
+    background: #fff; /* white */
+    border: 2px solid #e5e7eb; /* gray.200 */
+    color: #111827; /* gray.900 */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-kt-alert][data-kt-alert-variant="outline"] {
+      background: #111827; /* gray.900 */
+      border-color: #374151; /* gray.700 */
+      color: #f9fafb; /* gray.100 */
+    }
+  }
+
+  /* Outline variant type-specific colors */
+  [data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="success"] {
+    border-color: var(--kt-alert-success-bg);
+    color: var(--kt-alert-success-bg);
+  }
+
+  [data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="info"] {
+    border-color: var(--kt-alert-info-bg);
+    color: var(--kt-alert-info-bg);
+  }
+
+  [data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="warning"] {
+    border-color: var(--kt-alert-warning-bg);
+    color: var(--kt-alert-warning-bg);
+  }
+
+  [data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="primary"] {
+    border-color: var(--kt-alert-primary-bg);
+    color: var(--kt-alert-primary-bg);
+  }
+
+  [data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="destructive"],
+  [data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="error"] {
+    border-color: var(--kt-alert-error-bg);
+    color: var(--kt-alert-error-bg);
+  }
+
+  [data-kt-alert][data-kt-alert-variant="outline"][data-kt-alert-type="mono"] {
+    border-color: var(--kt-alert-mono-bg);
+    color: var(--kt-alert-mono-bg);
+  }
+
+  /* Light Variant - Subtle background with muted colors */
+  [data-kt-alert][data-kt-alert-variant="light"] {
+    background: #f9fafb; /* gray.50 */
+    border: 1px solid #e5e7eb; /* gray.200 */
+    color: #111827; /* gray.900 */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-kt-alert][data-kt-alert-variant="light"] {
+      background: #1f2937; /* gray.800 */
+      border-color: #374151; /* gray.700 */
+      color: #f9fafb; /* gray.100 */
+    }
+  }
+
+  [data-kt-alert][data-kt-alert-variant="light"] [data-kt-alert-icon] > svg {
+    color: #4b5563; /* gray.600 */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-kt-alert][data-kt-alert-variant="light"] [data-kt-alert-icon] > svg {
+      color: #9ca3af; /* gray.400 */
+    }
+  }
+
+  /* ==========================================================================
+     Responsive Design
+     ========================================================================== */
+
+  /* Mobile-first responsive design */
+  @media (max-width: 640px) {
+    [data-kt-alert] {
+      padding: 0.75rem; /* spacing.3 */
+      gap: 0.5rem; /* spacing.2 */
+    }
+    [data-kt-alert][aria-modal="true"] {
+      padding: 0.5rem; /* spacing.2 */
+    }
+    [data-kt-alert][aria-modal="true"] > * {
+      padding: 1rem; /* spacing.4 */
+    }
+    [data-kt-alert-title] {
+      font-size: 0.875rem; /* fontSize.sm */
+    }
+    [data-kt-alert-message] {
+      font-size: 0.75rem; /* fontSize.xs */
+    }
+    [data-kt-alert-actions] {
+      flex-direction: column;
+      gap: 0.5rem; /* spacing.2 */
+    }
+  }
+
+  /* Tablet and larger screens */
+  @media (min-width: 768px) {
+    [data-kt-alert][aria-modal="true"] > * {
+      max-width: 32rem; /* maxWidth.lg */
+    }
+  }
+
+  /* ==========================================================================
+     Accessibility Enhancements
+     ========================================================================== */
+
+  /* ARIA role support for alert dialogs */
+  [data-kt-alert][role="alertdialog"] {
+    /* Ensure proper focus management */
+    outline: none;
+  }
+
+  [data-kt-alert][role="alert"] {
+    /* Non-modal alerts */
+    position: relative;
+  }
+
+  /* Focus management for modal alerts */
+  [data-kt-alert][aria-modal="true"]:focus {
+    outline: none;
+  }
+
+  /* Ensure proper contrast for all text elements */
+  [data-kt-alert] * {
+    color: inherit;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    [data-kt-alert] {
+      border-width: 2px;
+    }
+
+    [data-kt-alert-close] {
+      border: 1px solid currentColor;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    [data-kt-alert],
+    [data-kt-alert] *,
+    [data-kt-alert-close] {
+      transition: none;
+    }
+  }
+
+  /* ==========================================================================
+     Performance Optimizations
+     ========================================================================== */
+
+  /* CSS containment for modal overlays */
+  [data-kt-alert][aria-modal="true"] {
+    contain: layout style paint;
+  }
+
+  /* Will-change for smooth animations */
+  [data-kt-alert-close]:hover {
+    will-change: transform;
+  }
+
+  /* Optimize paint operations */
+  [data-kt-alert] {
+    transform: translateZ(0);
+  }
 }

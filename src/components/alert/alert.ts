@@ -20,13 +20,29 @@ const defaultConfig: KTAlertConfig = {
   type: 'info',
   title: '',
   message: '',
+  icon: undefined, // success, error, warning, info, question, or custom HTML
+  position: 'center',
   dismissible: false,
   modal: false,
   input: false,
+  inputPlaceholder: '',
+  inputValue: '',
+  inputType: 'text',
+  inputLabel: '',
+  inputAttributes: {},
   customContent: '',
   confirmText: 'OK',
   cancelText: 'Cancel',
+  showConfirmButton: true,
+  showCancelButton: false,
+  showCloseButton: true,
   timer: undefined,
+  allowOutsideClick: true,
+  allowEscapeKey: true,
+  focusConfirm: true,
+  showLoaderOnConfirm: false,
+  customClass: '',
+  loaderHtml: '',
 };
 
 /**
@@ -36,13 +52,6 @@ const defaultConfig: KTAlertConfig = {
  *
  * @class
  * @extends KTComponent
- *
- * Features (to be implemented):
- * - Modal and non-modal support
- * - Multiple alert types (success, error, warning, info, question)
- * - Customizable via templates and data attributes
- * - Dismiss, confirm, cancel, and input flows
- * - Accessibility and ARIA support
  */
 export class KTAlert extends KTComponent {
   /**
@@ -88,6 +97,13 @@ export class KTAlert extends KTComponent {
   private _container: HTMLElement;
 
   /**
+   * Timer ID for auto-dismiss
+   * @private
+   * @type {ReturnType<typeof setTimeout> | null}
+   */
+  private _timerId: ReturnType<typeof setTimeout> | null = null;
+
+  /**
    * Constructor: Initializes the alert component (matches KTDatepicker pattern)
    * @param element - The root element for the alert
    * @param config - Optional user config
@@ -104,6 +120,16 @@ export class KTAlert extends KTComponent {
       inputValue: this._config.inputValue || ''
     };
     this._render();
+    // Auto-dismiss logic: start timer if timer is set in config
+    if (typeof this._config.timer === 'number' && this._config.timer > 0) {
+      this._timerId = setTimeout(() => {
+        if (!this._state.isDismissed) {
+          this._state.isDismissed = true;
+          this._fireEvent('dismiss', { reason: 'timer' });
+          this._element.innerHTML = '';
+        }
+      }, this._config.timer);
+    }
   }
 
   /**
@@ -133,7 +159,19 @@ export class KTAlert extends KTComponent {
         const key = attr.name
           .replace('data-kt-alert-', '')
           .replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-        dataAttrs[key] = attr.value;
+        let value: any = attr.value;
+        // Parse booleans and numbers for known config keys
+        if ([
+          'dismissible', 'modal', 'input', 'showConfirmButton', 'showCancelButton', 'showCloseButton',
+          'allowOutsideClick', 'allowEscapeKey', 'focusConfirm', 'showLoaderOnConfirm'
+        ].includes(key)) {
+          value = value === 'true';
+        } else if (['timer'].includes(key)) {
+          value = Number(value);
+        } else if (['inputAttributes'].includes(key)) {
+          try { value = JSON.parse(value); } catch { value = {}; }
+        }
+        dataAttrs[key] = value;
       }
     });
     // JSON config (data-kt-alert-config)
@@ -146,13 +184,33 @@ export class KTAlert extends KTComponent {
         // Invalid JSON, ignore
       }
     }
-    this._config = {
+    // Merge all config sources
+    let mergedConfig: KTAlertConfig = {
       ...defaultConfig,
       ...globalConfig,
       ...dataAttrs,
       ...jsonConfig,
       ...(config || {}),
     };
+    // Apply per-type theming if present
+    if (mergedConfig.theme && mergedConfig.type && mergedConfig.theme[mergedConfig.type]) {
+      const themeOverrides = mergedConfig.theme[mergedConfig.type];
+      mergedConfig = {
+        ...mergedConfig,
+        ...themeOverrides,
+        // Merge button classes into templates if provided
+        templates: {
+          ...((mergedConfig.templates as any) || {}),
+          confirmButton: themeOverrides.confirmButtonClass
+            ? `<button type="button" data-kt-alert-confirm aria-label="Confirm" tabindex="0" class="${themeOverrides.confirmButtonClass}">{{confirmText}}</button>`
+            : ((mergedConfig.templates && mergedConfig.templates.confirmButton) || undefined),
+          cancelButton: themeOverrides.cancelButtonClass
+            ? `<button type="button" data-kt-alert-cancel aria-label="Cancel" tabindex="0" class="${themeOverrides.cancelButtonClass}">{{cancelText}}</button>`
+            : ((mergedConfig.templates && mergedConfig.templates.cancelButton) || undefined),
+        },
+      };
+    }
+    this._config = mergedConfig;
   }
 
   /**
@@ -183,12 +241,17 @@ export class KTAlert extends KTComponent {
     } else if (typeof containerTpl === 'string') {
       containerHtml = renderTemplateString(containerTpl, { ...this._config, content });
     } else {
+      // fallback
       containerHtml = `<div>${content}</div>`;
     }
     // Create DOM node
     const temp = document.createElement('div');
     temp.innerHTML = containerHtml;
     this._container = temp.firstElementChild as HTMLElement;
+    // Add custom class if set
+    if (this._config.customClass) {
+      this._container.classList.add(this._config.customClass);
+    }
     // Set ARIA attributes for accessibility
     this._container.setAttribute('role', this._config.modal ? 'alertdialog' : 'alert');
     this._container.setAttribute('aria-modal', this._config.modal ? 'true' : 'false');
@@ -241,6 +304,7 @@ export class KTAlert extends KTComponent {
     // Escape closes alert if dismissible or modal
     this._container.addEventListener('keydown', (e: KeyboardEvent) => {
       if (e.key === 'Escape' && (this._config.dismissible || this._config.modal)) {
+        this._clearTimer();
         this._state.isDismissed = true;
         this._fireEvent('dismiss', {});
         this._element.innerHTML = '';
@@ -257,8 +321,8 @@ export class KTAlert extends KTComponent {
 
   /** Render icon fragment */
   private _renderIcon(): string {
-    if (!this._templateSet.icon) return '';
-    const iconVal = this._config.icon || '';
+    if (!this._config.icon || !this._templateSet.icon) return '';
+    const iconVal = this._config.icon;
     const tpl = this._templateSet.icon;
     if (isTemplateFunction(tpl)) {
       return tpl({ ...this._config, icon: iconVal });
@@ -296,13 +360,48 @@ export class KTAlert extends KTComponent {
 
   /** Render input fragment */
   private _renderInput(): string {
-    if (!this._config.input || !this._templateSet.input) return '';
-    const inputVal = this._config.inputValue || '';
-    const tpl = this._templateSet.input;
+    if (!this._config.input) return '';
+    const inputType = this._config.inputType || 'text';
+    const inputPlaceholder = this._config.inputPlaceholder || '';
+    const inputValue = this._config.inputValue || '';
+    const inputLabel = this._config.inputLabel || '';
+    const attrs = this._config.inputAttributes
+      ? Object.entries(this._config.inputAttributes).map(([k, v]) => `${k}="${v}"`).join(' ')
+      : '';
+    const options = this._config.inputOptions || [];
+    let tplKey: string = 'inputText';
+    let optionsHtml = '';
+    switch (inputType) {
+      case 'textarea':
+        tplKey = 'inputTextarea';
+        break;
+      case 'select':
+        tplKey = 'inputSelect';
+        optionsHtml = options.map(opt => `<option value="${opt.value}"${opt.value === inputValue ? ' selected' : ''}${opt.disabled ? ' disabled' : ''}>${opt.label}</option>`).join('');
+        break;
+      case 'radio':
+        tplKey = 'inputRadio';
+        optionsHtml = options.map((opt, i) =>
+          `<label><input type="radio" name="kt-alert-radio" data-kt-alert-input value="${opt.value}"${opt.value === inputValue ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
+        ).join('');
+        break;
+      case 'checkbox':
+        tplKey = 'inputCheckbox';
+        optionsHtml = options.map((opt, i) =>
+          `<label><input type="checkbox" name="kt-alert-checkbox" data-kt-alert-input value="${opt.value}"${opt.checked ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
+        ).join('');
+        break;
+      default:
+        tplKey = 'inputText';
+        break;
+    }
+    // Use type assertion to satisfy TS for dynamic template keys
+    const tpl = this._templateSet[tplKey as keyof typeof this._templateSet];
+    const data = { ...this._config, inputType, inputPlaceholder, inputValue, inputLabel, attrs, optionsHtml };
     if (isTemplateFunction(tpl)) {
-      return tpl({ ...this._config, input: inputVal });
+      return tpl(data);
     } else if (typeof tpl === 'string') {
-      return renderTemplateString(tpl, { ...this._config, input: inputVal });
+      return renderTemplateString(tpl, data);
     }
     return '';
   }
@@ -322,26 +421,34 @@ export class KTAlert extends KTComponent {
 
   /** Render confirm button fragment */
   private _renderConfirmButton(): string {
-    if (!this._templateSet.confirmButton) return '';
+    if (!this._config.showConfirmButton) return '';
     const confirmText = this._config.confirmText || 'OK';
-    const tpl = this._templateSet.confirmButton;
+    let tpl = this._templateSet.confirmButton;
+    // Use custom class template if present
+    if (this._config.confirmButtonClass && this._templateSet.confirmButtonCustomClass) {
+      tpl = this._templateSet.confirmButtonCustomClass;
+    }
     if (isTemplateFunction(tpl)) {
-      return tpl({ ...this._config, confirmText });
+      return tpl({ ...this._config, confirmText, confirmButtonClass: this._config.confirmButtonClass });
     } else if (typeof tpl === 'string') {
-      return renderTemplateString(tpl, { ...this._config, confirmText });
+      return renderTemplateString(tpl, { ...this._config, confirmText, confirmButtonClass: this._config.confirmButtonClass });
     }
     return '';
   }
 
   /** Render cancel button fragment */
   private _renderCancelButton(): string {
-    if (!this._templateSet.cancelButton) return '';
+    if (!this._config.showCancelButton) return '';
     const cancelText = this._config.cancelText || 'Cancel';
-    const tpl = this._templateSet.cancelButton;
+    let tpl = this._templateSet.cancelButton;
+    // Use custom class template if present
+    if (this._config.cancelButtonClass && this._templateSet.cancelButtonCustomClass) {
+      tpl = this._templateSet.cancelButtonCustomClass;
+    }
     if (isTemplateFunction(tpl)) {
-      return tpl({ ...this._config, cancelText });
+      return tpl({ ...this._config, cancelText, cancelButtonClass: this._config.cancelButtonClass });
     } else if (typeof tpl === 'string') {
-      return renderTemplateString(tpl, { ...this._config, cancelText });
+      return renderTemplateString(tpl, { ...this._config, cancelText, cancelButtonClass: this._config.cancelButtonClass });
     }
     return '';
   }
@@ -360,7 +467,7 @@ export class KTAlert extends KTComponent {
 
   /** Render close button fragment */
   private _renderCloseButton(): string {
-    if (!this._config.dismissible || !this._templateSet.closeButton) return '';
+    if (!this._config.showCloseButton || !this._templateSet.closeButton) return '';
     const tpl = this._templateSet.closeButton;
     if (isTemplateFunction(tpl)) {
       return tpl({ ...this._config });
@@ -381,6 +488,7 @@ export class KTAlert extends KTComponent {
     const closeBtn = this._container.querySelector('[data-kt-alert-close]');
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
+        this._clearTimer();
         this._state.isDismissed = true;
         this._fireEvent('dismiss', {});
         this._element.innerHTML = '';
@@ -390,7 +498,22 @@ export class KTAlert extends KTComponent {
     const confirmBtn = this._container.querySelector('[data-kt-alert-confirm]');
     if (confirmBtn) {
       confirmBtn.addEventListener('click', () => {
-        this._fireEvent('confirm', { inputValue: this._state.inputValue });
+        this._clearTimer();
+        // Gather input value(s) for all supported types
+        let inputValue: any = undefined;
+        const inputType = this._config.inputType || 'text';
+        if (inputType === 'checkbox') {
+          const checkboxes = this._container.querySelectorAll('input[type="checkbox"][data-kt-alert-input]');
+          // Return as comma-separated string for type safety
+          inputValue = Array.from(checkboxes).filter((el: any) => el.checked).map((el: any) => el.value).join(',');
+        } else if (inputType === 'radio') {
+          const radio = this._container.querySelector('input[type="radio"][data-kt-alert-input]:checked') as HTMLInputElement;
+          inputValue = radio ? radio.value : undefined;
+        } else {
+          const inputEl = this._container.querySelector('[data-kt-alert-input]') as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+          inputValue = inputEl ? inputEl.value : undefined;
+        }
+        this._fireEvent('confirm', { inputValue });
         this._state.isDismissed = true;
         this._element.innerHTML = '';
       });
@@ -399,136 +522,279 @@ export class KTAlert extends KTComponent {
     const cancelBtn = this._container.querySelector('[data-kt-alert-cancel]');
     if (cancelBtn) {
       cancelBtn.addEventListener('click', () => {
+        this._clearTimer();
         this._fireEvent('cancel', {});
         this._state.isDismissed = true;
         this._element.innerHTML = '';
       });
     }
-    // Input field
-    const inputEl = this._container.querySelector('[data-kt-alert-input]') as HTMLInputElement;
-    if (inputEl) {
-      inputEl.addEventListener('input', (e: Event) => {
-        this._state.inputValue = (e.target as HTMLInputElement).value;
-        this._fireEvent('input', { value: this._state.inputValue });
+    // Outside click dismissal (for modal alerts)
+    if (this._config.modal && this._config.allowOutsideClick) {
+      const overlay = this._element.closest('[data-kt-alert-overlay]');
+      if (overlay) {
+        overlay.addEventListener('click', (e: Event) => {
+          if (e.target === overlay) {
+            this._clearTimer();
+            this._state.isDismissed = true;
+            this._fireEvent('dismiss', {});
+            this._element.innerHTML = '';
+          }
+        });
+      }
+    }
+    // Input field (update state on input/change)
+    const inputType = this._config.inputType || 'text';
+    if (inputType === 'checkbox' || inputType === 'radio' || inputType === 'select') {
+      const inputs = this._container.querySelectorAll('[data-kt-alert-input]');
+      inputs.forEach((input: any) => {
+        input.addEventListener('change', (e: Event) => {
+          if (inputType === 'checkbox') {
+            const checkboxes = this._container.querySelectorAll('input[type="checkbox"][data-kt-alert-input]');
+            // Store as comma-separated string for type safety
+            this._state.inputValue = Array.from(checkboxes).filter((el: any) => el.checked).map((el: any) => el.value).join(',');
+          } else if (inputType === 'radio') {
+            const radio = this._container.querySelector('input[type="radio"][data-kt-alert-input]:checked') as HTMLInputElement;
+            this._state.inputValue = radio ? radio.value : undefined;
+          } else if (inputType === 'select') {
+            const select = this._container.querySelector('select[data-kt-alert-input]') as HTMLSelectElement;
+            this._state.inputValue = select ? select.value : undefined;
+          }
+          this._fireEvent('input', { value: this._state.inputValue });
+        });
       });
+    } else {
+      const inputEl = this._container.querySelector('[data-kt-alert-input]') as HTMLInputElement | HTMLTextAreaElement;
+      if (inputEl) {
+        inputEl.addEventListener('input', (e: Event) => {
+          this._state.inputValue = (e.target as HTMLInputElement | HTMLTextAreaElement).value;
+          this._fireEvent('input', { value: this._state.inputValue });
+        });
+      }
     }
   }
 
   /**
-   * Show an alert as a modal overlay (SweetAlert2-style JS API).
-   * Creates and manages its own overlay/modal DOM. Returns a Promise that resolves with the user's action/result.
-   * @param config - KTAlertConfig for the alert
+   * Clear the current timer if it exists.
+   * @private
    */
-  static show(config: KTAlertConfig): Promise<{ action: 'confirm' | 'cancel' | 'dismiss', inputValue?: string }> {
+  private _clearTimer() {
+    if (this._timerId) {
+      clearTimeout(this._timerId);
+      this._timerId = null;
+    }
+  }
+
+  /**
+   * SweetAlert2-style API: KTAlert.fire(options)
+   * Accepts a config object and returns a Promise that resolves with the user's action and input value.
+   */
+  static fire(options: any): Promise<{ isConfirmed: boolean, isDismissed: boolean, isCanceled: boolean, value?: string }> {
     // Remove any existing overlay
-    const existing = document.getElementById('kt-alert-overlay');
+    const existing = document.querySelector('[data-kt-alert-overlay]');
     if (existing) existing.parentNode?.removeChild(existing);
-    // Create overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'kt-alert-overlay';
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100vw';
-    overlay.style.height = '100vh';
-    overlay.style.zIndex = '9999';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.background = 'rgba(0,0,0,0.2)';
+    // Prepare templates
+    const templates = getTemplateStrings(options);
+    // Helper to resolve template (string or function)
+    function resolveTemplate(tpl: string | ((data: any) => string) | undefined, data: any): string {
+      if (typeof tpl === 'function') return tpl(data);
+      return tpl ? renderTemplateString(tpl, data) : '';
+    }
+
+    // Set default icon based on type if no explicit icon is provided
+    const iconToUse = options.icon === false ? '' : (options.icon || (() => {
+      switch (options.type) {
+        case 'success': return '✓';
+        case 'error': return '✕';
+        case 'warning': return '⚠';
+        case 'info': return 'ℹ';
+        case 'question': return '?';
+        default: return '';
+      }
+    })());
+
+    // Render modal content (all fragments)
+    const icon = iconToUse ? resolveTemplate(templates.icon, { ...options, icon: iconToUse }) : '';
+    const title = resolveTemplate(templates.title, options);
+    const message = resolveTemplate(templates.message, { ...options, message: options.text || options.message || '' });
+
+    // Render input based on type
+    let input = '';
+    if (options.input) {
+      const inputType = options.inputType || 'text';
+      const inputPlaceholder = options.inputPlaceholder || '';
+      const inputValue = options.inputValue || '';
+      const inputLabel = options.inputLabel || '';
+      const attrs = options.inputAttributes ? Object.entries(options.inputAttributes).map(([k, v]) => `${k}="${v}"`).join(' ') : '';
+      const inputOptions = options.inputOptions || [];
+
+      let tplKey = 'inputText';
+      let optionsHtml = '';
+
+      switch (inputType) {
+        case 'textarea':
+          tplKey = 'inputTextarea';
+          break;
+        case 'select':
+          tplKey = 'inputSelect';
+          optionsHtml = inputOptions.map((opt: any) =>
+            `<option value="${opt.value}"${opt.value === inputValue ? ' selected' : ''}${opt.disabled ? ' disabled' : ''}>${opt.label}</option>`
+          ).join('');
+          break;
+        case 'radio':
+          tplKey = 'inputRadio';
+          optionsHtml = inputOptions.map((opt: any) =>
+            `<label><input type="radio" name="kt-alert-radio" data-kt-alert-input value="${opt.value}"${opt.value === inputValue ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
+          ).join('');
+          break;
+        case 'checkbox':
+          tplKey = 'inputCheckbox';
+          optionsHtml = inputOptions.map((opt: any) =>
+            `<label><input type="checkbox" name="kt-alert-checkbox" data-kt-alert-input value="${opt.value}"${opt.checked ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
+          ).join('');
+          break;
+        default:
+          tplKey = 'inputText';
+          break;
+      }
+
+      const inputTemplate = templates[tplKey as keyof typeof templates];
+      const inputData = {
+        ...options,
+        inputType,
+        inputPlaceholder,
+        inputValue,
+        inputLabel,
+        attrs,
+        optionsHtml
+      };
+
+      if (typeof inputTemplate === 'string') {
+        input = renderTemplateString(inputTemplate, inputData);
+      } else if (typeof inputTemplate === 'function') {
+        input = inputTemplate(inputData);
+      }
+    }
+
+    const customContent = options.customContent ? resolveTemplate(templates.customContent, options) : '';
+    const confirmButton = options.showConfirmButton !== false ? resolveTemplate(templates.confirmButton, { ...options, confirmText: options.confirmText || 'OK' }) : '';
+    const cancelButton = options.showCancelButton ? resolveTemplate(templates.cancelButton, { ...options, cancelText: options.cancelText || 'Cancel' }) : '';
+    const actions = resolveTemplate(templates.actions, { ...options, confirmButton, cancelButton });
+    const closeButton = options.showCloseButton !== false ? resolveTemplate(templates.closeButton, options) : '';
+    // Loader support
+    const loaderHtml = options.showLoaderOnConfirm && options.loaderHtml ? resolveTemplate(templates.loaderHtml, options) : '';
+    // Compose content
+    const content = [icon, title, message, input, customContent, actions, closeButton, loaderHtml].join('');
+    // Render modal container
+    const modalHtml = resolveTemplate(templates.modal, {
+      ...options,
+      type: options.type || 'info',
+      variant: options.variant || '',
+      ariaModal: options.modal !== false ? 'true' : 'false',
+      role: options.modal !== false ? 'alertdialog' : 'alert',
+      content,
+      customClass: options.customClass || '',
+      position: options.position || 'center',
+    });
+    // Render overlay (if modal)
+    const overlayHtml = options.modal !== false
+      ? resolveTemplate(templates.overlay, { ...options, modal: modalHtml })
+      : modalHtml;
+    // Create DOM node from template
+    const temp = document.createElement('div');
+    temp.innerHTML = overlayHtml;
+    const overlay = options.modal !== false
+      ? temp.querySelector('[data-kt-alert-overlay]') as HTMLElement
+      : temp.firstElementChild as HTMLElement;
     document.body.appendChild(overlay);
-    // Render alert in overlay
-    const alertInstance = new KTAlert(overlay, config);
+
+    // Set custom ID if provided
+    const alert = overlay.querySelector('[data-kt-alert]') || overlay;
+    if (options.id) {
+      alert.id = options.id;
+    }
+
+    // Timer support (auto-dismiss)
+    let timerId: ReturnType<typeof setTimeout> | null = null;
     // Promise for result
     return new Promise((resolve) => {
       // Helper to clean up overlay
       const cleanup = () => {
+        if (timerId) clearTimeout(timerId);
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
       };
-      // Listen for confirm, cancel, dismiss
-      overlay.addEventListener('click', (e) => {
-        // Prevent overlay click from closing unless explicitly allowed (optional: config.closeOnClickOutside)
-        if (e.target === overlay && config.closeOnClickOutside) {
+
+      // Timer support (auto-dismiss) - moved inside Promise to access cleanup and resolve
+      if (options.timer && typeof options.timer === 'number' && options.timer > 0) {
+        timerId = setTimeout(() => {
           cleanup();
-          resolve({ action: 'dismiss' });
+          resolve({ isConfirmed: false, isDismissed: true, isCanceled: false });
+        }, options.timer);
+      }
+
+      // Bind events manually
+      const alert = overlay.querySelector('[data-kt-alert]') || overlay;
+
+      // Dismiss (close) button
+      const closeBtn = alert.querySelector('[data-kt-alert-close]');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          cleanup();
+          resolve({ isConfirmed: false, isDismissed: true, isCanceled: false });
+        });
+      }
+
+      // Confirm button
+      const confirmBtn = alert.querySelector('[data-kt-alert-confirm]');
+      if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+          // Gather input value(s) for all supported types
+          let inputValue: any = undefined;
+          const inputType = options.inputType || 'text';
+          if (inputType === 'checkbox') {
+            const checkboxes = alert.querySelectorAll('input[type="checkbox"][data-kt-alert-input]');
+            inputValue = Array.from(checkboxes).filter((el: any) => el.checked).map((el: any) => el.value).join(',');
+          } else if (inputType === 'radio') {
+            const radio = alert.querySelector('input[type="radio"][data-kt-alert-input]:checked') as HTMLInputElement;
+            inputValue = radio ? radio.value : undefined;
+          } else {
+            const inputEl = alert.querySelector('[data-kt-alert-input]') as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+            inputValue = inputEl ? inputEl.value : undefined;
+          }
+          cleanup();
+          resolve({ isConfirmed: true, isDismissed: false, isCanceled: false, value: inputValue });
+        });
+      }
+
+      // Cancel button
+      const cancelBtn = alert.querySelector('[data-kt-alert-cancel]');
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          cleanup();
+          resolve({ isConfirmed: false, isDismissed: false, isCanceled: true });
+        });
+      }
+
+      // Outside click dismissal (for modal alerts)
+      if (options.modal && options.allowOutsideClick) {
+        overlay.addEventListener('click', (e: Event) => {
+          if (e.target === overlay) {
+            cleanup();
+            resolve({ isConfirmed: false, isDismissed: true, isCanceled: false });
+          }
+        });
+      }
+
+      // Keyboard events
+      alert.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && (options.allowEscapeKey !== false || options.dismissible || options.modal)) {
+          cleanup();
+          resolve({ isConfirmed: false, isDismissed: true, isCanceled: false });
+        }
+        if (e.key === 'Enter' && confirmBtn) {
+          (confirmBtn as HTMLElement).click();
         }
       });
-      // Listen for alert actions
-      const observer = new MutationObserver(() => {
-        if (!overlay.contains(overlay.firstChild)) {
-          cleanup();
-          observer.disconnect();
-        }
-      });
-      observer.observe(overlay, { childList: true });
-      // Patch KTAlert to fire custom events for confirm/cancel/dismiss
-      const origFireEvent = (alertInstance as any)._fireEvent;
-      (alertInstance as any)._fireEvent = function(type: string, payload: any) {
-        origFireEvent.call(this, type, payload);
-        if (type === 'confirm') {
-          cleanup();
-          resolve({ action: 'confirm', inputValue: payload?.inputValue });
-        } else if (type === 'cancel') {
-          cleanup();
-          resolve({ action: 'cancel' });
-        } else if (type === 'dismiss') {
-          cleanup();
-          resolve({ action: 'dismiss' });
-        }
-      };
     });
   }
 
-  /**
-   * [DEPRECATED] Auto-initializes all KTAlert components in the DOM.
-   * Declarative [data-kt-alert] usage is no longer supported. Use KTAlert.show(config) instead.
-   */
-  // static init(selector: string = '[data-kt-alert]'): void {
-  //   const elements = document.querySelectorAll<HTMLElement>(selector);
-  //   elements.forEach((el) => {
-  //     const anyEl = el as any;
-  //     if (anyEl.__kt_alert_instance__) return;
-  //     const isButton = el.tagName === 'BUTTON' || el.getAttribute('role') === 'button' || el.tagName === 'A';
-  //     if (isButton) {
-  //       el.addEventListener('click', (e) => {
-  //         e.preventDefault();
-  //         let alertOverlay = document.createElement('div');
-  //         alertOverlay.style.position = 'fixed';
-  //         alertOverlay.style.top = '0';
-  //         alertOverlay.style.left = '0';
-  //         alertOverlay.style.width = '100vw';
-  //         alertOverlay.style.height = '100vh';
-  //         alertOverlay.style.zIndex = '9999';
-  //         alertOverlay.style.display = 'flex';
-  //         alertOverlay.style.alignItems = 'center';
-  //         alertOverlay.style.justifyContent = 'center';
-  //         alertOverlay.style.background = 'rgba(0,0,0,0.2)';
-  //         document.body.appendChild(alertOverlay);
-  //         const alertInstance = new KTAlert(alertOverlay, undefined);
-  //         Array.from(el.attributes).forEach(attr => {
-  //           if (attr.name.startsWith('data-kt-alert-')) {
-  //             alertOverlay.setAttribute(attr.name, attr.value);
-  //           }
-  //         });
-  //         (alertInstance as any)._buildConfig();
-  //         (alertInstance as any)._render();
-  //         const removeOverlay = () => {
-  //           if (alertOverlay.parentNode) alertOverlay.parentNode.removeChild(alertOverlay);
-  //         };
-  //         alertOverlay.addEventListener('dismiss', removeOverlay);
-  //         alertOverlay.addEventListener('kt-alert-dismiss', removeOverlay);
-  //         const observer = new MutationObserver(() => {
-  //           if (!alertOverlay.contains(alertOverlay.firstChild)) {
-  //             removeOverlay();
-  //             observer.disconnect();
-  //           }
-  //         });
-  //         observer.observe(alertOverlay, { childList: true });
-  //       });
-  //       anyEl.__kt_alert_instance__ = true;
-  //     } else {
-  //       anyEl.__kt_alert_instance__ = new KTAlert(el);
-  //     }
-  //   });
-  // }
 }

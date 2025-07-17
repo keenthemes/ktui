@@ -6,15 +6,25 @@
 // Template keys for all customizable UI fragments
 export type KTAlertTemplateKey =
   | 'container'
+  | 'overlay'
+  | 'modal'
   | 'icon'
   | 'title'
   | 'message'
   | 'actions'
   | 'confirmButton'
   | 'cancelButton'
+  | 'confirmButtonCustomClass'
+  | 'cancelButtonCustomClass'
   | 'input'
+  | 'inputText'
+  | 'inputTextarea'
+  | 'inputSelect'
+  | 'inputRadio'
+  | 'inputCheckbox'
   | 'closeButton'
-  | 'customContent';
+  | 'customContent'
+  | 'loaderHtml';
 
 // Template string map
 export type KTAlertTemplateStrings = {
@@ -33,20 +43,68 @@ export interface KTAlertConfig {
   title?: string;
   /** Message text or HTML */
   message?: string;
+  /** Icon name or HTML (success, error, warning, info, question, or custom HTML) */
+  icon?: string;
+  /** Position of the alert (top, center, bottom, etc.) */
+  position?: string;
   /** Whether the alert is dismissible */
   dismissible?: boolean;
   /** Whether the alert is modal (blocks background) */
   modal?: boolean;
   /** Whether to show an input field */
   input?: boolean;
+  /** Input placeholder text */
+  inputPlaceholder?: string;
+  /** Input default value */
+  inputValue?: string;
+  /** Input type (text, password, email, textarea, select, radio, checkbox, etc.) */
+  inputType?: string;
+  /** Input label */
+  inputLabel?: string;
+  /** Input attributes (object of key-value pairs) */
+  inputAttributes?: Record<string, string>;
+  /** Input options (for select, radio, checkbox, etc.) */
+  inputOptions?: Array<{ value: string; label: string; checked?: boolean; disabled?: boolean }>;
   /** Custom content HTML */
   customContent?: string;
   /** Confirm button text */
   confirmText?: string;
   /** Cancel button text */
   cancelText?: string;
+  /** Show confirm button */
+  showConfirmButton?: boolean;
+  /** Show cancel button */
+  showCancelButton?: boolean;
+  /** Show close (X) button */
+  showCloseButton?: boolean;
   /** Auto-dismiss timer (ms) */
   timer?: number;
+  /** Allow dismiss by clicking outside the alert */
+  allowOutsideClick?: boolean;
+  /** Allow dismiss by pressing Escape key */
+  allowEscapeKey?: boolean;
+  /** Focus confirm button on open */
+  focusConfirm?: boolean;
+  /** Show loader on confirm */
+  showLoaderOnConfirm?: boolean;
+  /** Custom class for alert container */
+  customClass?: string;
+  /** Loader HTML or template */
+  loaderHtml?: string;
+  /**
+   * Per-type theming overrides (e.g., { success: { customClass, icon, confirmText, ... }, ... })
+   */
+  theme?: {
+    [type: string]: {
+      customClass?: string;
+      icon?: string;
+      confirmText?: string;
+      cancelText?: string;
+      confirmButtonClass?: string;
+      cancelButtonClass?: string;
+      // Add more per-type overrides as needed
+    }
+  };
   /** Additional config options */
   [key: string]: any;
 }
