@@ -11,17 +11,15 @@
 <body class="bg-gray-50 min-h-screen">
 	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
 		<form class="flex flex-col gap-6">
-			<!--
-  Correct usage: The datepicker must be initialized on a container element (e.g., <div data-kt-datepicker="true">),
-  with the <input> as a child. Do NOT put data-kt-datepicker on the input itself.
-  For advanced config, see configuration.md.
--->
-<div class="kt-datepicker" data-kt-datepicker="true">
-  <input
-    id="datepicker-custom"
-    placeholder="Pick a date..."
-  />
-</div>
+			<div class="kt-datepicker" data-kt-datepicker="true">
+				<input id="datepicker-custom" placeholder="Pick a date..." />
+			</div>
+
+			<!-- Example: Custom header template using data-kt-datepicker-config -->
+			<div class="kt-datepicker mt-8" data-kt-datepicker="true"
+				data-kt-datepicker-config='{"templates": { "header": "<div data-kt-datepicker-header style=\"background:#e0f7fa;color:#00796b;padding:8px;border-radius:4px;text-align:center;font-weight:bold;\">Custom Header: {{month}} {{year}}</div>" }}'>
+				<input id="datepicker-custom-header" placeholder="Pick a date (custom header)..." />
+			</div>
 		</form>
 	</div>
 	<script src="../../dist/ktui.js"></script>

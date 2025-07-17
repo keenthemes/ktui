@@ -1,0 +1,65 @@
+<!--
+  KTUI Alert Examples (No Custom JS)
+  - All alerts are configured via data attributes.
+  - No custom JavaScript is required; KTUI auto-initializes alerts on page load.
+  - Pattern matches Toast examples for consistency.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KTUI Alert Examples</title>
+  <link rel="stylesheet" href="../../dist/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="bg-white rounded-lg shadow p-8 w-full max-w-md mt-10 mx-auto">
+    <h2 class="text-xl font-bold mb-4">KTUI Alert Examples</h2>
+
+    <!-- Alert Types -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Alert Types</h3>
+      <div class="flex flex-col gap-4">
+        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Info" data-kt-alert-message="This is an info alert." class="kt-btn w-full">Show Info Alert</button>
+        <button data-kt-alert data-kt-alert-type="success" data-kt-alert-title="Success" data-kt-alert-message="Action completed successfully!" class="kt-btn w-full">Show Success Alert</button>
+        <button data-kt-alert data-kt-alert-type="error" data-kt-alert-title="Error" data-kt-alert-message="Something went wrong." class="kt-btn w-full">Show Error Alert</button>
+        <button data-kt-alert data-kt-alert-type="warning" data-kt-alert-title="Warning" data-kt-alert-message="Please check your input." class="kt-btn w-full">Show Warning Alert</button>
+        <button data-kt-alert data-kt-alert-type="question" data-kt-alert-title="Are you sure?" data-kt-alert-message="Do you want to proceed?" class="kt-btn w-full">Show Question Alert</button>
+      </div>
+    </div>
+
+    <!-- Modal & Non-Modal -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Modal & Non-Modal</h3>
+      <div class="flex flex-col gap-4">
+        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Modal Alert" data-kt-alert-message="This is a modal alert." data-kt-alert-modal="true" class="kt-btn w-full">Show Modal Alert</button>
+        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Non-Modal Alert" data-kt-alert-message="This is a non-modal alert." data-kt-alert-modal="false" class="kt-btn w-full">Show Non-Modal Alert</button>
+      </div>
+    </div>
+
+    <!-- Confirmation & Input -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Confirmation & Input</h3>
+      <div class="flex flex-col gap-4">
+        <button data-kt-alert data-kt-alert-type="question" data-kt-alert-title="Confirm Action" data-kt-alert-message="Are you sure you want to continue?" data-kt-alert-confirm-text="Yes" data-kt-alert-cancel-text="No" data-kt-alert-modal="true" data-kt-alert-dismissible="true" class="kt-btn w-full">Show Confirmation Dialog</button>
+        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Enter Your Name" data-kt-alert-message="Please provide your name below:" data-kt-alert-input="true" data-kt-alert-confirm-text="Submit" data-kt-alert-cancel-text="Cancel" data-kt-alert-modal="true" data-kt-alert-dismissible="true" class="kt-btn w-full">Show Prompt/Input Alert</button>
+      </div>
+    </div>
+
+    <!-- Custom Content & Dismissible -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Custom & Dismissible</h3>
+      <div class="flex flex-col gap-4">
+        <button data-kt-alert data-kt-alert-type="success" data-kt-alert-title="Custom Content" data-kt-alert-custom-content='<img src="https://placekitten.com/80/80" alt="Kitten" class="rounded-full mx-auto mb-2" /> <div class="text-center">Here is a custom image!</div>' data-kt-alert-modal="true" data-kt-alert-dismissible="true" class="kt-btn w-full">Show Custom Content Alert</button>
+        <button data-kt-alert data-kt-alert-type="info" data-kt-alert-title="Dismissible" data-kt-alert-message="You can close this alert." data-kt-alert-dismissible="true" class="kt-btn w-full">Show Dismissible Alert</button>
+      </div>
+    </div>
+
+    <!-- Accessibility Note -->
+    <div class="mb-6 text-xs text-gray-500">
+      All alerts are fully accessible: ARIA roles, keyboard navigation, and focus management are supported.
+    </div>
+  </div>
+  <script src="../../dist/ktui.js"></script>
+</body>
+</html>

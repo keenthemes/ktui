@@ -28,6 +28,7 @@ import { KTDataTable } from './components/datatable';
 import { KTDatepicker } from './components/datepicker';
 import { KTSelect } from './components/select';
 import { KTToast } from './components/toast';
+import { KTAlert } from './components/alert';
 
 export { KTDropdown } from './components/dropdown';
 export { KTModal } from './components/modal';
@@ -51,6 +52,7 @@ export { KTDataTable } from './components/datatable';
 export { KTDatepicker } from './components/datepicker';
 export { KTSelect } from './components/select';
 export { KTToast } from './components/toast';
+export { KTAlert } from './components/alert';
 
 const KTComponents = {
 	init(): void {
@@ -76,6 +78,7 @@ const KTComponents = {
 		(KTDatepicker as any).init();
 		KTSelect.init();
 		KTToast.init();
+		KTAlert.init();
 	},
 };
 
@@ -106,6 +109,7 @@ declare global {
 		KTDatepicker: typeof KTDatepicker;
 		KTSelect: typeof KTSelect;
 		KTToast: typeof KTToast;
+		KTAlert: typeof KTAlert;
 		KTComponents: typeof KTComponents;
 	}
 }
@@ -113,6 +117,7 @@ declare global {
 export default KTComponents;
 
 window.KTDatepicker = KTDatepicker;
+window.KTAlert = KTAlert;
 
 KTDom.ready(() => {
 	KTComponents.init();
