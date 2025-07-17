@@ -1,0 +1,78 @@
+<!--
+  KTUI Datepicker Consolidated Examples
+  - Each example in its own card/panel (max-w-md)
+  - Consistent layout, heading, and spacing as in toast/example.html
+  - Styles/scripts loaded once
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KTUI Datepicker Examples</title>
+  <link rel="stylesheet" href="../../dist/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <h2 class="text-2xl font-bold mt-10 mb-8 text-center">KTUI Datepicker Examples</h2>
+  <div class="flex flex-col items-center gap-10">
+    <!-- Basic Usage -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Basic Usage</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true">
+        <input id="datepicker-basic" placeholder="Select a date" />
+      </div>
+    </div>
+    <!-- Range Selection -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Date Range</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-range="true">
+        <input id="datepicker-range" placeholder="Select a date range" />
+      </div>
+    </div>
+    <!-- Multi-Month Range -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Multi-Month Range</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"visibleMonths":2,"range":true}'>
+        <input id="datepicker-multi-month" placeholder="Select a date range" />
+      </div>
+    </div>
+    <!-- Min/Max Date -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Min/Max Date</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"minDate":"2025-07-10","maxDate":"2025-07-20"}'>
+        <input id="datepicker-minmax" placeholder="Select a date (10-20 July 2025)" />
+      </div>
+    </div>
+    <!-- Locale Support -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Locale: French (fr-FR)</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"locale":"fr-FR"}'>
+        <input id="datepicker-locale" placeholder="Sélectionnez une date" />
+      </div>
+    </div>
+    <!-- Custom Format -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Custom Format: yyyy-mm-dd</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"format":"yyyy-mm-dd"}'>
+        <input id="datepicker-format" placeholder="YYYY-MM-DD" />
+      </div>
+    </div>
+    <!-- Template Customization -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Template Customization</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true">
+        <input id="datepicker-custom" placeholder="Pick a date..." />
+      </div>
+    </div>
+    <!-- Disabled State -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Disabled State</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"disabled":true}'>
+        <input id="datepicker-disabled" placeholder="Datepicker is disabled" />
+      </div>
+    </div>
+  </div>
+  <!-- Load KTUI JS once at the end -->
+  <script src="../../dist/ktui.js"></script>
+</body>
+</html>

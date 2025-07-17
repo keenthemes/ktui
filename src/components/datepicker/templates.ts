@@ -9,7 +9,7 @@ import { mergeTemplates } from './utils/template';
 // Default template strings for all UI fragments
 export const defaultTemplates: KTDatepickerTemplateStrings = {
   container: `<div data-kt-datepicker-container></div>`,
-  header: `<div data-kt-datepicker-header>{{prevButton}}{{month}} {{year}}{{nextButton}}</div>`,
+  header: `<div data-kt-datepicker-header>{{prevButton}}<span data-kt-datepicker-month>{{month}}</span> {{year}}{{nextButton}}</div>`,
   footer: `<div data-kt-datepicker-footer>{{todayButton}} {{clearButton}} {{applyButton}}</div>`,
   calendarGrid: `<table data-kt-datepicker-calendar-grid>{{calendar}}</table>`,
   dayCell: `<td data-kt-datepicker-day {{attributes}}><button type="button" data-day="{{day}}" aria-label="Select {{day}}" tabindex="-1">{{day}}</button></td>`,
@@ -34,7 +34,15 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   dropdown: `<div data-kt-datepicker-dropdown></div>`,
   prevButton: `<button type="button" data-kt-datepicker-prev aria-label="Previous month">&lt;</button>`,
   nextButton: `<button type="button" data-kt-datepicker-next aria-label="Next month">&gt;</button>`,
-  calendarTable: `<table data-kt-datepicker-calendar-table>{{body}}</table>`,
+  calendarTable: `<table data-kt-datepicker-calendar-table><thead><tr>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Sun</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Mon</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Tue</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Wed</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Thu</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Fri</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Sat</th>
+  </tr></thead>{{body}}</table>`,
   calendarBody: `<tbody>{{rows}}</tbody>`,
   calendarRow: `<tr>{{cells}}</tr>`,
   todayButton: `<button type="button" data-kt-datepicker-today>Today</button>`,
@@ -43,7 +51,7 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   /**
    * Container for multiple calendar months (horizontal multi-month view)
    */
-  multiMonthContainer: `<div data-kt-datepicker-multimonth-container class="flex flex-row gap-4">{{calendars}}</div>`,
+  multiMonthContainer: `<div data-kt-datepicker-multimonth-container class="flex flex-col md:flex-row gap-4">{{calendars}}</div>`,
 };
 
 /**

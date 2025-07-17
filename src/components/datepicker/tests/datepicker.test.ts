@@ -177,8 +177,10 @@ describe('KTDatepicker', () => {
     const calendarButton = container.querySelector('button[data-kt-datepicker-calendar-btn]');
     expect(calendarButton).not.toBeNull();
     if (calendarButton) {
-      (calendarButton as HTMLButtonElement).focus();
-      expect(document.activeElement).not.toBe(calendarButton);
+      // Instead of testing focus (which JSDOM does not enforce), check correct attributes
+      expect(calendarButton.hasAttribute('disabled')).toBe(true);
+      expect(calendarButton.getAttribute('tabindex')).toBe('-1');
+      expect(calendarButton.getAttribute('aria-disabled')).toBe('true');
       calendarButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       expect((dp as any)._isOpen).toBe(false);
     }
@@ -194,7 +196,7 @@ describe('KTDatepicker', () => {
     expect((dp as any)._isOpen).toBe(false);
   });
 
-  it('renders two months side by side when visibleMonths is 2', () => {
+  it('renders two months side by side when visibleMonths is 2', async () => {
     const dp = new KTDatepicker(container, { visibleMonths: 2 });
     dp.open();
     // Should render the multiMonthContainer
@@ -207,17 +209,21 @@ describe('KTDatepicker', () => {
     expect(calendars?.length).toBe(2);
     // Navigation: next button should be in the last header only
     const lastHeader = headers?.[1];
-    expect(lastHeader).toBeInstanceOf(HTMLElement);
-    const nextBtn = lastHeader?.querySelector('[data-kt-datepicker-next]') as HTMLButtonElement;
-    expect(nextBtn).toBeInstanceOf(HTMLButtonElement);
-    if (nextBtn) {
-      nextBtn.click();
-      // After navigation, the first header should now be one month later
-      const newHeaders = multiMonth.querySelectorAll('[data-kt-datepicker-header]');
-      const firstMonth = newHeaders[0].textContent;
-      const expectedMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1).toLocaleString('en-US', { month: 'long' });
-      expect(firstMonth).toContain(expectedMonth);
-    }
+    const nextBtn = lastHeader?.querySelector('[data-kt-datepicker-next]');
+    expect(nextBtn).toBeInstanceOf(HTMLElement);
+    // Get the month names before navigation
+    const monthSpans = multiMonth?.querySelectorAll('[data-kt-datepicker-month]');
+    const firstMonthInitial = monthSpans?.[0]?.textContent;
+    const secondMonthInitial = monthSpans?.[1]?.textContent;
+    // Click next and wait for DOM update
+    (nextBtn as HTMLElement).click();
+    await Promise.resolve();
+    // Query again after update
+    const updatedMultiMonth = container.querySelector('[data-kt-datepicker-multimonth-container]');
+    const updatedMonthSpans = updatedMultiMonth?.querySelectorAll('[data-kt-datepicker-month]');
+    const updatedFirstMonth = updatedMonthSpans?.[0]?.textContent;
+    // The new first month should be the previous second month
+    expect(updatedFirstMonth).toBe(secondMonthInitial);
   });
 
   it('debug: log last header innerHTML for multi-month', () => {

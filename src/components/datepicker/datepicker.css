@@ -10,27 +10,58 @@
 }
 
 [data-kt-datepicker-calendar-table] {
+  /*
+   * Calendar table:
+   * - Full width, fixed layout for even columns
+   * - No border spacing
+   * - Prevent text selection
+   */
   @apply w-full border-collapse table-fixed select-none;
 }
 
 [data-kt-datepicker-calendar-table] thead tr {
+  /*
+   * Weekday header row:
+   * - Small, bold text
+   * - Muted color for non-intrusive appearance
+   */
   @apply text-xs font-semibold text-gray-500 dark:text-gray-400;
 }
 
 [data-kt-datepicker-calendar-table] th {
-  @apply py-1 px-0.5 text-center font-medium tracking-wide;
+  /*
+   * Weekday header cell:
+   * - Equal width for all days
+   * - Centered text
+   * - Consistent padding
+   */
+  @apply w-12 text-center py-2 px-1 font-medium tracking-wide;
 }
 
 [data-kt-datepicker-calendar-table] tbody tr {
-  @apply h-10;
+  /*
+   * Date row:
+   * - Consistent height for alignment
+   */
+  @apply h-12;
 }
 
 [data-kt-datepicker-day] {
+  /*
+   * Date cell:
+   * - Centered content
+   * - Relative for state overlays
+   */
   @apply text-center align-middle relative;
 }
 
 [data-kt-datepicker-day] button[data-day] {
-  @apply w-9 h-9 flex items-center justify-center rounded-lg transition-colors duration-150 outline-none border-0 bg-transparent text-base font-normal text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:z-10 cursor-pointer;
+  /*
+   * Date button:
+   * - Consistent size for touch targets
+   * - Centered, rounded, interactive
+   */
+  @apply w-10 h-10 flex items-center justify-center rounded-lg transition-colors duration-150 outline-none border-0 bg-transparent text-base font-normal text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:z-10 cursor-pointer appearance-none;
 }
 
 [data-kt-datepicker-day][data-today] button[data-day] {

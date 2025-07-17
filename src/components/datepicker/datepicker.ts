@@ -545,31 +545,45 @@ export class KTDatepicker extends KTComponent {
           this._config.range ? this._state.selectedRange : undefined
         );
         console.log('[KTDatepicker] Calendar DOM:', calendar);
-        // Append header and calendar nodes
-        multiMonthContainer.appendChild(header);
-        multiMonthContainer.appendChild(calendar);
+        // --- Wrap header + calendar in a styled panel div ---
+        const panel = document.createElement('div');
+        panel.className = 'bg-white dark:bg-gray-900 p-4 rounded-xl shadow border border-gray-200 dark:border-gray-700 flex flex-col items-center min-w-[260px]';
+        panel.appendChild(header);
+        panel.appendChild(calendar);
+        multiMonthContainer.appendChild(panel);
       }
       console.log('[KTDatepicker] Multi-month container structure:', multiMonthContainer);
       dropdownEl.appendChild(multiMonthContainer);
     }
-    // Render footer using template-driven buttons (always one footer)
-    let todayButtonHtml: string;
-    let clearButtonHtml: string;
-    let applyButtonHtml: string;
-    const todayButtonTpl = this._templateSet.todayButton || defaultTemplates.todayButton;
-    const clearButtonTpl = this._templateSet.clearButton || defaultTemplates.clearButton;
-    const applyButtonTpl = this._templateSet.applyButton || defaultTemplates.applyButton;
-    todayButtonHtml = typeof todayButtonTpl === 'function' ? todayButtonTpl({}) : todayButtonTpl;
-    clearButtonHtml = typeof clearButtonTpl === 'function' ? clearButtonTpl({}) : clearButtonTpl;
-    applyButtonHtml = typeof applyButtonTpl === 'function' ? applyButtonTpl({}) : applyButtonTpl;
-    const footer = renderFooter(
-      this._templateSet.footer,
-      { todayButton: todayButtonHtml, clearButton: clearButtonHtml, applyButton: applyButtonHtml },
-      this._onToday,
-      this._onClear,
-      this._onApply
-    );
-    dropdownEl.appendChild(footer);
+    // --- Render footer using template-driven buttons (conditional by mode) ---
+    const isRange = !!this._config.range;
+    const isMultiDate = !!this._config.multiDate;
+    const showFooter = isRange || isMultiDate;
+    if (showFooter) {
+      let todayButtonHtml: string | undefined = undefined;
+      let clearButtonHtml: string | undefined = undefined;
+      let applyButtonHtml: string | undefined = undefined;
+      const todayButtonTpl = this._templateSet.todayButton || defaultTemplates.todayButton;
+      const clearButtonTpl = this._templateSet.clearButton || defaultTemplates.clearButton;
+      const applyButtonTpl = this._templateSet.applyButton || defaultTemplates.applyButton;
+      // Only show Today/Clear if explicitly enabled in config/templates
+      if (this._config.showTodayButton) {
+        todayButtonHtml = typeof todayButtonTpl === 'function' ? todayButtonTpl({}) : todayButtonTpl;
+      }
+      if (this._config.showClearButton) {
+        clearButtonHtml = typeof clearButtonTpl === 'function' ? clearButtonTpl({}) : clearButtonTpl;
+      }
+      // Always show Apply in range/multi-date mode
+      applyButtonHtml = typeof applyButtonTpl === 'function' ? applyButtonTpl({}) : applyButtonTpl;
+      const footer = renderFooter(
+        this._templateSet.footer,
+        { todayButton: todayButtonHtml, clearButton: clearButtonHtml, applyButton: applyButtonHtml },
+        this._onToday,
+        this._onClear,
+        this._onApply
+      );
+      dropdownEl.appendChild(footer);
+    }
   }
 
   /**
