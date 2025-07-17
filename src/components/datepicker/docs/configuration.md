@@ -107,6 +107,14 @@ KTDatepicker provides fine-grained control over dropdown behavior with the follo
 - This matches best-practice UX for date range pickers (see Airbnb, Google Flights, etc.).
 - `closeOnSelect` is now **true by default** for range mode, so you do not need to set it explicitly unless you want to override this behavior.
 
+## 6. Outside Click Close Behavior
+
+KTDatepicker will automatically close the calendar dropdown when the user clicks outside the datepicker root, dropdown, input, or calendar button. This behavior is enabled by default and applies to all modes (single, range, multi-date).
+
+- Clicking inside the dropdown, input, or calendar button will NOT close the dropdown.
+- Event listeners are cleaned up on close and destroy to prevent memory leaks.
+- No configuration is required; this is the default for all datepickers.
+
 ### Accessibility & Best Practices
 - The calendar will not open on focus if the input is disabled or readonly.
 - Always ensure the Apply button is accessible via keyboard in multi-date mode.

@@ -295,3 +295,57 @@ describe('showOnFocus and closeOnSelect behaviors', () => {
     expect((dp as any)._isOpen).toBe(true);
   });
 });
+
+describe('outside click close behavior', () => {
+  let container: HTMLElement;
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    container = document.createElement('div');
+    container.setAttribute('data-kt-datepicker', 'true');
+    document.body.appendChild(container);
+  });
+
+  it('should close calendar on outside click', () => {
+    const dp = new KTDatepicker(container, { showOnFocus: true });
+    (dp as any).open();
+    expect((dp as any)._isOpen).toBe(true);
+    // Simulate outside click
+    const outside = document.createElement('div');
+    document.body.appendChild(outside);
+    outside.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    expect((dp as any)._isOpen).toBe(false);
+  });
+
+  it('should NOT close calendar on inside click (dropdown)', () => {
+    const dp = new KTDatepicker(container, { showOnFocus: true });
+    (dp as any).open();
+    expect((dp as any)._isOpen).toBe(true);
+    const dropdown = container.querySelector('[data-kt-datepicker-dropdown]');
+    if (dropdown) {
+      dropdown.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }
+    expect((dp as any)._isOpen).toBe(true);
+  });
+
+  it('should NOT close calendar on input click', () => {
+    const dp = new KTDatepicker(container, { showOnFocus: true });
+    (dp as any).open();
+    expect((dp as any)._isOpen).toBe(true);
+    const input = (dp as any)._input;
+    if (input) {
+      input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }
+    expect((dp as any)._isOpen).toBe(true);
+  });
+
+  it('should NOT close calendar on calendar button click', () => {
+    const dp = new KTDatepicker(container, { showOnFocus: true });
+    (dp as any).open();
+    expect((dp as any)._isOpen).toBe(true);
+    const calendarBtn = container.querySelector('button[data-kt-datepicker-calendar-btn]');
+    if (calendarBtn) {
+      calendarBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }
+    expect((dp as any)._isOpen).toBe(true);
+  });
+});
