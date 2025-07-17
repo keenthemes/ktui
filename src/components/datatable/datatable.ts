@@ -1423,9 +1423,77 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		return id;
 	}
 
-	private _dispose() {
-		// Remove all event listeners and clean up resources
-	}
+    /**
+     * Clean up all event listeners, handlers, and DOM nodes created by this instance.
+     * This method is called before re-rendering or when disposing the component.
+     */
+    private _dispose() {
+        // --- 1. Remove search input event listener (debounced) ---
+        const tableId: string = this._tableId();
+        const searchElement: HTMLInputElement | null =
+            document.querySelector<HTMLInputElement>(
+                `[data-kt-datatable-search="#${tableId}"]`,
+            );
+        if (searchElement && (searchElement as any)._debouncedSearch) {
+            searchElement.removeEventListener(
+                'keyup',
+                (searchElement as any)._debouncedSearch,
+            );
+            delete (searchElement as any)._debouncedSearch;
+        }
+
+        // --- 2. Remove page size dropdown event listener ---
+        if (this._sizeElement && this._sizeElement.onchange) {
+            this._sizeElement.onchange = null;
+        }
+
+        // --- 3. Remove all pagination button event listeners ---
+        if (this._paginationElement) {
+            // Remove all child nodes (buttons) to ensure no lingering listeners
+            while (this._paginationElement.firstChild) {
+                this._paginationElement.removeChild(this._paginationElement.firstChild);
+            }
+        }
+
+        // --- 4. Dispose of handler objects (checkbox, sort) ---
+        // KTDataTableCheckboxAPI does not have a dispose method, but we can remove header checkbox listener
+        if (this._checkbox && typeof (this._checkbox as any).dispose === 'function') {
+            (this._checkbox as any).dispose();
+        } else {
+            // Remove header checkbox event listener if possible
+            const headerCheckElement = this._element.querySelector<HTMLInputElement>(
+                this._config.attributes.check,
+            );
+            if (headerCheckElement) {
+                headerCheckElement.replaceWith(headerCheckElement.cloneNode(true));
+            }
+        }
+        // KTDataTableSortAPI does not have a dispose method, but we can remove th click listeners by replacing them
+        if (this._theadElement) {
+            const ths = this._theadElement.querySelectorAll('th');
+            ths.forEach((th) => {
+                th.replaceWith(th.cloneNode(true));
+            });
+        }
+
+        // --- 5. Remove spinner DOM node if it exists ---
+        const spinner = this._element.querySelector<HTMLElement>(
+            this._config.attributes.spinner,
+        );
+        if (spinner && spinner.parentNode) {
+            spinner.parentNode.removeChild(spinner);
+        }
+        this._element.classList.remove(this._config.loadingClass);
+
+        // --- 6. Remove instance reference from the DOM element ---
+        if ((this._element as any).instance) {
+            delete (this._element as any).instance;
+        }
+
+        // --- 7. (Optional) Clear localStorage state ---
+        // Uncomment the following line if you want to clear state on dispose:
+        // this._deleteState();
+    }
 
 	private _debounce(func: Function, wait: number) {
 		let timeout: number | undefined;
@@ -1595,12 +1663,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	/**
 	 * Create KTDataTable instances for all elements with a data-kt-datatable="true" attribute.
-	 *
-	 * This function should be called after the control(s) have been
-	 * loaded and parsed by the browser. It will create instances of
-	 * KTDataTable for all elements with a data-kt-datatable="true" attribute.
+	 * This function is now browser-guarded and must be called explicitly.
 	 */
 	public static createInstances(): void {
+		if (typeof document === 'undefined') return;
 		const elements = document.querySelectorAll<HTMLElement>(
 			'[data-kt-datatable="true"]',
 		);
@@ -1634,11 +1700,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	/**
 	 * Initializes all KTDataTable instances on the page.
-	 *
-	 * This function should be called after the control(s) have been
-	 * loaded and parsed by the browser.
+	 * This function is now browser-guarded and must be called explicitly.
 	 */
 	public static init(): void {
+		if (typeof document === 'undefined') return;
 		// Create instances of KTDataTable for all elements with a
 		// data-kt-datatable="true" attribute
 		KTDataTable.createInstances();
@@ -1699,6 +1764,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	// Other plugin methods can be added here
 }
 
-if (typeof window !== 'undefined') {
-	window.KTDataTable = KTDataTable;
+/**
+ * NOTE: This module is now PURE. No side effects or DOM/global assignments occur on import.
+ * To auto-initialize all datatables on the page, call the exported `initAllDataTables()` function explicitly in the browser.
+ */
+
+export function initAllDataTables(): void {
+  if (typeof document !== 'undefined') {
+    KTDataTable.createInstances();
+    // Optionally assign to window for legacy support
+    window.KTDataTable = KTDataTable;
+  }
 }
