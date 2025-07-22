@@ -91,6 +91,13 @@ export interface KTDatepickerConfig {
   maxTime?: string;
   /** Time step increment in minutes (default: 1) */
   timeStep?: number;
+  /** Dropdown positioning and behavior options */
+  dropdownPlacement?: string;
+  dropdownOffset?: string;
+  dropdownBoundary?: string;
+  dropdownWidth?: 'auto' | 'toggle' | string;
+  dropdownZindex?: number;
+  dropdownContainer?: string;
   /** Custom classes for template elements */
   classes?: {
     container?: string;

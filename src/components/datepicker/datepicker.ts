@@ -14,6 +14,8 @@ import { renderHeader } from './renderers/header';
 import { renderCalendar } from './renderers/calendar';
 import { renderFooter } from './renderers/footer';
 import { renderTimePicker } from './renderers/time-picker';
+import { EventManager, FocusManager } from '../select/utils';
+import { KTDatepickerDropdown } from './dropdown';
 import { getInitialState } from './state';
 import { SegmentedInput, SegmentedInputOptions } from './segmented-input';
 import { parseDateFromFormat } from './date-utils';
@@ -51,6 +53,9 @@ export class KTDatepicker extends KTComponent {
   private _container: HTMLElement;
   private _input: HTMLInputElement | null = null;
   private _isOpen: boolean = false;
+  private _eventManager: EventManager;
+  private _focusManager: FocusManager | null = null;
+  private _dropdownModule: KTDatepickerDropdown | null = null;
 
   // --- Mode-specific helpers ---
   /** Initialize single date from config */
@@ -404,7 +409,7 @@ export class KTDatepicker extends KTComponent {
     }
     // --- Input focus event for showOnFocus ---
     if (this._input) {
-      this._input.addEventListener('focus', this._onInputFocus);
+      this._eventManager.addListener(this._input, 'focus', this._onInputFocus);
     }
     (element as any).instance = this;
     this._render();
@@ -469,6 +474,15 @@ export class KTDatepicker extends KTComponent {
       templates: mergedTemplates,
       closeOnSelect,
     };
+
+    // Initialize event manager
+    this._eventManager = new EventManager();
+
+    // Initialize focus manager for keyboard navigation
+    this._focusManager = new FocusManager(
+      this._element,
+      '[data-kt-datepicker-day] button, [data-kt-datepicker-today], [data-kt-datepicker-clear], [data-kt-datepicker-apply]'
+    );
   }
 
   /**
@@ -602,94 +616,13 @@ export class KTDatepicker extends KTComponent {
    */
   private _renderDropdownContent(dropdownEl: HTMLElement) {
     const visibleMonths = this._config.visibleMonths ?? 1;
+
     if (visibleMonths === 1) {
-      // Single month (existing logic)
-      let prevButtonHtml: string;
-      let nextButtonHtml: string;
-      const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
-      const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
-      prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
-      nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
-      const header = renderHeader(
-        this._templateSet.header,
-        {
-          month: this._state.currentDate.toLocaleString(this._config.locale, { month: 'long' }),
-          year: this._state.currentDate.getFullYear(),
-          prevButton: prevButtonHtml,
-          nextButton: nextButtonHtml,
-        },
-        (e) => { e.stopPropagation(); this._changeMonth(-1); },
-        (e) => { e.stopPropagation(); this._changeMonth(1); }
-      );
-      dropdownEl.appendChild(header);
-      // --- FIX: Only close dropdown after day click in single mode ---
-      const dayClickHandler = (day: Date) => {
-        this.setDate(day);
-        if (!this._config.range && !this._config.multiDate) {
-          this.close();
-        }
-        // In range mode, dropdown remains open until both dates are selected (handled by _maybeCloseDropdownOnSelect)
-      };
-      const calendar = renderCalendar(
-        this._templateSet.dayCell,
-        this._getCalendarDays(this._state.currentDate),
-        this._state.currentDate,
-        this._state.selectedDate,
-        dayClickHandler,
-        this._config.range ? this._state.selectedRange : undefined
-      );
-      dropdownEl.appendChild(calendar);
+      this._renderSingleMonth(dropdownEl);
     } else {
-      // Multi-month rendering (DOM node-based)
-      const baseDate = new Date(this._state.currentDate);
-      const multiMonthContainer = document.createElement('div');
-      multiMonthContainer.setAttribute('data-kt-datepicker-multimonth-container', '');
-      multiMonthContainer.className = 'flex flex-row gap-4';
-      for (let i = 0; i < visibleMonths; i++) {
-        const monthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
-        // Navigation buttons: only first gets prev, only last gets next
-        let prevButtonHtml = '';
-        let nextButtonHtml = '';
-        if (i === 0) {
-          const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
-          prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
-        }
-        if (i === visibleMonths - 1) {
-          const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
-          nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
-        }
-        console.log(`[KTDatepicker] Rendering month ${i + 1}/${visibleMonths}:`, monthDate.toLocaleString(this._config.locale, { month: 'long', year: 'numeric' }));
-        const header = renderHeader(
-          this._templateSet.header,
-          {
-            month: monthDate.toLocaleString(this._config.locale, { month: 'long' }),
-            year: monthDate.getFullYear(),
-            prevButton: prevButtonHtml,
-            nextButton: nextButtonHtml,
-          },
-          (e) => { console.log('[KTDatepicker] Prev button clicked for', monthDate); e.stopPropagation(); this._changeMonth(-1); },
-          (e) => { console.log('[KTDatepicker] Next button clicked for', monthDate); e.stopPropagation(); this._changeMonth(1); }
-        );
-        console.log('[KTDatepicker] Header DOM:', header);
-        const calendar = renderCalendar(
-          this._templateSet.dayCell,
-          this._getCalendarDays(monthDate),
-          monthDate,
-          this._state.selectedDate,
-          (day) => { console.log('[KTDatepicker] Day clicked:', day); this.setDate(day); },
-          this._config.range ? this._state.selectedRange : undefined
-        );
-        console.log('[KTDatepicker] Calendar DOM:', calendar);
-        // --- Wrap header + calendar in a styled panel div ---
-        const panel = document.createElement('div');
-        panel.className = 'bg-white dark:bg-gray-900 p-4 rounded-xl shadow border border-gray-200 dark:border-gray-700 flex flex-col items-center min-w-[260px]';
-        panel.appendChild(header);
-        panel.appendChild(calendar);
-        multiMonthContainer.appendChild(panel);
-      }
-      console.log('[KTDatepicker] Multi-month container structure:', multiMonthContainer);
-      dropdownEl.appendChild(multiMonthContainer);
+      this._renderMultiMonth(dropdownEl, visibleMonths);
     }
+
     // --- Render footer using template-driven buttons (conditional by mode) ---
     const isRange = !!this._config.range;
     const isMultiDate = !!this._config.multiDate;
@@ -751,6 +684,104 @@ export class KTDatepicker extends KTComponent {
   }
 
   /**
+   * Render single month calendar
+   */
+  private _renderSingleMonth(dropdownEl: HTMLElement) {
+    let prevButtonHtml: string;
+    let nextButtonHtml: string;
+    const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
+    const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
+    prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
+    nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
+
+    const header = renderHeader(
+      this._templateSet.header,
+      {
+        month: this._state.currentDate.toLocaleString(this._config.locale, { month: 'long' }),
+        year: this._state.currentDate.getFullYear(),
+        prevButton: prevButtonHtml,
+        nextButton: nextButtonHtml,
+      },
+      (e) => { e.stopPropagation(); this._changeMonth(-1); },
+      (e) => { e.stopPropagation(); this._changeMonth(1); }
+    );
+    dropdownEl.appendChild(header);
+
+    const dayClickHandler = (day: Date) => {
+      this.setDate(day);
+      if (!this._config.range && !this._config.multiDate) {
+        this.close();
+      }
+    };
+
+    const calendar = renderCalendar(
+      this._templateSet.dayCell,
+      this._getCalendarDays(this._state.currentDate),
+      this._state.currentDate,
+      this._state.selectedDate,
+      dayClickHandler,
+      this._config.range ? this._state.selectedRange : undefined
+    );
+    dropdownEl.appendChild(calendar);
+  }
+
+  /**
+   * Render multi-month calendar
+   */
+  private _renderMultiMonth(dropdownEl: HTMLElement, visibleMonths: number) {
+    const baseDate = new Date(this._state.currentDate);
+    const multiMonthContainer = document.createElement('div');
+    multiMonthContainer.setAttribute('data-kt-datepicker-multimonth-container', '');
+    multiMonthContainer.className = 'flex flex-row gap-4';
+
+    for (let i = 0; i < visibleMonths; i++) {
+      const monthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+
+      // Navigation buttons: only first gets prev, only last gets next
+      let prevButtonHtml = '';
+      let nextButtonHtml = '';
+      if (i === 0) {
+        const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
+        prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
+      }
+      if (i === visibleMonths - 1) {
+        const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
+        nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
+      }
+
+      const header = renderHeader(
+        this._templateSet.header,
+        {
+          month: monthDate.toLocaleString(this._config.locale, { month: 'long' }),
+          year: monthDate.getFullYear(),
+          prevButton: prevButtonHtml,
+          nextButton: nextButtonHtml,
+        },
+        (e) => { e.stopPropagation(); this._changeMonth(-1); },
+        (e) => { e.stopPropagation(); this._changeMonth(1); }
+      );
+
+      const calendar = renderCalendar(
+        this._templateSet.dayCell,
+        this._getCalendarDays(monthDate),
+        monthDate,
+        this._state.selectedDate,
+        (day) => { this.setDate(day); },
+        this._config.range ? this._state.selectedRange : undefined
+      );
+
+      // Wrap header + calendar in a styled panel div
+      const panel = document.createElement('div');
+      panel.className = 'bg-white dark:bg-gray-900 p-4 rounded-xl shadow border border-gray-200 dark:border-gray-700 flex flex-col items-center min-w-[260px]';
+      panel.appendChild(header);
+      panel.appendChild(calendar);
+      multiMonthContainer.appendChild(panel);
+    }
+
+    dropdownEl.appendChild(multiMonthContainer);
+  }
+
+  /**
    * Render the datepicker UI using templates
    */
   private _render() {
@@ -798,12 +829,12 @@ export class KTDatepicker extends KTComponent {
     console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._isOpen, 'selectedDate:', this._state.selectedDate);
     // Attach keyboard event listeners
     if (this._input) {
-      this._input.removeEventListener('keydown', this._onKeyDown);
-      this._input.addEventListener('keydown', this._onKeyDown);
+      this._eventManager.removeListener(this._input, 'keydown', this._onKeyDown);
+      this._eventManager.addListener(this._input, 'keydown', this._onKeyDown);
     }
     if (dropdownEl) {
-      dropdownEl.removeEventListener('keydown', this._onKeyDown);
-      dropdownEl.addEventListener('keydown', this._onKeyDown);
+      this._eventManager.removeListener(dropdownEl, 'keydown', this._onKeyDown);
+      this._eventManager.addListener(dropdownEl, 'keydown', this._onKeyDown);
     }
     // Ensure live region exists
     let liveRegion = this._element.querySelector('[data-kt-datepicker-live]');
@@ -820,10 +851,31 @@ export class KTDatepicker extends KTComponent {
    * Attach the dropdown after the input wrapper
    */
   private _attachDropdown(inputWrapperEl: HTMLElement, dropdownEl: HTMLElement) {
-    if (inputWrapperEl.nextSibling) {
-      this._element.insertBefore(dropdownEl, inputWrapperEl.nextSibling);
+    // Clean up existing dropdown module
+    if (this._dropdownModule) {
+      this._dropdownModule.dispose();
+    }
+
+    // Find the toggle element (calendar button)
+    const toggleElement = this._element.querySelector('button[data-kt-datepicker-calendar-btn]') as HTMLElement;
+
+    if (toggleElement) {
+      // Create new dropdown module
+      this._dropdownModule = new KTDatepickerDropdown(
+        this._element,
+        toggleElement,
+        dropdownEl,
+        this._config
+      );
+      console.log('🗓️ [KTDatepicker] Dropdown module created:', this._dropdownModule);
     } else {
-      this._element.appendChild(dropdownEl);
+      console.log('🗓️ [KTDatepicker] No toggle element found, using fallback');
+      // Fallback to old attachment method
+      if (inputWrapperEl.nextSibling) {
+        this._element.insertBefore(dropdownEl, inputWrapperEl.nextSibling);
+      } else {
+        this._element.appendChild(dropdownEl);
+      }
     }
   }
 
@@ -930,12 +982,24 @@ export class KTDatepicker extends KTComponent {
     if (this._container && this._container.parentNode) {
       this._container.parentNode.removeChild(this._container);
     }
+
+    // Clean up event manager
+    this._eventManager.removeAllListeners(document as unknown as HTMLElement);
     if (this._input) {
-      this._input.removeEventListener('focus', this._onInputFocus);
+      this._eventManager.removeAllListeners(this._input);
     }
+
+    // Clean up focus manager
+    if (this._focusManager) {
+      this._focusManager.dispose();
+    }
+
+    // Clean up dropdown module
+    if (this._dropdownModule) {
+      this._dropdownModule.dispose();
+    }
+
     (this._element as any).instance = null;
-    // Always unbind outside click listener to prevent leaks
-    document.removeEventListener('mousedown', this._onDocumentClick, true);
   }
 
   private _updateInputValue() {
@@ -1053,9 +1117,21 @@ export class KTDatepicker extends KTComponent {
       return;
     }
     this._isOpen = true;
-    // Bind outside click listener
-    document.addEventListener('mousedown', this._onDocumentClick, true);
-    this._render();
+
+    console.log('🗓️ [KTDatepicker] open() called, dropdown module:', this._dropdownModule);
+
+    // Use dropdown module if available
+    if (this._dropdownModule) {
+      console.log('🗓️ [KTDatepicker] Calling dropdown module open()');
+      this._dropdownModule.open();
+    } else {
+      console.log('🗓️ [KTDatepicker] No dropdown module, using fallback');
+      // Fallback to old method
+      this._eventManager.addListener(document as unknown as HTMLElement, 'mousedown', this._onDocumentClick);
+    }
+
+    // Don't call _render() here as it recreates the dropdown module
+    // The dropdown module handles its own visibility
   }
 
   /**
@@ -1067,9 +1143,17 @@ export class KTDatepicker extends KTComponent {
     // Debug log with stack trace
     console.log('[KTDatepicker] close() called. Dropdown will close. Stack trace:', new Error().stack);
     this._isOpen = false;
-    // Unbind outside click listener
-    document.removeEventListener('mousedown', this._onDocumentClick, true);
-    this._render();
+
+    // Use dropdown module if available
+    if (this._dropdownModule) {
+      this._dropdownModule.close();
+    } else {
+      // Fallback to old method
+      this._eventManager.removeListener(document as unknown as HTMLElement, 'mousedown', this._onDocumentClick);
+    }
+
+    // Don't call _render() here as it recreates the dropdown module
+    // The dropdown module handles its own visibility
   }
 
   public toggle() {

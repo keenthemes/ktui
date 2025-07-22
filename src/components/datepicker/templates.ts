@@ -47,7 +47,7 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
     </svg>
   </button>`,
   // Add role="dialog" and aria-modal to dropdown
-  dropdown: `<div data-kt-datepicker-dropdown role="dialog" aria-modal="true" aria-label="Date picker" class="kt-datepicker-dropdown {{class}}"></div>`,
+  dropdown: `<div data-kt-datepicker-dropdown role="dialog" aria-modal="true" aria-label="Date picker" class="kt-datepicker-dropdown hidden {{class}}"></div>`,
   prevButton: `<button type="button" data-kt-datepicker-prev aria-label="Previous month" class="kt-datepicker-prev-button {{class}}">&lt;</button>`,
   nextButton: `<button type="button" data-kt-datepicker-next aria-label="Next month" class="kt-datepicker-next-button {{class}}">&gt;</button>`,
   // Add role="row" to calendar table rows

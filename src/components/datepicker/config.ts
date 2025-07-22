@@ -27,6 +27,13 @@ export const defaultDatepickerConfig: KTDatepickerConfig = {
   minTime: undefined,
   maxTime: undefined,
   timeStep: 1,
+  // Dropdown defaults
+  dropdownPlacement: 'bottom-start',
+  dropdownOffset: '0,8',
+  dropdownBoundary: 'clippingParents',
+  dropdownWidth: 'auto',
+  dropdownZindex: undefined,
+  dropdownContainer: undefined,
   // Custom classes for template elements
   classes: {},
 };
