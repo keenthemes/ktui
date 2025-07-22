@@ -43,7 +43,7 @@ KTDatepicker supports multiple selection modes to accommodate a wide range of da
   - Maximum number of selectable dates can be limited via config.
 
 ## 4. Time Selection
-- **Description:** Adds time picking (12/24 hour) to any selection mode.
+- **Description:** Adds time picking (12/24 hour) to any selection mode with granularity control.
 - **Usage:** Activate with `data-kt-datepicker-enable-time="true"` or via config.
 - **Example:**
   ```html
@@ -51,9 +51,17 @@ KTDatepicker supports multiple selection modes to accommodate a wide range of da
     <input type="text" data-kt-datepicker-input />
   </div>
   ```
+- **Configuration Options:**
+  - `timeGranularity`: 'second', 'minute', or 'hour' (default: 'minute')
+  - `timeFormat`: '12h' or '24h' (default: '24h')
+  - `minTime`: Minimum time constraint (format: 'HH:MM' or 'HH:MM:SS')
+  - `maxTime`: Maximum time constraint (format: 'HH:MM' or 'HH:MM:SS')
+  - `timeStep`: Time increment in minutes (default: 1)
 - **Edge Cases:**
   - Time selection is optional unless required by config.
   - 12/24 hour format is configurable.
+  - Time constraints are validated against min/max values.
+  - Time granularity affects the precision of time selection.
 
 ## References
 - See [configuration.md](./configuration.md) for enabling selection types via config.

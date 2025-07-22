@@ -4,6 +4,7 @@
 import { KTDatepickerConfig, KTDatepickerState } from './types';
 import { renderTemplateToDOM } from './utils/template';
 import { SegmentedInput } from './segmented-input';
+import { getTimeSegments } from './time-utils';
 
 export {};
 
@@ -73,9 +74,22 @@ export function instantiateSingleSegmentedInput(
   config: KTDatepickerConfig,
   onChange: (date: Date) => void
 ): void {
+  // Determine segments based on time configuration
+  let segments: Array<'day' | 'month' | 'year' | 'hour' | 'minute' | 'second' | 'ampm'> = ['month', 'day', 'year'];
+
+  if (config.enableTime) {
+    const timeSegments = getTimeSegments(config.timeGranularity || 'minute');
+    segments = [...segments, ...timeSegments];
+
+    // Add AM/PM for 12-hour format
+    if (config.timeFormat === '12h') {
+      segments.push('ampm');
+    }
+  }
+
   SegmentedInput(container, {
     value: state.selectedDate || state.currentDate || new Date(),
-    segments: ['month', 'day', 'year'],
+    segments,
     disabled: !!config.disabled,
     required: !!config.required,
     readOnly: !!config.readOnly,

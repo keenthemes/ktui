@@ -79,6 +79,18 @@ export interface KTDatepickerConfig {
    * Number of calendar months to display side-by-side (horizontal). Default: 1.
    */
   visibleMonths?: number;
+  /** Enable time selection (default: false) */
+  enableTime?: boolean;
+  /** Time granularity - smallest unit to display (default: 'minute') */
+  timeGranularity?: 'second' | 'minute' | 'hour';
+  /** Time format - 12 or 24 hour (default: '24h') */
+  timeFormat?: '12h' | '24h';
+  /** Minimum time constraint (format: 'HH:MM' or 'HH:MM:SS') */
+  minTime?: string;
+  /** Maximum time constraint (format: 'HH:MM' or 'HH:MM:SS') */
+  maxTime?: string;
+  /** Time step increment in minutes (default: 1) */
+  timeStep?: number;
   /** Custom classes for template elements */
   classes?: {
     container?: string;
@@ -116,12 +128,21 @@ export interface KTDatepickerConfig {
   [key: string]: any;
 }
 
+// Time state interface
+export interface TimeState {
+  hour: number;
+  minute: number;
+  second: number;
+}
+
 // State interface for KTDatepicker
 export interface KTDatepickerState {
   currentDate: Date;
   selectedDate: Date | null;
   selectedRange: { start: Date | null; end: Date | null } | null;
   selectedDates: Date[];
+  selectedTime: TimeState | null;
+  timeGranularity: 'second' | 'minute' | 'hour';
   viewMode: 'days' | 'months' | 'years';
   isOpen: boolean;
   isFocused: boolean;

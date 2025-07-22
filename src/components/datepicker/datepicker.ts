@@ -13,9 +13,11 @@ import { defaultDatepickerConfig } from './config';
 import { renderHeader } from './renderers/header';
 import { renderCalendar } from './renderers/calendar';
 import { renderFooter } from './renderers/footer';
+import { renderTimePicker } from './renderers/time-picker';
 import { getInitialState } from './state';
 import { SegmentedInput, SegmentedInputOptions } from './segmented-input';
 import { parseDateFromFormat } from './date-utils';
+import { dateToTimeState, applyTimeToDate, validateTime } from './time-utils';
 import {
   renderSingleSegmentedInputUI,
   renderRangeSegmentedInputUI,
@@ -147,10 +149,16 @@ export class KTDatepicker extends KTComponent {
 
   /** Select a single date */
   private _selectSingleDate(date: Date) {
-    this._state.selectedDate = date;
+    // Preserve time if time is enabled and we have a selected time
+    if (this._config.enableTime && this._state.selectedTime) {
+      const dateWithTime = applyTimeToDate(date, this._state.selectedTime);
+      this._state.selectedDate = dateWithTime;
+    } else {
+      this._state.selectedDate = date;
+    }
     this._state.currentDate = date;
     if (this._input) {
-      this._input.value = this._formatSingleDate(date);
+      this._input.value = this._formatSingleDate(this._state.selectedDate!);
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
@@ -214,6 +222,7 @@ export class KTDatepicker extends KTComponent {
     this._state.selectedDate = null;
     this._state.selectedRange = { start: null, end: null };
     this._state.selectedDates = [];
+    this._state.selectedTime = null;
     if (this._input) {
       this._input.value = '';
       const evt = new Event('change', { bubbles: true });
@@ -240,6 +249,12 @@ export class KTDatepicker extends KTComponent {
   private _onKeyDown = (e: KeyboardEvent) => {
     if (!this._isOpen) return;
     const target = e.target as HTMLElement;
+
+    // Check if segmented input is focused - let it handle its own keyboard events
+    if (target.closest('[data-segment]')) {
+      return; // Let segmented input handle its own keyboard events
+    }
+
     // Handle Escape: close dropdown
     if (e.key === 'Escape') {
       this.close();
@@ -371,6 +386,14 @@ export class KTDatepicker extends KTComponent {
       this._input.setAttribute('disabled', 'true');
       console.log('🗓️ [KTDatepicker] Input disabled from config');
     }
+    // --- Time initialization ---
+    if (this._config.enableTime) {
+      this._state.timeGranularity = this._config.timeGranularity || 'minute';
+      // Initialize time from selected date or current time
+      const baseDate = this._state.selectedDate || this._state.currentDate || new Date();
+      this._state.selectedTime = dateToTimeState(baseDate);
+    }
+
     // --- Mode-specific initialization ---
     if (this._config.range && this._config.valueRange) {
       this._initRangeFromConfig();
@@ -695,6 +718,35 @@ export class KTDatepicker extends KTComponent {
         this._onApply
       );
       dropdownEl.appendChild(footer);
+    }
+
+    // --- Render time picker if enabled ---
+    if (this._config.enableTime && this._state.selectedTime) {
+      const timePickerContainer = document.createElement('div');
+      timePickerContainer.className = 'kt-datepicker-time-container';
+      timePickerContainer.setAttribute('data-kt-datepicker-time-container', '');
+
+      renderTimePicker(timePickerContainer, {
+        time: this._state.selectedTime,
+        granularity: this._state.timeGranularity,
+        format: this._config.timeFormat || '24h',
+        minTime: this._config.minTime,
+        maxTime: this._config.maxTime,
+        timeStep: this._config.timeStep || 1,
+        disabled: !!this._config.disabled,
+        onChange: (newTime: any) => {
+          this._state.selectedTime = newTime;
+          // Apply time to selected date
+          if (this._state.selectedDate) {
+            const dateWithTime = applyTimeToDate(this._state.selectedDate, newTime);
+            this._state.selectedDate = dateWithTime;
+            this._updateInputValue();
+          }
+        },
+        templates: this._templateSet
+      });
+
+      dropdownEl.appendChild(timePickerContainer);
     }
   }
 

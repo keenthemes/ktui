@@ -123,6 +123,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
   let focusedIdx = 0;
   // --- Track caret position (offset) ---
   let caretOffset: number | null = null;
+  // --- Track if we're in the middle of Arrow Up/Down navigation ---
+  let isArrowNavigation = false;
 
   // --- Focus a segment by index and restore caret position ---
   /**
@@ -131,25 +133,32 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
    * @param caret - Caret offset to restore (null for end)
    */
   function restoreFocus(idx: number, caret: number | null = null) {
-    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
-    if (segs[idx]) {
-      segs.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
-      segs[idx].focus();
-      // Restore caret position (at end if null)
-      if (segs[idx].isContentEditable) {
-        const range = document.createRange();
-        range.selectNodeContents(segs[idx]);
-        range.collapse(false); // place at end
-        if (caret !== null && segs[idx].firstChild) {
-          range.setStart(segs[idx].firstChild, Math.min(caret, segs[idx].textContent?.length || 0));
-          range.collapse(true);
-        }
-        const sel = window.getSelection();
-        if (sel) {
-          sel.removeAllRanges();
-          sel.addRange(range);
+    try {
+      const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+      if (segs[idx] && segs[idx].offsetParent !== null) { // Check if element is in DOM
+        segs.forEach((el, i) => el.setAttribute('tabindex', i === idx ? '0' : '-1'));
+        segs[idx].focus();
+        // Restore caret position (at end if null)
+        if (segs[idx].isContentEditable) {
+          const range = document.createRange();
+          range.selectNodeContents(segs[idx]);
+          range.collapse(false); // place at end
+          if (caret !== null && segs[idx].firstChild) {
+            range.setStart(segs[idx].firstChild, Math.min(caret, segs[idx].textContent?.length || 0));
+            range.collapse(true);
+          }
+          const sel = window.getSelection();
+          if (sel) {
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
         }
       }
+    } catch (error) {
+      console.warn('Focus restoration failed:', error);
+      // Fallback: focus first available segment
+      const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+      if (segs[0]) segs[0].focus();
     }
   }
 
@@ -240,19 +249,31 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         // Wrapping navigation
         if (e.key === 'ArrowRight' || (e.key === 'Tab' && !e.shiftKey)) {
           e.preventDefault();
+          isArrowNavigation = true; // Set flag to prevent blur onChange
           focusedIdx = (idx + 1) % segments.length;
           caretOffset = null;
           render();
           restoreFocus(focusedIdx, caretOffset);
+          // Reset flag after a short delay to allow focus to be restored
+          setTimeout(() => {
+            isArrowNavigation = false;
+          }, 10);
         } else if (e.key === 'ArrowLeft' || (e.key === 'Tab' && e.shiftKey)) {
           e.preventDefault();
+          isArrowNavigation = true; // Set flag to prevent blur onChange
           focusedIdx = (idx - 1 + segments.length) % segments.length;
           caretOffset = null;
           render();
           restoreFocus(focusedIdx, caretOffset);
+          // Reset flag after a short delay to allow focus to be restored
+          setTimeout(() => {
+            isArrowNavigation = false;
+          }, 10);
         } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
           // Increment/decrement value
           e.preventDefault();
+          e.stopPropagation(); // Prevent bubbling to main datepicker
+          isArrowNavigation = true; // Set flag to prevent blur onChange
           const min = getSegmentMin(segments[idx], currentValue) ?? 0;
           const max = getSegmentMax(segments[idx], currentValue) ?? 9999;
           let current = Number(span.textContent) || min;
@@ -269,10 +290,15 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           }
           span.textContent = newValue;
           currentValue = setSegmentValue(segments[idx], newValue, currentValue);
-          if (options.onChange) options.onChange(currentValue);
+          // Don't call onChange immediately for Arrow Up/Down to prevent dropdown closing
+          // onChange will be called on blur or when user finishes editing
           caretOffset = null;
           render();
           restoreFocus(focusedIdx, caretOffset);
+          // Reset flag after a short delay to allow focus to be restored
+          setTimeout(() => {
+            isArrowNavigation = false;
+          }, 10);
         } else if (/^[0-9]$/.test(e.key)) {
           // Direct typing, enforce min/max
           let newValue;
@@ -304,6 +330,12 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       });
       span.addEventListener('blur', () => {
         span.setAttribute('tabindex', '-1');
+        // Call onChange when user finishes editing to update the main datepicker
+        // But not during Arrow Up/Down navigation
+        if (options.onChange && !isArrowNavigation) {
+          const updatedValue = setSegmentValue(segments[idx], span.textContent || '', currentValue);
+          options.onChange(updatedValue);
+        }
       });
       // Mouse click focuses segment
       span.addEventListener('mousedown', (e) => {

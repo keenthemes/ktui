@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Datepicker Base Class + Overrideable Class Examples</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+	<style>
+		/* Base class styling examples */
+		.kt-datepicker-header {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			padding: 1rem;
+			border-radius: 0.5rem 0.5rem 0 0;
+			text-align: center;
+			font-weight: bold;
+		}
+
+		.kt-datepicker-day-cell {
+			border-radius: 0.25rem;
+			transition: all 0.2s ease;
+			padding: 0.5rem;
+		}
+
+		.kt-datepicker-day-cell:hover {
+			background-color: #e3f2fd;
+			transform: scale(1.05);
+		}
+
+		.kt-datepicker-calendar-button {
+			background-color: #4caf50;
+			color: white;
+			border: none;
+			padding: 0.5rem 1rem;
+			border-radius: 0.25rem;
+			cursor: pointer;
+			transition: background-color 0.2s ease;
+		}
+
+		.kt-datepicker-calendar-button:hover {
+			background-color: #45a049;
+		}
+
+		.kt-datepicker-dropdown {
+			box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+			border: 2px solid #e0e0e0;
+			border-radius: 0.5rem;
+		}
+
+		.kt-datepicker-today-button {
+			background-color: #2196f3;
+			color: white;
+			border: none;
+			padding: 0.5rem 1rem;
+			border-radius: 0.25rem;
+			cursor: pointer;
+			transition: background-color 0.2s ease;
+		}
+
+		.kt-datepicker-today-button:hover {
+			background-color: #1976d2;
+		}
+
+		/* Custom overrideable class examples */
+		.custom-header-override {
+			background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
+			font-size: 1.2rem;
+		}
+
+		.custom-day-override {
+			border: 2px solid #74b9ff;
+			background-color: #f8f9fa;
+		}
+
+		.custom-button-override {
+			background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%) !important;
+			box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+		}
+
+		.responsive-container {
+			max-width: 400px;
+			margin: 0 auto;
+		}
+
+		.dark-theme {
+			background-color: #1a1a1a;
+			color: white;
+		}
+
+		.dark-theme .kt-datepicker-header {
+			background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+		}
+
+		.dark-theme .kt-datepicker-day-cell:hover {
+			background-color: #34495e;
+		}
+
+		/* Example section styling */
+		.example-section {
+			margin-bottom: 2rem;
+			padding: 1.5rem;
+			border: 1px solid #e0e0e0;
+			border-radius: 0.5rem;
+			background-color: #fafafa;
+		}
+
+		.example-title {
+			font-size: 1.25rem;
+			font-weight: bold;
+			margin-bottom: 1rem;
+			color: #333;
+		}
+
+		.example-description {
+			color: #666;
+			margin-bottom: 1rem;
+		}
+	</style>
+</head>
+
+<body class="bg-gray-50 min-h-screen p-8">
+	<div class="max-w-6xl mx-auto">
+		<h1 class="text-4xl font-bold text-gray-800 mb-8">Datepicker Base Class + Overrideable Class Examples</h1>
+
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+			<!-- Example 1: Base Classes Only -->
+			<div class="example-section">
+				<h2 class="example-title">1. Base Classes Only</h2>
+				<p class="example-description">Using only the default base classes without any custom overrides. Base classes provide consistent default styling.</p>
+
+				<div class="kt-datepicker" data-kt-datepicker="true">
+					<input type="text" placeholder="Select a date..." class="w-full p-2 border rounded" />
+				</div>
+
+				<div class="mt-4 p-3 bg-blue-50 rounded">
+					<strong>CSS Used:</strong>
+					<pre class="text-sm mt-2"><code>.kt-datepicker-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.kt-datepicker-day-cell {
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}</code></pre>
+				</div>
+			</div>
+
+			<!-- Example 2: Base + Overrideable Classes -->
+			<div class="example-section">
+				<h2 class="example-title">2. Base + Overrideable Classes</h2>
+				<p class="example-description">Combining base classes with custom overrideable classes for enhanced styling.</p>
+
+				<div class="kt-datepicker" data-kt-datepicker="true"
+					data-kt-datepicker-config='{
+						"classes": {
+							"header": "custom-header-override",
+							"dayCell": "custom-day-override",
+							"calendarButton": "custom-button-override"
+						}
+					}'>
+					<input type="text" placeholder="Select a date..." class="w-full p-2 border rounded" />
+				</div>
+
+				<div class="mt-4 p-3 bg-green-50 rounded">
+					<strong>Classes Applied:</strong>
+					<ul class="text-sm mt-2 space-y-1">
+						<li><code>kt-datepicker-header custom-header-override</code></li>
+						<li><code>kt-datepicker-day-cell custom-day-override</code></li>
+						<li><code>kt-datepicker-calendar-button custom-button-override</code></li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Example 3: Tailwind CSS Overrides -->
+			<div class="example-section">
+				<h2 class="example-title">3. Tailwind CSS Overrides</h2>
+				<p class="example-description">Using Tailwind utility classes as overrideable classes for rapid styling.</p>
+
+				<div class="kt-datepicker" data-kt-datepicker="true"
+					data-kt-datepicker-config='{
+						"classes": {
+							"header": "bg-gradient-to-r from-pink-500 to-purple-600 text-white p-4 rounded-t-lg font-bold",
+							"dayCell": "hover:bg-pink-100 transition-colors duration-200 rounded",
+							"todayButton": "bg-pink-500 hover:bg-pink-600 text-white px-3 py-1 rounded text-sm",
+							"dropdown": "shadow-xl border-2 border-pink-200 rounded-lg"
+						}
+					}'>
+					<input type="text" placeholder="Select a date..." class="w-full p-2 border rounded" />
+				</div>
+
+				<div class="mt-4 p-3 bg-pink-50 rounded">
+					<strong>Tailwind Classes:</strong>
+					<ul class="text-sm mt-2 space-y-1">
+						<li><code>bg-gradient-to-r from-pink-500 to-purple-600</code></li>
+						<li><code>hover:bg-pink-100 transition-colors</code></li>
+						<li><code>shadow-xl border-2 border-pink-200</code></li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Example 4: Responsive Design -->
+			<div class="example-section">
+				<h2 class="example-title">4. Responsive Design</h2>
+				<p class="example-description">Classes that adapt to different screen sizes using responsive utilities.</p>
+
+				<div class="kt-datepicker" data-kt-datepicker="true"
+					data-kt-datepicker-config='{
+						"classes": {
+							"container": "responsive-container",
+							"dropdown": "w-full md:w-80 shadow-lg border rounded-lg",
+							"calendarGrid": "w-full text-xs md:text-sm",
+							"header": "text-sm md:text-base font-semibold p-2 md:p-3 bg-gray-100"
+						}
+					}'>
+					<input type="text" placeholder="Select a date..." class="w-full p-2 border rounded" />
+				</div>
+
+				<div class="mt-4 p-3 bg-yellow-50 rounded">
+					<strong>Responsive Classes:</strong>
+					<ul class="text-sm mt-2 space-y-1">
+						<li><code>w-full md:w-80</code> - Full width on mobile, fixed width on desktop</li>
+						<li><code>text-xs md:text-sm</code> - Smaller text on mobile</li>
+						<li><code>p-2 md:p-3</code> - Less padding on mobile</li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Example 5: Dark Theme -->
+			<div class="example-section">
+				<h2 class="example-title">5. Dark Theme</h2>
+				<p class="example-description">Custom dark theme styling using both base and overrideable classes.</p>
+
+				<div class="kt-datepicker" data-kt-datepicker="true"
+					data-kt-datepicker-config='{
+						"classes": {
+							"container": "dark-theme",
+							"header": "custom-header-override",
+							"dayCell": "custom-day-override text-white",
+							"dropdown": "custom-button-override dark-theme",
+							"todayButton": "bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+						}
+					}'>
+					<input type="text" placeholder="Select a date..." class="w-full p-2 border rounded bg-gray-800 text-white" />
+				</div>
+
+				<div class="mt-4 p-3 bg-gray-800 text-white rounded">
+					<strong>Dark Theme Classes:</strong>
+					<ul class="text-sm mt-2 space-y-1">
+						<li><code>dark-theme</code> - Dark background and text</li>
+						<li><code>text-white</code> - White text for dark backgrounds</li>
+						<li><code>bg-gray-800</code> - Dark input background</li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Example 6: Custom Template + Classes -->
+			<div class="example-section">
+				<h2 class="example-title">6. Custom Template + Classes</h2>
+				<p class="example-description">Combining custom templates with base and overrideable classes.</p>
+
+				<div class="kt-datepicker" data-kt-datepicker="true"
+					data-kt-datepicker-config='{
+						"templates": {
+							"dayCell": "<td class=\"kt-datepicker-day-cell custom-day-cell {{class}}\" data-kt-datepicker-day role=\"gridcell\"><button type=\"button\" data-day=\"{{day}}\" aria-label=\"Select {{day}}\" class=\"w-full h-full p-2 hover:bg-blue-200 rounded transition-colors\">{{day}}</button></td>",
+							"header": "<div class=\"kt-datepicker-header custom-header-wrapper {{class}}\" data-kt-datepicker-header><div class=\"flex justify-between items-center\">{{prevButton}}<span class=\"text-lg font-bold\">{{month}} {{year}}</span>{{nextButton}}</div></div>"
+						},
+						"classes": {
+							"dayCell": "border border-gray-200",
+							"header": "bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-t-lg"
+						}
+					}'>
+					<input type="text" placeholder="Select a date..." class="w-full p-2 border rounded" />
+				</div>
+
+				<div class="mt-4 p-3 bg-indigo-50 rounded">
+					<strong>Template + Classes:</strong>
+					<ul class="text-sm mt-2 space-y-1">
+						<li><code>kt-datepicker-day-cell custom-day-cell border border-gray-200</code></li>
+						<li><code>kt-datepicker-header custom-header-wrapper bg-gradient-to-r from-indigo-500 to-purple-600</code></li>
+					</ul>
+				</div>
+			</div>
+
+		</div>
+
+		<!-- Documentation Section -->
+		<div class="mt-12 bg-white rounded-lg shadow p-6">
+			<h2 class="text-2xl font-bold mb-4">Understanding Base Class + Overrideable Class Pattern</h2>
+
+			<div class="prose max-w-none">
+				<h3>Class Structure</h3>
+				<p>Each template element uses the pattern: <code>class="kt-datepicker-{element} {{class}}"</code></p>
+
+				<h3>Base Classes</h3>
+				<p>Base classes (e.g., <code>kt-datepicker-header</code>) are always present and provide:</p>
+				<ul>
+					<li>Consistent default styling across all instances</li>
+					<li>Semantic class names for targeting</li>
+					<li>Foundation for component theming</li>
+				</ul>
+
+				<h3>Overrideable Classes</h3>
+				<p>Overrideable classes (via <code>{{class}}</code>) allow:</p>
+				<ul>
+					<li>Per-instance customization</li>
+					<li>Integration with CSS frameworks</li>
+					<li>Dynamic styling based on state</li>
+				</ul>
+
+				<h3>Best Practices</h3>
+				<ul>
+					<li><strong>Always include base classes</strong> in custom templates</li>
+					<li><strong>Use semantic class names</strong> for overrideable classes</li>
+					<li><strong>Test responsive behavior</strong> with different screen sizes</li>
+					<li><strong>Maintain accessibility</strong> when customizing styles</li>
+				</ul>
+
+				<h3>CSS Targeting Examples</h3>
+				<pre><code>/* Target all datepicker headers */
+.kt-datepicker-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Target specific instance with custom class */
+.kt-datepicker-header.custom-theme {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+}
+
+/* Target base class with Tailwind utilities */
+.kt-datepicker-day-cell.hover\:bg-blue-100:hover {
+  background-color: #dbeafe;
+}</code></pre>
+			</div>
+		</div>
+	</div>
+
+	<script src="../../dist/ktui.js"></script>
+	<script>
+		// Initialize all datepickers
+		document.addEventListener('DOMContentLoaded', function() {
+			KTDatepicker.initDatepickers();
+		});
+	</script>
+</body>
+
+</html>

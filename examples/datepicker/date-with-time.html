@@ -1,0 +1,162 @@
+<!--
+  KTUI Datepicker Example: Date with Time
+  - Demonstrates time selection functionality
+  - Shows different time granularities and formats
+  - Follows HeroUI best practices for time picker
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KTUI Datepicker: Date with Time</title>
+  <link rel="stylesheet" href="../../dist/styles.css">
+  <style>
+    .example-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .example-card {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .example-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #374151;
+    }
+    .example-description {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+    .time-display {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #f3f4f6;
+      border-radius: 0.375rem;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">KTUI Datepicker: Date with Time</h1>
+    <p class="text-gray-600 mb-8">Examples demonstrating time selection functionality with different granularities and formats.</p>
+
+    <div class="example-grid">
+      <!-- Basic Date with Time (Minute Granularity) -->
+      <div class="example-card">
+        <h2 class="example-title">Basic Date with Time</h2>
+        <p class="example-description">Default time picker with minute granularity and 24-hour format.</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-enable-time="true">
+          <input id="datepicker-basic-time" placeholder="Select date and time" />
+        </div>
+        <div class="time-display" id="display-basic-time">No selection</div>
+      </div>
+
+      <!-- Date with Time (Second Granularity) -->
+      <div class="example-card">
+        <h2 class="example-title">Date with Seconds</h2>
+        <p class="example-description">Time picker with second granularity for precise time selection.</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeGranularity": "second"}'>
+          <input id="datepicker-seconds" placeholder="Select date and time with seconds" />
+        </div>
+        <div class="time-display" id="display-seconds">No selection</div>
+      </div>
+
+      <!-- Date with Time (Hour Granularity) -->
+      <div class="example-card">
+        <h2 class="example-title">Date with Hour Only</h2>
+        <p class="example-description">Time picker with hour granularity for approximate time selection.</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeGranularity": "hour"}'>
+          <input id="datepicker-hour" placeholder="Select date and hour" />
+        </div>
+        <div class="time-display" id="display-hour">No selection</div>
+      </div>
+
+      <!-- 12-Hour Format -->
+      <div class="example-card">
+        <h2 class="example-title">12-Hour Format</h2>
+        <p class="example-description">Time picker with 12-hour format and AM/PM selection.</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeFormat": "12h"}'>
+          <input id="datepicker-12h" placeholder="Select date and time (12h)" />
+        </div>
+        <div class="time-display" id="display-12h">No selection</div>
+      </div>
+
+      <!-- Time Constraints -->
+      <div class="example-card">
+        <h2 class="example-title">Time Constraints</h2>
+        <p class="example-description">Time picker with min/max time constraints (9:00 AM - 5:00 PM).</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "minTime": "09:00", "maxTime": "17:00"}'>
+          <input id="datepicker-constraints" placeholder="Select time between 9 AM - 5 PM" />
+        </div>
+        <div class="time-display" id="display-constraints">No selection</div>
+      </div>
+
+      <!-- Custom Time Step -->
+      <div class="example-card">
+        <h2 class="example-title">Custom Time Step</h2>
+        <p class="example-description">Time picker with 15-minute increments for appointment scheduling.</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeStep": 15}'>
+          <input id="datepicker-step" placeholder="Select time (15-min intervals)" />
+        </div>
+        <div class="time-display" id="display-step">No selection</div>
+      </div>
+
+      <!-- Range with Time -->
+      <div class="example-card">
+        <h2 class="example-title">Date Range with Time</h2>
+        <p class="example-description">Date range picker with time selection for both start and end dates.</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-range="true" data-kt-datepicker-enable-time="true">
+          <input id="datepicker-range-time" placeholder="Select date range with time" />
+        </div>
+        <div class="time-display" id="display-range-time">No selection</div>
+      </div>
+
+      <!-- All Features Combined -->
+      <div class="example-card">
+        <h2 class="example-title">All Features Combined</h2>
+        <p class="example-description">Complete example with seconds, 12-hour format, and constraints.</p>
+        <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeGranularity": "second", "timeFormat": "12h", "minTime": "08:00", "maxTime": "18:00", "timeStep": 5}'>
+          <input id="datepicker-all" placeholder="Select date and time (all features)" />
+        </div>
+        <div class="time-display" id="display-all">No selection</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../dist/ktui.js"></script>
+  <script>
+    // Initialize all datepickers and add event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      const datepickers = document.querySelectorAll('[data-kt-datepicker]');
+
+      datepickers.forEach((element, index) => {
+        const input = element.querySelector('input');
+        const display = document.getElementById(`display-${getDisplayId(index)}`);
+
+        if (input && display) {
+          input.addEventListener('change', function() {
+            const value = this.value;
+            display.textContent = value || 'No selection';
+            console.log(`Datepicker ${index + 1} value:`, value);
+          });
+        }
+      });
+    });
+
+    function getDisplayId(index) {
+      const ids = ['basic-time', 'seconds', 'hour', '12h', 'constraints', 'step', 'range-time', 'all'];
+      return ids[index] || `picker-${index}`;
+    }
+  </script>
+</body>
+</html>

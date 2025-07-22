@@ -20,6 +20,13 @@ export const defaultDatepickerConfig: KTDatepickerConfig = {
   closeOnSelect: true,
   // Number of calendar months to display side-by-side (horizontal). Default: 1.
   visibleMonths: 1,
+  // Time-related defaults
+  enableTime: false,
+  timeGranularity: 'minute',
+  timeFormat: '24h',
+  minTime: undefined,
+  maxTime: undefined,
+  timeStep: 1,
   // Custom classes for template elements
   classes: {},
 };

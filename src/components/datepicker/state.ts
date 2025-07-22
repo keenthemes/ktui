@@ -14,6 +14,8 @@ export function getInitialState(): KTDatepickerState {
     selectedDate: null,
     selectedRange: null,
     selectedDates: [],
+    selectedTime: null,
+    timeGranularity: 'minute',
     viewMode: 'days',
     isOpen: false,
     isFocused: false,

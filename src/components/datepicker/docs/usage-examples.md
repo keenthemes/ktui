@@ -41,6 +41,33 @@ This document provides a variety of usage examples for KTDatepicker, demonstrati
 
 ---
 
+### 4a. Time with Granularity Example
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeGranularity": "second"}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+```
+
+---
+
+### 4b. Time with 12-Hour Format Example
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeFormat": "12h"}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+```
+
+---
+
+### 4c. Time with Constraints Example
+```html
+<div data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "minTime": "09:00", "maxTime": "17:00"}'>
+  <input type="text" data-kt-datepicker-input />
+</div>
+```
+
+---
+
 ### 5. Template Customization Example
 ```html
 <div data-kt-datepicker="true" data-kt-datepicker-config='{"dayCell": "<td class=\"rounded bg-blue-100\">{{day}}</td>"}'>

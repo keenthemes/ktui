@@ -53,7 +53,32 @@ KTDatepicker supports flexible configuration via HTML attributes and a JSON conf
   - Attribute values are parsed first.
   - JSON config values override attribute values for matching keys.
 
-## 4. Config Merging Logic
+## 4. Time Configuration
+- **Description:** Time picker configuration options for granularity, format, and constraints.
+- **Example:**
+  ```html
+  <div
+    data-kt-datepicker="true"
+    data-kt-datepicker-enable-time="true"
+    data-kt-datepicker-config='{
+      "timeGranularity": "second",
+      "timeFormat": "12h",
+      "minTime": "09:00",
+      "maxTime": "17:00",
+      "timeStep": 15
+    }'>
+    <input type="text" data-kt-datepicker-input />
+  </div>
+  ```
+- **Time Options:**
+  - `enableTime`: Enable time selection (boolean)
+  - `timeGranularity`: 'second', 'minute', or 'hour' (default: 'minute')
+  - `timeFormat`: '12h' or '24h' (default: '24h')
+  - `minTime`: Minimum time constraint (format: 'HH:MM' or 'HH:MM:SS')
+  - `maxTime`: Maximum time constraint (format: 'HH:MM' or 'HH:MM:SS')
+  - `timeStep`: Time increment in minutes (default: 1)
+
+## 5. Config Merging Logic
 - **Order of Precedence:**
   1. Default values
   2. Attribute-based values
