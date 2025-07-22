@@ -22,6 +22,7 @@ export type KTAlertTemplateKey =
   | 'inputSelect'
   | 'inputRadio'
   | 'inputCheckbox'
+  | 'inputError'
   | 'closeButton'
   | 'customContent'
   | 'loaderHtml'
@@ -94,6 +95,28 @@ export interface KTAlertConfig {
   customClass?: string;
   /** Loader HTML or template */
   loaderHtml?: string;
+
+  // Validation and processing callbacks
+  /** Input validation function - return string for error, null/undefined for success */
+  inputValidator?: (value: string) => string | null | undefined | Promise<string | null | undefined>;
+  /** Pre-confirmation processing function - can return Promise for async processing */
+  preConfirm?: (value: string) => string | Promise<string>;
+  /** Auto-focus the input field when alert opens */
+  inputAutoFocus?: boolean;
+
+  // Granular class overrides for individual UI elements
+  overlayClass?: string;
+  modalClass?: string;
+  containerClass?: string;
+  iconClass?: string;
+  titleClass?: string;
+  messageClass?: string;
+  actionsClass?: string;
+  inputClass?: string;
+  inputLabelClass?: string;
+  closeButtonClass?: string;
+  customContentClass?: string;
+  loaderClass?: string;
   /**
    * Per-type theming overrides (e.g., { success: { customClass, icon, confirmText, ... }, ... })
    */

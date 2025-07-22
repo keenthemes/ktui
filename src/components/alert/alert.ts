@@ -11,7 +11,7 @@
 
 import KTComponent from '../component';
 import { KTAlertConfig, KTAlertState, KTAlertTemplateStrings } from './types';
-import { getTemplateStrings, defaultTemplates, renderTemplateString, isTemplateFunction, renderOptions } from './templates';
+import { getTemplateStrings, coreTemplateStrings, renderTemplateString, isTemplateFunction, renderOptions } from './templates';
 
 /**
  * Default configuration for KTAlert
@@ -201,8 +201,8 @@ export class KTAlert extends KTComponent {
         // Use custom class templates if provided
         templates: {
           ...((mergedConfig.templates as any) || {}),
-          confirmButton: themeOverrides.confirmButtonClass ? defaultTemplates.confirmButtonCustomClass : undefined,
-          cancelButton: themeOverrides.cancelButtonClass ? defaultTemplates.cancelButtonCustomClass : undefined,
+          confirmButton: themeOverrides.confirmButtonClass ? coreTemplateStrings.confirmButtonCustomClass : undefined,
+          cancelButton: themeOverrides.cancelButtonClass ? coreTemplateStrings.cancelButtonCustomClass : undefined,
         },
       };
     }
@@ -238,7 +238,7 @@ export class KTAlert extends KTComponent {
       containerHtml = renderTemplateString(containerTpl, { ...this._config, content });
     } else {
       // Use default container template
-      const defaultContainer = defaultTemplates.container;
+      const defaultContainer = coreTemplateStrings.container;
       if (isTemplateFunction(defaultContainer)) {
         containerHtml = defaultContainer({ ...this._config, content });
       } else if (typeof defaultContainer === 'string') {
@@ -277,6 +277,17 @@ export class KTAlert extends KTComponent {
    */
   private _focusFirstInteractive() {
     if (!this._container) return;
+
+    // Auto-focus input if configured and input exists
+    if (this._config.inputAutoFocus && this._config.input) {
+      const inputElement = this._container.querySelector('[data-kt-alert-input]') as HTMLElement;
+      if (inputElement) {
+        inputElement.focus();
+        return;
+      }
+    }
+
+    // Fallback to first interactive element
     const first = this._container.querySelector('[data-kt-alert-input], [data-kt-alert-confirm], [data-kt-alert-cancel], [data-kt-alert-close]') as HTMLElement;
     if (first) first.focus();
   }
@@ -505,8 +516,9 @@ export class KTAlert extends KTComponent {
     // Confirm button
     const confirmBtn = this._container.querySelector('[data-kt-alert-confirm]');
     if (confirmBtn) {
-      confirmBtn.addEventListener('click', () => {
+      confirmBtn.addEventListener('click', async () => {
         this._clearTimer();
+
         // Gather input value(s) for all supported types
         let inputValue: any = undefined;
         const inputType = this._config.inputType || 'text';
@@ -521,6 +533,37 @@ export class KTAlert extends KTComponent {
           const inputEl = this._container.querySelector('[data-kt-alert-input]') as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
           inputValue = inputEl ? inputEl.value : undefined;
         }
+
+        // Validate input if validator is provided
+        if (this._config.inputValidator) {
+          try {
+            const validationResult = await this._config.inputValidator(inputValue || '');
+            if (validationResult) {
+              // Show validation error
+              this._showValidationError(validationResult);
+              return; // Don't proceed with confirmation
+            }
+          } catch (error) {
+            // Show validation error for exceptions
+            this._showValidationError('Validation failed. Please try again.');
+            return;
+          }
+        }
+
+        // Clear any existing validation errors
+        this._clearValidationError();
+
+        // Process input with preConfirm if provided
+        if (this._config.preConfirm) {
+          try {
+            inputValue = await this._config.preConfirm(inputValue || '');
+          } catch (error) {
+            // Show error for pre-confirmation failures
+            this._showValidationError('Processing failed. Please try again.');
+            return;
+          }
+        }
+
         this._fireEvent('confirm', { inputValue });
         this._state.isDismissed = true;
         this._element.innerHTML = '';
@@ -593,7 +636,105 @@ export class KTAlert extends KTComponent {
   }
 
   /**
-   * SweetAlert2-style API: KTAlert.fire(options)
+   * Show validation error message below input field.
+   * @private
+   */
+  private _showValidationError(message: string) {
+    if (!this._container) return;
+
+    // Clear any existing error
+    this._clearValidationError();
+
+    // Create error element
+    const errorElement = document.createElement('div');
+    errorElement.setAttribute('data-kt-alert-input-error', '');
+    errorElement.className = 'kt-alert-input-error';
+    errorElement.setAttribute('role', 'alert');
+    errorElement.setAttribute('aria-live', 'polite');
+    errorElement.textContent = message;
+
+    // Find input label and insert error after it
+    const inputLabel = this._container.querySelector('[data-kt-alert-input-label]');
+    if (inputLabel) {
+      inputLabel.parentNode?.insertBefore(errorElement, inputLabel.nextSibling);
+    }
+
+    // Mark input as invalid
+    const inputElement = this._container.querySelector('[data-kt-alert-input]') as HTMLElement;
+    if (inputElement) {
+      inputElement.setAttribute('aria-invalid', 'true');
+    }
+  }
+
+  /**
+   * Clear validation error message.
+   * @private
+   */
+  private _clearValidationError() {
+    if (!this._container) return;
+
+    // Remove error element
+    const errorElement = this._container.querySelector('[data-kt-alert-input-error]');
+    if (errorElement) {
+      errorElement.remove();
+    }
+
+    // Remove invalid state from input
+    const inputElement = this._container.querySelector('[data-kt-alert-input]') as HTMLElement;
+    if (inputElement) {
+      inputElement.removeAttribute('aria-invalid');
+    }
+  }
+
+  /**
+   * Show validation error message below input field (static method helper).
+   * @private
+   */
+  private static showValidationError(alert: HTMLElement, message: string) {
+    // Clear any existing error
+    this.clearValidationError(alert);
+
+    // Create error element
+    const errorElement = document.createElement('div');
+    errorElement.setAttribute('data-kt-alert-input-error', '');
+    errorElement.className = 'kt-alert-input-error';
+    errorElement.setAttribute('role', 'alert');
+    errorElement.setAttribute('aria-live', 'polite');
+    errorElement.textContent = message;
+
+    // Find input label and insert error after it
+    const inputLabel = alert.querySelector('[data-kt-alert-input-label]');
+    if (inputLabel) {
+      inputLabel.parentNode?.insertBefore(errorElement, inputLabel.nextSibling);
+    }
+
+    // Mark input as invalid
+    const inputElement = alert.querySelector('[data-kt-alert-input]') as HTMLElement;
+    if (inputElement) {
+      inputElement.setAttribute('aria-invalid', 'true');
+    }
+  }
+
+  /**
+   * Clear validation error message (static method helper).
+   * @private
+   */
+  private static clearValidationError(alert: HTMLElement) {
+    // Remove error element
+    const errorElement = alert.querySelector('[data-kt-alert-input-error]');
+    if (errorElement) {
+      errorElement.remove();
+    }
+
+    // Remove invalid state from input
+    const inputElement = alert.querySelector('[data-kt-alert-input]') as HTMLElement;
+    if (inputElement) {
+      inputElement.removeAttribute('aria-invalid');
+    }
+  }
+
+  /**
+   * KTAlert.fire(options)
    * Accepts a config object and returns a Promise that resolves with the user's action and input value.
    */
   static fire(options: any): Promise<{ isConfirmed: boolean, isDismissed: boolean, isCanceled: boolean, value?: string }> {
@@ -755,7 +896,7 @@ export class KTAlert extends KTComponent {
       // Confirm button
       const confirmBtn = alert.querySelector('[data-kt-alert-confirm]');
       if (confirmBtn) {
-        confirmBtn.addEventListener('click', () => {
+        confirmBtn.addEventListener('click', async () => {
           // Gather input value(s) for all supported types
           let inputValue: any = undefined;
           const inputType = options.inputType || 'text';
@@ -769,6 +910,37 @@ export class KTAlert extends KTComponent {
             const inputEl = alert.querySelector('[data-kt-alert-input]') as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
             inputValue = inputEl ? inputEl.value : undefined;
           }
+
+          // Validate input if validator is provided
+          if (options.inputValidator) {
+            try {
+              const validationResult = await options.inputValidator(inputValue || '');
+              if (validationResult) {
+                // Show validation error
+                KTAlert.showValidationError(alert as HTMLElement, validationResult);
+                return; // Don't proceed with confirmation
+              }
+            } catch (error) {
+              // Show validation error for exceptions
+              KTAlert.showValidationError(alert as HTMLElement, 'Validation failed. Please try again.');
+              return;
+            }
+          }
+
+          // Clear any existing validation errors
+          KTAlert.clearValidationError(alert as HTMLElement);
+
+          // Process input with preConfirm if provided
+          if (options.preConfirm) {
+            try {
+              inputValue = await options.preConfirm(inputValue || '');
+            } catch (error) {
+              // Show error for pre-confirmation failures
+              KTAlert.showValidationError(alert as HTMLElement, 'Processing failed. Please try again.');
+              return;
+            }
+          }
+
           cleanup();
           resolve({ isConfirmed: true, isDismissed: false, isCanceled: false, value: inputValue });
         });
@@ -803,6 +975,15 @@ export class KTAlert extends KTComponent {
           (confirmBtn as HTMLElement).click();
         }
       });
+
+      // Auto-focus input if configured
+      if (options.inputAutoFocus && options.input) {
+        const inputElement = alert.querySelector('[data-kt-alert-input]') as HTMLElement;
+        if (inputElement) {
+          // Use setTimeout to ensure DOM is ready
+          setTimeout(() => inputElement.focus(), 0);
+        }
+      }
     });
   }
 

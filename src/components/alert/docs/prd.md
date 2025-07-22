@@ -49,6 +49,3 @@ Provide a modern, user-friendly alert/dialog component inspired by SweetAlert2, 
 - Not a full notification/toast system.
 - No backend integration.
 - No persistent storage of alerts.
-
-## 9. Benchmark
-- The component should support features similar to [SweetAlert2](https://sweetalert2.github.io/#usage) as a reference for functionality and user experience.
