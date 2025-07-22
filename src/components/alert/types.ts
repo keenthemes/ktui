@@ -24,7 +24,10 @@ export type KTAlertTemplateKey =
   | 'inputCheckbox'
   | 'closeButton'
   | 'customContent'
-  | 'loaderHtml';
+  | 'loaderHtml'
+  | 'option'
+  | 'radioOption'
+  | 'checkboxOption';
 
 // Template string map
 export type KTAlertTemplateStrings = {

@@ -34,6 +34,10 @@ export const defaultTemplates: KTAlertTemplateStrings = {
   closeButton: `<button type="button" data-kt-alert-close aria-label="Close alert" tabindex="0">&times;</button>`,
   customContent: `<div data-kt-alert-custom-content>{{customContent}}</div>`,
   loaderHtml: `<span data-kt-alert-loader>{{loaderHtml}}</span>`,
+  // Input option templates
+  option: `<option value="{{value}}"{{selected}} {{disabled}}>{{label}}</option>`,
+  radioOption: `<label><input type="radio" name="kt-alert-radio" data-kt-alert-input value="{{value}}"{{checked}} {{disabled}} {{attrs}} aria-label="{{label}}" tabindex="0" />{{label}}</label>`,
+  checkboxOption: `<label><input type="checkbox" name="kt-alert-checkbox" data-kt-alert-input value="{{value}}"{{checked}} {{disabled}} {{attrs}} aria-label="{{label}}" tabindex="0" />{{label}}</label>`,
 };
 
 /**
@@ -57,4 +61,30 @@ export function renderTemplateString(template: string, data: Record<string, any>
  */
 export function isTemplateFunction(tpl: unknown): tpl is (data: any) => string {
   return typeof tpl === 'function';
+}
+
+/**
+ * Renders an array of options using a template.
+ */
+export function renderOptions(options: Array<any>, templateKey: string, templateSet: KTAlertTemplateStrings): string {
+  const template = templateSet[templateKey as keyof KTAlertTemplateStrings];
+  if (!template) return '';
+
+  return options.map(option => {
+    const data = {
+      value: option.value,
+      label: option.label,
+      selected: option.value === option.inputValue ? ' selected' : '',
+      checked: option.checked || false ? ' checked' : '',
+      disabled: option.disabled || false ? ' disabled' : '',
+      attrs: option.attrs || ''
+    };
+
+    if (isTemplateFunction(template)) {
+      return template(data);
+    } else if (typeof template === 'string') {
+      return renderTemplateString(template, data);
+    }
+    return '';
+  }).join('');
 }

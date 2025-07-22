@@ -11,7 +11,7 @@
 
 import KTComponent from '../component';
 import { KTAlertConfig, KTAlertState, KTAlertTemplateStrings } from './types';
-import { getTemplateStrings, defaultTemplates, renderTemplateString, isTemplateFunction } from './templates';
+import { getTemplateStrings, defaultTemplates, renderTemplateString, isTemplateFunction, renderOptions } from './templates';
 
 /**
  * Default configuration for KTAlert
@@ -198,15 +198,11 @@ export class KTAlert extends KTComponent {
       mergedConfig = {
         ...mergedConfig,
         ...themeOverrides,
-        // Merge button classes into templates if provided
+        // Use custom class templates if provided
         templates: {
           ...((mergedConfig.templates as any) || {}),
-          confirmButton: themeOverrides.confirmButtonClass
-            ? `<button type="button" data-kt-alert-confirm aria-label="Confirm" tabindex="0" class="${themeOverrides.confirmButtonClass}">{{confirmText}}</button>`
-            : ((mergedConfig.templates && mergedConfig.templates.confirmButton) || undefined),
-          cancelButton: themeOverrides.cancelButtonClass
-            ? `<button type="button" data-kt-alert-cancel aria-label="Cancel" tabindex="0" class="${themeOverrides.cancelButtonClass}">{{cancelText}}</button>`
-            : ((mergedConfig.templates && mergedConfig.templates.cancelButton) || undefined),
+          confirmButton: themeOverrides.confirmButtonClass ? defaultTemplates.confirmButtonCustomClass : undefined,
+          cancelButton: themeOverrides.cancelButtonClass ? defaultTemplates.cancelButtonCustomClass : undefined,
         },
       };
     }
@@ -241,8 +237,15 @@ export class KTAlert extends KTComponent {
     } else if (typeof containerTpl === 'string') {
       containerHtml = renderTemplateString(containerTpl, { ...this._config, content });
     } else {
-      // fallback
-      containerHtml = `<div>${content}</div>`;
+      // Use default container template
+      const defaultContainer = defaultTemplates.container;
+      if (isTemplateFunction(defaultContainer)) {
+        containerHtml = defaultContainer({ ...this._config, content });
+      } else if (typeof defaultContainer === 'string') {
+        containerHtml = renderTemplateString(defaultContainer, { ...this._config, content });
+      } else {
+        containerHtml = `<div>${content}</div>`;
+      }
     }
     // Create DOM node
     const temp = document.createElement('div');
@@ -371,30 +374,35 @@ export class KTAlert extends KTComponent {
     const options = this._config.inputOptions || [];
     let tplKey: string = 'inputText';
     let optionsHtml = '';
+
+    // Set template key and render options if needed
     switch (inputType) {
       case 'textarea':
         tplKey = 'inputTextarea';
         break;
       case 'select':
         tplKey = 'inputSelect';
-        optionsHtml = options.map(opt => `<option value="${opt.value}"${opt.value === inputValue ? ' selected' : ''}${opt.disabled ? ' disabled' : ''}>${opt.label}</option>`).join('');
+        if (options.length > 0) {
+          optionsHtml = renderOptions(options.map(opt => ({ ...opt, inputValue })), 'option', this._templateSet);
+        }
         break;
       case 'radio':
         tplKey = 'inputRadio';
-        optionsHtml = options.map((opt, i) =>
-          `<label><input type="radio" name="kt-alert-radio" data-kt-alert-input value="${opt.value}"${opt.value === inputValue ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
-        ).join('');
+        if (options.length > 0) {
+          optionsHtml = renderOptions(options.map(opt => ({ ...opt, inputValue })), 'radioOption', this._templateSet);
+        }
         break;
       case 'checkbox':
         tplKey = 'inputCheckbox';
-        optionsHtml = options.map((opt, i) =>
-          `<label><input type="checkbox" name="kt-alert-checkbox" data-kt-alert-input value="${opt.value}"${opt.checked ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
-        ).join('');
+        if (options.length > 0) {
+          optionsHtml = renderOptions(options, 'checkboxOption', this._templateSet);
+        }
         break;
       default:
         tplKey = 'inputText';
         break;
     }
+
     // Use type assertion to satisfy TS for dynamic template keys
     const tpl = this._templateSet[tplKey as keyof typeof this._templateSet];
     const data = { ...this._config, inputType, inputPlaceholder, inputValue, inputLabel, attrs, optionsHtml };
@@ -630,27 +638,28 @@ export class KTAlert extends KTComponent {
       let tplKey = 'inputText';
       let optionsHtml = '';
 
+      // Set template key and render options if needed
       switch (inputType) {
         case 'textarea':
           tplKey = 'inputTextarea';
           break;
         case 'select':
           tplKey = 'inputSelect';
-          optionsHtml = inputOptions.map((opt: any) =>
-            `<option value="${opt.value}"${opt.value === inputValue ? ' selected' : ''}${opt.disabled ? ' disabled' : ''}>${opt.label}</option>`
-          ).join('');
+          if (inputOptions.length > 0) {
+            optionsHtml = renderOptions(inputOptions.map((opt: any) => ({ ...opt, inputValue })), 'option', templates);
+          }
           break;
         case 'radio':
           tplKey = 'inputRadio';
-          optionsHtml = inputOptions.map((opt: any) =>
-            `<label><input type="radio" name="kt-alert-radio" data-kt-alert-input value="${opt.value}"${opt.value === inputValue ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
-          ).join('');
+          if (inputOptions.length > 0) {
+            optionsHtml = renderOptions(inputOptions.map((opt: any) => ({ ...opt, inputValue })), 'radioOption', templates);
+          }
           break;
         case 'checkbox':
           tplKey = 'inputCheckbox';
-          optionsHtml = inputOptions.map((opt: any) =>
-            `<label><input type="checkbox" name="kt-alert-checkbox" data-kt-alert-input value="${opt.value}"${opt.checked ? ' checked' : ''}${opt.disabled ? ' disabled' : ''} ${attrs} aria-label="${opt.label}" tabindex="0" />${opt.label}</label>`
-          ).join('');
+          if (inputOptions.length > 0) {
+            optionsHtml = renderOptions(inputOptions, 'checkboxOption', templates);
+          }
           break;
         default:
           tplKey = 'inputText';
