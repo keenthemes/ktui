@@ -4,11 +4,18 @@
  *
  * Features:
  * - Segments: day, month, year, (optionally hour, minute, second, AM/PM)
- * - Keyboard navigation: Tab, Shift+Tab, arrow keys
+ * - Keyboard navigation: Tab, Shift+Tab, arrow keys, Enter
  * - Direct typing/editing of segments
  * - ARIA roles and accessibility for all segments
  * - Emits change events on value update
  * - Integrates with KTDatepicker for value sync
+ *
+ * Keyboard Navigation:
+ * - Tab/Shift+Tab: Move between segments
+ * - Arrow Left/Right: Move between segments
+ * - Arrow Up/Down: Increment/decrement segment value
+ * - Enter: Move to next segment (wraps from last to first)
+ * - Number keys: Direct input with validation
  */
 
 import { parseDateFromFormat } from './date-utils';
@@ -292,6 +299,19 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           currentValue = setSegmentValue(segments[idx], newValue, currentValue);
           // Don't call onChange immediately for Arrow Up/Down to prevent dropdown closing
           // onChange will be called on blur or when user finishes editing
+          caretOffset = null;
+          render();
+          restoreFocus(focusedIdx, caretOffset);
+          // Reset flag after a short delay to allow focus to be restored
+          setTimeout(() => {
+            isArrowNavigation = false;
+          }, 10);
+        } else if (e.key === 'Enter') {
+          // Move to next segment on Enter
+          e.preventDefault();
+          e.stopPropagation(); // Prevent bubbling to main datepicker
+          isArrowNavigation = true; // Set flag to prevent blur onChange
+          focusedIdx = (idx + 1) % segments.length;
           caretOffset = null;
           render();
           restoreFocus(focusedIdx, caretOffset);
