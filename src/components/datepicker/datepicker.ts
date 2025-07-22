@@ -8,7 +8,7 @@ import KTComponent from '../component';
 import { KTDatepickerConfig, KTDatepickerState, KTDatepickerTemplateStrings } from './types';
 import { getTemplateStrings, defaultTemplates } from './templates';
 import { getMergedTemplates } from './template-manager';
-import { renderTemplateString, isTemplateFunction, renderTemplateToDOM } from './utils/template';
+import { renderTemplateString, isTemplateFunction, renderTemplateToDOM, mergeClassData } from './utils/template';
 import { defaultDatepickerConfig } from './config';
 import { renderHeader } from './renderers/header';
 import { renderCalendar } from './renderers/calendar';
@@ -464,9 +464,11 @@ export class KTDatepicker extends KTComponent {
     const tpl = this._templateSet.container || defaultTemplates.container;
     let html: string;
     if (isTemplateFunction(tpl)) {
-      html = tpl({});
+      const classData = mergeClassData('container', {}, this._config.classes);
+      html = tpl(classData);
     } else {
-      html = tpl as string;
+      const classData = mergeClassData('container', {}, this._config.classes);
+      html = renderTemplateString(tpl as string, classData);
     }
     const containerFrag = renderTemplateToDOM(html);
     const containerEl = (containerFrag.firstElementChild || containerFrag.firstChild) as HTMLElement;
@@ -546,9 +548,11 @@ export class KTDatepicker extends KTComponent {
     const dropdownTpl = this._templateSet.dropdown || defaultTemplates.dropdown;
     let dropdownHtml: string;
     if (typeof dropdownTpl === 'function') {
-      dropdownHtml = dropdownTpl({});
+      const classData = mergeClassData('dropdown', {}, this._config.classes);
+      dropdownHtml = dropdownTpl(classData);
     } else {
-      dropdownHtml = dropdownTpl;
+      const classData = mergeClassData('dropdown', {}, this._config.classes);
+      dropdownHtml = renderTemplateString(dropdownTpl, classData);
     }
     const dropdownFrag = renderTemplateToDOM(dropdownHtml);
     const dropdownEl = dropdownFrag.firstElementChild as HTMLElement;
@@ -713,9 +717,11 @@ export class KTDatepicker extends KTComponent {
     const calendarButtonTpl = this._templateSet.calendarButton || defaultTemplates.calendarButton;
     let calendarButtonHtml: string;
     if (typeof calendarButtonTpl === 'function') {
-      calendarButtonHtml = calendarButtonTpl({ ariaLabel: this._config.calendarButtonAriaLabel || 'Open calendar' });
+      const classData = mergeClassData('calendarButton', { ariaLabel: this._config.calendarButtonAriaLabel || 'Open calendar' }, this._config.classes);
+      calendarButtonHtml = calendarButtonTpl(classData);
     } else {
-      calendarButtonHtml = calendarButtonTpl.replace(/{{ariaLabel}}/g, this._config.calendarButtonAriaLabel || 'Open calendar');
+      const classData = mergeClassData('calendarButton', { ariaLabel: this._config.calendarButtonAriaLabel || 'Open calendar' }, this._config.classes);
+      calendarButtonHtml = renderTemplateString(calendarButtonTpl, classData);
     }
     // Render input wrapper and calendar button from template
     const inputWrapperEl = this._renderInputWrapper(calendarButtonHtml);

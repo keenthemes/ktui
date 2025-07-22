@@ -79,6 +79,39 @@ export interface KTDatepickerConfig {
    * Number of calendar months to display side-by-side (horizontal). Default: 1.
    */
   visibleMonths?: number;
+  /** Custom classes for template elements */
+  classes?: {
+    container?: string;
+    header?: string;
+    footer?: string;
+    calendarGrid?: string;
+    dayCell?: string;
+    monthYearSelect?: string;
+    monthSelection?: string;
+    yearSelection?: string;
+    inputWrapper?: string;
+    segmentedDateInput?: string;
+    segmentedDateRangeInput?: string;
+    dateSegment?: string;
+    segmentSeparator?: string;
+    placeholder?: string;
+    displayWrapper?: string;
+    displayElement?: string;
+    timePanel?: string;
+    multiDateTag?: string;
+    emptyState?: string;
+    calendarButton?: string;
+    dropdown?: string;
+    prevButton?: string;
+    nextButton?: string;
+    calendarTable?: string;
+    calendarRow?: string;
+    calendarBody?: string;
+    todayButton?: string;
+    clearButton?: string;
+    applyButton?: string;
+    multiMonthContainer?: string;
+  };
   /** Any additional custom config options */
   [key: string]: any;
 }
