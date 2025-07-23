@@ -1,12 +1,12 @@
 @layer components {
 /*
  * datepicker.css - Tailwind-based utility styles for KTDatepicker (revamp)
- * Calendar grid redesign inspired by HeroUI DatePicker
- * Only CSS, no class/template changes
+ * Enhanced styling adopting select component's superior design patterns
+ * Design system integration with consistent tokens and state management
  */
 
 [data-kt-datepicker-calendar] {
-  @apply p-4 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 w-full max-w-xs mx-auto;
+  @apply p-4 bg-card border border-border rounded-xl shadow-xs shadow-[rgba(0,0,0,0.05)] w-full max-w-xs mx-auto;
 }
 
 [data-kt-datepicker-calendar-table] {
@@ -19,121 +19,108 @@
   @apply w-full border-collapse table-fixed select-none;
 }
 
-
-
-
-
-/* Dropdown styling following select component pattern */
-/* Dropdown container styling - Compact design following HeroUI */
+/* Enhanced Dropdown styling following select component pattern */
+/* Dropdown container styling - Adopting select's superior design */
 .kt-datepicker-dropdown {
-  @apply bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700;
+  @apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
   @apply transition-all duration-200 ease-in-out;
   @apply w-[280px] max-w-[280px];
   @apply p-3;
   @apply z-50;
 }
 
-/* Dropdown open state */
+/* Dropdown open state - Clean transitions like select */
 .kt-datepicker-dropdown.open {
   @apply opacity-100;
 }
 
-/* Dropdown closed state */
+/* Dropdown closed state - Consistent with select pattern */
 .kt-datepicker-dropdown:not(.open) {
   @apply opacity-0 pointer-events-none;
 }
 
-/* Calendar button styling */
+/* Enhanced Calendar button styling - Adopting select's focus patterns */
 .kt-datepicker-calendar-button {
-  @apply w-10 h-10 flex items-center justify-center rounded-lg;
-  @apply text-gray-600 dark:text-gray-400;
-  @apply hover:text-gray-900 dark:hover:text-gray-100;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply w-10 h-10 flex items-center justify-center rounded-md;
+  @apply text-muted-foreground;
+  @apply hover:text-foreground hover:bg-accent hover:text-accent-foreground;
   @apply transition-all duration-150 ease-in-out;
-  @apply border border-gray-200 dark:border-gray-700;
-  @apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2;
-  @apply outline-none;
+  @apply border border-input;
+  @apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
+  @apply shadow-xs shadow-[rgba(0,0,0,0.05)];
 }
 
-/* Calendar button active state */
+/* Calendar button active state - Consistent with select active state */
 .kt-datepicker-calendar-button.active {
-  @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
-  @apply border-blue-500 dark:border-blue-400;
-  @apply bg-blue-50 dark:bg-blue-900/30;
-  @apply text-blue-700 dark:text-blue-300;
+  @apply ring-ring/30 border-ring outline-none ring-[3px];
+  @apply bg-accent text-accent-foreground;
   @apply shadow-sm;
 }
 
-
-
-/* Dropdown header styling - Compact design */
+/* Enhanced Dropdown header styling - Design system integration */
 .kt-datepicker-header {
   @apply flex items-center justify-between p-2 mb-2;
-  @apply text-sm font-medium text-gray-900 dark:text-gray-100;
+  @apply text-sm font-medium text-foreground;
+  @apply border-b border-border pb-2;
 }
 
-/* Header navigation buttons - Compact design */
+/* Header navigation buttons - Adopting select option hover patterns */
 .kt-datepicker-prev-button,
 .kt-datepicker-next-button {
-  @apply w-6 h-6 flex items-center justify-center rounded;
-  @apply text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply w-6 h-6 flex items-center justify-center rounded-md;
+  @apply text-muted-foreground hover:text-foreground;
+  @apply hover:bg-accent hover:text-accent-foreground;
   @apply transition-all duration-150 ease-in-out;
   @apply text-xs;
+  @apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
 }
 
-.kt-datepicker-prev-button:focus-visible,
-.kt-datepicker-next-button:focus-visible {
-  @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
-  @apply outline-none;
-}
-
-/* Header month/year display - Compact design */
+/* Header month/year display - Enhanced styling */
 .kt-datepicker-header span[data-kt-datepicker-month] {
-  @apply text-sm font-medium text-gray-900 dark:text-gray-100;
-  @apply px-1 py-0.5 rounded;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply text-sm font-medium text-foreground;
+  @apply px-2 py-1 rounded-md;
+  @apply hover:bg-accent hover:text-accent-foreground;
   @apply transition-colors duration-150;
   @apply cursor-pointer;
 }
 
-/* Dropdown footer styling */
+/* Enhanced Dropdown footer styling - Design system colors */
 .kt-datepicker-footer {
-  @apply flex items-center justify-between p-4 border-t border-gray-100 dark:border-gray-800;
-  @apply bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-900;
-  @apply rounded-b-xl;
+  @apply flex items-center justify-between p-4 border-t border-border;
+  @apply bg-muted/30;
+  @apply rounded-b-md;
 }
 
-/* Footer buttons */
+/* Footer buttons - Adopting select's button patterns */
 .kt-datepicker-today-button,
 .kt-datepicker-clear-button,
 .kt-datepicker-apply-button {
-  @apply px-3 py-2 rounded-lg text-sm font-medium;
+  @apply px-3 py-2 rounded-md text-sm font-medium;
   @apply transition-all duration-150 ease-in-out;
-  @apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2;
-  @apply outline-none;
+  @apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
+  @apply shadow-xs shadow-[rgba(0,0,0,0.05)];
 }
 
 .kt-datepicker-today-button {
-  @apply bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300;
-  @apply hover:bg-blue-100 dark:hover:bg-blue-900/50;
+  @apply bg-accent text-accent-foreground;
+  @apply hover:bg-accent/80;
 }
 
 .kt-datepicker-clear-button {
-  @apply bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-700;
+  @apply bg-secondary text-secondary-foreground;
+  @apply hover:bg-secondary/80;
 }
 
 .kt-datepicker-apply-button {
-  @apply bg-blue-600 text-white dark:bg-blue-500;
-  @apply hover:bg-blue-700 dark:hover:bg-blue-600;
+  @apply bg-primary text-primary-foreground;
+  @apply hover:bg-primary/90;
   @apply shadow-sm;
 }
 
-/* Time picker container styling */
+/* Time picker container styling - Design system integration */
 .kt-datepicker-time-container {
-  @apply p-4 border-t border-gray-100 dark:border-gray-800;
-  @apply bg-gray-50/50 dark:bg-gray-800/50;
+  @apply p-4 border-t border-border;
+  @apply bg-muted/20;
 }
 
 /* Multi-month container styling */
@@ -142,89 +129,128 @@
   @apply overflow-x-auto;
 }
 
-/* Calendar body styling - Compact design */
+/* Calendar body styling - Enhanced spacing */
 .kt-datepicker-calendar-body {
   @apply p-1;
 }
 
-/* Calendar row styling */
+/* Calendar row styling - Subtle hover effects */
 .kt-datepicker-calendar-row {
-  @apply hover:bg-gray-50/30 dark:hover:bg-gray-800/30;
+  @apply hover:bg-accent/20;
   @apply transition-colors duration-100;
 }
 
-/* Enhanced day cell styling - Compact design */
+/* Enhanced day cell styling - Adopting select option patterns */
 [data-kt-datepicker-day] {
   @apply text-center align-middle relative p-0.5;
 }
 
 [data-kt-datepicker-day] button[data-day] {
-  @apply w-7 h-7 flex items-center justify-center rounded;
+  @apply w-7 h-7 flex items-center justify-center rounded-md;
   @apply transition-all duration-150 ease-in-out;
   @apply outline-none border-0 bg-transparent;
   @apply text-xs font-medium;
-  @apply text-gray-700 dark:text-gray-200;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
-  @apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1;
+  @apply text-foreground;
+  @apply hover:bg-accent hover:text-accent-foreground;
+  @apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
   @apply cursor-pointer appearance-none;
   @apply relative overflow-hidden;
 }
 
-/* Today styling */
+/* Today styling - Enhanced with design system */
 [data-kt-datepicker-day][data-today] button[data-day] {
-  @apply border-2 border-blue-500 dark:border-blue-400;
-  @apply bg-blue-50 dark:bg-blue-900/30;
-  @apply text-blue-700 dark:text-blue-300;
+  @apply border-2 border-primary;
+  @apply bg-primary/10 text-primary;
   @apply font-semibold;
 }
 
-/* Selected day styling */
+/* Selected day styling - Primary color integration */
 [data-kt-datepicker-day][data-selected] button[data-day] {
-  @apply bg-gradient-to-br from-blue-500 to-blue-600;
-  @apply text-white font-bold;
-  @apply shadow-lg shadow-blue-500/25;
+  @apply bg-primary text-primary-foreground;
+  @apply font-bold;
+  @apply shadow-sm shadow-primary/25;
   @apply transform scale-105;
 }
 
-/* Outside month styling */
+/* Outside month styling - Muted colors */
 [data-kt-datepicker-day][data-outside] button[data-day] {
-  @apply text-gray-400 dark:text-gray-600;
+  @apply text-muted-foreground;
   @apply opacity-60;
 }
 
-/* Hover effects for interactive days */
+/* Hover effects for interactive days - Consistent with select options */
 [data-kt-datepicker-day]:not([data-outside]):not([data-selected]):not([data-today]) button[data-day]:hover {
-  @apply bg-gray-100 dark:bg-gray-800;
-  @apply text-gray-900 dark:text-gray-100;
+  @apply bg-accent text-accent-foreground;
   @apply transform scale-105;
 }
 
-/* Focus states */
+/* Focus states - Consistent with select focus patterns */
 [data-kt-datepicker-day] button[data-day]:focus-visible {
-  @apply ring-2 ring-blue-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+  @apply ring-ring/30 border-ring outline-none ring-[3px];
   @apply z-10;
 }
 
-/* Calendar table header enhancement - Compact design */
+/* Calendar table header enhancement - Design system colors */
 [data-kt-datepicker-calendar-table] thead tr {
-  @apply text-xs font-medium text-gray-500 dark:text-gray-400;
-  @apply bg-gray-50/30 dark:bg-gray-800/30;
+  @apply text-xs font-medium text-muted-foreground;
+  @apply bg-muted/30;
 }
 
 [data-kt-datepicker-calendar-table] th {
   @apply w-8 text-center py-1 px-0.5 font-medium tracking-wide;
-  @apply border-b border-gray-100 dark:border-gray-800;
+  @apply border-b border-border;
 }
 
-/* Calendar table body enhancement - Compact design */
+/* Calendar table body enhancement */
 [data-kt-datepicker-calendar-table] tbody tr {
   @apply h-8;
 }
 
-/* Calendar table enhancement */
+/* Calendar table enhancement - Design system integration */
 [data-kt-datepicker-calendar-table] {
   @apply w-full border-collapse table-fixed select-none;
   @apply rounded-lg overflow-hidden;
-  @apply bg-white dark:bg-gray-900;
+  @apply bg-card;
+}
+
+/* Custom variants for datepicker - Following select pattern */
+@custom-variant kt-datepicker-day-selected {
+  [data-kt-datepicker-day][data-selected] {
+    @slot;
+  }
+
+  [data-kt-datepicker-day][data-selected] & {
+    @slot;
+  }
+}
+
+@custom-variant kt-datepicker-day-today {
+  [data-kt-datepicker-day][data-today] {
+    @slot;
+  }
+
+  [data-kt-datepicker-day][data-today] & {
+    @slot;
+  }
+}
+
+@custom-variant kt-datepicker-day-outside {
+  [data-kt-datepicker-day][data-outside] {
+    @slot;
+  }
+
+  [data-kt-datepicker-day][data-outside] & {
+    @slot;
+  }
+}
+
+@custom-variant kt-datepicker-day-hover {
+  [data-kt-datepicker-day]:hover {
+    @slot;
+  }
+
+  [data-kt-datepicker-day]:hover & {
+    @slot;
+  }
 }
 }

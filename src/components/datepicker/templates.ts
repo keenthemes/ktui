@@ -48,8 +48,16 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   </button>`,
   // Add role="dialog" and aria-modal to dropdown
   dropdown: `<div data-kt-datepicker-dropdown role="dialog" aria-modal="true" aria-label="Date picker" class="kt-datepicker-dropdown hidden {{class}}"></div>`,
-  prevButton: `<button type="button" data-kt-datepicker-prev aria-label="Previous month" class="kt-datepicker-prev-button {{class}}">&lt;</button>`,
-  nextButton: `<button type="button" data-kt-datepicker-next aria-label="Next month" class="kt-datepicker-next-button {{class}}">&gt;</button>`,
+  prevButton: `<button type="button" data-kt-datepicker-prev aria-label="Previous month" class="kt-datepicker-prev-button {{class}}">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m15 18-6-6 6-6"/>
+    </svg>
+  </button>`,
+  nextButton: `<button type="button" data-kt-datepicker-next aria-label="Next month" class="kt-datepicker-next-button {{class}}">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m9 18 6-6-6-6"/>
+    </svg>
+  </button>`,
   // Add role="row" to calendar table rows
   calendarTable: `<table data-kt-datepicker-calendar-table role="grid" aria-label="Calendar" aria-readonly="true" class="kt-datepicker-calendar-table {{class}}"><thead><tr role="row">
     <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Sun</th>
