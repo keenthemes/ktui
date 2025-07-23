@@ -70,39 +70,12 @@ export class KTDatepickerDropdown extends KTComponent {
 
   /**
    * Set up event listeners for the dropdown
+   * Note: Outside click handling is now delegated to the main datepicker class
+   * to avoid duplicate logic and ensure consistent behavior
    */
   private _setupEventListeners(): void {
-    // Close on outside click
-    this._eventManager.addListener(
-      document as unknown as HTMLElement,
-      'click',
-      this._handleOutsideClick.bind(this),
-    );
-  }
-
-  /**
-   * Handle outside click to close dropdown
-   */
-  private _handleOutsideClick(event: MouseEvent): void {
-    if (!this._isOpen) return;
-
-    const target = event.target as Node;
-
-    // Elements considered inside: root, dropdown, input, calendar button
-    const dropdown = this._element.querySelector('[data-kt-datepicker-dropdown]');
-    const input = this._element.querySelector('input[data-kt-datepicker-input]');
-    const calendarBtn = this._element.querySelector('button[data-kt-datepicker-calendar-btn]');
-
-    if (
-      this._element.contains(target) ||
-      (dropdown && dropdown.contains(target)) ||
-      (input && input.contains(target)) ||
-      (calendarBtn && calendarBtn.contains(target))
-    ) {
-      return; // Click inside, do nothing
-    }
-
-    this.close();
+    // Outside click handling is now managed by the main datepicker class
+    // This eliminates duplicate logic and ensures consistent behavior
   }
 
   /**

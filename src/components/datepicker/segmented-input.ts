@@ -5,9 +5,9 @@
  * Features:
  * - Segments: day, month, year, (optionally hour, minute, second, AM/PM)
  * - Keyboard navigation: Tab, Shift+Tab, arrow keys, Enter
- * - Direct typing/editing of segments
+ * - Direct typing/editing of segments with focus preservation
  * - ARIA roles and accessibility for all segments
- * - Emits change events on value update
+ * - Emits change events on value update (debounced)
  * - Integrates with KTDatepicker for value sync
  *
  * Keyboard Navigation:
@@ -15,7 +15,13 @@
  * - Arrow Left/Right: Move between segments
  * - Arrow Up/Down: Increment/decrement segment value
  * - Enter: Move to next segment (wraps from last to first)
- * - Number keys: Direct input with validation
+ * - Number keys: Direct input with validation (optimized for performance)
+ *
+ * Performance Optimizations:
+ * - No DOM re-rendering during number typing
+ * - Focus preserved during rapid input
+ * - Debounced onChange events (150ms delay)
+ * - Caret position maintained during editing
  */
 
 import { parseDateFromFormat } from './date-utils';
@@ -320,7 +326,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
             isArrowNavigation = false;
           }, 10);
         } else if (/^[0-9]$/.test(e.key)) {
-          // Direct typing, enforce min/max
+          // Direct typing, enforce min/max - optimized to avoid focus loss
+          e.preventDefault();
           let newValue;
           if (segments[idx] === 'year') {
             newValue = (span.textContent?.length === 4 ? e.key : (span.textContent || '') + e.key).slice(-4);
@@ -331,16 +338,37 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           const max = getSegmentMax(segments[idx], currentValue) ?? (segments[idx] === 'year' ? 9999 : 99);
           let num = Math.max(min, Math.min(max, Number(newValue)));
           if (isNaN(num)) num = min;
+
+          // Update content directly without re-rendering to preserve focus
+          const oldText = span.textContent;
           if (segments[idx] === 'year') {
             span.textContent = num.toString().padStart(4, '0');
           } else {
             span.textContent = num.toString().padStart(2, '0');
           }
+
+          // Update internal value
           currentValue = setSegmentValue(segments[idx], span.textContent || '', currentValue);
-          if (options.onChange) options.onChange(currentValue);
-          caretOffset = null;
-          render();
-          restoreFocus(focusedIdx, caretOffset);
+
+          // Debounce onChange to avoid excessive updates during rapid typing
+          if (options.onChange) {
+            clearTimeout((span as any)._onChangeTimeout);
+            (span as any)._onChangeTimeout = setTimeout(() => {
+              options.onChange!(currentValue);
+            }, 150); // 150ms debounce
+          }
+
+          // Preserve caret position at end of content
+          if (span.isContentEditable) {
+            const range = document.createRange();
+            range.selectNodeContents(span);
+            range.collapse(false); // place at end
+            const sel = window.getSelection();
+            if (sel) {
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+          }
         }
       });
       // Focus/blur styling (no classes, just ARIA/tabindex)
@@ -350,6 +378,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       });
       span.addEventListener('blur', () => {
         span.setAttribute('tabindex', '-1');
+        // Clear any pending debounced onChange calls
+        if ((span as any)._onChangeTimeout) {
+          clearTimeout((span as any)._onChangeTimeout);
+          (span as any)._onChangeTimeout = null;
+        }
         // Call onChange when user finishes editing to update the main datepicker
         // But not during Arrow Up/Down navigation
         if (options.onChange && !isArrowNavigation) {
@@ -375,6 +408,13 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
 
   // --- Cleanup function ---
   return () => {
+    // Clear any pending debounced onChange calls
+    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+    segs.forEach(span => {
+      if ((span as any)._onChangeTimeout) {
+        clearTimeout((span as any)._onChangeTimeout);
+      }
+    });
     container.innerHTML = '';
   };
 }

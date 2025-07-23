@@ -200,8 +200,10 @@ describe('KTDatepicker', () => {
   it('renders two months side by side when visibleMonths is 2', async () => {
     const dp = new KTDatepicker(container, { visibleMonths: 2 });
     dp.open();
-    // Should render the multiMonthContainer
-    const multiMonth = container.querySelector('[data-kt-datepicker-multimonth-container]');
+    // Should render the multiMonthContainer inside the dropdown
+    // The dropdown module moves the dropdown to document.body for better positioning
+    const dropdown = document.body.querySelector('[data-kt-datepicker-dropdown]');
+    const multiMonth = dropdown?.querySelector('[data-kt-datepicker-multimonth-container]');
     expect(multiMonth).toBeInstanceOf(HTMLElement);
     // Should contain two headers and two calendar tables
     const headers = multiMonth?.querySelectorAll('[data-kt-datepicker-header]');
@@ -220,7 +222,8 @@ describe('KTDatepicker', () => {
     (nextBtn as HTMLElement).click();
     await Promise.resolve();
     // Query again after update
-    const updatedMultiMonth = container.querySelector('[data-kt-datepicker-multimonth-container]');
+    const updatedDropdown = document.body.querySelector('[data-kt-datepicker-dropdown]');
+    const updatedMultiMonth = updatedDropdown?.querySelector('[data-kt-datepicker-multimonth-container]');
     const updatedMonthSpans = updatedMultiMonth?.querySelectorAll('[data-kt-datepicker-month]');
     const updatedFirstMonth = updatedMonthSpans?.[0]?.textContent;
     // The new first month should be the previous second month
@@ -230,7 +233,8 @@ describe('KTDatepicker', () => {
   it('debug: log last header innerHTML for multi-month', () => {
     const dp = new KTDatepicker(container, { visibleMonths: 2 });
     dp.open();
-    const multiMonth = container.querySelector('[data-kt-datepicker-multimonth-container]');
+    const dropdown = document.body.querySelector('[data-kt-datepicker-dropdown]');
+    const multiMonth = dropdown?.querySelector('[data-kt-datepicker-multimonth-container]');
     const headers = multiMonth?.querySelectorAll('[data-kt-datepicker-header]');
     const lastHeader = headers?.[1];
     // eslint-disable-next-line no-console

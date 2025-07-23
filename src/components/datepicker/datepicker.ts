@@ -120,36 +120,60 @@ export class KTDatepicker extends KTComponent {
   }
 
   /**
-   * Helper to decide if dropdown should close after selection
+   * Unified closing decision engine
+   * Determines whether the dropdown should close based on action and context
    */
-  private _maybeCloseDropdownOnSelect(mode: 'single' | 'range' | 'multi' | 'other' = 'other') {
-    if (mode === 'single') {
-      if (this._config.closeOnSelect) {
-        console.log('[KTDatepicker] Closing dropdown after single date select');
-        this.close();
-      } else {
-        console.log('[KTDatepicker] Not closing dropdown after single date select (closeOnSelect is false)');
-      }
-    } else if (mode === 'range') {
-      const { start, end } = this._state.selectedRange || {};
-      console.log('[KTDatepicker] maybeCloseDropdownOnSelect (range): start:', start, 'end:', end, 'closeOnSelect:', this._config.closeOnSelect);
-      if (this._config.closeOnSelect && start && end) {
-        console.log('[KTDatepicker] Closing dropdown after range select (both dates selected)');
-        this.close();
-      } else {
-        console.log('[KTDatepicker] Not closing dropdown after range select (waiting for both dates)');
-      }
-    } else if (mode === 'multi') {
-      // Only close on Apply, not on each selection
-      console.log('[KTDatepicker] Not closing dropdown after multi-date select (only closes on Apply)');
-    } else {
-      if (this._config.closeOnSelect) {
-        console.log('[KTDatepicker] Closing dropdown (other action)');
-        this.close();
-      } else {
-        console.log('[KTDatepicker] Not closing dropdown (other action, closeOnSelect is false)');
-      }
+  private _shouldCloseDropdown(action: 'date-selection' | 'outside-click' | 'escape-key' | 'button-click' | 'time-change'): boolean {
+    // Always close on outside click or escape key
+    if (action === 'outside-click' || action === 'escape-key') {
+      console.log('[KTDatepicker] Closing dropdown: outside click or escape key');
+      return true;
     }
+
+    // Never close on time change
+    if (action === 'time-change') {
+      console.log('[KTDatepicker] Not closing dropdown: time change');
+      return false;
+    }
+
+    // Handle date selection based on mode and configuration
+    if (action === 'date-selection') {
+      // Time-enabled datepickers never close on date selection
+      if (this._config.enableTime) {
+        console.log('[KTDatepicker] Not closing dropdown: time-enabled datepicker');
+        return false;
+      }
+
+      // Range mode: close only when both dates are selected
+      if (this._config.range) {
+        const { start, end } = this._state.selectedRange || {};
+        const shouldClose = this._config.closeOnSelect && !!start && !!end;
+        console.log('[KTDatepicker] Range mode closing decision:', shouldClose, 'start:', start, 'end:', end);
+        return shouldClose;
+      }
+
+      // Multi-date mode: never close on individual selections
+      if (this._config.multiDate) {
+        console.log('[KTDatepicker] Not closing dropdown: multi-date mode');
+        return false;
+      }
+
+      // Single date mode: close if closeOnSelect is true
+      const shouldClose = this._config.closeOnSelect;
+      console.log('[KTDatepicker] Single date mode closing decision:', shouldClose);
+      return shouldClose;
+    }
+
+    // Handle button clicks (Apply, Today, Clear, etc.)
+    if (action === 'button-click') {
+      const shouldClose = this._config.closeOnSelect;
+      console.log('[KTDatepicker] Button click closing decision:', shouldClose);
+      return shouldClose;
+    }
+
+    // Default: don't close
+    console.log('[KTDatepicker] Default: not closing dropdown');
+    return false;
   }
 
   /** Select a single date */
@@ -168,7 +192,9 @@ export class KTDatepicker extends KTComponent {
       this._input.dispatchEvent(evt);
     }
     console.log('[KTDatepicker] Single date selected:', date);
-    this._maybeCloseDropdownOnSelect('single');
+    if (this._shouldCloseDropdown('date-selection')) {
+      this.close();
+    }
     this._render();
   }
 
@@ -183,7 +209,9 @@ export class KTDatepicker extends KTComponent {
       this._input.dispatchEvent(evt);
     }
     console.log('[KTDatepicker] Range date selected:', this._state.selectedRange);
-    this._maybeCloseDropdownOnSelect('range');
+    if (this._shouldCloseDropdown('date-selection')) {
+      this.close();
+    }
     this._render();
   }
 
@@ -202,14 +230,18 @@ export class KTDatepicker extends KTComponent {
       this._input.dispatchEvent(evt);
     }
     console.log('[KTDatepicker] Multi-date selected:', this._state.selectedDates);
-    this._maybeCloseDropdownOnSelect('multi');
+    if (this._shouldCloseDropdown('date-selection')) {
+      this.close();
+    }
     this._render();
   }
 
   /** Handler for Apply button in multi-date mode */
   private _onApplyMultiDate = (e: Event) => {
     console.log('[KTDatepicker] Apply button clicked in multi-date mode (should close if closeOnSelect is true)');
-    this._maybeCloseDropdownOnSelect('other');
+    if (this._shouldCloseDropdown('button-click')) {
+      this.close();
+    }
   };
 
   private _onToday = (e: Event) => {
@@ -217,7 +249,9 @@ export class KTDatepicker extends KTComponent {
     const today = new Date();
     this.setDate(today);
     console.log('[KTDatepicker] Today button clicked');
-    this._maybeCloseDropdownOnSelect('other');
+    if (this._shouldCloseDropdown('button-click')) {
+      this.close();
+    }
   };
 
   // Stub for _onClear (to be implemented next)
@@ -235,7 +269,9 @@ export class KTDatepicker extends KTComponent {
     }
     this._render();
     console.log('[KTDatepicker] Clear button clicked');
-    this._maybeCloseDropdownOnSelect('other');
+    if (this._shouldCloseDropdown('button-click')) {
+      this.close();
+    }
   };
 
   // Stub for _onApply (to be implemented next)
@@ -243,7 +279,9 @@ export class KTDatepicker extends KTComponent {
     e.preventDefault();
     // For multi-date, update input value (already handled by selection logic)
     console.log('[KTDatepicker] Apply button clicked');
-    this._maybeCloseDropdownOnSelect('other');
+    if (this._shouldCloseDropdown('button-click')) {
+      this.close();
+    }
   };
 
   /**
@@ -262,7 +300,9 @@ export class KTDatepicker extends KTComponent {
 
     // Handle Escape: close dropdown
     if (e.key === 'Escape') {
-      this.close();
+      if (this._shouldCloseDropdown('escape-key')) {
+        this.close();
+      }
       e.preventDefault();
       return;
     }
@@ -457,15 +497,22 @@ export class KTDatepicker extends KTComponent {
       (config && config.templates) || {},
       this._userTemplates || {}
     );
-    // Determine closeOnSelect default based on mode if not explicitly set
+    // Determine closeOnSelect default based on mode and requirements
     let closeOnSelect: boolean;
     if (typeof (config && config.closeOnSelect) !== 'undefined') {
+      // User explicitly set closeOnSelect, respect their choice
       closeOnSelect = config!.closeOnSelect!;
+    } else if (config?.enableTime) {
+      // Time-enabled: never close on date selection
+      closeOnSelect = false;
     } else if (config?.range) {
-      closeOnSelect = true; // changed from false to true for range mode
+      // Range mode: don't close on any clicks inside dropdown
+      closeOnSelect = false;
     } else if (config?.multiDate) {
+      // Multi-date mode: don't close on individual selections
       closeOnSelect = false;
     } else {
+      // Single date only: close on date click
       closeOnSelect = true;
     }
     this._config = {
@@ -709,7 +756,8 @@ export class KTDatepicker extends KTComponent {
 
     const dayClickHandler = (day: Date) => {
       this.setDate(day);
-      if (!this._config.range && !this._config.multiDate) {
+      // Use unified decision engine for closing
+      if (this._shouldCloseDropdown('date-selection')) {
         this.close();
       }
     };
@@ -856,6 +904,13 @@ export class KTDatepicker extends KTComponent {
       this._dropdownModule.dispose();
     }
 
+    // Always attach dropdown element to DOM first
+    if (inputWrapperEl.nextSibling) {
+      this._element.insertBefore(dropdownEl, inputWrapperEl.nextSibling);
+    } else {
+      this._element.appendChild(dropdownEl);
+    }
+
     // Find the toggle element (calendar button)
     const toggleElement = this._element.querySelector('button[data-kt-datepicker-calendar-btn]') as HTMLElement;
 
@@ -867,15 +922,6 @@ export class KTDatepicker extends KTComponent {
         dropdownEl,
         this._config
       );
-      console.log('🗓️ [KTDatepicker] Dropdown module created:', this._dropdownModule);
-    } else {
-      console.log('🗓️ [KTDatepicker] No toggle element found, using fallback');
-      // Fallback to old attachment method
-      if (inputWrapperEl.nextSibling) {
-        this._element.insertBefore(dropdownEl, inputWrapperEl.nextSibling);
-      } else {
-        this._element.appendChild(dropdownEl);
-      }
     }
   }
 
@@ -907,7 +953,47 @@ export class KTDatepicker extends KTComponent {
     const d = new Date(this._state.currentDate);
     d.setMonth(d.getMonth() + offset);
     this._state.currentDate = d;
-    this._render();
+
+    // Update only the calendar content without recreating the entire dropdown
+    this._updateCalendarContent();
+  }
+
+      /**
+   * Update only the calendar content without recreating the dropdown
+   * This preserves the dropdown state while updating the month view
+   */
+  private _updateCalendarContent() {
+    // Note: dropdown might be in document.body when using dropdown module
+    const dropdownEl = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement ||
+                      document.body.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+    if (!dropdownEl) {
+      // Fallback to full render if dropdown doesn't exist
+      this._render();
+      return;
+    }
+
+    // Clear existing calendar content
+    const existingHeader = dropdownEl.querySelector('[data-kt-datepicker-header]');
+    const existingCalendar = dropdownEl.querySelector('[data-kt-datepicker-calendar-table]');
+    const existingFooter = dropdownEl.querySelector('[data-kt-datepicker-footer]');
+
+    if (existingHeader && existingHeader.parentNode) {
+      existingHeader.parentNode.removeChild(existingHeader);
+    }
+    if (existingCalendar && existingCalendar.parentNode) {
+      existingCalendar.parentNode.removeChild(existingCalendar);
+    }
+    if (existingFooter && existingFooter.parentNode) {
+      existingFooter.parentNode.removeChild(existingFooter);
+    }
+
+    // Re-render only the calendar content
+    this._renderDropdownContent(dropdownEl);
+
+    // Update min/max date constraints
+    this._enforceMinMaxDates();
+
+    console.log('🗓️ [KTDatepicker] Calendar content updated for month:', this._state.currentDate.toLocaleString(this._config.locale, { month: 'long', year: 'numeric' }));
   }
 
   /**
@@ -1092,7 +1178,9 @@ export class KTDatepicker extends KTComponent {
     if (!this._isOpen) return;
     const target = e.target as Node;
     // Elements considered inside: root, dropdown, input, calendar button
-    const dropdown = this._element.querySelector('[data-kt-datepicker-dropdown]');
+    // Note: dropdown might be in document.body when using dropdown module
+    const dropdown = this._element.querySelector('[data-kt-datepicker-dropdown]') ||
+                    document.body.querySelector('[data-kt-datepicker-dropdown]');
     const input = this._input;
     const calendarBtn = this._element.querySelector('button[data-kt-datepicker-calendar-btn]');
     if (
@@ -1103,7 +1191,11 @@ export class KTDatepicker extends KTComponent {
     ) {
       return; // Click inside, do nothing
     }
-    this.close();
+
+    // Use unified decision engine
+    if (this._shouldCloseDropdown('outside-click')) {
+      this.close();
+    }
   };
 
   /**
@@ -1120,14 +1212,23 @@ export class KTDatepicker extends KTComponent {
 
     console.log('🗓️ [KTDatepicker] open() called, dropdown module:', this._dropdownModule);
 
+    // Always set up outside click handler for consistent behavior
+    this._eventManager.addListener(document as unknown as HTMLElement, 'mousedown', this._onDocumentClick);
+
+    // Ensure dropdown content is rendered before opening
+    const dropdownEl = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+    if (dropdownEl) {
+      // Always render dropdown content to ensure it's up to date
+      console.log('🗓️ [KTDatepicker] Rendering dropdown content before opening');
+      this._renderDropdownContent(dropdownEl);
+    }
+
     // Use dropdown module if available
     if (this._dropdownModule) {
       console.log('🗓️ [KTDatepicker] Calling dropdown module open()');
       this._dropdownModule.open();
     } else {
       console.log('🗓️ [KTDatepicker] No dropdown module, using fallback');
-      // Fallback to old method
-      this._eventManager.addListener(document as unknown as HTMLElement, 'mousedown', this._onDocumentClick);
     }
 
     // Don't call _render() here as it recreates the dropdown module
@@ -1144,12 +1245,14 @@ export class KTDatepicker extends KTComponent {
     console.log('[KTDatepicker] close() called. Dropdown will close. Stack trace:', new Error().stack);
     this._isOpen = false;
 
+    // Always remove outside click handler for consistent behavior
+    this._eventManager.removeListener(document as unknown as HTMLElement, 'mousedown', this._onDocumentClick);
+
     // Use dropdown module if available
     if (this._dropdownModule) {
       this._dropdownModule.close();
     } else {
-      // Fallback to old method
-      this._eventManager.removeListener(document as unknown as HTMLElement, 'mousedown', this._onDocumentClick);
+      console.log('🗓️ [KTDatepicker] No dropdown module, using fallback');
     }
 
     // Don't call _render() here as it recreates the dropdown module
