@@ -7,7 +7,7 @@
 import { TimeState } from '../../config/types';
 import { formatTime, getTimeStepOptions, validateTime } from '../../utils/time-utils';
 import { KTDatepickerConfig } from '../../config/types';
-import { createTemplateRenderer, TemplateRenderer } from '../../utils/template-renderer';
+import { createTemplateRenderer, TemplateRenderer } from '../../templates/templates';
 import { KTDatepickerTemplateStrings } from '../../config/types';
 
 /**

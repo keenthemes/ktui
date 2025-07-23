@@ -1,10 +1,10 @@
 /*
- * templates.ts - Default templates and merging logic for KTDatepicker (revamp)
- * Defines all default template strings and provides merged template set.
+ * templates.ts - Unified template system for KTDatepicker
+ * Consolidates all template functionality including default templates, merging logic,
+ * rendering utilities, and template management into a single, unified system.
  */
 
 import { KTDatepickerConfig, KTDatepickerTemplateStrings } from '../config/types';
-import { mergeTemplates } from '../utils/template-utils';
 
 // Default template strings for all UI fragments
 export const defaultTemplates: KTDatepickerTemplateStrings = {
@@ -90,6 +90,197 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   ampmControl: `<div data-kt-datepicker-ampm-control class="kt-datepicker-ampm-control {{class}}">{{ampmButton}}</div>`,
   ampmButton: `<button type="button" data-kt-datepicker-ampm-button aria-label="Toggle AM/PM" class="kt-datepicker-ampm-button {{class}}" {{disabled}}>{{ampmValue}}</button>`,
 };
+
+/**
+ * Template rendering options
+ */
+export interface TemplateRenderOptions {
+  templateKey: keyof KTDatepickerTemplateStrings;
+  data: Record<string, any>;
+  configClasses?: Record<string, string>;
+  fallbackTemplate?: string | ((data: any) => string);
+}
+
+/**
+ * Merges default templates with user overrides.
+ * User overrides take precedence.
+ */
+export function mergeTemplates(
+  defaults: KTDatepickerTemplateStrings,
+  overrides?: KTDatepickerTemplateStrings
+): KTDatepickerTemplateStrings {
+  return { ...defaults, ...(overrides || {}) };
+}
+
+/**
+ * Merges default, config, and user templates (string or function)
+ * Precedence: default < config < user
+ */
+export function getMergedTemplates(
+  configTemplates?: Record<string, string | ((data: any) => string)>,
+  userTemplates?: Record<string, string | ((data: any) => string)>
+): Record<string, string | ((data: any) => string)> {
+  return {
+    ...(defaultTemplates as Record<string, string | ((data: any) => string)>),
+    ...(configTemplates || {}),
+    ...(userTemplates || {}),
+  };
+}
+
+/**
+ * Renders a template string with data using {{key}} placeholders.
+ * Enhanced to handle class placeholders specifically.
+ */
+export function renderTemplateString(
+  template: string,
+  data: Record<string, any>
+): string {
+  return template.replace(/{{(\w+)}}/g, (_, key) => {
+    const value = data[key];
+    if (value !== undefined) {
+      return String(value);
+    }
+    return '';
+  });
+}
+
+/**
+ * Merges class data with template data for rendering.
+ * Extracts class for specific template key from config classes object.
+ */
+export function mergeClassData(
+  templateKey: string,
+  templateData: Record<string, any>,
+  configClasses?: Record<string, string>
+): Record<string, any> {
+  const classValue = configClasses?.[templateKey] || '';
+  return {
+    ...templateData,
+    class: classValue
+  };
+}
+
+/**
+ * Checks if a template is a function.
+ */
+export function isTemplateFunction(tpl: unknown): tpl is (data: any) => string {
+  return typeof tpl === 'function';
+}
+
+/**
+ * Renders a template string with data and returns a DocumentFragment.
+ * Usage: const frag = renderTemplateToDOM(template, data)
+ */
+export function renderTemplateToDOM(template: string, data: Record<string, any> = {}): DocumentFragment {
+  const html = renderTemplateString(template, data);
+  const frag = document.createDocumentFragment();
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  while (temp.firstChild) {
+    frag.appendChild(temp.firstChild);
+  }
+  return frag;
+}
+
+/**
+ * Unified template renderer for all datepicker UI components
+ * Ensures consistent template usage and eliminates scattered rendering logic
+ */
+export class TemplateRenderer {
+  private _templates: KTDatepickerTemplateStrings;
+
+  constructor(templates: KTDatepickerTemplateStrings) {
+    this._templates = templates;
+  }
+
+  /**
+   * Render a template with data and return HTML string
+   */
+  renderTemplateString(options: TemplateRenderOptions): string {
+    const { templateKey, data, configClasses, fallbackTemplate } = options;
+
+    // Get template from template set
+    let template = this._templates[templateKey];
+
+    // Use fallback if template not found
+    if (!template && fallbackTemplate) {
+      template = fallbackTemplate;
+    }
+
+    // Validate template exists
+    if (!template) {
+      throw new Error(`Template not found for key: ${templateKey}`);
+    }
+
+    // Merge class data
+    const mergedData = mergeClassData(templateKey, data, configClasses);
+
+    // Render template
+    if (isTemplateFunction(template)) {
+      return template(mergedData);
+    } else {
+      return renderTemplateString(template as string, mergedData);
+    }
+  }
+
+  /**
+   * Render a template with data and return HTMLElement
+   */
+  renderTemplateToElement(options: TemplateRenderOptions): HTMLElement {
+    const html = this.renderTemplateString(options);
+    const fragment = renderTemplateToDOM(html);
+    const element = fragment.firstElementChild as HTMLElement;
+
+    if (!element) {
+      throw new Error(`Failed to render template to element for key: ${options.templateKey}`);
+    }
+
+    return element;
+  }
+
+  /**
+   * Render a template with data and return DocumentFragment
+   */
+  renderTemplateToFragment(options: TemplateRenderOptions): DocumentFragment {
+    const html = this.renderTemplateString(options);
+    return renderTemplateToDOM(html);
+  }
+
+  /**
+   * Check if a template exists
+   */
+  hasTemplate(templateKey: keyof KTDatepickerTemplateStrings): boolean {
+    return !!this._templates[templateKey];
+  }
+
+  /**
+   * Get template by key
+   */
+  getTemplate(templateKey: keyof KTDatepickerTemplateStrings): string | ((data: any) => string) | undefined {
+    return this._templates[templateKey];
+  }
+
+  /**
+   * Update templates
+   */
+  updateTemplates(templates: KTDatepickerTemplateStrings): void {
+    this._templates = templates;
+  }
+
+  /**
+   * Get all templates
+   */
+  getTemplates(): KTDatepickerTemplateStrings {
+    return { ...this._templates };
+  }
+}
+
+/**
+ * Factory function to create a template renderer
+ */
+export function createTemplateRenderer(templates: KTDatepickerTemplateStrings): TemplateRenderer {
+  return new TemplateRenderer(templates);
+}
 
 /**
  * Returns the merged template set for a given config.

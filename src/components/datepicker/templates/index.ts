@@ -1,7 +1,6 @@
 /*
  * templates/index.ts - Template module exports
- * Provides template management and default templates for KTDatepicker
+ * Provides unified template system for KTDatepicker
  */
 
 export * from './templates';
-export * from './template-manager';

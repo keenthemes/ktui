@@ -3,7 +3,7 @@
  * Renders the calendar header (month, year, navigation buttons) using provided template and data.
  */
 
-import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../../utils/template-utils';
+import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../../templates/templates';
 import { defaultTemplates } from '../../templates/templates';
 
 /**

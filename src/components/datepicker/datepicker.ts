@@ -6,10 +6,16 @@
 
 import KTComponent from '../component';
 import { KTDatepickerConfig, KTDatepickerState, KTDatepickerTemplateStrings } from './config/types';
-import { getTemplateStrings, defaultTemplates } from './templates/templates';
-import { getMergedTemplates } from './templates/template-manager';
-import { renderTemplateString, isTemplateFunction, renderTemplateToDOM, mergeClassData } from './utils/template-utils';
-import { createTemplateRenderer, TemplateRenderer } from './utils/template-renderer';
+import {
+  getTemplateStrings,
+  defaultTemplates,
+  createTemplateRenderer,
+  TemplateRenderer,
+  renderTemplateString,
+  mergeClassData,
+  isTemplateFunction,
+  renderTemplateToDOM
+} from './templates/templates';
 import { defaultDatepickerConfig } from './config/config';
 import { renderHeader } from './ui/renderers/header';
 import { renderCalendar } from './ui/renderers/calendar';
@@ -18,17 +24,12 @@ import { renderTimePicker } from './ui/renderers/time-picker';
 import { EventManager } from './core/event-manager';
 import { FocusManager } from './core/focus-manager';
 import { KTDatepickerDropdown } from './ui/input/dropdown';
-// Legacy imports removed - using unified state manager
-// import { KTDatepickerSimpleStateManager as KTDropdownStateManager, DropdownState } from './core/state-manager';
-// import { KTDropdownEventManager } from './core/event-manager';
+
 import { KTDatepickerUnifiedStateManager, StateObserver } from './core/unified-state-manager';
 import { DropdownState } from './config/types';
 import { debugLogger } from './core/debug-utils';
-import { InputObserver } from './ui/observers/input-observer';
-import { SegmentedInputObserver } from './ui/observers/segmented-input-observer';
-import { CalendarObserver } from './ui/observers/calendar-observer';
-import { TimePickerObserver } from './ui/observers/time-picker-observer';
 import { ObserverFactory } from './ui/observers/observer-factory';
+import { UnifiedObserver } from './ui/observers/unified-observer';
 import { SegmentedInput, SegmentedInputOptions } from './ui/input/segmented-input';
 import { parseDateFromFormat } from './utils/date-utils';
 import { dateToTimeState, applyTimeToDate, validateTime } from './utils/time-utils';
@@ -55,7 +56,7 @@ import {
 export class KTDatepicker extends KTComponent implements StateObserver {
   protected override readonly _name: string = 'datepicker';
   protected override _config: KTDatepickerConfig;
-  protected _state: KTDatepickerState;
+
   protected _templateSet: ReturnType<typeof getTemplateStrings>;
   private _userTemplates: Record<string, string | ((data: any) => string)> = {};
   private _templateRenderer: TemplateRenderer;
@@ -65,9 +66,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _eventManager: EventManager;
   private _focusManager: FocusManager | null = null;
   private _dropdownModule: KTDatepickerDropdown | null = null;
-  // Legacy state managers (to be removed after migration) - DEPRECATED
-  // private _dropdownStateManager: KTDropdownStateManager;
-  // private _dropdownEventManager: KTDropdownEventManager;
   private _timePickerRenderer: { cleanup: () => void; update: (newTime: TimeState) => void } | null = null;
 
   // Unified state manager
@@ -75,10 +73,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _unsubscribeFromState: (() => void) | null = null;
 
   // Component observers
-  private _inputObserver: InputObserver | null = null;
-  private _segmentedInputObserver: SegmentedInputObserver | null = null;
-  private _calendarObserver: CalendarObserver | null = null;
-  private _timePickerObserver: TimePickerObserver | null = null;
+  private _unifiedObserver: UnifiedObserver | null = null;
 
   // Observer factory
   private _observerFactory: ObserverFactory;
@@ -88,9 +83,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // --- StateObserver implementation ---
   public onStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
-    // Update local state
-    this._state = { ...newState };
-
     // Update UI based on state changes
     this._handleStateChange(newState, oldState);
   }
@@ -105,63 +97,44 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _initializeObservers(): void {
     // Initialize observer factory
     this._observerFactory = new ObserverFactory({
-      input: {
-        enableDebugging: this._config.debug || false,
-        enableFormatValidation: true,
-        updateDelay: 0
-      },
-      segmentedInput: {
-        enableDebugging: this._config.debug || false,
-        enableValidation: true,
-        updateDelay: 0,
-        formatOptions: {
-          yearFormat: 'numeric',
-          monthFormat: '2-digit',
-          dayFormat: '2-digit',
-          hourFormat: '2-digit',
-          minuteFormat: '2-digit',
-          secondFormat: '2-digit',
-          timeFormat: this._config.timeFormat === '12h' ? '12h' : '24h'
-        }
-      },
-      calendar: {
-        enableDebugging: this._config.debug || false,
-        enableSmoothTransitions: true,
-        updateDelay: 0
-      },
-      timePicker: {
-        enableDebugging: this._config.debug || false,
-        enableSmoothTransitions: true,
-        updateDelay: 0
+      enableDebugging: this._config.debug || false,
+      enableValidation: true,
+      enableSmoothTransitions: true,
+      updateDelay: 0,
+      formatOptions: {
+        yearFormat: 'numeric',
+        monthFormat: '2-digit',
+        dayFormat: '2-digit',
+        hourFormat: '2-digit',
+        minuteFormat: '2-digit',
+        secondFormat: '2-digit',
+        timeFormat: this._config.timeFormat === '12h' ? '12h' : '24h'
       }
     });
 
-    // Create observers using factory
-    console.log('[KTDatepicker] Creating observers with containers:', {
+    // Create unified observer
+    console.log('[KTDatepicker] Creating unified observer with containers:', {
       input: this._input,
       segmentedInputContainer: this._element,
       calendarElement: null,
       timePickerElement: null
     });
 
-    const observers = this._observerFactory.createAllObservers({
+    this._unifiedObserver = this._observerFactory.createUnifiedObserver({
       input: this._input,
       segmentedInputContainer: this._element,
       calendarElement: null, // Will be set when calendar is rendered
       timePickerElement: null // Will be set when time picker is rendered
     }, {
-      enableDebugging: this._config.debug || false
+      enableDebugging: this._config.debug || false,
+      enableValidation: true,
+      enableSmoothTransitions: true,
+      updateDelay: 0
     });
 
-    // Assign observers
-    this._inputObserver = observers.inputObserver || null;
-    this._segmentedInputObserver = observers.segmentedInputObserver || null;
-    this._calendarObserver = observers.calendarObserver || null;
-    this._timePickerObserver = observers.timePickerObserver || null;
-
-    // Set custom formatter for input observer
-    if (this._inputObserver) {
-      this._inputObserver.setFormatter((state: KTDatepickerState) => {
+    // Set custom formatter for unified observer
+    if (this._unifiedObserver) {
+      this._unifiedObserver.setFormatter((state: KTDatepickerState) => {
         if (this._config.range && state.selectedRange) {
           return this._formatRange(state.selectedRange.start, state.selectedRange.end);
         } else if (this._config.multiDate && state.selectedDates.length > 0) {
@@ -173,44 +146,15 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       });
     }
 
-    // Subscribe all observers to unified state manager
-    console.log('[KTDatepicker] Subscribing observers to unified state manager');
-
-    if (this._inputObserver) {
-      console.log('[KTDatepicker] Subscribing InputObserver');
-      this._unifiedStateManager.subscribe(this._inputObserver);
+    // Subscribe unified observer to state manager
+    if (this._unifiedObserver) {
+      console.log('[KTDatepicker] Subscribing unified observer to state manager');
+      this._unifiedStateManager.subscribe(this._unifiedObserver);
     } else {
-      console.warn('[KTDatepicker] InputObserver not available for subscription');
+      console.warn('[KTDatepicker] Unified observer not available for subscription');
     }
 
-    if (this._segmentedInputObserver) {
-      console.log('[KTDatepicker] Subscribing SegmentedInputObserver');
-      this._unifiedStateManager.subscribe(this._segmentedInputObserver);
-    } else {
-      console.warn('[KTDatepicker] SegmentedInputObserver not available for subscription');
-    }
-
-    if (this._calendarObserver) {
-      console.log('[KTDatepicker] Subscribing CalendarObserver');
-      this._unifiedStateManager.subscribe(this._calendarObserver);
-    } else {
-      console.warn('[KTDatepicker] CalendarObserver not available for subscription');
-    }
-
-    if (this._timePickerObserver) {
-      console.log('[KTDatepicker] Subscribing TimePickerObserver');
-      this._unifiedStateManager.subscribe(this._timePickerObserver);
-    } else {
-      console.warn('[KTDatepicker] TimePickerObserver not available for subscription');
-    }
-
-    console.log('[KTDatepicker] Component observers initialized using factory');
-    console.log('[KTDatepicker] Observer status:', {
-      inputObserver: !!this._inputObserver,
-      segmentedInputObserver: !!this._segmentedInputObserver,
-      calendarObserver: !!this._calendarObserver,
-      timePickerObserver: !!this._timePickerObserver
-    });
+    console.log('[KTDatepicker] Unified observer initialized:', !!this._unifiedObserver);
   }
 
     private _handleStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
@@ -228,35 +172,22 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       this._updateDisabledState();
     }
 
-    // Update segmented input observer container if needed
-    console.log('[KTDatepicker] Checking segmented input observer container');
-    if (this._segmentedInputObserver && !this._segmentedInputObserver.getContainer()) {
-      console.log('[KTDatepicker] Setting segmented input observer container to main element');
-      this._segmentedInputObserver.setContainer(this._element);
-    } else if (this._segmentedInputObserver) {
-      console.log('[KTDatepicker] Segmented input observer already has container:', this._segmentedInputObserver.getContainer());
-    } else {
-      console.log('[KTDatepicker] No segmented input observer available');
+    // Update unified observer elements if needed
+    console.log('[KTDatepicker] Updating unified observer elements');
+    if (this._unifiedObserver) {
+      const calendarElement = this._element.querySelector('[data-kt-datepicker-calendar-table]') as HTMLElement;
+      const timePickerElement = this._element.querySelector('[data-kt-datepicker-time-container]') as HTMLElement;
+
+      this._unifiedObserver.setElements({
+        input: this._input,
+        segmentedInputContainer: this._element,
+        calendarElement: calendarElement || null,
+        timePickerElement: timePickerElement || null
+      });
     }
 
     // Start observing for dynamic element creation
     this._startElementObservation();
-
-    // Update calendar observer element reference if needed
-    if (this._calendarObserver && !this._calendarObserver.getCalendarElement()) {
-      const calendarElement = this._element.querySelector('[data-kt-datepicker-calendar-table]') as HTMLElement;
-      if (calendarElement) {
-        this._calendarObserver.setCalendarElement(calendarElement);
-      }
-    }
-
-    // Update time picker observer element reference if needed
-    if (this._timePickerObserver && !this._timePickerObserver.getTimePickerElement()) {
-      const timePickerElement = this._element.querySelector('[data-kt-datepicker-time-container]') as HTMLElement;
-      if (timePickerElement) {
-        this._timePickerObserver.setTimePickerElement(timePickerElement);
-      }
-    }
   }
 
   // --- Mode-specific helpers ---
@@ -325,7 +256,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * @returns Time format string
    */
   private _getTimeFormat(): string {
-    const granularity = this._state.timeGranularity || 'minute';
+    const granularity = this._unifiedStateManager.getState().timeGranularity || 'minute';
     const timeFormat = this._config.timeFormat || '24h';
 
     switch (granularity) {
@@ -360,8 +291,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   /** Select a single date */
   private _selectSingleDate(date: Date) {
     // Preserve time if time is enabled and we have a selected time
-    if (this._config.enableTime && this._state.selectedTime) {
-      const dateWithTime = applyTimeToDate(date, this._state.selectedTime);
+    if (this._config.enableTime && this._unifiedStateManager.getState().selectedTime) {
+      const dateWithTime = applyTimeToDate(date, this._unifiedStateManager.getState().selectedTime);
       this._unifiedStateManager.setSelectedDate(dateWithTime, 'calendar');
     } else {
       this._unifiedStateManager.setSelectedDate(date, 'calendar');
@@ -612,25 +543,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         // Subscribe to state changes
     this._unsubscribeFromState = this._unifiedStateManager.subscribe(this);
 
-    // Get initial state
-    this._state = this._unifiedStateManager.getState();
+
 
     // Initialize component observers
     this._initializeObservers();
 
-    // Initialize centralized state management (for backward compatibility)
-    // Legacy state managers removed - using unified state manager instead
-    // this._dropdownStateManager = new KTDropdownStateManager({
-    //   enableValidation: true,
-    //   enableDebugging: this._config.debug || false
-    // });
 
-    // this._dropdownEventManager = new KTDropdownEventManager({
-    //   enableEventBubbling: true,
-    //   enableCustomEvents: false,
-    //   enableValidation: true,
-    //   enableDebugging: this._config.debug || false
-    // });
     // Set placeholder from config if available
     if (this._input && this._config.placeholder) {
       this._input.setAttribute('placeholder', this._config.placeholder);
@@ -651,7 +569,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       }, 'config');
 
       // Initialize time from selected date or current time
-      const baseDate = this._state.selectedDate || this._state.currentDate || new Date();
+      const baseDate = this._unifiedStateManager.getState().selectedDate || this._unifiedStateManager.getState().currentDate || new Date();
       this._unifiedStateManager.setSelectedTime(dateToTimeState(baseDate), 'config');
     }
 
@@ -709,10 +627,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    */
   protected override _buildConfig(config?: KTDatepickerConfig) {
     // Merge templates separately to ensure correct type
-    const mergedTemplates = getMergedTemplates(
-      (config && config.templates) || {},
-      this._userTemplates || {}
-    );
+    const mergedTemplates = {
+      ...defaultTemplates,
+      ...(config && config.templates) || {},
+      ...(this._userTemplates || {})
+    };
     // Determine closeOnSelect default based on mode and requirements
     let closeOnSelect: boolean;
     if (typeof (config && config.closeOnSelect) !== 'undefined') {
@@ -789,20 +708,20 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       instantiateRangeSegmentedInputs(
         startContainer,
         endContainer,
-        this._state,
+        this._unifiedStateManager.getState(),
         this._config,
         (date: Date) => {
-          const end = this._state.selectedRange?.end || null;
+          const end = this._unifiedStateManager.getState().selectedRange?.end || null;
           let newEnd = end;
           if (end && date > end) newEnd = null;
-          this._state.selectedRange = { start: date, end: newEnd };
+          this._unifiedStateManager.updateState({ selectedRange: { start: date, end: newEnd } }, 'range-selection');
           this._render();
         },
         (date: Date) => {
-          const start = this._state.selectedRange?.start || null;
+          const start = this._unifiedStateManager.getState().selectedRange?.start || null;
           let newStart = start;
           if (start && date < start) newStart = null;
-          this._state.selectedRange = { start: newStart, end: date };
+          this._unifiedStateManager.updateState({ selectedRange: { start: newStart, end: date } }, 'range-selection');
           this._render();
         }
       );
@@ -826,7 +745,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     console.log('[KTDatepicker] Final segmented input container:', segmentedInputContainer);
     console.log('[KTDatepicker] Container HTML before instantiation:', segmentedInputContainer.innerHTML);
 
-    instantiateSingleSegmentedInput(segmentedInputContainer as HTMLElement, this._state, this._config, (date: Date) => {
+    instantiateSingleSegmentedInput(segmentedInputContainer as HTMLElement, this._unifiedStateManager.getState(), this._config, (date: Date) => {
       this.setDate(date);
     });
     return inputWrapperEl;
@@ -1058,9 +977,9 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         this._templateSet.dayCell,
         this._getCalendarDays(monthDate),
         monthDate,
-        this._state.selectedDate,
+        this._unifiedStateManager.getState().selectedDate,
         (day) => { this.setDate(day); },
-        this._config.range ? this._state.selectedRange : undefined
+        this._config.range ? this._unifiedStateManager.getState().selectedRange : undefined
       );
 
       // Wrap header + calendar in a styled panel div
@@ -1080,9 +999,9 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _render() {
             // Store current state before rendering
     const wasOpen = this._unifiedStateManager.isDropdownOpen();
-    const selectedDate = this._state.selectedDate;
-    const selectedRange = this._state.selectedRange;
-    const selectedDates = this._state.selectedDates;
+    const selectedDate = this._unifiedStateManager.getState().selectedDate;
+    const selectedRange = this._unifiedStateManager.getState().selectedRange;
+    const selectedDates = this._unifiedStateManager.getState().selectedDates;
 
     // Remove any previous container
     if (this._container && this._container.parentNode) {
@@ -1123,9 +1042,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._attachDropdown(inputWrapperEl, dropdownEl);
 
     // Restore state
-    this._state.selectedDate = selectedDate;
-    this._state.selectedRange = selectedRange;
-    this._state.selectedDates = selectedDates;
+    this._unifiedStateManager.updateState({
+      selectedDate,
+      selectedRange,
+      selectedDates
+    }, 'render-restore');
 
     // Restore open state
     if (wasOpen) {
@@ -1140,7 +1061,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._updateDisabledState();
     this._enforceMinMaxDates();
     console.log('🗓️ [KTDatepicker] _render: this._input:', this._input);
-    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._unifiedStateManager.isDropdownOpen(), 'selectedDate:', this._state.selectedDate);
+    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._unifiedStateManager.isDropdownOpen(), 'selectedDate:', this._unifiedStateManager.getState().selectedDate);
     // Attach keyboard event listeners
     if (this._input) {
       this._eventManager.removeListener(this._input, 'keydown', this._onKeyDown);
@@ -1442,30 +1363,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       this._dropdownModule.dispose();
     }
 
-    // Clean up state managers (legacy managers removed)
-    // if (this._dropdownEventManager) {
-    //   this._dropdownEventManager.dispose();
-    // }
-    // if (this._dropdownStateManager) {
-    //   this._dropdownStateManager.dispose();
-    // }
 
-    // Clean up component observers
-    if (this._inputObserver) {
-      this._inputObserver.dispose();
-      this._inputObserver = null;
-    }
-    if (this._segmentedInputObserver) {
-      this._segmentedInputObserver.dispose();
-      this._segmentedInputObserver = null;
-    }
-    if (this._calendarObserver) {
-      this._calendarObserver.dispose();
-      this._calendarObserver = null;
-    }
-    if (this._timePickerObserver) {
-      this._timePickerObserver.dispose();
-      this._timePickerObserver = null;
+
+    // Clean up unified observer
+    if (this._unifiedObserver) {
+      this._unifiedObserver.dispose();
+      this._unifiedObserver = null;
     }
 
     // Clean up unified state manager
@@ -1508,7 +1411,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as Element;
               if (element.querySelector('[data-segment]')) {
-                this._reinitializeSegmentedInputObserver();
+                this._reinitializeUnifiedObserver();
               }
             }
           });
@@ -1523,28 +1426,35 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   }
 
   /**
-   * Re-initialize segmented input observer when elements are created
+   * Re-initialize unified observer when elements are created
    */
-  private _reinitializeSegmentedInputObserver(): void {
-    console.log('[KTDatepicker] Re-initializing SegmentedInputObserver');
+  private _reinitializeUnifiedObserver(): void {
+    console.log('[KTDatepicker] Re-initializing UnifiedObserver');
 
-    if (this._segmentedInputObserver) {
-      console.log('[KTDatepicker] Disposing existing SegmentedInputObserver');
-      this._segmentedInputObserver.dispose();
+    if (this._unifiedObserver) {
+      console.log('[KTDatepicker] Disposing existing UnifiedObserver');
+      this._unifiedObserver.dispose();
     }
 
-    console.log('[KTDatepicker] Creating new SegmentedInputObserver with element:', this._element);
-    this._segmentedInputObserver = this._observerFactory.createSegmentedInputObserver(
-      this._element,
-      { enableDebugging: this._config.debug || false }
-    );
+    console.log('[KTDatepicker] Creating new UnifiedObserver with element:', this._element);
+    this._unifiedObserver = this._observerFactory.createUnifiedObserver({
+      input: this._input,
+      segmentedInputContainer: this._element,
+      calendarElement: null,
+      timePickerElement: null
+    }, {
+      enableDebugging: this._config.debug || false,
+      enableValidation: true,
+      enableSmoothTransitions: true,
+      updateDelay: 0
+    });
 
-    if (this._segmentedInputObserver) {
-      console.log('[KTDatepicker] Subscribing SegmentedInputObserver to unified state manager');
-      this._unifiedStateManager.subscribe(this._segmentedInputObserver);
-      console.log('[KTDatepicker] Segmented input observer re-initialized successfully');
+    if (this._unifiedObserver) {
+      console.log('[KTDatepicker] Subscribing UnifiedObserver to unified state manager');
+      this._unifiedStateManager.subscribe(this._unifiedObserver);
+      console.log('[KTDatepicker] Unified observer re-initialized successfully');
     } else {
-      console.error('[KTDatepicker] Failed to create SegmentedInputObserver');
+      console.error('[KTDatepicker] Failed to create UnifiedObserver');
     }
   }
 
@@ -1609,8 +1519,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         const td = btn.closest('td[data-kt-datepicker-day]');
         if (!td) return;
         // Get the date for this cell
-        const year = this._state.currentDate.getFullYear();
-        const month = this._state.currentDate.getMonth();
+        const year = this._unifiedStateManager.getState().currentDate.getFullYear();
+        const month = this._unifiedStateManager.getState().currentDate.getMonth();
         const date = new Date(year, month, day);
         let disabled = false;
         if (minDate && date < minDate) disabled = true;

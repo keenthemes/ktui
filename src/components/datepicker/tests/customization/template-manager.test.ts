@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getMergedTemplates } from '../../templates/template-manager';
+import { getMergedTemplates } from '../../templates/templates';
 
 describe('getMergedTemplates', () => {
   it('merges default, config, and user templates with correct precedence', () => {

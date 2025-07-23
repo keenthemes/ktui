@@ -1,22 +1,27 @@
 /*
- * observer-factory.ts - Observer factory for KTDatepicker unified state management
- * Provides unified creation and management of all datepicker observers with configurable
- * defaults and error handling.
+ * observer-factory.ts - Simplified observer factory for KTDatepicker unified state management
+ * Creates and manages the unified observer with configurable defaults and error handling.
  */
 
-import { InputObserver, InputObserverConfig } from './input-observer';
-import { SegmentedInputObserver, SegmentedInputObserverConfig } from './segmented-input-observer';
-import { CalendarObserver, CalendarObserverConfig } from './calendar-observer';
-import { TimePickerObserver, TimePickerObserverConfig } from './time-picker-observer';
+import { UnifiedObserver, UnifiedObserverConfig, UIElements } from './unified-observer';
 
 /**
  * Unified observer configuration
  */
 export interface ObserverConfig {
-  input: Partial<InputObserverConfig>;
-  segmentedInput: Partial<SegmentedInputObserverConfig>;
-  calendar: Partial<CalendarObserverConfig>;
-  timePicker: Partial<TimePickerObserverConfig>;
+  enableDebugging: boolean;
+  enableValidation: boolean;
+  enableSmoothTransitions: boolean;
+  updateDelay: number;
+  formatOptions: {
+    yearFormat: 'numeric' | '2-digit';
+    monthFormat: 'numeric' | '2-digit' | 'short' | 'long';
+    dayFormat: 'numeric' | '2-digit';
+    hourFormat: 'numeric' | '2-digit';
+    minuteFormat: 'numeric' | '2-digit';
+    secondFormat: 'numeric' | '2-digit';
+    timeFormat: '12h' | '24h';
+  };
 }
 
 /**
@@ -25,6 +30,7 @@ export interface ObserverConfig {
 export interface ObserverCreationOptions {
   enableDebugging?: boolean;
   enableValidation?: boolean;
+  enableSmoothTransitions?: boolean;
   updateDelay?: number;
   customConfig?: Partial<ObserverConfig>;
 }
@@ -32,201 +38,50 @@ export interface ObserverCreationOptions {
 /**
  * ObserverFactory
  *
- * Factory for creating and managing all datepicker observers with unified configuration
- * and error handling. Provides a centralized approach to observer creation and management.
+ * Simplified factory for creating and managing the unified datepicker observer.
+ * Provides a centralized approach to observer creation and management.
  */
 export class ObserverFactory {
   private _defaultConfig: ObserverConfig;
 
   constructor(defaultConfig?: Partial<ObserverConfig>) {
     this._defaultConfig = {
-      input: {
-        enableDebugging: false,
-        enableFormatValidation: true,
-        updateDelay: 0
-      },
-      segmentedInput: {
-        enableDebugging: false,
-        enableValidation: true,
-        updateDelay: 0,
-        formatOptions: {
-          yearFormat: 'numeric',
-          monthFormat: '2-digit',
-          dayFormat: '2-digit',
-          hourFormat: '2-digit',
-          minuteFormat: '2-digit',
-          secondFormat: '2-digit',
-          timeFormat: '24h'
-        }
-      },
-      calendar: {
-        enableDebugging: false,
-        enableSmoothTransitions: true,
-        updateDelay: 0
-      },
-      timePicker: {
-        enableDebugging: false,
-        enableSmoothTransitions: true,
-        updateDelay: 0
+      enableDebugging: false,
+      enableValidation: true,
+      enableSmoothTransitions: true,
+      updateDelay: 0,
+      formatOptions: {
+        yearFormat: 'numeric',
+        monthFormat: '2-digit',
+        dayFormat: '2-digit',
+        hourFormat: '2-digit',
+        minuteFormat: '2-digit',
+        secondFormat: '2-digit',
+        timeFormat: '24h'
       },
       ...defaultConfig
     };
   }
 
   /**
-   * Create InputObserver for hidden input field
+   * Create unified observer for all datepicker UI components
    */
-  public createInputObserver(
-    input: HTMLInputElement | null,
+  public createUnifiedObserver(
+    elements: UIElements,
     options?: ObserverCreationOptions
-  ): InputObserver {
+  ): UnifiedObserver {
     try {
-      const config = this._mergeConfig('input', options);
-      const observer = new InputObserver(input, config);
+      const config = this._mergeConfig(options);
+      const observer = new UnifiedObserver(elements, config);
 
       if (options?.enableDebugging) {
-        console.log('[ObserverFactory] InputObserver created successfully');
+        console.log('[ObserverFactory] UnifiedObserver created successfully');
       }
 
       return observer;
     } catch (error) {
-      console.error('[ObserverFactory] Error creating InputObserver:', error);
-      throw new Error('Failed to create InputObserver');
-    }
-  }
-
-  /**
-   * Create SegmentedInputObserver for segmented input components
-   */
-  public createSegmentedInputObserver(
-    container: HTMLElement | null,
-    options?: ObserverCreationOptions
-  ): SegmentedInputObserver {
-    try {
-      console.log('[ObserverFactory] Creating SegmentedInputObserver with container:', container);
-      console.log('[ObserverFactory] Options:', options);
-
-      const config = this._mergeConfig('segmentedInput', options);
-      console.log('[ObserverFactory] Merged config:', config);
-
-      const observer = new SegmentedInputObserver(container, config);
-      console.log('[ObserverFactory] SegmentedInputObserver created successfully:', observer);
-
-      if (options?.enableDebugging) {
-        console.log('[ObserverFactory] Debug mode enabled for SegmentedInputObserver');
-      }
-
-      return observer;
-    } catch (error) {
-      console.error('[ObserverFactory] Error creating SegmentedInputObserver:', error);
-      throw new Error('Failed to create SegmentedInputObserver');
-    }
-  }
-
-  /**
-   * Create CalendarObserver for calendar UI
-   */
-  public createCalendarObserver(
-    element: HTMLElement | null,
-    options?: ObserverCreationOptions
-  ): CalendarObserver {
-    try {
-      const config = this._mergeConfig('calendar', options);
-      const observer = new CalendarObserver(element, config);
-
-      if (options?.enableDebugging) {
-        console.log('[ObserverFactory] CalendarObserver created successfully');
-      }
-
-      return observer;
-    } catch (error) {
-      console.error('[ObserverFactory] Error creating CalendarObserver:', error);
-      throw new Error('Failed to create CalendarObserver');
-    }
-  }
-
-  /**
-   * Create TimePickerObserver for time picker UI
-   */
-  public createTimePickerObserver(
-    element: HTMLElement | null,
-    options?: ObserverCreationOptions
-  ): TimePickerObserver {
-    try {
-      const config = this._mergeConfig('timePicker', options);
-      const observer = new TimePickerObserver(element, config);
-
-      if (options?.enableDebugging) {
-        console.log('[ObserverFactory] TimePickerObserver created successfully');
-      }
-
-      return observer;
-    } catch (error) {
-      console.error('[ObserverFactory] Error creating TimePickerObserver:', error);
-      throw new Error('Failed to create TimePickerObserver');
-    }
-  }
-
-  /**
-   * Create all observers for a complete datepicker setup
-   */
-  public createAllObservers(
-    elements: {
-      input?: HTMLInputElement | null;
-      segmentedInputContainer?: HTMLElement | null;
-      calendarElement?: HTMLElement | null;
-      timePickerElement?: HTMLElement | null;
-    },
-    options?: ObserverCreationOptions
-  ): {
-    inputObserver?: InputObserver;
-    segmentedInputObserver?: SegmentedInputObserver;
-    calendarObserver?: CalendarObserver;
-    timePickerObserver?: TimePickerObserver;
-  } {
-    const observers: any = {};
-
-    try {
-      // Create input observer if input element is provided
-      if (elements.input) {
-        observers.inputObserver = this.createInputObserver(elements.input, options);
-      }
-
-      // Create segmented input observer if container is provided
-      if (elements.segmentedInputContainer) {
-        observers.segmentedInputObserver = this.createSegmentedInputObserver(
-          elements.segmentedInputContainer,
-          options
-        );
-      }
-
-      // Create calendar observer if element is provided
-      if (elements.calendarElement) {
-        observers.calendarObserver = this.createCalendarObserver(
-          elements.calendarElement,
-          options
-        );
-      }
-
-      // Create time picker observer if element is provided
-      if (elements.timePickerElement) {
-        observers.timePickerObserver = this.createTimePickerObserver(
-          elements.timePickerElement,
-          options
-        );
-      }
-
-      if (options?.enableDebugging) {
-        console.log('[ObserverFactory] All observers created successfully:', Object.keys(observers));
-      }
-
-      return observers;
-    } catch (error) {
-      console.error('[ObserverFactory] Error creating observers:', error);
-
-      // Clean up any created observers on error
-      this._disposeObservers(observers);
-      throw new Error('Failed to create observers');
+      console.error('[ObserverFactory] Error creating UnifiedObserver:', error);
+      throw new Error('Failed to create UnifiedObserver');
     }
   }
 
@@ -238,81 +93,31 @@ export class ObserverFactory {
   }
 
   /**
-   * Get current default configuration
+   * Get default configuration
    */
   public getDefaultConfig(): ObserverConfig {
     return { ...this._defaultConfig };
   }
 
   /**
-   * Update specific observer configuration
+   * Merge configuration with defaults
    */
-  public updateObserverConfig(
-    observerType: keyof ObserverConfig,
-    config: Partial<ObserverConfig[keyof ObserverConfig]>
-  ): void {
-    if (this._defaultConfig[observerType]) {
-      this._defaultConfig[observerType] = {
-        ...this._defaultConfig[observerType],
-        ...config
-      };
-    }
-  }
+  private _mergeConfig(options?: ObserverCreationOptions): UnifiedObserverConfig {
+    const baseConfig = this._defaultConfig;
+    const customConfig = options?.customConfig || {};
 
-  /**
-   * Merge configuration with options
-   */
-  private _mergeConfig(
-    observerType: keyof ObserverConfig,
-    options?: ObserverCreationOptions
-  ): any {
-    const baseConfig = this._defaultConfig[observerType];
-    const customConfig = options?.customConfig?.[observerType] || {};
-
-    // Apply global options
-    const mergedConfig = {
+    return {
       ...baseConfig,
-      ...customConfig
+      ...customConfig,
+      enableDebugging: options?.enableDebugging ?? baseConfig.enableDebugging,
+      enableValidation: options?.enableValidation ?? baseConfig.enableValidation,
+      enableSmoothTransitions: options?.enableSmoothTransitions ?? baseConfig.enableSmoothTransitions,
+      updateDelay: options?.updateDelay ?? baseConfig.updateDelay
     };
-
-        // Override with global options if provided
-    if (options?.enableDebugging !== undefined) {
-      mergedConfig.enableDebugging = options.enableDebugging;
-    }
-
-    if (options?.enableValidation !== undefined) {
-      // Handle different property names for different observers
-      if ('enableValidation' in mergedConfig) {
-        mergedConfig.enableValidation = options.enableValidation;
-      } else if ('enableFormatValidation' in mergedConfig) {
-        mergedConfig.enableFormatValidation = options.enableValidation;
-      }
-    }
-
-    if (options?.updateDelay !== undefined) {
-      mergedConfig.updateDelay = options.updateDelay;
-    }
-
-    return mergedConfig;
   }
 
   /**
-   * Dispose all observers in a collection
-   */
-  private _disposeObservers(observers: Record<string, any>): void {
-    for (const [name, observer] of Object.entries(observers)) {
-      if (observer && typeof observer.dispose === 'function') {
-        try {
-          observer.dispose();
-        } catch (error) {
-          console.warn(`[ObserverFactory] Error disposing ${name}:`, error);
-        }
-      }
-    }
-  }
-
-  /**
-   * Validate observer configuration
+   * Validate configuration
    */
   public validateConfig(config: Partial<ObserverConfig>): {
     isValid: boolean;
@@ -320,39 +125,20 @@ export class ObserverFactory {
   } {
     const errors: string[] = [];
 
-    // Validate input observer config
-    if (config.input) {
-      if (config.input.updateDelay && config.input.updateDelay < 0) {
-        errors.push('Input observer updateDelay must be non-negative');
-      }
+    if (typeof config.enableDebugging !== 'boolean' && config.enableDebugging !== undefined) {
+      errors.push('enableDebugging must be a boolean');
     }
 
-    // Validate segmented input observer config
-    if (config.segmentedInput) {
-      if (config.segmentedInput.updateDelay && config.segmentedInput.updateDelay < 0) {
-        errors.push('Segmented input observer updateDelay must be non-negative');
-      }
-
-      if (config.segmentedInput.formatOptions) {
-        const formatOptions = config.segmentedInput.formatOptions;
-        if (formatOptions.timeFormat && !['12h', '24h'].includes(formatOptions.timeFormat)) {
-          errors.push('Time format must be either "12h" or "24h"');
-        }
-      }
+    if (typeof config.enableValidation !== 'boolean' && config.enableValidation !== undefined) {
+      errors.push('enableValidation must be a boolean');
     }
 
-    // Validate calendar observer config
-    if (config.calendar) {
-      if (config.calendar.updateDelay && config.calendar.updateDelay < 0) {
-        errors.push('Calendar observer updateDelay must be non-negative');
-      }
+    if (typeof config.enableSmoothTransitions !== 'boolean' && config.enableSmoothTransitions !== undefined) {
+      errors.push('enableSmoothTransitions must be a boolean');
     }
 
-    // Validate time picker observer config
-    if (config.timePicker) {
-      if (config.timePicker.updateDelay && config.timePicker.updateDelay < 0) {
-        errors.push('Time picker observer updateDelay must be non-negative');
-      }
+    if (typeof config.updateDelay !== 'number' && config.updateDelay !== undefined) {
+      errors.push('updateDelay must be a number');
     }
 
     return {
@@ -370,8 +156,8 @@ export class ObserverFactory {
     defaultConfig: ObserverConfig;
   } {
     return {
-      version: '1.0.0',
-      supportedObservers: ['InputObserver', 'SegmentedInputObserver', 'CalendarObserver', 'TimePickerObserver'],
+      version: '3.0.0',
+      supportedObservers: ['unified'],
       defaultConfig: this.getDefaultConfig()
     };
   }
