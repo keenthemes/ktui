@@ -4,7 +4,7 @@
  * Follows HeroUI best practices for time picker functionality.
  */
 
-import { TimeState } from './types';
+import { TimeState } from '../config/types';
 
 /**
  * Parse time string to TimeState object

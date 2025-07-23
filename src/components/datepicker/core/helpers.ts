@@ -1,10 +1,10 @@
 /*
  * datepicker-helpers.ts - Modular helpers for KTDatepicker input rendering and state
  */
-import { KTDatepickerConfig, KTDatepickerState } from './types';
-import { renderTemplateToDOM } from './utils/template';
-import { SegmentedInput } from './segmented-input';
-import { getTimeSegments } from './time-utils';
+import { KTDatepickerConfig, KTDatepickerState } from '../config/types';
+import { renderTemplateToDOM } from '../utils/template-utils';
+import { SegmentedInput } from '../ui/input/segmented-input';
+import { getTimeSegments } from '../utils/time-utils';
 
 export {};
 

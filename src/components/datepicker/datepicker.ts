@@ -5,30 +5,30 @@
  */
 
 import KTComponent from '../component';
-import { KTDatepickerConfig, KTDatepickerState, KTDatepickerTemplateStrings } from './types';
-import { getTemplateStrings, defaultTemplates } from './templates';
-import { getMergedTemplates } from './template-manager';
-import { renderTemplateString, isTemplateFunction, renderTemplateToDOM, mergeClassData } from './utils/template';
-import { defaultDatepickerConfig } from './config';
-import { renderHeader } from './renderers/header';
-import { renderCalendar } from './renderers/calendar';
-import { renderFooter } from './renderers/footer';
-import { renderTimePicker } from './renderers/time-picker';
+import { KTDatepickerConfig, KTDatepickerState, KTDatepickerTemplateStrings } from './config/types';
+import { getTemplateStrings, defaultTemplates } from './templates/templates';
+import { getMergedTemplates } from './templates/template-manager';
+import { renderTemplateString, isTemplateFunction, renderTemplateToDOM, mergeClassData } from './utils/template-utils';
+import { defaultDatepickerConfig } from './config/config';
+import { renderHeader } from './ui/renderers/header';
+import { renderCalendar } from './ui/renderers/calendar';
+import { renderFooter } from './ui/renderers/footer';
+import { renderTimePicker } from './ui/renderers/time-picker';
 import { EventManager, FocusManager } from '../select/utils';
-import { KTDatepickerDropdown } from './dropdown';
+import { KTDatepickerDropdown } from './ui/input/dropdown';
 // getInitialState moved to simple-state-manager
-import { KTDatepickerSimpleStateManager as KTDropdownStateManager, DropdownState } from './simple-state-manager';
-import { KTDropdownEventManager } from './event-manager';
-import { SegmentedInput, SegmentedInputOptions } from './segmented-input';
-import { parseDateFromFormat } from './date-utils';
-import { dateToTimeState, applyTimeToDate, validateTime } from './time-utils';
+import { KTDatepickerSimpleStateManager as KTDropdownStateManager, DropdownState } from './core/state-manager';
+import { KTDropdownEventManager } from './core/event-manager';
+import { SegmentedInput, SegmentedInputOptions } from './ui/input/segmented-input';
+import { parseDateFromFormat } from './utils/date-utils';
+import { dateToTimeState, applyTimeToDate, validateTime } from './utils/time-utils';
 import {
   renderSingleSegmentedInputUI,
   renderRangeSegmentedInputUI,
   instantiateSingleSegmentedInput,
   instantiateRangeSegmentedInputs,
   updateRangeSelection
-} from './datepicker-helpers';
+} from './core/helpers';
 
 /**
  * KTDatepicker

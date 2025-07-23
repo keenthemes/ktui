@@ -3,8 +3,8 @@
  * Renders the calendar grid (days) using provided template and data.
  */
 
-import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../utils/template';
-import { defaultTemplates } from '../templates';
+import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../../utils/template-utils';
+import { defaultTemplates } from '../../templates/templates';
 
 /**
  * Renders the datepicker calendar and returns an HTMLElement.

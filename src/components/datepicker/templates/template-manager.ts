@@ -3,7 +3,7 @@
  * Handles merging and retrieval of template strings/functions from defaults, config, and user overrides.
  */
 
-import { KTDatepickerTemplateStrings } from './types';
+import { KTDatepickerTemplateStrings } from '../config/types';
 import { defaultTemplates } from './templates';
 
 /**

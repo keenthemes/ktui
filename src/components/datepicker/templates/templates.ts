@@ -3,8 +3,8 @@
  * Defines all default template strings and provides merged template set.
  */
 
-import { KTDatepickerConfig, KTDatepickerTemplateStrings } from './types';
-import { mergeTemplates } from './utils/template';
+import { KTDatepickerConfig, KTDatepickerTemplateStrings } from '../config/types';
+import { mergeTemplates } from '../utils/template-utils';
 
 // Default template strings for all UI fragments
 export const defaultTemplates: KTDatepickerTemplateStrings = {

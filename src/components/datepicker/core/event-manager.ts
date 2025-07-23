@@ -4,8 +4,8 @@
  * Extends the select component's EventManager with dropdown-specific functionality.
  */
 
-import { EventManager } from '../select/utils';
-import { KTDatepickerSimpleStateManager as KTDropdownStateManager, DropdownState, StateChangeEvent } from './simple-state-manager';
+import { EventManager } from '../../select/utils';
+import { KTDatepickerSimpleStateManager as KTDropdownStateManager, DropdownState, StateChangeEvent } from './state-manager';
 // State validator removed - using simplified validation in state manager
 
 /**

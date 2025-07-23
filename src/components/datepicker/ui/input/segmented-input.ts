@@ -24,9 +24,9 @@
  * - Caret position maintained during editing
  */
 
-import { parseDateFromFormat } from './date-utils';
-import { getTemplateStrings } from './templates';
-import { KTDatepickerConfig } from './types';
+import { parseDateFromFormat } from '../../utils/date-utils';
+import { getTemplateStrings } from '../../templates/templates';
+import { KTDatepickerConfig } from '../../config/types';
 
 /**
  * SegmentedInputOptions defines the configuration for the segmented input.

@@ -3,7 +3,7 @@
  * Provides merging and rendering utilities for template customization.
  */
 
-import { KTDatepickerTemplateStrings } from '../types';
+import { KTDatepickerTemplateStrings } from '../config/types';
 
 /**
  * Merges default templates with user overrides.

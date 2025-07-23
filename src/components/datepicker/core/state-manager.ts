@@ -4,7 +4,7 @@
  * Replaces the complex state-manager.ts, state-validator.ts, and state.ts files.
  */
 
-import { KTDatepickerState } from './types';
+import { KTDatepickerState } from '../config/types';
 
 /**
  * Dropdown state interface - simplified version

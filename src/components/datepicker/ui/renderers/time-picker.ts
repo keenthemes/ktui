@@ -4,9 +4,9 @@
  * Follows HeroUI best practices for time picker functionality.
  */
 
-import { TimeState } from '../types';
-import { formatTime, getTimeStepOptions, validateTime } from '../time-utils';
-import { KTDatepickerConfig } from '../types';
+import { TimeState } from '../../config/types';
+import { formatTime, getTimeStepOptions, validateTime } from '../../utils/time-utils';
+import { KTDatepickerConfig } from '../../config/types';
 
 /**
  * Options for rendering time picker

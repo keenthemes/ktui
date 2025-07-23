@@ -9,11 +9,11 @@ import {
   createPopper,
   Placement,
 } from '@popperjs/core';
-import KTDom from '../../helpers/dom';
-import KTData from '../../helpers/data';
-import KTComponent from '../component';
-import { KTDatepickerConfig } from './types';
-import { EventManager } from '../select/utils';
+import KTDom from '../../../../helpers/dom';
+import KTData from '../../../../helpers/data';
+import KTComponent from '../../../component';
+import { KTDatepickerConfig } from '../../config/types';
+import { EventManager } from '../../../select/utils';
 
 /**
  * KTDatepickerDropdown
