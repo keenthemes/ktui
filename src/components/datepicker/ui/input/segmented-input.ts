@@ -51,16 +51,61 @@ export interface SegmentedInputOptions {
  * @returns cleanup function
  */
 export function SegmentedInput(container: HTMLElement, options: SegmentedInputOptions) {
+  console.log('[SegmentedInput] Starting with container:', container);
+  console.log('[SegmentedInput] Options:', options);
+
   // --- Internal state ---
   let currentValue = new Date(options.value);
   const segments = options.segments || ['month', 'day', 'year'];
   const locale = options.locale || 'default';
+
+  console.log('[SegmentedInput] Internal state:', {
+    currentValue,
+    segments,
+    locale
+  });
 
   // --- Get templates ---
   // Use a minimal config to get templates; in real usage, pass full config if available
   const templates = getTemplateStrings({} as KTDatepickerConfig);
   const segmentTpl = templates.dateSegment as string | ((data: any) => string) | undefined;
   const separatorTpl = templates.segmentSeparator as string | ((data: any) => string) | undefined;
+
+  console.log('[SegmentedInput] Templates loaded:', {
+    segmentTpl: typeof segmentTpl,
+    separatorTpl: typeof separatorTpl
+  });
+
+  // --- Utility: get separator from format ---
+  function getSeparatorFromFormat(format: string | undefined): string {
+    if (!format) return '/'; // Default fallback
+
+    // Find the first non-date token character to use as separator
+    const tokenRegex = /(yyyy|yy|MM|M|dd|d)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = tokenRegex.exec(format)) !== null) {
+      if (match.index > lastIndex) {
+        // Found a separator character
+        const separator = format.slice(lastIndex, match.index);
+        if (separator && separator.length > 0) {
+          return separator;
+        }
+      }
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Check for separator after the last token
+    if (lastIndex < format.length) {
+      const separator = format.slice(lastIndex);
+      if (separator && separator.length > 0) {
+        return separator;
+      }
+    }
+
+    return '/'; // Default fallback
+  }
 
   // --- Utility: get segment value as string ---
   function getSegmentValue(segment: string, date: Date): string {
@@ -177,6 +222,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
 
   // --- Render segments using templates ---
   function render() {
+    console.log('[SegmentedInput] render() called');
+
     // Capture caret position before DOM update
     const prevSegs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
     if (prevSegs[focusedIdx] && document.activeElement === prevSegs[focusedIdx]) {
@@ -194,6 +241,12 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     container.setAttribute('aria-label', 'Date input');
     container.tabIndex = -1;
 
+    console.log('[SegmentedInput] Container prepared for rendering');
+
+    // Get separator from format
+    const separator = getSeparatorFromFormat(options.format);
+    console.log('[SegmentedInput] Separator from format:', separator);
+
     // Build segments HTML using templates
     let segmentsHtml = '';
     segments.forEach((segment, idx) => {
@@ -209,10 +262,16 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         tabindex: idx === focusedIdx ? '0' : '-1',
         contenteditable: (!options.disabled && !options.readOnly).toString(),
       };
+
+      console.log(`[SegmentedInput] Processing segment ${segment}:`, segmentData);
+
       let segmentHtml = '';
       if (typeof segmentTpl === 'function') {
         segmentHtml = segmentTpl(segmentData);
       } else if (typeof segmentTpl === 'string') {
+        console.log(`[SegmentedInput] Template before replacement:`, segmentTpl);
+        console.log(`[SegmentedInput] Segment data for replacement:`, segmentData);
+
         segmentHtml = segmentTpl
           .replace(/{{segmentType}}/g, segmentData.segmentType)
           .replace(/{{segmentValue}}/g, segmentData.segmentValue)
@@ -223,23 +282,31 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           .replace(/{{ariaValueMax}}/g, segmentData.ariaValueMax)
           .replace(/{{tabindex}}/g, segmentData.tabindex)
           .replace(/{{contenteditable}}/g, segmentData.contenteditable);
+
+        console.log(`[SegmentedInput] Template after replacement:`, segmentHtml);
       } else {
         segmentHtml = '';
       }
+
+      console.log(`[SegmentedInput] Generated HTML for ${segment}:`, segmentHtml);
       segmentsHtml += segmentHtml;
+
       if (idx < segments.length - 1) {
-        const sep = segment === 'year' ? ' ' : '/';
+        // Use format-derived separator instead of hardcoded logic
         let sepHtml = '';
         if (typeof separatorTpl === 'function') {
-          sepHtml = separatorTpl({ separator: sep });
+          sepHtml = separatorTpl({ separator });
         } else if (typeof separatorTpl === 'string') {
-          sepHtml = separatorTpl.replace(/{{separator}}/g, sep);
+          sepHtml = separatorTpl.replace(/{{separator}}/g, separator);
         } else {
           sepHtml = '';
         }
         segmentsHtml += sepHtml;
       }
     });
+
+    console.log('[SegmentedInput] All segments HTML generated:', segmentsHtml);
+
     // Wrap in segmentedDateInput template
     let segmentedInputHtml = segmentsHtml;
     const segmentedDateInputTpl = templates.segmentedDateInput as string | ((data: any) => string) | undefined;
@@ -252,10 +319,24 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         segmentedInputHtml = segmentsHtml;
       }
     }
+
+    console.log('[SegmentedInput] Final HTML to insert:', segmentedInputHtml);
     container.innerHTML = segmentedInputHtml;
+    console.log('[SegmentedInput] HTML inserted, container HTML now:', container.innerHTML);
+
+    // Verify template rendering was successful
+    console.log('[SegmentedInput] Verifying template rendering success');
+    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+    console.log('[SegmentedInput] Found segments after template rendering:', segs.length, segs);
+
+    if (segs.length === 0) {
+      console.error('[SegmentedInput] Template rendering failed - no segments found');
+      throw new Error('Segmented input template rendering failed');
+    }
 
     // Re-bind events to all segments
-    const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+    console.log('[SegmentedInput] Found segments after insertion:', segs.length, segs);
+
     segs.forEach((span, idx) => {
       span.addEventListener('keydown', (e) => {
         if (options.disabled || options.readOnly) return;

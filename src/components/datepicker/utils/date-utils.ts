@@ -55,3 +55,46 @@ export function parseDateFromFormat(str: string, format: string): Date | null {
   }
   return new Date(year, month - 1, day);
 }
+
+/**
+ * Extracts segment order from a format string for use in segmented input.
+ * @param format Format string (e.g., 'dd/MM/yyyy', 'yyyy-MM-dd')
+ * @returns Array of segment types in the order they appear in the format
+ */
+export function getSegmentOrderFromFormat(format: string): Array<'day' | 'month' | 'year'> {
+  if (!format) return ['month', 'day', 'year']; // Default fallback
+
+  const segments: Array<'day' | 'month' | 'year'> = [];
+  const tokenRegex = /(yyyy|yy|MM|M|dd|d)/g;
+  let match;
+
+  while ((match = tokenRegex.exec(format)) !== null) {
+    switch (match[0]) {
+      case 'yyyy':
+      case 'yy':
+        segments.push('year');
+        break;
+      case 'MM':
+      case 'M':
+        segments.push('month');
+        break;
+      case 'dd':
+      case 'd':
+        segments.push('day');
+        break;
+    }
+  }
+
+  // Remove duplicates while preserving order
+  const uniqueSegments = segments.filter((segment, index) => segments.indexOf(segment) === index);
+
+  // Ensure we have all required segments, add missing ones at the end
+  const requiredSegments: Array<'day' | 'month' | 'year'> = ['day', 'month', 'year'];
+  requiredSegments.forEach(segment => {
+    if (!uniqueSegments.includes(segment)) {
+      uniqueSegments.push(segment);
+    }
+  });
+
+  return uniqueSegments;
+}

@@ -5,7 +5,7 @@ import { KTDatepickerConfig } from './types';
  */
 export const defaultDatepickerConfig: KTDatepickerConfig = {
   templates: {},
-  format: 'yyyy-mm-dd',
+  format: 'yyyy-MM-dd',
   range: false,
   multiDate: false,
   minDate: undefined,

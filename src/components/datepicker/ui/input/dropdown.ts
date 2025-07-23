@@ -13,7 +13,7 @@ import KTDom from '../../../../helpers/dom';
 import KTData from '../../../../helpers/data';
 import KTComponent from '../../../component';
 import { KTDatepickerConfig } from '../../config/types';
-import { EventManager } from '../../../select/utils';
+import { EventManager } from '../../core/event-manager';
 
 /**
  * KTDatepickerDropdown

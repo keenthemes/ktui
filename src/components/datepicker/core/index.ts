@@ -3,6 +3,8 @@
  * Provides core logic components for KTDatepicker
  */
 
-export * from './state-manager';
+export * from './unified-state-manager';
 export * from './event-manager';
+export * from './focus-manager';
+export * from './debug-utils';
 export * from './helpers';

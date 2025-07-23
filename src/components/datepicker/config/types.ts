@@ -34,7 +34,17 @@ export type KTDatepickerTemplateKey =
   | 'applyButton'
   | 'multiMonthContainer'
   | 'dateSegment'
-  | 'segmentSeparator';
+  | 'segmentSeparator'
+  | 'timePickerWrapper'
+  | 'timeDisplay'
+  | 'timeControls'
+  | 'timeUnit'
+  | 'timeUpButton'
+  | 'timeDownButton'
+  | 'timeValue'
+  | 'timeSeparator'
+  | 'ampmControl'
+  | 'ampmButton';
 
 // Template string map
 export type KTDatepickerTemplateStrings = {
@@ -143,6 +153,16 @@ export interface TimeState {
 }
 
 // State interface for KTDatepicker
+/**
+ * Dropdown state interface
+ */
+export interface DropdownState {
+  isOpen: boolean;
+  isTransitioning: boolean;
+  isDisabled: boolean;
+  isFocused: boolean;
+}
+
 export interface KTDatepickerState {
   currentDate: Date;
   selectedDate: Date | null;
@@ -153,4 +173,10 @@ export interface KTDatepickerState {
   viewMode: 'days' | 'months' | 'years';
   isOpen: boolean;
   isFocused: boolean;
+  isTransitioning: boolean;
+  isDisabled: boolean;
+  validationErrors: string[];
+  isValid: boolean;
+  // Dropdown state (consolidated from legacy state manager)
+  dropdownState: DropdownState;
 }

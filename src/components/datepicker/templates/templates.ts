@@ -10,7 +10,7 @@ import { mergeTemplates } from '../utils/template-utils';
 export const defaultTemplates: KTDatepickerTemplateStrings = {
   // Add role="dialog" and aria-modal to the dropdown container
   container: `<div data-kt-datepicker-container class="kt-datepicker-container {{class}}"></div>`,
-  header: `<div data-kt-datepicker-header class="kt-datepicker-header {{class}}">{{prevButton}}<span data-kt-datepicker-month>{{month}}</span> {{year}}{{nextButton}}</div>`,
+  header: `<div data-kt-datepicker-header class="kt-datepicker-header {{class}}">{{prevButton}}<span data-kt-datepicker-month-year>{{month}} {{year}}</span>{{nextButton}}</div>`,
   footer: `<div data-kt-datepicker-footer class="kt-datepicker-footer {{class}}">{{todayButton}} {{clearButton}} {{applyButton}}</div>`,
   // Add role="grid" and aria-label to the calendar grid
   calendarGrid: `<table data-kt-datepicker-calendar-grid role="grid" aria-label="Calendar" aria-readonly="true" class="kt-datepicker-calendar-grid {{class}}">{{calendar}}</table>`,
@@ -77,6 +77,18 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
    * Container for multiple calendar months (horizontal multi-month view)
    */
   multiMonthContainer: `<div data-kt-datepicker-multimonth-container class="kt-datepicker-multimonth-container flex flex-col md:flex-row gap-4 {{class}}">{{calendars}}</div>`,
+
+  // Time picker templates
+  timePickerWrapper: `<div data-kt-datepicker-time-picker class="kt-datepicker-time-picker {{class}}">{{timeDisplay}} {{timeControls}}</div>`,
+  timeDisplay: `<div data-kt-datepicker-time-display class="kt-datepicker-time-display {{class}}">{{timeValue}}</div>`,
+  timeControls: `<div data-kt-datepicker-time-controls class="kt-datepicker-time-controls {{class}}">{{timeUnits}} {{ampmControl}}</div>`,
+  timeUnit: `<div data-kt-datepicker-time-unit data-kt-datepicker-time-unit="{{unitType}}" class="kt-datepicker-time-unit {{class}}">{{upButton}} {{valueDisplay}} {{downButton}}</div>`,
+  timeUpButton: `<button type="button" data-kt-datepicker-time-up aria-label="Increment {{unitType}}" class="kt-datepicker-time-up {{class}}" {{disabled}}>▲</button>`,
+  timeDownButton: `<button type="button" data-kt-datepicker-time-down aria-label="Decrement {{unitType}}" class="kt-datepicker-time-down {{class}}" {{disabled}}>▼</button>`,
+  timeValue: `<span data-kt-datepicker-time-value class="kt-datepicker-time-value {{class}}">{{value}}</span>`,
+  timeSeparator: `<span data-kt-datepicker-time-separator class="kt-datepicker-time-separator {{class}}">{{separator}}</span>`,
+  ampmControl: `<div data-kt-datepicker-ampm-control class="kt-datepicker-ampm-control {{class}}">{{ampmButton}}</div>`,
+  ampmButton: `<button type="button" data-kt-datepicker-ampm-button aria-label="Toggle AM/PM" class="kt-datepicker-ampm-button {{class}}" {{disabled}}>{{ampmValue}}</button>`,
 };
 
 /**
