@@ -218,6 +218,11 @@ export class KTDatepickerDropdown extends KTComponent {
     KTDom.transitionEnd(this._dropdownElement, () => {
       this._isTransitioning = false;
       this._isOpen = true;
+
+      // Notify state manager that transition is complete
+      if (this._config.debug) {
+        console.log('KTDatepickerDropdown: Open transition completed');
+      }
     });
   }
 
@@ -274,6 +279,11 @@ export class KTDatepickerDropdown extends KTComponent {
 
     // Clean up popper
     this._destroyPopper();
+
+    // Notify state manager that transition is complete
+    if (this._config.debug) {
+      console.log('KTDatepickerDropdown: Close transition completed');
+    }
   }
 
   /**

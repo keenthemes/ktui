@@ -17,6 +17,8 @@ import { renderTimePicker } from './renderers/time-picker';
 import { EventManager, FocusManager } from '../select/utils';
 import { KTDatepickerDropdown } from './dropdown';
 import { getInitialState } from './state';
+import { KTDropdownStateManager } from './state-manager';
+import { KTDropdownEventManager } from './event-manager';
 import { SegmentedInput, SegmentedInputOptions } from './segmented-input';
 import { parseDateFromFormat } from './date-utils';
 import { dateToTimeState, applyTimeToDate, validateTime } from './time-utils';
@@ -48,10 +50,11 @@ export class KTDatepicker extends KTComponent {
 
   private _container: HTMLElement;
   private _input: HTMLInputElement | null = null;
-  private _isOpen: boolean = false;
   private _eventManager: EventManager;
   private _focusManager: FocusManager | null = null;
   private _dropdownModule: KTDatepickerDropdown | null = null;
+  private _dropdownStateManager: KTDropdownStateManager;
+  private _dropdownEventManager: KTDropdownEventManager;
 
   // --- Mode-specific helpers ---
   /** Initialize single date from config */
@@ -210,7 +213,7 @@ export class KTDatepicker extends KTComponent {
    * Covers: Tab, Shift+Tab, Arrow keys, Enter, Space, Escape, Home, End, PageUp, PageDown.
    */
   private _onKeyDown = (e: KeyboardEvent) => {
-    if (!this._isOpen) return;
+    if (!this._dropdownStateManager.isOpen()) return;
     const target = e.target as HTMLElement;
 
     // Check if segmented input is focused - let it handle its own keyboard events
@@ -347,6 +350,24 @@ export class KTDatepicker extends KTComponent {
     this._buildConfig(configWithAttrs);
     this._templateSet = getTemplateStrings(this._config);
     this._state = getInitialState();
+
+    // Initialize centralized state management
+    this._dropdownStateManager = new KTDropdownStateManager({
+      enableValidation: true, // Re-enable validation with fixed rules
+      enableHistory: true,
+      enableDebugging: this._config.debug || false
+    });
+
+    this._dropdownEventManager = new KTDropdownEventManager(
+      this._element,
+      this._dropdownStateManager,
+      {
+        enableEventBubbling: true,
+        enableCustomEvents: false, // Disable custom events to avoid conflicts
+        enableValidation: true,
+        enableDebugging: this._config.debug || false
+      }
+    );
     // Set placeholder from config if available
     if (this._input && this._config.placeholder) {
       this._input.setAttribute('placeholder', this._config.placeholder);
@@ -356,6 +377,9 @@ export class KTDatepicker extends KTComponent {
     if (this._input && this._config.disabled) {
       this._input.setAttribute('disabled', 'true');
       console.log('🗓️ [KTDatepicker] Input disabled from config');
+
+      // Also set disabled state in state manager
+      this._dropdownStateManager.disable('config');
     }
     // --- Time initialization ---
     if (this._config.enableTime) {
@@ -546,7 +570,11 @@ export class KTDatepicker extends KTComponent {
       buttonEl.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (this._config.disabled || buttonEl.hasAttribute('disabled')) return;
+        if (this._config.disabled || buttonEl.hasAttribute('disabled')) {
+          console.log('🗓️ [KTDatepicker] Calendar button click blocked: disabled');
+          return;
+        }
+        console.log('🗓️ [KTDatepicker] Calendar button clicked, calling toggle()');
         this.toggle();
       });
     }
@@ -568,7 +596,7 @@ export class KTDatepicker extends KTComponent {
     const dropdownFrag = renderTemplateToDOM(dropdownHtml);
     const dropdownEl = dropdownFrag.firstElementChild as HTMLElement;
     dropdownEl.setAttribute('data-kt-datepicker-dropdown', '');
-    if (!this._isOpen) {
+    if (!this._dropdownStateManager.isOpen()) {
       dropdownEl.classList.add('hidden');
     }
     // --- Debug event listeners for close tracing ---
@@ -758,7 +786,7 @@ export class KTDatepicker extends KTComponent {
    */
   private _render() {
             // Store current state before rendering
-    const wasOpen = this._isOpen;
+    const wasOpen = this._dropdownStateManager.isOpen();
     const selectedDate = this._state.selectedDate;
     const selectedRange = this._state.selectedRange;
     const selectedDates = this._state.selectedDates;
@@ -808,7 +836,7 @@ export class KTDatepicker extends KTComponent {
 
     // Restore open state
     if (wasOpen) {
-      this._isOpen = true;
+      this._dropdownStateManager.open('render-restore');
       // Re-open dropdown if it was open
       if (this._dropdownModule) {
         this._dropdownModule.open();
@@ -819,7 +847,7 @@ export class KTDatepicker extends KTComponent {
     this._updateDisabledState();
     this._enforceMinMaxDates();
     console.log('🗓️ [KTDatepicker] _render: this._input:', this._input);
-    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._isOpen, 'selectedDate:', this._state.selectedDate);
+    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._dropdownStateManager.isOpen(), 'selectedDate:', this._state.selectedDate);
     // Attach keyboard event listeners
     if (this._input) {
       this._eventManager.removeListener(this._input, 'keydown', this._onKeyDown);
@@ -1014,6 +1042,8 @@ export class KTDatepicker extends KTComponent {
    * Clean up event listeners and DOM on destroy
    */
   public destroy() {
+    console.log('🗓️ [KTDatepicker] destroy() called');
+
     if (this._container && this._container.parentNode) {
       this._container.parentNode.removeChild(this._container);
     }
@@ -1034,7 +1064,16 @@ export class KTDatepicker extends KTComponent {
       this._dropdownModule.dispose();
     }
 
+    // Clean up state managers
+    if (this._dropdownEventManager) {
+      this._dropdownEventManager.dispose();
+    }
+    if (this._dropdownStateManager) {
+      this._dropdownStateManager.dispose();
+    }
+
     (this._element as any).instance = null;
+    console.log('🗓️ [KTDatepicker] destroy() completed');
   }
 
   private _updateInputValue() {
@@ -1126,16 +1165,25 @@ export class KTDatepicker extends KTComponent {
    * Opens the datepicker dropdown.
    */
   public open() {
-    if (this._isOpen) return;
+    if (this._dropdownStateManager.isOpen()) {
+      console.log('🗓️ [KTDatepicker] open() skipped: already open');
+      return;
+    }
     if (this._config.disabled) {
       console.log('🗓️ [KTDatepicker] open() blocked: datepicker is disabled');
       return;
     }
-    this._isOpen = true;
 
-    console.log('🗓️ [KTDatepicker] open() called, dropdown module:', this._dropdownModule);
+    console.log('🗓️ [KTDatepicker] open() called, attempting to open dropdown');
 
+    // Use centralized state management
+    const success = this._dropdownStateManager.open('datepicker-open');
+    if (!success) {
+      console.log('🗓️ [KTDatepicker] open() blocked by state validation');
+      return;
+    }
 
+    console.log('🗓️ [KTDatepicker] State manager open() successful, dropdown module:', this._dropdownModule);
 
     // Ensure dropdown content is rendered before opening
     const dropdownEl = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
@@ -1160,13 +1208,28 @@ export class KTDatepicker extends KTComponent {
   /**
    * Closes the datepicker dropdown.
    */
-  public close() {
-    if (!this._isOpen) return;
+      public close() {
+    console.log('🗓️ [KTDatepicker] close() called, current state:', {
+      stateManagerOpen: this._dropdownStateManager.isOpen(),
+      dropdownModuleOpen: this._dropdownModule?.isOpen(),
+      stateManagerState: this._dropdownStateManager.getState()
+    });
+
+    if (!this._dropdownStateManager.isOpen()) {
+      console.log('🗓️ [KTDatepicker] close() skipped: already closed');
+      return;
+    }
     // Debug log with stack trace
     console.log('[KTDatepicker] close() called. Dropdown will close. Stack trace:', new Error().stack);
-    this._isOpen = false;
 
+    // Use centralized state management
+    const success = this._dropdownStateManager.close('datepicker-close');
+    if (!success) {
+      console.log('🗓️ [KTDatepicker] close() blocked by state validation');
+      return;
+    }
 
+    console.log('🗓️ [KTDatepicker] State manager close() successful');
 
     // Use dropdown module if available
     if (this._dropdownModule) {
@@ -1180,7 +1243,7 @@ export class KTDatepicker extends KTComponent {
   }
 
   public toggle() {
-    if (this._isOpen) {
+    if (this._dropdownStateManager.isOpen()) {
       this.close();
     } else {
       this.open();
