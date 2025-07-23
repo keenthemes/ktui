@@ -70,12 +70,9 @@ export class KTDatepickerDropdown extends KTComponent {
 
   /**
    * Set up event listeners for the dropdown
-   * Note: Outside click handling is now delegated to the main datepicker class
-   * to avoid duplicate logic and ensure consistent behavior
    */
   private _setupEventListeners(): void {
-    // Outside click handling is now managed by the main datepicker class
-    // This eliminates duplicate logic and ensures consistent behavior
+    // Event listeners are managed by the main datepicker class
   }
 
   /**
