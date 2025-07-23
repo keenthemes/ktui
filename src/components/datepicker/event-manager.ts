@@ -5,8 +5,8 @@
  */
 
 import { EventManager } from '../select/utils';
-import { KTDropdownStateManager, DropdownState, StateChangeEvent } from './state-manager';
-import { KTDropdownStateValidator, ValidationContext } from './state-validator';
+import { KTDatepickerSimpleStateManager as KTDropdownStateManager, DropdownState, StateChangeEvent } from './simple-state-manager';
+// State validator removed - using simplified validation in state manager
 
 /**
  * Event types for dropdown state changes
@@ -60,7 +60,6 @@ export interface DropdownEventManagerConfig {
 export class KTDropdownEventManager {
   private _eventManager: EventManager;
   private _stateManager: KTDropdownStateManager;
-  private _validator: KTDropdownStateValidator;
   private _config: DropdownEventManagerConfig;
   private _element: HTMLElement;
   private _unsubscribeState: (() => void) | null = null;
@@ -72,7 +71,6 @@ export class KTDropdownEventManager {
   ) {
     this._element = element;
     this._stateManager = stateManager;
-    this._validator = new KTDropdownStateValidator();
 
     this._config = {
       enableEventBubbling: true,
@@ -349,10 +347,10 @@ export class KTDropdownEventManager {
   }
 
   /**
-   * Get validator
+   * Get validator - removed in simplified version
    */
-  public getValidator(): KTDropdownStateValidator {
-    return this._validator;
+  public getValidator(): null {
+    return null;
   }
 
   /**

@@ -16,8 +16,8 @@ import { renderFooter } from './renderers/footer';
 import { renderTimePicker } from './renderers/time-picker';
 import { EventManager, FocusManager } from '../select/utils';
 import { KTDatepickerDropdown } from './dropdown';
-import { getInitialState } from './state';
-import { KTDropdownStateManager } from './state-manager';
+// getInitialState moved to simple-state-manager
+import { KTDatepickerSimpleStateManager as KTDropdownStateManager, DropdownState } from './simple-state-manager';
 import { KTDropdownEventManager } from './event-manager';
 import { SegmentedInput, SegmentedInputOptions } from './segmented-input';
 import { parseDateFromFormat } from './date-utils';
@@ -349,12 +349,11 @@ export class KTDatepicker extends KTComponent {
     }
     this._buildConfig(configWithAttrs);
     this._templateSet = getTemplateStrings(this._config);
-    this._state = getInitialState();
+    this._state = KTDropdownStateManager.getInitialDatepickerState();
 
     // Initialize centralized state management
     this._dropdownStateManager = new KTDropdownStateManager({
       enableValidation: true, // Re-enable validation with fixed rules
-      enableHistory: true,
       enableDebugging: this._config.debug || false
     });
 
@@ -1248,6 +1247,27 @@ export class KTDatepicker extends KTComponent {
     } else {
       this.open();
     }
+  }
+
+  /**
+   * Returns whether the datepicker dropdown is currently open.
+   */
+  public isOpen(): boolean {
+    return this._dropdownStateManager.isOpen();
+  }
+
+  /**
+   * Returns the current state of the datepicker component.
+   */
+  public getState(): KTDatepickerState {
+    return { ...this._state };
+  }
+
+  /**
+   * Returns the current dropdown state.
+   */
+  public getDropdownState(): DropdownState {
+    return this._dropdownStateManager.getState();
   }
 }
 
