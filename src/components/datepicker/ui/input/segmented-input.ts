@@ -346,7 +346,9 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           isArrowNavigation = true; // Set flag to prevent blur onChange
           focusedIdx = (idx + 1) % segments.length;
           caretOffset = null;
-          render();
+          // Update tabindex directly instead of full re-render
+          const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+          segs.forEach((el, i) => el.setAttribute('tabindex', i === focusedIdx ? '0' : '-1'));
           restoreFocus(focusedIdx, caretOffset);
           // Reset flag after a short delay to allow focus to be restored
           setTimeout(() => {
@@ -357,7 +359,9 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           isArrowNavigation = true; // Set flag to prevent blur onChange
           focusedIdx = (idx - 1 + segments.length) % segments.length;
           caretOffset = null;
-          render();
+          // Update tabindex directly instead of full re-render
+          const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+          segs.forEach((el, i) => el.setAttribute('tabindex', i === focusedIdx ? '0' : '-1'));
           restoreFocus(focusedIdx, caretOffset);
           // Reset flag after a short delay to allow focus to be restored
           setTimeout(() => {
@@ -384,11 +388,22 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           }
           span.textContent = newValue;
           currentValue = setSegmentValue(segments[idx], newValue, currentValue);
-          // Don't call onChange immediately for Arrow Up/Down to prevent dropdown closing
-          // onChange will be called on blur or when user finishes editing
-          caretOffset = null;
-          render();
-          restoreFocus(focusedIdx, caretOffset);
+          // Call onChange immediately for Arrow Up/Down to update the main datepicker
+          if (options.onChange) {
+            console.log('[SegmentedInput] Arrow navigation: calling onChange with new value');
+            options.onChange(currentValue);
+          }
+          // Preserve caret position at end of content
+          if (span.isContentEditable) {
+            const range = document.createRange();
+            range.selectNodeContents(span);
+            range.collapse(false); // place at end
+            const sel = window.getSelection();
+            if (sel) {
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+          }
           // Reset flag after a short delay to allow focus to be restored
           setTimeout(() => {
             isArrowNavigation = false;
@@ -400,7 +415,9 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           isArrowNavigation = true; // Set flag to prevent blur onChange
           focusedIdx = (idx + 1) % segments.length;
           caretOffset = null;
-          render();
+          // Update tabindex directly instead of full re-render
+          const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+          segs.forEach((el, i) => el.setAttribute('tabindex', i === focusedIdx ? '0' : '-1'));
           restoreFocus(focusedIdx, caretOffset);
           // Reset flag after a short delay to allow focus to be restored
           setTimeout(() => {
@@ -465,18 +482,26 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           (span as any)._onChangeTimeout = null;
         }
         // Call onChange when user finishes editing to update the main datepicker
-        // But not during Arrow Up/Down navigation
+        // But not during Arrow Up/Down navigation and only if value actually changed
         if (options.onChange && !isArrowNavigation) {
           const updatedValue = setSegmentValue(segments[idx], span.textContent || '', currentValue);
-          options.onChange(updatedValue);
+          // Only call onChange if the value has actually changed
+          if (updatedValue.getTime() !== currentValue.getTime()) {
+            console.log('[SegmentedInput] Blur event: value changed, calling onChange');
+            options.onChange(updatedValue);
+          } else {
+            console.log('[SegmentedInput] Blur event: no value change, skipping onChange');
+          }
         }
       });
-      // Mouse click focuses segment
+      // Mouse click focuses segment (optimized to avoid unnecessary re-rendering)
       span.addEventListener('mousedown', (e) => {
         e.preventDefault();
         focusedIdx = idx;
         caretOffset = null;
-        render();
+        // Only update tabindex and focus, no full re-render
+        const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
+        segs.forEach((el, i) => el.setAttribute('tabindex', i === focusedIdx ? '0' : '-1'));
         restoreFocus(focusedIdx, caretOffset);
       });
     });
