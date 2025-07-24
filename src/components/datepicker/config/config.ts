@@ -18,6 +18,7 @@ export const defaultDatepickerConfig: KTDatepickerConfig = {
   values: undefined,
   showOnFocus: true,
   closeOnSelect: false, // Default: don't close dropdown by default
+  closeOnOutsideClick: true, // Default: close dropdown when clicking outside
   // Number of calendar months to display side-by-side (horizontal). Default: 1.
   visibleMonths: 1,
   // Time-related defaults

@@ -510,11 +510,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         console.warn('[KTDatepicker] Failed to parse data-kt-datepicker-config:', err);
       }
     }
-    // --- Data attribute overrides for showOnFocus, closeOnSelect, enableTime, and range ---
+    // --- Data attribute overrides for showOnFocus, closeOnSelect, enableTime, range, and closeOnOutsideClick ---
     const showOnFocusAttr = element.getAttribute('data-kt-datepicker-show-on-focus');
     const closeOnSelectAttr = element.getAttribute('data-kt-datepicker-close-on-select');
     const enableTimeAttr = element.getAttribute('data-kt-datepicker-enable-time');
     const rangeAttr = element.getAttribute('data-kt-datepicker-range');
+    const closeOnOutsideClickAttr = element.getAttribute('data-kt-datepicker-close-on-outside-click');
     let configWithAttrs = { ...configFromAttr, ...(config || {}) };
     if (showOnFocusAttr !== null) {
       configWithAttrs.showOnFocus = showOnFocusAttr === 'true' || showOnFocusAttr === '';
@@ -522,12 +523,19 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     if (closeOnSelectAttr !== null) {
       configWithAttrs.closeOnSelect = closeOnSelectAttr === 'true' || closeOnSelectAttr === '';
     }
+    if (closeOnOutsideClickAttr !== null) {
+      configWithAttrs.closeOnOutsideClick = closeOnOutsideClickAttr === 'true' || closeOnOutsideClickAttr === '';
+    }
     if (enableTimeAttr !== null) {
       configWithAttrs.enableTime = enableTimeAttr === 'true' || enableTimeAttr === '';
     }
     if (rangeAttr !== null) {
       configWithAttrs.range = rangeAttr === 'true' || rangeAttr === '';
       console.log('[KTDatepicker] Range attribute processed:', rangeAttr, 'configWithAttrs.range:', configWithAttrs.range);
+    }
+    if (closeOnOutsideClickAttr !== null) {
+      configWithAttrs.closeOnOutsideClick = closeOnOutsideClickAttr === 'true' || closeOnOutsideClickAttr === '';
+      console.log('[KTDatepicker] CloseOnOutsideClick attribute processed:', closeOnOutsideClickAttr, 'configWithAttrs.closeOnOutsideClick:', configWithAttrs.closeOnOutsideClick);
     }
     this._buildConfig(configWithAttrs);
     this._templateSet = getTemplateStrings(this._config);
@@ -592,6 +600,14 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     if (this._input) {
       this._eventManager.addListener(this._input, 'focus', this._onInputFocus);
     }
+
+    // --- Document click event for outside click detection ---
+    this._eventManager.addListener(
+      document as unknown as HTMLElement,
+      'click',
+      this._handleDocumentClick
+    );
+
     (element as any).instance = this;
     this._render();
   }
@@ -604,6 +620,25 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     if (this._input.hasAttribute('disabled') || this._input.hasAttribute('readonly')) return;
     if (this._config.showOnFocus) {
       this.open();
+    }
+  };
+
+  /**
+   * Handler for document click event, closes the datepicker if click is outside the component
+   */
+  private _handleDocumentClick = (e: MouseEvent): void => {
+    // Skip if click-outside is disabled
+    if (!this._config.closeOnOutsideClick) return;
+
+    // Skip if dropdown is not open
+    if (!this._unifiedStateManager.isDropdownOpen()) return;
+
+    const targetElement = e.target as HTMLElement;
+
+    // Check if click is outside the datepicker element
+    if (!this._element.contains(targetElement)) {
+      console.log('🗓️ [KTDatepicker] Outside click detected, closing dropdown');
+      this.close();
     }
   };
 
@@ -1528,7 +1563,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     }
 
     // Clean up event manager
-    this._eventManager.removeAllListeners(document as unknown as HTMLElement);
+    this._eventManager.removeListener(
+      document as unknown as HTMLElement,
+      'click',
+      this._handleDocumentClick
+    );
     if (this._input) {
       this._eventManager.removeAllListeners(this._input);
     }

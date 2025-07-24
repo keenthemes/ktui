@@ -85,6 +85,8 @@ export interface KTDatepickerConfig {
   showOnFocus?: boolean;
   /** Whether to close the calendar on date selection (default: true) */
   closeOnSelect?: boolean;
+  /** Whether to close the calendar when clicking outside (default: true) */
+  closeOnOutsideClick?: boolean;
   /**
    * Number of calendar months to display side-by-side (horizontal). Default: 1.
    */
