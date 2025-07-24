@@ -216,7 +216,7 @@ export class UnifiedObserver implements StateObserver {
       }
 
       // Update segmented input
-      if (options.updateSegmentedInput && this._elements.segmentedInputContainer) {
+      if (options.updateSegmentedInput && (this._elements.segmentedInputContainer || this._isRangeMode())) {
         this._updateSegmentedInput(state);
       }
 

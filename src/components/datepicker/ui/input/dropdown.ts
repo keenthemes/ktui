@@ -14,6 +14,8 @@ import KTData from '../../../../helpers/data';
 import KTComponent from '../../../component';
 import { KTDatepickerConfig } from '../../config/types';
 import { EventManager } from '../../core/event-manager';
+import { StateObserver, KTDatepickerUnifiedStateManager } from '../../core/unified-state-manager';
+import { KTDatepickerState } from '../../config/types';
 
 /**
  * KTDatepickerDropdown
@@ -22,7 +24,7 @@ import { EventManager } from '../../core/event-manager';
  * This module handles the dropdown functionality for the datepicker component,
  * including positioning and showing/hiding.
  */
-export class KTDatepickerDropdown extends KTComponent {
+export class KTDatepickerDropdown extends KTComponent implements StateObserver {
   protected override readonly _name: string = 'datepicker-dropdown';
   protected override readonly _config: KTDatepickerConfig;
 
@@ -31,11 +33,14 @@ export class KTDatepickerDropdown extends KTComponent {
   private _toggleElement: HTMLElement;
   private _dropdownElement: HTMLElement;
 
-  // State
+  // State (will be managed by unified state manager)
   private _isOpen: boolean = false;
   private _isTransitioning: boolean = false;
   private _popperInstance: PopperInstance | null = null;
   private _eventManager: EventManager;
+
+  // Unified state manager reference
+  private _unifiedStateManager: KTDatepickerUnifiedStateManager | null = null;
 
   /**
    * Constructor
@@ -73,6 +78,181 @@ export class KTDatepickerDropdown extends KTComponent {
    */
   private _setupEventListeners(): void {
     // Event listeners are managed by the main datepicker class
+  }
+
+  /**
+   * StateObserver implementation
+   */
+  public onStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
+    // React to dropdown state changes from unified state manager
+    if (newState.dropdownState.isOpen !== oldState.dropdownState.isOpen) {
+      if (newState.dropdownState.isOpen) {
+        this._handleOpenFromState();
+      } else {
+        this._handleCloseFromState();
+      }
+    }
+
+    if (newState.dropdownState.isTransitioning !== oldState.dropdownState.isTransitioning) {
+      this._isTransitioning = newState.dropdownState.isTransitioning;
+    }
+  }
+
+  public getUpdatePriority(): number {
+    return 10; // Medium priority for dropdown updates
+  }
+
+  /**
+   * Set unified state manager reference
+   */
+  public setUnifiedStateManager(stateManager: KTDatepickerUnifiedStateManager): void {
+    this._unifiedStateManager = stateManager;
+  }
+
+  /**
+   * Handle open state change from unified state manager
+   */
+  private _handleOpenFromState(): void {
+    if (this._config.debug) {
+      console.log('KTDatepickerDropdown: Handling open state change from unified manager');
+    }
+    this._isOpen = true;
+    this._performOpenTransition();
+  }
+
+  /**
+   * Handle close state change from unified state manager
+   */
+  private _handleCloseFromState(): void {
+    if (this._config.debug) {
+      console.log('KTDatepickerDropdown: Handling close state change from unified manager');
+    }
+    this._performCloseTransition();
+  }
+
+  /**
+   * Perform the actual open transition
+   */
+  private _performOpenTransition(): void {
+    if (this._isTransitioning) return;
+
+    // Begin opening transition
+    this._isTransitioning = true;
+
+    // Set initial styles
+    this._dropdownElement.classList.remove('hidden');
+    this._dropdownElement.style.opacity = '0';
+
+    // Set dropdown width
+    this._setDropdownWidth();
+
+    // Reflow
+    KTDom.reflow(this._dropdownElement);
+
+    // Apply z-index
+    let zIndexToApply: number | null = null;
+
+    if (this._config.dropdownZindex) {
+      zIndexToApply = this._config.dropdownZindex;
+    }
+
+    // Consider the dropdown's current z-index if it's already set and higher
+    const currentDropdownZIndexStr = KTDom.getCssProp(this._dropdownElement, 'z-index');
+    if (currentDropdownZIndexStr && currentDropdownZIndexStr !== 'auto') {
+      const currentDropdownZIndex = parseInt(currentDropdownZIndexStr);
+      if (!isNaN(currentDropdownZIndex) && currentDropdownZIndex > (zIndexToApply || 0)) {
+        zIndexToApply = currentDropdownZIndex;
+      }
+    }
+
+    // Ensure dropdown is above elements within its original toggle's parent context
+    const toggleParentContextZindex = KTDom.getHighestZindex(this._element);
+    if (toggleParentContextZindex !== null && toggleParentContextZindex >= (zIndexToApply || 0)) {
+      zIndexToApply = toggleParentContextZindex + 1;
+    }
+
+    if (zIndexToApply !== null) {
+      this._dropdownElement.style.zIndex = zIndexToApply.toString();
+    }
+
+    // Initialize popper
+    this._initPopper();
+
+    // Add active classes for visual state
+    this._dropdownElement.classList.add('open');
+    this._toggleElement.classList.add('active');
+
+    // Start transition
+    this._dropdownElement.style.opacity = '1';
+
+    // Handle transition end
+    KTDom.transitionEnd(this._dropdownElement, () => {
+      this._isTransitioning = false;
+
+      // Notify unified state manager that transition is complete
+      if (this._unifiedStateManager) {
+        this._unifiedStateManager.setDropdownTransitioning(false, 'dropdown-transition-complete');
+      }
+
+      if (this._config.debug) {
+        console.log('KTDatepickerDropdown: Open transition completed');
+      }
+    });
+  }
+
+  /**
+   * Perform the actual close transition
+   */
+  private _performCloseTransition(): void {
+    if (this._isTransitioning) return;
+
+    this._isTransitioning = true;
+    this._dropdownElement.style.opacity = '0';
+
+    let transitionComplete = false;
+    const fallbackTimer = setTimeout(() => {
+      if (!transitionComplete) {
+        transitionComplete = true;
+        this._completeCloseTransition();
+      }
+    }, 300); // Fallback timeout
+
+    const completeTransition = () => {
+      if (!transitionComplete) {
+        transitionComplete = true;
+        clearTimeout(fallbackTimer);
+        this._completeCloseTransition();
+      }
+    };
+
+    KTDom.transitionEnd(this._dropdownElement, completeTransition);
+  }
+
+  /**
+   * Complete the close transition
+   */
+  private _completeCloseTransition(): void {
+    this._isTransitioning = false;
+    this._isOpen = false;
+
+    // Remove active classes
+    this._dropdownElement.classList.remove('open');
+    this._toggleElement.classList.remove('active');
+
+    // Hide dropdown
+    this._dropdownElement.classList.add('hidden');
+
+    // Clean up popper
+    this._destroyPopper();
+
+    // Notify unified state manager that transition is complete
+    if (this._unifiedStateManager) {
+      this._unifiedStateManager.setDropdownTransitioning(false, 'dropdown-transition-complete');
+    }
+
+    if (this._config.debug) {
+      console.log('KTDatepickerDropdown: Close transition completed');
+    }
   }
 
   /**
@@ -154,135 +334,30 @@ export class KTDatepickerDropdown extends KTComponent {
   }
 
   /**
-   * Open the dropdown
+   * Open the dropdown (legacy method - now handled by observer pattern)
    */
   public open(): void {
-    if (this._config.disabled) {
-      if (this._config.debug) {
-        console.log('KTDatepickerDropdown.open: datepicker is disabled, not opening');
-      }
-      return;
-    }
-    if (this._isOpen || this._isTransitioning) return;
-
-    // Begin opening transition
-    this._isTransitioning = true;
-
-    // Set initial styles
-    this._dropdownElement.classList.remove('hidden');
-    this._dropdownElement.style.opacity = '0';
-
-    // Set dropdown width
-    this._setDropdownWidth();
-
-    // Reflow
-    KTDom.reflow(this._dropdownElement);
-
-    // Apply z-index
-    let zIndexToApply: number | null = null;
-
-    if (this._config.dropdownZindex) {
-      zIndexToApply = this._config.dropdownZindex;
+    if (this._config.debug) {
+      console.log('KTDatepickerDropdown.open: Legacy method called, should use unified state manager');
     }
 
-    // Consider the dropdown's current z-index if it's already set and higher
-    const currentDropdownZIndexStr = KTDom.getCssProp(this._dropdownElement, 'z-index');
-    if (currentDropdownZIndexStr && currentDropdownZIndexStr !== 'auto') {
-      const currentDropdownZIndex = parseInt(currentDropdownZIndexStr);
-      if (!isNaN(currentDropdownZIndex) && currentDropdownZIndex > (zIndexToApply || 0)) {
-        zIndexToApply = currentDropdownZIndex;
-      }
+    // This method is now deprecated - use unified state manager instead
+    if (this._unifiedStateManager) {
+      this._unifiedStateManager.setDropdownOpen(true, 'legacy-open-method');
     }
-
-    // Ensure dropdown is above elements within its original toggle's parent context
-    const toggleParentContextZindex = KTDom.getHighestZindex(this._element);
-    if (toggleParentContextZindex !== null && toggleParentContextZindex >= (zIndexToApply || 0)) {
-      zIndexToApply = toggleParentContextZindex + 1;
-    }
-
-    if (zIndexToApply !== null) {
-      this._dropdownElement.style.zIndex = zIndexToApply.toString();
-    }
-
-    // Initialize popper
-    this._initPopper();
-
-    // Add active classes for visual state
-    this._dropdownElement.classList.add('open');
-    this._toggleElement.classList.add('active');
-
-    // Start transition
-    this._dropdownElement.style.opacity = '1';
-
-    // Handle transition end
-    KTDom.transitionEnd(this._dropdownElement, () => {
-      this._isTransitioning = false;
-      this._isOpen = true;
-
-      // Notify state manager that transition is complete
-      if (this._config.debug) {
-        console.log('KTDatepickerDropdown: Open transition completed');
-      }
-    });
   }
 
   /**
-   * Close the dropdown
+   * Close the dropdown (legacy method - now handled by observer pattern)
    */
   public close(): void {
     if (this._config.debug) {
-      console.log('KTDatepickerDropdown.close called - isOpen:', this._isOpen, 'isTransitioning:', this._isTransitioning);
+      console.log('KTDatepickerDropdown.close: Legacy method called, should use unified state manager');
     }
 
-    if (!this._isOpen || this._isTransitioning) {
-      if (this._config.debug) {
-        console.log('KTDatepickerDropdown.close - early return: dropdown not open or is transitioning');
-      }
-      return;
-    }
-
-    this._isTransitioning = true;
-    this._dropdownElement.style.opacity = '0';
-
-    let transitionComplete = false;
-    const fallbackTimer = setTimeout(() => {
-      if (!transitionComplete) {
-        transitionComplete = true;
-        this._completeClose();
-      }
-    }, 300); // Fallback timeout
-
-    const completeTransition = () => {
-      if (!transitionComplete) {
-        transitionComplete = true;
-        clearTimeout(fallbackTimer);
-        this._completeClose();
-      }
-    };
-
-    KTDom.transitionEnd(this._dropdownElement, completeTransition);
-  }
-
-  /**
-   * Complete the close process
-   */
-  private _completeClose(): void {
-    this._isTransitioning = false;
-    this._isOpen = false;
-
-    // Remove active classes
-    this._dropdownElement.classList.remove('open');
-    this._toggleElement.classList.remove('active');
-
-    // Hide dropdown
-    this._dropdownElement.classList.add('hidden');
-
-    // Clean up popper
-    this._destroyPopper();
-
-    // Notify state manager that transition is complete
-    if (this._config.debug) {
-      console.log('KTDatepickerDropdown: Close transition completed');
+    // This method is now deprecated - use unified state manager instead
+    if (this._unifiedStateManager) {
+      this._unifiedStateManager.setDropdownOpen(false, 'legacy-close-method');
     }
   }
 

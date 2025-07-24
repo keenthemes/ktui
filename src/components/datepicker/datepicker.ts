@@ -298,7 +298,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     } else {
       this._unifiedStateManager.setSelectedDate(date, 'calendar');
     }
-    this._unifiedStateManager.setCurrentDate(date, 'calendar');
 
     // Dispatch change event
     if (this._input) {
@@ -951,6 +950,71 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   }
 
   /**
+   * Get array of dates for multi-month display
+   * @param baseDate - The base date to calculate months from
+   * @param count - Number of months to generate
+   * @returns Array of dates representing the first day of each month
+   */
+  private _getMultiMonthDates(baseDate: Date, count: number): Date[] {
+    const dates: Date[] = [];
+    for (let i = 0; i < count; i++) {
+      const monthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+      dates.push(monthDate);
+    }
+    return dates;
+  }
+
+  /**
+   * Render a single calendar month for multi-month display
+   * @param monthDate - The date representing the month to render
+   * @param index - Index of this month in the multi-month display
+   * @param totalMonths - Total number of months being displayed
+   * @returns HTMLElement containing the rendered month
+   */
+  private _renderMultiMonthCalendar(monthDate: Date, index: number, totalMonths: number): HTMLElement {
+    // Navigation buttons: only first gets prev, only last gets next
+    let prevButtonHtml = '';
+    let nextButtonHtml = '';
+    if (index === 0) {
+      const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
+      prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
+    }
+    if (index === totalMonths - 1) {
+      const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
+      nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
+    }
+
+    const header = renderHeader(
+      this._templateSet.header,
+      {
+        month: monthDate.toLocaleString(this._config.locale, { month: 'long' }),
+        year: monthDate.getFullYear(),
+        prevButton: prevButtonHtml,
+        nextButton: nextButtonHtml,
+      },
+      (e) => { e.stopPropagation(); this._changeMonth(-1); },
+      (e) => { e.stopPropagation(); this._changeMonth(1); }
+    );
+
+    const calendar = renderCalendar(
+      this._templateSet.dayCell,
+      this._getCalendarDays(monthDate),
+      monthDate,
+      this._unifiedStateManager.getState().selectedDate,
+      (day) => { this.setDate(day); },
+      this._config.range ? this._unifiedStateManager.getState().selectedRange : undefined
+    );
+
+    // Wrap header + calendar in a styled panel div
+    const panel = document.createElement('div');
+    panel.className = 'bg-white dark:bg-gray-900 p-4 rounded-xl shadow border border-gray-200 dark:border-gray-700 flex flex-col items-center min-w-[260px]';
+    panel.appendChild(header);
+    panel.appendChild(calendar);
+
+    return panel;
+  }
+
+  /**
    * Render multi-month calendar
    */
   private _renderMultiMonth(dropdownEl: HTMLElement, visibleMonths: number) {
@@ -960,49 +1024,14 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     multiMonthContainer.setAttribute('data-kt-datepicker-multimonth-container', '');
     multiMonthContainer.className = 'flex flex-row gap-4';
 
-    for (let i = 0; i < visibleMonths; i++) {
-      const monthDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+    // Get all month dates for multi-month display
+    const monthDates = this._getMultiMonthDates(baseDate, visibleMonths);
 
-      // Navigation buttons: only first gets prev, only last gets next
-      let prevButtonHtml = '';
-      let nextButtonHtml = '';
-      if (i === 0) {
-        const prevButtonTpl = this._templateSet.prevButton || defaultTemplates.prevButton;
-        prevButtonHtml = typeof prevButtonTpl === 'function' ? prevButtonTpl({}) : prevButtonTpl;
-      }
-      if (i === visibleMonths - 1) {
-        const nextButtonTpl = this._templateSet.nextButton || defaultTemplates.nextButton;
-        nextButtonHtml = typeof nextButtonTpl === 'function' ? nextButtonTpl({}) : nextButtonTpl;
-      }
-
-      const header = renderHeader(
-        this._templateSet.header,
-        {
-          month: monthDate.toLocaleString(this._config.locale, { month: 'long' }),
-          year: monthDate.getFullYear(),
-          prevButton: prevButtonHtml,
-          nextButton: nextButtonHtml,
-        },
-        (e) => { e.stopPropagation(); this._changeMonth(-1); },
-        (e) => { e.stopPropagation(); this._changeMonth(1); }
-      );
-
-      const calendar = renderCalendar(
-        this._templateSet.dayCell,
-        this._getCalendarDays(monthDate),
-        monthDate,
-        this._unifiedStateManager.getState().selectedDate,
-        (day) => { this.setDate(day); },
-        this._config.range ? this._unifiedStateManager.getState().selectedRange : undefined
-      );
-
-      // Wrap header + calendar in a styled panel div
-      const panel = document.createElement('div');
-      panel.className = 'bg-white dark:bg-gray-900 p-4 rounded-xl shadow border border-gray-200 dark:border-gray-700 flex flex-col items-center min-w-[260px]';
-      panel.appendChild(header);
-      panel.appendChild(calendar);
+    // Render each month using the helper method
+    monthDates.forEach((monthDate, index) => {
+      const panel = this._renderMultiMonthCalendar(monthDate, index, visibleMonths);
       multiMonthContainer.appendChild(panel);
-    }
+    });
 
     dropdownEl.appendChild(multiMonthContainer);
   }
@@ -1065,10 +1094,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Restore open state
     if (wasOpen) {
       this._unifiedStateManager.setDropdownOpen(true, 'render-restore');
-      // Re-open dropdown if it was open
-      if (this._dropdownModule) {
-        this._dropdownModule.open();
-      }
+      // The dropdown module will automatically open via observer pattern
     }
 
     // Force observer reinitialization for range mode
@@ -1130,6 +1156,13 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         dropdownEl,
         this._config
       );
+
+      // Connect dropdown module to unified state manager
+      if (this._dropdownModule) {
+        this._dropdownModule.setUnifiedStateManager(this._unifiedStateManager);
+        this._unifiedStateManager.subscribe(this._dropdownModule);
+        console.log('🗓️ [KTDatepicker] Dropdown module connected to unified state manager');
+      }
     }
   }
 
@@ -1174,11 +1207,20 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
       // Check if the state actually changed
       if (updatedState.currentDate.getMonth() === d.getMonth()) {
-        this._updateCalendarContent();
+        // Use multi-month update if multiple months are visible
+        if (this._config.visibleMonths && this._config.visibleMonths > 1) {
+          this._updateMultiMonthCalendarContent();
+        } else {
+          this._updateCalendarContent();
+        }
       } else {
         // Wait a bit more for state to propagate
         setTimeout(() => {
-          this._updateCalendarContent();
+          if (this._config.visibleMonths && this._config.visibleMonths > 1) {
+            this._updateMultiMonthCalendarContent();
+          } else {
+            this._updateCalendarContent();
+          }
         }, 50);
       }
     }, 10);
@@ -1208,14 +1250,22 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       }
     }
 
-    // Final fallback: global search with warnings
+    // Final fallback: global search with warnings (only if no other instances exist)
     if (!dropdownEl) {
-      console.warn('[KTDatepicker] Dropdown not found in current instance, falling back to global search');
-      dropdownEl = document.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
-
       const allDropdowns = document.querySelectorAll('[data-kt-datepicker-dropdown]');
-      if (allDropdowns.length > 1) {
-        console.warn(`[KTDatepicker] Found ${allDropdowns.length} dropdowns globally, using first one. This may cause issues with multiple datepickers.`);
+      if (allDropdowns.length === 1) {
+        // Only one dropdown exists globally, safe to use
+        dropdownEl = allDropdowns[0] as HTMLElement;
+        console.warn('[KTDatepicker] Using global dropdown as fallback (only one instance found)');
+      } else if (allDropdowns.length > 1) {
+        // Multiple dropdowns exist - this could cause cross-instance issues
+        console.error(`[KTDatepicker] Found ${allDropdowns.length} dropdowns globally. Cannot safely determine correct dropdown for instance ${this._instanceId}. Falling back to full render.`);
+        this._render();
+        return;
+      } else {
+        console.warn('[KTDatepicker] No dropdown found globally, falling back to full render');
+        this._render();
+        return;
       }
     }
 
@@ -1291,6 +1341,83 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       console.warn('[KTDatepicker] Calendar element not found, falling back to full render');
       this._render();
     }
+  }
+
+  /**
+   * Update multi-month calendar content without recreating the dropdown
+   * This preserves the dropdown state while updating all visible months
+   */
+  private _updateMultiMonthCalendarContent() {
+    // Instance-scoped dropdown element selection strategy
+    let dropdownEl: HTMLElement | null = null;
+
+    // First priority: find dropdown within current datepicker instance
+    dropdownEl = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+
+    // Second priority: if instance ID is available, find by instance ID
+    if (!dropdownEl && this._instanceId) {
+      dropdownEl = document.querySelector(`[data-kt-datepicker-dropdown][data-kt-datepicker-instance-id="${this._instanceId}"]`) as HTMLElement;
+    }
+
+    // Third priority: check dropdown module reference
+    if (!dropdownEl && this._dropdownModule) {
+      const dropdownModuleElement = (this._dropdownModule as any)._dropdownElement;
+      if (dropdownModuleElement) {
+        dropdownEl = dropdownModuleElement;
+      }
+    }
+
+    // Final fallback: global search with warnings (only if no other instances exist)
+    if (!dropdownEl) {
+      const allDropdowns = document.querySelectorAll('[data-kt-datepicker-dropdown]');
+      if (allDropdowns.length === 1) {
+        // Only one dropdown exists globally, safe to use
+        dropdownEl = allDropdowns[0] as HTMLElement;
+        console.warn('[KTDatepicker] Using global dropdown as fallback (only one instance found)');
+      } else if (allDropdowns.length > 1) {
+        // Multiple dropdowns exist - this could cause cross-instance issues
+        console.error(`[KTDatepicker] Found ${allDropdowns.length} dropdowns globally. Cannot safely determine correct dropdown for instance ${this._instanceId}. Falling back to full render.`);
+        this._render();
+        return;
+      } else {
+        console.warn('[KTDatepicker] No dropdown found globally, falling back to full render');
+        this._render();
+        return;
+      }
+    }
+
+    if (!dropdownEl) {
+      // Fallback to full render if dropdown doesn't exist (should be rare)
+      console.warn('[KTDatepicker] Dropdown element not found, falling back to full render');
+      this._render();
+      return;
+    }
+
+    // Get current state - ensure we have the most up-to-date state
+    const currentState = this._unifiedStateManager.getState();
+    const visibleMonths = this._config.visibleMonths || 1;
+
+    // Find the multi-month container
+    const multiMonthContainer = dropdownEl.querySelector('[data-kt-datepicker-multimonth-container]');
+    if (!multiMonthContainer) {
+      console.warn('[KTDatepicker] Multi-month container not found, falling back to full render');
+      this._render();
+      return;
+    }
+
+    // Clear existing multi-month content
+    multiMonthContainer.innerHTML = '';
+
+    // Get all month dates for multi-month display
+    const monthDates = this._getMultiMonthDates(currentState.currentDate, visibleMonths);
+
+    // Re-render each month using the helper method
+    monthDates.forEach((monthDate, index) => {
+      const panel = this._renderMultiMonthCalendar(monthDate, index, visibleMonths);
+      multiMonthContainer.appendChild(panel);
+    });
+
+    console.log('[KTDatepicker] Multi-month calendar content updated successfully');
   }
 
   /**
@@ -1626,8 +1753,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // Use dropdown module if available
     if (this._dropdownModule) {
-      console.log('🗓️ [KTDatepicker] Calling dropdown module open()');
-      this._dropdownModule.open();
+      console.log('🗓️ [KTDatepicker] Dropdown module available, state change will trigger open');
+      // The dropdown module will automatically open via observer pattern
     } else {
       console.log('🗓️ [KTDatepicker] No dropdown module, using fallback');
     }
@@ -1664,7 +1791,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // Use dropdown module if available
     if (this._dropdownModule) {
-      this._dropdownModule.close();
+      console.log('🗓️ [KTDatepicker] Dropdown module available, state change will trigger close');
+      // The dropdown module will automatically close via observer pattern
     } else {
       console.log('🗓️ [KTDatepicker] No dropdown module, using fallback');
     }
