@@ -16,7 +16,8 @@
 		@apply bg-white text-gray-900 rounded-xl;
 		@apply shadow-[0_0_1px_rgba(0,0,0,0.075),0_1px_2px_rgba(0,0,0,0.075),1px_2px_4px_rgba(0,0,0,0.075),1px_3px_8px_rgba(0,0,0,0.075),2px_4px_16px_rgba(0,0,0,0.075)];
 		@apply transition-all duration-300 ease-out;
-		@apply animate-in fade-in-0 zoom-in-95 duration-300;
+		@apply duration-300;
+		animation: fadeIn 0.3s ease-out, zoomIn 0.3s ease-out;
 	}
 
 	.kt-alert-container {
@@ -24,7 +25,8 @@
 		@apply bg-white text-gray-900 rounded-xl;
 		@apply shadow-[0_0_1px_rgba(0,0,0,0.075),0_1px_2px_rgba(0,0,0,0.075),1px_2px_4px_rgba(0,0,0,0.075),1px_3px_8px_rgba(0,0,0,0.075),2px_4px_16px_rgba(0,0,0,0.075)];
 		@apply transition-all duration-300 ease-out;
-		@apply animate-in fade-in-0 zoom-in-95 duration-300;
+		@apply duration-300;
+		animation: fadeIn 0.3s ease-out, zoomIn 0.3s ease-out;
 	}
 
 	/* Content layout with proper padding */
@@ -47,7 +49,8 @@
 		@apply flex-shrink-0 size-16 mx-auto mb-4;
 		@apply flex items-center justify-center;
 		@apply rounded-full;
-		@apply animate-in zoom-in-50 duration-300 delay-100;
+		@apply duration-300 delay-100;
+		animation: fadeIn 0.3s ease-out 0.1s both, zoomInSmall 0.3s ease-out 0.1s both;
 	}
 
 	.kt-alert-title {
