@@ -31,7 +31,9 @@ export interface UnifiedObserverConfig {
  */
 export interface UIElements {
   input?: HTMLInputElement | null;
-  segmentedInputContainer?: HTMLElement | null;
+  segmentedInputContainer?: HTMLElement | null; // Single date mode
+  startContainer?: HTMLElement | null;           // Range mode - start date
+  endContainer?: HTMLElement | null;             // Range mode - end date
   calendarElement?: HTMLElement | null;
   timePickerElement?: HTMLElement | null;
 }
@@ -307,6 +309,25 @@ export class UnifiedObserver implements StateObserver {
    * Update segmented input components
    */
   private _updateSegmentedInput(state: KTDatepickerState): void {
+    // Handle range mode
+    if (this._isRangeMode()) {
+      this._updateRangeSegmentedInput(state);
+    } else {
+      this._updateSingleSegmentedInput(state);
+    }
+  }
+
+  /**
+   * Check if this is range mode
+   */
+  private _isRangeMode(): boolean {
+    return !!(this._elements.startContainer && this._elements.endContainer);
+  }
+
+  /**
+   * Update single date segmented input
+   */
+  private _updateSingleSegmentedInput(state: KTDatepickerState): void {
     if (!this._elements.segmentedInputContainer) return;
 
     // Update date segments
@@ -321,7 +342,36 @@ export class UnifiedObserver implements StateObserver {
     }
 
     if (this._config.enableDebugging) {
-      console.log('[UnifiedObserver] Segmented input updated');
+      console.log('[UnifiedObserver] Single segmented input updated');
+    }
+  }
+
+  /**
+   * Update range mode segmented inputs (start and end)
+   */
+  private _updateRangeSegmentedInput(state: KTDatepickerState): void {
+    if (!this._elements.startContainer || !this._elements.endContainer) {
+      if (this._config.enableDebugging) {
+        console.warn('[UnifiedObserver] Range mode detected but containers missing');
+      }
+      return;
+    }
+
+    // Update start container
+    if (state.selectedRange?.start) {
+      this._updateDateSegmentsInContainer(state.selectedRange.start, this._elements.startContainer);
+    }
+
+    // Update end container
+    if (state.selectedRange?.end) {
+      this._updateDateSegmentsInContainer(state.selectedRange.end, this._elements.endContainer);
+    }
+
+    if (this._config.enableDebugging) {
+      console.log('[UnifiedObserver] Range segmented inputs updated:', {
+        start: state.selectedRange?.start,
+        end: state.selectedRange?.end
+      });
     }
   }
 
@@ -329,9 +379,17 @@ export class UnifiedObserver implements StateObserver {
    * Update date segments (year, month, day)
    */
   private _updateDateSegments(date: Date): void {
-    const yearElement = this._elements.segmentedInputContainer?.querySelector('[data-segment="year"]') as HTMLElement;
-    const monthElement = this._elements.segmentedInputContainer?.querySelector('[data-segment="month"]') as HTMLElement;
-    const dayElement = this._elements.segmentedInputContainer?.querySelector('[data-segment="day"]') as HTMLElement;
+    if (!this._elements.segmentedInputContainer) return;
+    this._updateDateSegmentsInContainer(date, this._elements.segmentedInputContainer);
+  }
+
+  /**
+   * Update date segments in a specific container
+   */
+  private _updateDateSegmentsInContainer(date: Date, container: HTMLElement): void {
+    const yearElement = container.querySelector('[data-segment="year"]') as HTMLElement;
+    const monthElement = container.querySelector('[data-segment="month"]') as HTMLElement;
+    const dayElement = container.querySelector('[data-segment="day"]') as HTMLElement;
 
     if (yearElement) {
       yearElement.textContent = this._formatYear(date.getFullYear());

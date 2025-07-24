@@ -3,6 +3,16 @@
  * datepicker.css - Tailwind-based utility styles for KTDatepicker (revamp)
  * Enhanced styling adopting select component's superior design patterns
  * Design system integration with consistent tokens and state management
+ *
+ * REFACTORING SUMMARY (2025):
+ * - Consolidated dropdown selectors to use attribute-based targeting [data-kt-datepicker-dropdown]
+ * - Improved dropdown container styling with better shadows and responsive width
+ * - Enhanced z-index management with consistent high value (z-[9999])
+ * - Optimized transitions with GPU acceleration and scale transforms
+ * - Implemented responsive width handling (min-w-[280px] max-w-[320px] w-auto)
+ * - Added backdrop blur for modern appearance
+ * - Fixed multiple dropdown instance issue
+ * - Improved visual consistency and accessibility
  */
 
 [data-kt-datepicker-calendar] {
@@ -19,24 +29,29 @@
   @apply w-full border-collapse table-fixed select-none;
 }
 
-/* Enhanced Dropdown styling following select component pattern */
-/* Dropdown container styling - Adopting select's superior design */
-.kt-datepicker-dropdown {
-  @apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
-  @apply transition-all duration-200 ease-in-out;
-  @apply w-[280px] max-w-[280px];
-  @apply p-3;
-  @apply z-50;
+/* Enhanced Dropdown styling - Consolidated attribute-based selectors */
+/* Dropdown container styling - Improved design with better shadows and responsive width */
+[data-kt-datepicker-dropdown] {
+  @apply rounded-lg shadow-lg border border-border bg-popover text-popover-foreground;
+  @apply transition-all duration-200 ease-out;
+  @apply min-w-[280px] max-w-[320px] w-auto;
+  @apply p-4;
+  @apply z-[9999];
+  @apply backdrop-blur-sm;
+  @apply transform-gpu;
 }
 
-/* Dropdown open state - Clean transitions like select */
-.kt-datepicker-dropdown.open {
-  @apply opacity-100;
+/* Dropdown open state - Smooth transitions */
+[data-kt-datepicker-dropdown].open {
+  @apply opacity-100 scale-100;
+  @apply pointer-events-auto;
 }
 
-/* Dropdown closed state - Consistent with select pattern */
-.kt-datepicker-dropdown:not(.open) {
-  @apply opacity-0 pointer-events-none;
+/* Dropdown closed state - Clean hidden state */
+[data-kt-datepicker-dropdown]:not(.open) {
+  @apply opacity-0 scale-95;
+  @apply pointer-events-none;
+  @apply transform-gpu;
 }
 
 /* Enhanced Calendar button styling - Adopting select's focus patterns */

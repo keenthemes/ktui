@@ -80,6 +80,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
   // Dynamic element detection
   private _elementObserver: MutationObserver | null = null;
+  private _instanceId: string;
 
     // --- StateObserver implementation ---
   public onStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
@@ -490,7 +491,14 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    */
   constructor(element: HTMLElement, config?: KTDatepickerConfig) {
     super();
-    console.log('🗓️ [KTDatepicker] Constructor: element:', element);
+
+    // Generate unique instance ID
+    this._instanceId = `datepicker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Add instance ID to element for debugging
+    element.setAttribute('data-kt-datepicker-instance-id', this._instanceId);
+
+    console.log('🗓️ [KTDatepicker] Constructor: element:', element, 'instanceId:', this._instanceId);
     this._init(element);
     console.log('🗓️ [KTDatepicker] After _init, this._input:', this._input);
     // --- Data attribute config parsing ---
@@ -782,6 +790,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       configClasses: this._config.classes
     });
     dropdownEl.setAttribute('data-kt-datepicker-dropdown', '');
+
+    // Add instance association for better identification
+    if (this._instanceId) {
+      dropdownEl.setAttribute('data-kt-datepicker-instance-id', this._instanceId);
+    }
+
     if (!this._unifiedStateManager.isDropdownOpen()) {
       dropdownEl.classList.add('hidden');
     }
@@ -1057,6 +1071,13 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       }
     }
 
+    // Force observer reinitialization for range mode
+    if (this._config.range) {
+      setTimeout(() => {
+        this._reinitializeUnifiedObserver();
+      }, 100);
+    }
+
     this._updatePlaceholder();
     this._updateDisabledState();
     this._enforceMinMaxDates();
@@ -1168,22 +1189,34 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * This preserves the dropdown state while updating the month view
    */
   private _updateCalendarContent() {
-    // More robust dropdown element selection strategy
-    // First try to find the dropdown by its unique identifier (if available)
-    let dropdownEl = document.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+    // Instance-scoped dropdown element selection strategy
+    let dropdownEl: HTMLElement | null = null;
 
-    // If not found, try to find it by looking for the most recently created dropdown
-    if (!dropdownEl) {
-      const allDropdowns = document.querySelectorAll('[data-kt-datepicker-dropdown]');
-      if (allDropdowns.length > 0) {
-        // Use the last one (most recently created)
-        dropdownEl = allDropdowns[allDropdowns.length - 1] as HTMLElement;
+    // First priority: find dropdown within current datepicker instance
+    dropdownEl = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+
+    // Second priority: if instance ID is available, find by instance ID
+    if (!dropdownEl && this._instanceId) {
+      dropdownEl = document.querySelector(`[data-kt-datepicker-dropdown][data-kt-datepicker-instance-id="${this._instanceId}"]`) as HTMLElement;
+    }
+
+    // Third priority: check dropdown module reference
+    if (!dropdownEl && this._dropdownModule) {
+      const dropdownModuleElement = (this._dropdownModule as any)._dropdownElement;
+      if (dropdownModuleElement) {
+        dropdownEl = dropdownModuleElement;
       }
     }
 
-    // Final fallback: look within this._element
+    // Final fallback: global search with warnings
     if (!dropdownEl) {
-      dropdownEl = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+      console.warn('[KTDatepicker] Dropdown not found in current instance, falling back to global search');
+      dropdownEl = document.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+
+      const allDropdowns = document.querySelectorAll('[data-kt-datepicker-dropdown]');
+      if (allDropdowns.length > 1) {
+        console.warn(`[KTDatepicker] Found ${allDropdowns.length} dropdowns globally, using first one. This may cause issues with multiple datepickers.`);
+      }
     }
 
     if (!dropdownEl) {
@@ -1410,7 +1443,13 @@ export class KTDatepicker extends KTComponent implements StateObserver {
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as Element;
+              // Check for segmented input elements (single mode)
               if (element.querySelector('[data-segment]')) {
+                this._reinitializeUnifiedObserver();
+              }
+              // Check for range mode containers
+              if (element.classList.contains('ktui-segmented-input-start') ||
+                  element.classList.contains('ktui-segmented-input-end')) {
                 this._reinitializeUnifiedObserver();
               }
             }
@@ -1429,33 +1468,48 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Re-initialize unified observer when elements are created
    */
   private _reinitializeUnifiedObserver(): void {
-    console.log('[KTDatepicker] Re-initializing UnifiedObserver');
-
     if (this._unifiedObserver) {
-      console.log('[KTDatepicker] Disposing existing UnifiedObserver');
       this._unifiedObserver.dispose();
     }
-
-    console.log('[KTDatepicker] Creating new UnifiedObserver with element:', this._element);
-    this._unifiedObserver = this._observerFactory.createUnifiedObserver({
-      input: this._input,
-      segmentedInputContainer: this._element,
-      calendarElement: null,
-      timePickerElement: null
-    }, {
+    // Prepare elements based on mode
+    const elements = this._prepareObserverElements();
+    this._unifiedObserver = this._observerFactory.createUnifiedObserver(elements, {
       enableDebugging: this._config.debug || false,
       enableValidation: true,
       enableSmoothTransitions: true,
       updateDelay: 0
     });
-
     if (this._unifiedObserver) {
-      console.log('[KTDatepicker] Subscribing UnifiedObserver to unified state manager');
       this._unifiedStateManager.subscribe(this._unifiedObserver);
-      console.log('[KTDatepicker] Unified observer re-initialized successfully');
-    } else {
-      console.error('[KTDatepicker] Failed to create UnifiedObserver');
     }
+  }
+
+  /**
+   * Prepare observer elements based on current mode
+   */
+  private _prepareObserverElements() {
+    const elements: any = {
+      input: this._input,
+      calendarElement: null,
+      timePickerElement: null
+    };
+    // Handle range mode
+    if (this._config.range) {
+      // Look for containers in the entire element subtree
+      const startContainer = this._element.querySelector('.ktui-segmented-input-start');
+      const endContainer = this._element.querySelector('.ktui-segmented-input-end');
+      if (startContainer && endContainer) {
+        elements.startContainer = startContainer;
+        elements.endContainer = endContainer;
+      } else {
+        // Fallback to single mode if containers not found
+        elements.segmentedInputContainer = this._element;
+      }
+    } else {
+      // Single date mode
+      elements.segmentedInputContainer = this._element;
+    }
+    return elements;
   }
 
   /**
