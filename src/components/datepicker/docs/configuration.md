@@ -1,150 +1,138 @@
-# KTDatepicker Configuration
+# Configuration System
 
 ## Overview
-KTDatepicker supports flexible configuration via HTML attributes and a JSON config attribute. This dual approach allows for both simple and advanced customization, with clear precedence rules.
+KTDatepicker provides a flexible and comprehensive configuration system that supports multiple configuration methods with clear precedence rules. The system is designed to accommodate both simple use cases and complex customization requirements.
 
-## 1. Attribute-Based Configuration
-- **Description:** Use individual HTML attributes for common options.
-- **Example:**
-  ```html
-  <div
-    data-kt-datepicker="true"
-    data-kt-datepicker-range="true"
-    data-kt-datepicker-enable-time="true"
-    data-kt-datepicker-placeholder="Select a date..."
-    data-kt-datepicker-locale="en-US">
-    <input type="text" data-kt-datepicker-input />
-  </div>
-  ```
-- **Notes:**
-  - Best for simple use cases.
-  - Each option is set via a separate attribute.
+## Configuration Methods
 
-## 2. JSON Config Attribute
-- **Description:** Use a single `data-kt-datepicker-config` attribute for advanced/custom options.
-- **Example:**
-  ```html
-  <div
-    data-kt-datepicker="true"
-    data-kt-datepicker-config='{
-      "calendarTemplate": "<div class=\"custom-calendar\">{{calendar}}</div>",
-      "locale": "fr-FR",
-      "placeholder": "Sélectionnez une date..."
-    }'>
-    <input type="text" data-kt-datepicker-input />
-  </div>
-  ```
-- **Notes:**
-  - Supports advanced and custom options.
-  - All options are grouped in a single JSON object.
+### Attribute-Based Configuration
+The simplest configuration method uses individual HTML attributes for common options. This approach is ideal for basic use cases where only a few options need to be set. Each option is configured via a separate attribute, providing clear and readable markup.
 
-## 3. Combined Usage & Precedence
-- **Description:** Both methods can be used together. If a key exists in both, the JSON config value takes precedence.
-- **Example:**
-  ```html
-  <div
-    data-kt-datepicker="true"
-    data-kt-datepicker-placeholder="Select a date..."
-    data-kt-datepicker-config='{"placeholder": "Overridden by config!"}'>
-    <input type="text" data-kt-datepicker-input />
-  </div>
-  ```
-- **Notes:**
-  - Attribute values are parsed first.
-  - JSON config values override attribute values for matching keys.
+### JSON Configuration
+For advanced customization, the system supports a single JSON configuration attribute that can contain all component options. This method is particularly useful for complex configurations, template customizations, and scenarios requiring multiple interrelated settings.
 
-## 4. Time Configuration
-- **Description:** Time picker configuration options for granularity, format, and constraints.
-- **Example:**
-  ```html
-  <div
-    data-kt-datepicker="true"
-    data-kt-datepicker-enable-time="true"
-    data-kt-datepicker-config='{
-      "timeGranularity": "second",
-      "timeFormat": "12h",
-      "minTime": "09:00",
-      "maxTime": "17:00",
-      "timeStep": 15
-    }'>
-    <input type="text" data-kt-datepicker-input />
-  </div>
-  ```
-- **Time Options:**
-  - `enableTime`: Enable time selection (boolean)
-  - `timeGranularity`: 'second', 'minute', or 'hour' (default: 'minute')
-  - `timeFormat`: '12h' or '24h' (default: '24h')
-  - `minTime`: Minimum time constraint (format: 'HH:MM' or 'HH:MM:SS')
-  - `maxTime`: Maximum time constraint (format: 'HH:MM' or 'HH:MM:SS')
-  - `timeStep`: Time increment in minutes (default: 1)
+### Combined Configuration
+Both configuration methods can be used together, with the JSON configuration taking precedence over individual attributes. This provides maximum flexibility while maintaining backward compatibility and clear precedence rules.
 
-## 5. Config Merging Logic
-- **Order of Precedence:**
-  1. Default values
-  2. Attribute-based values
-  3. JSON config values (highest)
-- **Implementation:**
-  - At initialization, all sources are merged according to the above order.
-  - This ensures maximum flexibility and backward compatibility.
+## Configuration Precedence
 
-## 5. showOnFocus and closeOnSelect Options
+The system follows a clear hierarchy for configuration resolution:
+1. **Default Values:** Built-in defaults provide sensible behavior
+2. **Attribute Values:** Individual attributes set basic options
+3. **JSON Configuration:** Complex configuration overrides attributes
+4. **Runtime Updates:** Dynamic configuration changes take highest precedence
 
-KTDatepicker provides fine-grained control over dropdown behavior with the following options:
+## Core Configuration Options
 
-| Option           | Type    | Default (Single) | Default (Range) | Default (Multi-Date) | Description |
-|------------------|---------|------------------|-----------------|----------------------|-------------|
-| showOnFocus      | boolean | true             | true            | true                 | Whether the calendar opens when the input receives focus. |
-| closeOnSelect    | boolean | true             | false           | false                | Whether the calendar closes after selection. For multi-date, closes only when the Apply button is clicked. |
+### Selection Mode Configuration
+- **Single Date:** Default selection mode for individual date selection
+- **Date Range:** Enables start and end date selection with range highlighting
+- **Multi-Date:** Allows selection of multiple non-contiguous dates
+- **Time Selection:** Adds time picking capabilities to any selection mode
 
-### Usage via Data Attributes
+### Display and Behavior Options
+- **Visible Months:** Controls the number of calendar months displayed
+- **Show on Focus:** Determines whether the calendar opens on input focus
+- **Close on Select:** Controls automatic closing behavior after selection
+- **Placeholder Text:** Custom placeholder for the input field
 
-```html
-<div
-  data-kt-datepicker="true"
-  data-kt-datepicker-show-on-focus="false"
-  data-kt-datepicker-close-on-select="true">
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Time Configuration
+- **Time Granularity:** Controls precision (hour, minute, second)
+- **Time Format:** 12-hour or 24-hour format selection
+- **Time Constraints:** Minimum and maximum time limits
+- **Time Step:** Increment size for time selection
 
-- Use `data-kt-datepicker-show-on-focus` to control whether the calendar opens on input focus.
-- Use `data-kt-datepicker-close-on-select` to control whether the calendar closes after selection.
-- Omit the attribute or set to `""`/`"true"` for true, set to `"false"` for false.
+### Validation and Constraints
+- **Date Range Limits:** Minimum and maximum selectable dates
+- **Disabled Dates:** Specific dates that cannot be selected
+- **Custom Validation:** User-defined validation rules
+- **Error Handling:** Custom error messages and validation behavior
 
-### Usage via JSON Config
+## Template Configuration
 
-```html
-<div
-  data-kt-datepicker="true"
-  data-kt-datepicker-config='{"showOnFocus": false, "closeOnSelect": true}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Class Customization
+The `classes` configuration object allows fine-grained control over component styling while maintaining the base class structure. This approach ensures consistent default styling while enabling full customization.
 
-### Behavior by Mode
-- **Single Date:** Opens on focus by default, closes after selection.
-- **Range:** Opens on focus by default, closes only after both start and end are selected.
-- **Multi-Date:** Opens on focus by default, closes only when the Apply button is clicked.
+### Template Overrides
+Complete template customization is supported through the template configuration system. Templates can be overridden individually or as a complete set, providing maximum flexibility for UI customization.
 
-### Range Mode Dropdown Close Behavior
+### Dynamic Template Updates
+The system supports runtime template updates, enabling dynamic customization and theme switching without component reinitialization.
 
-- When `range: true` is enabled, the dropdown **remains open after selecting the start date** and **closes automatically after selecting the end date** (when both start and end are set).
-- This matches best-practice UX for date range pickers (see Airbnb, Google Flights, etc.).
-- `closeOnSelect` is now **true by default** for range mode, so you do not need to set it explicitly unless you want to override this behavior.
+## Internationalization Configuration
 
-## 6. Outside Click Close Behavior
+### Locale Support
+- **Locale Selection:** Choose from supported locales for date formatting
+- **Custom Locales:** Define custom locale data for specialized requirements
+- **RTL Support:** Right-to-left language support for appropriate locales
 
-KTDatepicker will automatically close the calendar dropdown when the user clicks outside the datepicker root, dropdown, input, or calendar button. This behavior is enabled by default and applies to all modes (single, range, multi-date).
+### Format Customization
+- **Date Formats:** Custom date format strings
+- **Time Formats:** Custom time format strings
+- **Separator Customization:** Custom separators for date/time components
 
-- Clicking inside the dropdown, input, or calendar button will NOT close the dropdown.
-- Event listeners are cleaned up on close and destroy to prevent memory leaks.
-- No configuration is required; this is the default for all datepickers.
+## Performance Configuration
 
-### Accessibility & Best Practices
-- The calendar will not open on focus if the input is disabled or readonly.
-- Always ensure the Apply button is accessible via keyboard in multi-date mode.
-- These options can be changed at runtime via the API if needed.
+### Rendering Options
+- **Update Batching:** Control state update batching for performance
+- **Template Caching:** Enable template compilation caching
+- **Observer Priority:** Configure update priority for UI components
+
+### Memory Management
+- **Cleanup Behavior:** Control automatic cleanup and disposal
+- **Observer Management:** Configure observer lifecycle management
+- **Event Handling:** Optimize event listener management
+
+## Configuration Validation
+
+### Automatic Validation
+The system includes comprehensive validation to ensure configuration integrity:
+- **Type Validation:** Ensures configuration values match expected types
+- **Range Validation:** Validates numeric values within acceptable ranges
+- **Dependency Validation:** Ensures interdependent options are compatible
+
+### Error Handling
+Robust error handling provides graceful degradation:
+- **Fallback Values:** Default values used when configuration is invalid
+- **Error Reporting:** Detailed error messages for debugging
+- **Graceful Degradation:** Component continues to function with invalid configuration
+
+## Configuration Merging
+
+### Hierarchical Merging
+The system implements intelligent configuration merging:
+- **Default Merging:** Base configuration provides sensible defaults
+- **Attribute Merging:** Individual attributes override defaults
+- **JSON Merging:** Complex configuration overrides attributes
+- **Runtime Merging:** Dynamic updates merge with existing configuration
+
+### Conflict Resolution
+Clear conflict resolution ensures predictable behavior:
+- **Precedence Rules:** Well-defined precedence for conflicting options
+- **Validation Integration:** Configuration validation prevents invalid combinations
+- **Error Prevention:** Automatic prevention of conflicting configurations
+
+## Best Practices
+
+### Configuration Design
+- **Progressive Enhancement:** Start with simple configuration and add complexity as needed
+- **Consistent Naming:** Use consistent naming conventions across configuration options
+- **Documentation:** Document custom configurations for maintainability
+- **Testing:** Test configurations across different scenarios and edge cases
+
+### Performance Considerations
+- **Minimal Configuration:** Use only necessary configuration options
+- **Efficient Merging:** Leverage configuration merging for optimal performance
+- **Caching:** Utilize configuration caching where appropriate
+- **Validation:** Implement efficient validation to prevent performance issues
+
+### Maintenance Guidelines
+- **Version Compatibility:** Ensure configuration compatibility across versions
+- **Migration Support:** Provide migration paths for configuration changes
+- **Backward Compatibility:** Maintain backward compatibility where possible
+- **Documentation Updates:** Keep configuration documentation current
 
 ## References
-- See [template-customization.md](./template-customization.md) for template-related config.
-- See [usage-examples.md](./usage-examples.md) for real-world scenarios.
+- See [state-management.md](./state-management.md) for state-related configuration
+- See [template-customization.md](./template-customization.md) for template configuration
+- See [usage-examples.md](./usage-examples.md) for configuration examples

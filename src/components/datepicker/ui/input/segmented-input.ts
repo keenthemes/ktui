@@ -59,6 +59,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
   const segments = options.segments || ['month', 'day', 'year'];
   const locale = options.locale || 'default';
 
+  // Global flag to track arrow navigation across all segmented inputs
+  if (!(window as any).__ktui_segmented_input_arrow_navigation) {
+    (window as any).__ktui_segmented_input_arrow_navigation = false;
+  }
+
   console.log('[SegmentedInput] Internal state:', {
     currentValue,
     segments,
@@ -128,8 +133,17 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       case 'day': d.setDate(Number(value)); break;
       case 'month': d.setMonth(Number(value) - 1); break;
       case 'year': d.setFullYear(Number(value)); break;
-      case 'hour': d.setHours(Number(value)); break;
-      case 'minute': d.setMinutes(Number(value)); break;
+      case 'hour':
+        // Preserve existing minutes and seconds when setting hour
+        const currentMinutes = d.getMinutes();
+        const currentSecondsForHour = d.getSeconds();
+        d.setHours(Number(value), currentMinutes, currentSecondsForHour);
+        break;
+      case 'minute':
+        // Preserve existing seconds when setting minute
+        const currentSecondsForMinute = d.getSeconds();
+        d.setMinutes(Number(value), currentSecondsForMinute);
+        break;
       case 'second': d.setSeconds(Number(value)); break;
       case 'ampm':
         if (value === 'AM' && d.getHours() >= 12) d.setHours(d.getHours() - 12);
@@ -154,6 +168,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       case 'minute':
       case 'second':
         return 0;
+      case 'ampm':
+        return 0; // 0 = AM, 1 = PM
       default:
         return undefined;
     }
@@ -172,6 +188,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       case 'minute':
       case 'second':
         return 59;
+      case 'ampm':
+        return 1; // 0 = AM, 1 = PM
       default:
         return undefined;
     }
@@ -372,27 +390,51 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           e.preventDefault();
           e.stopPropagation(); // Prevent bubbling to main datepicker
           isArrowNavigation = true; // Set flag to prevent blur onChange
-          const min = getSegmentMin(segments[idx], currentValue) ?? 0;
-          const max = getSegmentMax(segments[idx], currentValue) ?? 9999;
-          let current = Number(span.textContent) || min;
-          if (e.key === 'ArrowUp') {
-            current = Math.min(max, current + 1);
-          } else if (e.key === 'ArrowDown') {
-            current = Math.max(min, current - 1);
-          }
-          let newValue = current.toString();
-          if (segments[idx] === 'year') {
-            newValue = newValue.padStart(4, '0');
+
+          let newValue: string;
+
+          if (segments[idx] === 'ampm') {
+            // Handle AM/PM toggle
+            const currentAmPm = span.textContent || 'AM';
+            if (e.key === 'ArrowUp') {
+              newValue = currentAmPm === 'AM' ? 'PM' : 'AM';
+            } else {
+              newValue = currentAmPm === 'AM' ? 'PM' : 'AM';
+            }
           } else {
-            newValue = newValue.padStart(2, '0');
+            // Handle numeric segments
+            const min = getSegmentMin(segments[idx], currentValue) ?? 0;
+            const max = getSegmentMax(segments[idx], currentValue) ?? 9999;
+            let current = Number(getSegmentValue(segments[idx], currentValue)) || min;
+            if (e.key === 'ArrowUp') {
+              current = Math.min(max, current + 1);
+            } else if (e.key === 'ArrowDown') {
+              current = Math.max(min, current - 1);
+            }
+            newValue = current.toString();
+            if (segments[idx] === 'year') {
+              newValue = newValue.padStart(4, '0');
+            } else {
+              newValue = newValue.padStart(2, '0');
+            }
           }
+
           span.textContent = newValue;
           currentValue = setSegmentValue(segments[idx], newValue, currentValue);
+
+          // Set global flag to prevent unified observer from overriding UI
+          (window as any).__ktui_segmented_input_arrow_navigation = true;
+
           // Call onChange immediately for Arrow Up/Down to update the main datepicker
           if (options.onChange) {
             console.log('[SegmentedInput] Arrow navigation: calling onChange with new value');
             options.onChange(currentValue);
           }
+
+          // Clear flag after onChange callback
+          setTimeout(() => {
+            (window as any).__ktui_segmented_input_arrow_navigation = false;
+          }, 50);
           // Preserve caret position at end of content
           if (span.isContentEditable) {
             const range = document.createRange();

@@ -229,6 +229,89 @@ export function renderTimePicker(container: HTMLElement, options: TimePickerOpti
     });
   }
 
+  // Add keyboard navigation for time picker
+  container.addEventListener('keydown', (e) => {
+    if (disabled) return;
+
+    // Handle arrow up/down for time units
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Find the currently focused time unit
+      const focusedElement = document.activeElement;
+      if (!focusedElement || !container.contains(focusedElement)) return;
+
+      // Determine which time unit is focused
+      let focusedUnit: string | null = null;
+      timeUnits.forEach(unit => {
+        const unitElement = container.querySelector(`[data-kt-datepicker-time-unit="${unit}"]`);
+        if (unitElement && unitElement.contains(focusedElement)) {
+          focusedUnit = unit;
+        }
+      });
+
+      // If no specific unit is focused, focus the first one
+      if (!focusedUnit && timeUnits.length > 0) {
+        focusedUnit = timeUnits[0];
+      }
+
+      if (focusedUnit && onChange) {
+        let newTime: TimeState;
+        if (e.key === 'ArrowUp') {
+          newTime = incrementTimeUnit(currentTime, focusedUnit, timeStep, format);
+        } else {
+          newTime = decrementTimeUnit(currentTime, focusedUnit, timeStep, format);
+        }
+
+        const validation = validateTime(newTime, minTime, maxTime);
+        if (validation.isValid) {
+          // Update current time state
+          currentTime = newTime;
+          // Update UI immediately
+          updateTimeDisplay(currentTime, updateableElements, timeDisplay, granularity, format);
+          // Call onChange callback
+          onChange(currentTime);
+        }
+      }
+    }
+
+    // Handle Tab navigation between time units
+    if (e.key === 'Tab') {
+      const timeUnitElements = timeUnits.map(unit =>
+        container.querySelector(`[data-kt-datepicker-time-unit="${unit}"]`)
+      ).filter(Boolean) as HTMLElement[];
+
+      if (timeUnitElements.length > 0) {
+        const currentIndex = timeUnitElements.findIndex(el => el.contains(document.activeElement));
+        let nextIndex = currentIndex;
+
+        if (e.shiftKey) {
+          // Shift+Tab: move to previous
+          nextIndex = currentIndex > 0 ? currentIndex - 1 : timeUnitElements.length - 1;
+        } else {
+          // Tab: move to next
+          nextIndex = currentIndex < timeUnitElements.length - 1 ? currentIndex + 1 : 0;
+        }
+
+        if (nextIndex >= 0 && nextIndex < timeUnitElements.length) {
+          timeUnitElements[nextIndex].focus();
+          e.preventDefault();
+        }
+      }
+    }
+  });
+
+  // Make time units focusable
+  timeUnits.forEach(unit => {
+    const unitElement = container.querySelector(`[data-kt-datepicker-time-unit="${unit}"]`) as HTMLElement;
+    if (unitElement) {
+      unitElement.tabIndex = 0;
+      unitElement.setAttribute('role', 'spinbutton');
+      unitElement.setAttribute('aria-label', `${unit} value`);
+    }
+  });
+
   // Update function to sync with external state changes
   const update = (newTime: TimeState) => {
     console.log(`🕐 [TimePicker] External update called with:`, newTime);

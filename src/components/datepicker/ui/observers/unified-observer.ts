@@ -330,6 +330,14 @@ export class UnifiedObserver implements StateObserver {
   private _updateSingleSegmentedInput(state: KTDatepickerState): void {
     if (!this._elements.segmentedInputContainer) return;
 
+    // Check if arrow navigation is in progress - skip update if so
+    if ((window as any).__ktui_segmented_input_arrow_navigation) {
+      if (this._config.enableDebugging) {
+        console.log('[UnifiedObserver] Skipping segmented input update - arrow navigation in progress');
+      }
+      return;
+    }
+
     // Update date segments
     const dateToUse = state.selectedDate || state.currentDate;
     if (dateToUse) {
@@ -357,14 +365,34 @@ export class UnifiedObserver implements StateObserver {
       return;
     }
 
-    // Update start container
+    // Update start container (date + time if enabled)
     if (state.selectedRange?.start) {
       this._updateDateSegmentsInContainer(state.selectedRange.start, this._elements.startContainer);
+
+      // Update time segments if time is enabled
+      if (this._config.formatOptions.timeFormat) {
+        const timeState = {
+          hour: state.selectedRange.start.getHours(),
+          minute: state.selectedRange.start.getMinutes(),
+          second: state.selectedRange.start.getSeconds()
+        };
+        this._updateTimeSegmentsInContainer(timeState, this._elements.startContainer);
+      }
     }
 
-    // Update end container
+    // Update end container (date + time if enabled)
     if (state.selectedRange?.end) {
       this._updateDateSegmentsInContainer(state.selectedRange.end, this._elements.endContainer);
+
+      // Update time segments if time is enabled
+      if (this._config.formatOptions.timeFormat) {
+        const timeState = {
+          hour: state.selectedRange.end.getHours(),
+          minute: state.selectedRange.end.getMinutes(),
+          second: state.selectedRange.end.getSeconds()
+        };
+        this._updateTimeSegmentsInContainer(timeState, this._elements.endContainer);
+      }
     }
 
     if (this._config.enableDebugging) {
@@ -406,10 +434,18 @@ export class UnifiedObserver implements StateObserver {
    * Update time segments (hour, minute, second, ampm)
    */
   private _updateTimeSegments(time: TimeState): void {
-    const hourElement = this._elements.segmentedInputContainer?.querySelector('[data-segment="hour"]') as HTMLElement;
-    const minuteElement = this._elements.segmentedInputContainer?.querySelector('[data-segment="minute"]') as HTMLElement;
-    const secondElement = this._elements.segmentedInputContainer?.querySelector('[data-segment="second"]') as HTMLElement;
-    const ampmElement = this._elements.segmentedInputContainer?.querySelector('[data-segment="ampm"]') as HTMLElement;
+    if (!this._elements.segmentedInputContainer) return;
+    this._updateTimeSegmentsInContainer(time, this._elements.segmentedInputContainer);
+  }
+
+  /**
+   * Update time segments in a specific container
+   */
+  private _updateTimeSegmentsInContainer(time: TimeState, container: HTMLElement): void {
+    const hourElement = container.querySelector('[data-segment="hour"]') as HTMLElement;
+    const minuteElement = container.querySelector('[data-segment="minute"]') as HTMLElement;
+    const secondElement = container.querySelector('[data-segment="second"]') as HTMLElement;
+    const ampmElement = container.querySelector('[data-segment="ampm"]') as HTMLElement;
 
     if (hourElement) {
       hourElement.textContent = this._formatHour(time.hour);

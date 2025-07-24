@@ -718,6 +718,16 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         this._unifiedStateManager.getState(),
         this._config,
         (date: Date) => {
+          // Validate time constraints if time is enabled
+          if (this._config.enableTime) {
+            const timeState = dateToTimeState(date);
+            const validation = validateTime(timeState, this._config.minTime, this._config.maxTime);
+            if (!validation.isValid) {
+              console.warn('[KTDatepicker] Start date time validation failed:', validation.error);
+              return;
+            }
+          }
+
           const end = this._unifiedStateManager.getState().selectedRange?.end || null;
           let newEnd = end;
           if (end && date > end) newEnd = null;
@@ -725,6 +735,16 @@ export class KTDatepicker extends KTComponent implements StateObserver {
           this._render();
         },
         (date: Date) => {
+          // Validate time constraints if time is enabled
+          if (this._config.enableTime) {
+            const timeState = dateToTimeState(date);
+            const validation = validateTime(timeState, this._config.minTime, this._config.maxTime);
+            if (!validation.isValid) {
+              console.warn('[KTDatepicker] End date time validation failed:', validation.error);
+              return;
+            }
+          }
+
           const start = this._unifiedStateManager.getState().selectedRange?.start || null;
           let newStart = start;
           if (start && date < start) newStart = null;

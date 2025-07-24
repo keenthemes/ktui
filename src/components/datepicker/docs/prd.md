@@ -1,67 +1,125 @@
-# KTDatepicker Component - Product Requirements Document (MVP)
+# KTDatepicker Component - Product Requirements Document
 
 ## Overview
-KTDatepicker is a customizable, framework-agnostic date and time selection component written in TypeScript. It enhances standard HTML form inputs with a rich calendar interface, supporting single date, date range, multi-date, and time selection. The MVP now features a HeroUI-style segmented input field with advanced keyboard navigation, real-time validation, and a fully extensible template/config system. The focus is on accessibility, internationalization, and ease of integration.
+KTDatepicker is a customizable, framework-agnostic date and time selection component written in TypeScript. It enhances standard HTML form inputs with a rich calendar interface, supporting single date, date range, multi-date, and time selection. The component features a unified state management system, comprehensive template customization, and advanced accessibility support.
 
-## Modular Code Structure (2025+)
-KTDatepicker is architected with a strict modular approach:
-- All major UI fragments and state updates are handled by dedicated, single-responsibility private methods in the main class (see `datepicker.ts`).
-- Example modular methods:
-  - `_renderContainer()`: Renders the main container
-  - `_renderInputWrapper()`: Renders the input wrapper and calendar button
-  - `_bindCalendarButtonEvent()`: Binds event to the calendar button
-  - `_renderDropdown()`: Renders the dropdown container
-  - `_renderDropdownContent()`: Renders header, calendar, and footer into the dropdown
-  - `_attachDropdown()`: Attaches the dropdown to the DOM
-  - `_updatePlaceholder()`: Updates the input placeholder
-  - `_updateDisabledState()`: Updates the disabled state of input and button
-  - `_enforceMinMaxDates()`: Disables day buttons outside min/max range
-- This modular structure ensures:
-  - High maintainability and readability
-  - Easy extensibility for new features
-  - Improved testability and isolation of logic
-  - Clean separation of concerns, following best practices
+## Architecture Overview
 
-## MVP Focus
-- HeroUI-style segmented input for date (and time) with segment navigation and editing
-- Core features for date and time selection
-- Extensibility and template customization for all UI fragments
-- Ease of integration and configuration
-- Accessibility and internationalization as first-class concerns
+### Unified State Management
+The component implements a centralized state management system that provides a single source of truth for all component state. The unified state manager uses the observer pattern to ensure automatic UI synchronization across all components, with built-in validation and performance optimization.
 
-## Feature Summary
-KTDatepicker provides the following major features:
-- **Segmented Input:** Single input field visually divided into editable segments (day, month, year, [hour, minute, second, AM/PM if enabled]), with keyboard and mouse navigation, input masking, and real-time validation
-- **Selection Types:** Single date, date range, multi-date, and time selection ([See: selection-types.md](./selection-types.md))
-- **Configuration:** Attribute-based, JSON config, and merging logic ([See: configuration.md](./configuration.md))
-- **Template Customization:** Overridable templates for all UI fragments, including segmented input and segment overlays ([See: template-customization.md](./template-customization.md))
-- **Accessibility & Internationalization:** Keyboard navigation, ARIA, screen reader, locale/RTL support ([See: accessibility-i18n.md](./accessibility-i18n.md))
-- **Usage Examples:** Standalone HTML snippets for all major scenarios, including segmented input and advanced navigation ([See: usage-examples.md](./usage-examples.md))
-- **Testing:** Automated test requirements and structure ([See: testing.md](./testing.md))
-- **Future Roadmap:** Planned features and improvements ([See: roadmap.md](./roadmap.md))
+### Unified Template System
+A comprehensive template system consolidates all template functionality into a single, extensible system. The template system supports hierarchical merging, dynamic customization, and performance optimization through caching and efficient rendering.
 
-## Attribute-Driven Architecture (2025+)
-- All internal DOM elements must use `data-kt-datepicker-*` attributes for targeting, logic, and styling.
-- Custom CSS classes (e.g., `kt-datepicker-*`) are not permitted for internal logic or styling.
-- Only general, well-known classes (`active`, `disabled`, `focus`, etc.) are allowed for state.
-- This ensures robust, conflict-free integration and easier customization.
-- If a UI fragment is rendered and there is no template key for it, a new key must be added to `templates.ts` and documented. The template system must always be the single source of truth for all UI markup.
+### Modular Component Architecture
+The component follows a strict modular approach with dedicated, single-responsibility methods for each major UI fragment and state update. This ensures maintainability, testability, and clean separation of concerns.
 
-## Directory & File Structure
-- All documentation is modularized in `ktui/src/components/datepicker/docs/`.
-- Each major feature or concern is documented in its own markdown file for clarity and maintainability.
-- Example HTML files are located in `ktui/examples/datepicker/` ([See: usage-examples.md](./usage-examples.md)).
-- Automated tests are located in `ktui/src/components/datepicker/tests/` ([See: testing.md](./testing.md)).
+## Core Features
+
+### Selection Modes
+- **Single Date Selection:** Standard date picking with immediate feedback
+- **Date Range Selection:** Start and end date selection with range highlighting
+- **Multi-Date Selection:** Multiple non-contiguous date selection
+- **Time Selection:** Precise time picking with granularity control
+- **DateTime Range Selection:** Comprehensive datetime range selection
+
+### Configuration System
+- **Attribute-Based Configuration:** Simple configuration via HTML attributes
+- **JSON Configuration:** Advanced configuration via JSON objects
+- **Combined Configuration:** Flexible combination of both methods
+- **Runtime Updates:** Dynamic configuration changes without reinitialization
+
+### Template Customization
+- **Complete Template Override:** Full control over all UI elements
+- **Class Customization:** Fine-grained styling control
+- **Dynamic Templates:** Runtime template updates and theme switching
+- **Performance Optimization:** Template caching and efficient rendering
+
+### Accessibility and Internationalization
+- **Full Keyboard Navigation:** Complete keyboard accessibility
+- **Screen Reader Support:** ARIA compliance and semantic markup
+- **Locale Support:** Multiple locale support with automatic adaptation
+- **RTL Support:** Right-to-left language support
+
+## Technical Implementation
+
+### State Management Architecture
+The unified state management system provides:
+- **Single Source of Truth:** Centralized state for all component data
+- **Observer Pattern:** Automatic UI synchronization
+- **State Validation:** Built-in validation and error prevention
+- **Performance Optimization:** Batched updates and efficient notifications
+
+### Template System Architecture
+The unified template system includes:
+- **Template Manager:** Central interface for all template operations
+- **Merging System:** Hierarchical template merging with clear precedence
+- **Rendering Utilities:** Comprehensive rendering capabilities
+- **Validation System:** Template validation and error handling
+
+### Component Integration
+The component integrates seamlessly with:
+- **HTML Forms:** Standard form integration and validation
+- **Frameworks:** Framework-agnostic design with integration patterns
+- **APIs:** Comprehensive programmatic control
+- **Build Systems:** Optimized for modern build tools
+
+## Quality Assurance
+
+### Testing Strategy
+Comprehensive testing coverage includes:
+- **Unit Testing:** Isolated testing of individual features
+- **Integration Testing:** End-to-end workflow validation
+- **Performance Testing:** Performance benchmarking and optimization
+- **Accessibility Testing:** Accessibility compliance validation
+
+### Documentation Standards
+Complete documentation includes:
+- **Architecture Documentation:** Technical implementation details
+- **Usage Examples:** Comprehensive implementation scenarios
+- **Configuration Reference:** Complete configuration options
+- **Best Practices:** Development and implementation guidelines
+
+## Development Guidelines
+
+### Code Organization
+- **Modular Structure:** Clear separation of concerns
+- **Single Responsibility:** Each method handles one specific task
+- **Clean Interfaces:** Well-defined component interfaces
+- **Extensible Design:** Easy to extend and customize
+
+### Performance Considerations
+- **Efficient Rendering:** Optimized template rendering and DOM manipulation
+- **Memory Management:** Proper cleanup and disposal
+- **State Optimization:** Efficient state updates and notifications
+- **Caching Strategies:** Intelligent caching for improved performance
+
+### Maintainability
+- **Clear Documentation:** Comprehensive code documentation
+- **Consistent Patterns:** Established coding patterns and conventions
+- **Error Handling:** Robust error handling and recovery
+- **Version Management:** Proper versioning and migration support
+
+## Future Roadmap
+
+### Planned Enhancements
+- **Advanced Template Features:** Per-date and per-segment customization
+- **Enhanced Accessibility:** Improved ARIA support and keyboard navigation
+- **Additional Views:** Month picker, year picker, and decade navigation
+- **Performance Improvements:** Virtualized rendering and lazy loading
+
+### Technical Improvements
+- **API Enhancements:** More granular event hooks and callbacks
+- **Framework Integration:** Enhanced framework integration patterns
+- **Analytics Support:** Built-in usage analytics and monitoring
+- **Security Enhancements:** Advanced security and validation features
 
 ## References
+- [state-management.md](./state-management.md): Unified state management system
+- [template-customization.md](./template-customization.md): Template system and customization
+- [configuration.md](./configuration.md): Configuration system and options
 - [selection-types.md](./selection-types.md): Selection modes and behaviors
-- [configuration.md](./configuration.md): Configuration methods and merging logic
-- [template-customization.md](./template-customization.md): Template keys, overrides, and usage
+- [usage-examples.md](./usage-examples.md): Implementation scenarios and examples
 - [accessibility-i18n.md](./accessibility-i18n.md): Accessibility and internationalization
-- [usage-examples.md](./usage-examples.md): Usage scenarios and HTML examples
-- [testing.md](./testing.md): Test requirements and structure
-- [roadmap.md](./roadmap.md): Future features and planned improvements
-
----
-
-> For detailed information on any feature, configuration, or implementation detail, please refer to the corresponding markdown file listed above. This PRD serves as the single source of truth for KTDatepicker's high-level requirements and as a navigational hub for all related documentation.
+- [testing.md](./testing.md): Testing strategy and guidelines
+- [roadmap.md](./roadmap.md): Development roadmap and future plans

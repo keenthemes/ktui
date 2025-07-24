@@ -1,288 +1,142 @@
-# KTDatepicker Template Customization (2025 Revamp)
+# Unified Template System
 
 ## Overview
-KTDatepicker is now a fully modular, template-driven component. All UI fragments are customizable via config or `data-kt-datepicker-config` attributes. The system is inspired by the select component's template merging logic for consistency and flexibility.
+KTDatepicker implements a unified template system that consolidates all template functionality into a single, comprehensive system. All UI fragments are customizable via configuration, with a focus on maintainability, extensibility, and consistency.
 
-> **Modular Rendering:** Each template key is rendered by a dedicated, single-responsibility private method in the main class (see `datepicker.ts`). This ensures maintainability, testability, and a clean separation of concerns.
+The template system follows a modular architecture where each template key is rendered by dedicated, single-responsibility methods in the main component. This ensures clean separation of concerns and improved testability.
 
-> **Note:** All internal templates must use `data-kt-datepicker-*` attributes for targeting and styling. Do not use custom classes (e.g., `kt-datepicker-*`) for internal logic or styling. Only general classes (`active`, `disabled`, `focus`) are allowed for state.
->
-> **Architectural Rule:** If a UI fragment is rendered and there is no template key for it, a new key must be added to `templates.ts` and documented here. The template system must always be the single source of truth for all UI markup.
+## Architecture Principles
 
-## 1. Template Keys
-The following template keys can be overridden via config:
-- `container`: Main dropdown container (**must use `data-kt-datepicker-container`**)
-- `header`: Calendar header (month/year navigation) (**must use `data-kt-datepicker-header`**)
-- `footer`: Footer actions (today, clear, apply) (**must use `data-kt-datepicker-footer`**)
-- `calendarGrid`: Calendar table/grid (**must use `data-kt-datepicker-calendar-grid`**)
-- `dayCell`: Individual day cell (**must use `data-kt-datepicker-day`**)
-- `monthYearSelect`: Month/year selector (**must use `data-kt-datepicker-monthyear-select`**)
-- `monthSelection`: Month selection view (**must use `data-kt-datepicker-month-selection`**)
-- `yearSelection`: Year selection view (**must use `data-kt-datepicker-year-selection`**)
-- `inputWrapper`: Input field wrapper (**must use `data-kt-datepicker-input-wrapper`**)
-- `segmentedDateInput`: Segmented input for date (container for all segments) (**must use `data-kt-datepicker-segmented-input`**)
-- `segmentedDateRangeInput`: Segmented input for date range (**must use `data-kt-datepicker-segmented-range-input`**)
-- `dateSegment`: Template for a single date segment (e.g., day, month, year)
-- `segmentOverlay`: Overlay/highlight for the active segment
-- `placeholder`: Placeholder text (**must use `data-kt-datepicker-placeholder`**)
-- `displayWrapper`: Display wrapper for selected value (**must use `data-kt-datepicker-display-wrapper`**)
-- `displayElement`: Display element for selected value (**must use `data-kt-datepicker-display-element`**)
-- `timePanel`: Time selection panel (**must use `data-kt-datepicker-time-panel`**)
-- `multiDateTag`: Tag for each selected date (multi-date) (**must use `data-kt-datepicker-multidate-tag`**)
-- `emptyState`: Empty state message (**must use `data-kt-datepicker-empty`**)
-- `calendarButton`: Button to open the calendar dropdown (customizable icon, ARIA label) (**must use `data-kt-datepicker-calendar-btn`**)
-- `multiMonthContainer`: Container for multiple calendar months (horizontal multi-month view) (**must use `data-kt-datepicker-multimonth-container`**)
+### Attribute-Driven Design
+All internal templates use `data-kt-datepicker-*` attributes for targeting and styling. Custom CSS classes (e.g., `kt-datepicker-*`) are not permitted for internal logic or styling. Only general classes (`active`, `disabled`, `focus`) are allowed for state management.
 
-## 2. Base Class + Overrideable Class Pattern
+### Single Source of Truth
+The template system serves as the single source of truth for all UI markup. If a UI fragment is rendered without a corresponding template key, a new key must be added to the template system and documented.
 
-All templates now follow the established pattern from the alert component: **base class + overrideable class**. This ensures consistent default styling while allowing full customization.
+### Base Class + Overrideable Class Pattern
+All templates follow the established pattern: `class="kt-datepicker-{element} {{class}}"`. This ensures consistent default styling while allowing full customization through configuration.
 
-### Class Structure
+## Template System Components
 
-Each template uses the pattern: `class="kt-datepicker-{element} {{class}}"`
+### Core Template Manager
+The `TemplateRenderer` class provides the central interface for all template operations:
+- **String Rendering:** Convert templates to HTML strings
+- **DOM Element Rendering:** Create HTMLElements from templates
+- **Document Fragment Rendering:** Generate DocumentFragments for complex structures
+- **Template Management:** Update and retrieve templates dynamically
 
-- **Base Class**: `kt-datepicker-{element}` - Always present, provides default styling
-- **Overrideable Class**: `{{class}}` - Injected from config, allows custom styling
+### Template Merging System
+The system supports hierarchical template merging with clear precedence:
+1. **Default Templates:** Core templates providing baseline functionality
+2. **Configuration Templates:** Templates specified in component configuration
+3. **User Templates:** Runtime template overrides for maximum flexibility
 
-### Base Classes Reference
+### Rendering Utilities
+Comprehensive utilities support various rendering scenarios:
+- **String Replacement:** Simple placeholder replacement for basic templates
+- **Function Templates:** Dynamic templates using JavaScript functions
+- **Class Injection:** Automatic class merging from configuration
+- **Validation:** Template validation and error handling
 
-The following base classes are automatically applied to each template element:
+## Template Categories
 
-- `kt-datepicker-container` - Main container element
-- `kt-datepicker-header` - Calendar header
-- `kt-datepicker-footer` - Footer actions
-- `kt-datepicker-calendar-grid` - Calendar grid table
-- `kt-datepicker-day-cell` - Individual day cells
-- `kt-datepicker-monthyear-select` - Month/year selector
-- `kt-datepicker-month-selection` - Month selection view
-- `kt-datepicker-year-selection` - Year selection view
-- `kt-datepicker-input-wrapper` - Input wrapper
-- `kt-datepicker-segmented-input` - Segmented input container
-- `kt-datepicker-segmented-range-input` - Range segmented input container
-- `kt-datepicker-date-segment` - Date segment elements
-- `kt-datepicker-segment-separator` - Segment separators
-- `kt-datepicker-placeholder` - Placeholder text
-- `kt-datepicker-display-wrapper` - Display wrapper
-- `kt-datepicker-display-element` - Display element
-- `kt-datepicker-time-panel` - Time selection panel
-- `kt-datepicker-multidate-tag` - Multi-date tags
-- `kt-datepicker-empty-state` - Empty state message
-- `kt-datepicker-calendar-button` - Calendar button
-- `kt-datepicker-dropdown` - Dropdown container
-- `kt-datepicker-prev-button` - Previous month button
-- `kt-datepicker-next-button` - Next month button
-- `kt-datepicker-calendar-table` - Calendar table
-- `kt-datepicker-calendar-row` - Calendar table rows
-- `kt-datepicker-calendar-body` - Calendar table body
-- `kt-datepicker-today-button` - Today button
-- `kt-datepicker-clear-button` - Clear button
-- `kt-datepicker-apply-button` - Apply button
-- `kt-datepicker-multimonth-container` - Multi-month container
+### Input and Display Templates
+- **Input Wrapper:** Container for input elements with calendar button
+- **Segmented Input:** Date/time input with editable segments
+- **Range Input:** Dual segmented inputs for date ranges
+- **Display Elements:** Value display and placeholder templates
 
-## 3. Class Customization via Config
+### Calendar Templates
+- **Calendar Grid:** Main calendar table structure
+- **Day Cells:** Individual day selection elements
+- **Navigation:** Previous/next month buttons
+- **Header/Footer:** Calendar navigation and action buttons
 
-You can customize classes for any template element using the `classes` object in the config:
+### Time Selection Templates
+- **Time Panel:** Container for time selection interface
+- **Time Units:** Hour, minute, and second selection controls
+- **AM/PM Control:** 12-hour format toggle
+- **Time Display:** Current time value display
 
-```html
-<div
-  data-kt-datepicker="true"
-  data-kt-datepicker-config='{
-    "classes": {
-      "container": "custom-container-class",
-      "header": "bg-blue-500 text-white",
-      "dayCell": "hover:bg-gray-100",
-      "calendarButton": "btn btn-primary",
-      "dropdown": "shadow-lg border-2"
-    }
-  }'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Multi-Date Templates
+- **Date Tags:** Individual selected date representations
+- **Tag Management:** Add/remove functionality for selected dates
+- **Empty State:** No selection state messaging
 
-### Available Class Properties
+## Template Customization Methods
 
-The following class properties can be set in the `classes` object:
+### Configuration-Based Customization
+Templates can be customized through the component configuration object, allowing for both simple class overrides and complex template replacements.
 
-- `container`: Main container element
-- `header`: Calendar header
-- `footer`: Footer actions
-- `calendarGrid`: Calendar grid table
-- `dayCell`: Individual day cells
-- `monthYearSelect`: Month/year selector
-- `monthSelection`: Month selection view
-- `yearSelection`: Year selection view
-- `inputWrapper`: Input wrapper
-- `segmentedDateInput`: Segmented input container
-- `segmentedDateRangeInput`: Range segmented input container
-- `dateSegment`: Date segment elements
-- `segmentSeparator`: Segment separators
-- `placeholder`: Placeholder text
-- `displayWrapper`: Display wrapper
-- `displayElement`: Display element
-- `timePanel`: Time selection panel
-- `multiDateTag`: Multi-date tags
-- `emptyState`: Empty state message
-- `calendarButton`: Calendar button
-- `dropdown`: Dropdown container
-- `prevButton`: Previous month button
-- `nextButton`: Next month button
-- `calendarTable`: Calendar table
-- `calendarRow`: Calendar table rows
-- `calendarBody`: Calendar table body
-- `todayButton`: Today button
-- `clearButton`: Clear button
-- `applyButton`: Apply button
-- `multiMonthContainer`: Multi-month container
+### Runtime Template Updates
+The template system supports dynamic template updates, enabling runtime customization and theme switching without component reinitialization.
 
-## 4. Overriding Templates
-Override any template by providing a matching key in the `data-kt-datepicker-config` JSON attribute or via the JS config:
-```html
-<div
-  data-kt-datepicker="true"
-  data-kt-datepicker-config='{
-    "dayCell": "<td class=\"kt-datepicker-day-cell custom-day {{class}}\">{{day}}</td>",
-    "header": "<div class=\"kt-datepicker-header custom-header {{class}}\">{{month}} {{year}}</div>",
-    "dateSegment": "<span class=\"kt-datepicker-date-segment segment {{isActive}} {{class}}\">{{value}}</span>",
-    "segmentOverlay": "<span class=\"absolute inset-0 bg-blue-100 opacity-50 pointer-events-none\"></span>"
-  }'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Class-Based Customization
+The `classes` configuration object allows fine-grained control over styling while maintaining the base class structure for consistency.
 
-## 5. Template Merging Logic
-- Templates are merged in this order:
-  1. Core templates (defaults)
-  2. User overrides (via config/templates object)
-- For each render, the merged template set is used, just like select's `getTemplateStrings()`.
-- If a key exists in both, the user override takes precedence.
+## Template Validation and Error Handling
 
-## 6. Placeholders
-Each template supports specific placeholders. Common examples include:
-- `{{day}}`, `{{month}}`, `{{year}}`, `{{isToday}}`, `{{isSelected}}`, `{{isInRange}}`
-- `{{prevButton}}`, `{{nextButton}}`, `{{todayButton}}`, `{{clearButton}}`, `{{applyButton}}`
-- `{{input}}`, `{{icon}}`, `{{segments}}`, `{{start}}`, `{{end}}`, `{{separator}}`, `{{placeholder}}`, `{{value}}`
-- `{{hours}}`, `{{minutes}}`, `{{seconds}}`, `{{amPm}}`, `{{date}}`, `{{removeButton}}`, `{{message}}`
-- `{{segmentType}}` (e.g., 'day', 'month', 'year'), `{{isActive}}` (active segment class), `{{segmentValue}}` (value for the segment)
-- `{{class}}` (dynamic class injection from config)
+### Template Validation
+The system includes comprehensive validation to ensure template integrity:
+- **Required Attributes:** Validation of essential data attributes
+- **Accessibility Compliance:** Automatic ARIA attribute inclusion
+- **Structure Validation:** Template structure and nesting validation
 
-> **Note:** The codebase is now fully modular and template-driven. All UI fragments are rendered via templates and can be customized.
+### Error Recovery
+Robust error handling ensures graceful degradation:
+- **Fallback Templates:** Default templates used when custom templates fail
+- **Error Reporting:** Detailed error messages for debugging
+- **Graceful Degradation:** Component continues to function with invalid templates
 
-## 7. Granular Customization
-- Per-segment and per-cell customization is supported (e.g., `dayCell`, `monthCell`, `yearCell`, `dateSegment`).
-- Custom classes, icons, or badges can be injected via placeholders.
-- The `segmentOverlay` template allows for custom highlighting of the active segment using Tailwind CSS or custom markup.
-- Class placeholders enable dynamic styling based on component state or user preferences.
-- Base classes ensure consistent default styling across all instances.
+## Performance Considerations
 
-## 8. Usage Examples
-### Override a Single Template
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"dayCell": "<td class=\"kt-datepicker-day-cell rounded bg-blue-100 {{class}}\">{{day}}</td>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Template Caching
+The system implements intelligent template caching to minimize rendering overhead:
+- **Template Compilation:** Templates are compiled once and reused
+- **Fragment Reuse:** Document fragments are reused when possible
+- **Memory Management:** Proper cleanup prevents memory leaks
 
-### Override Multiple Templates
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"header": "<div class=\"kt-datepicker-header flex justify-between {{class}}\">{{prevButton}}<span>{{month}} {{year}}</span>{{nextButton}}</div>", "footer": "<div class=\"kt-datepicker-footer {{class}}\">{{todayButton}} {{clearButton}} {{applyButton}}</div>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Rendering Optimization
+Optimized rendering strategies improve performance:
+- **Batch Updates:** Multiple template updates are batched
+- **Selective Rendering:** Only changed templates are re-rendered
+- **Efficient DOM Operations:** Minimal DOM manipulation for updates
 
-### Customizing Segment Highlighting
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"dateSegment": "<span class=\"kt-datepicker-date-segment segment {{isActive}} {{class}}\">{{value}}</span>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+## Integration with State Management
 
-### Class Customization Examples
-```html
-<!-- Custom styling for specific elements -->
-<div data-kt-datepicker="true" data-kt-datepicker-config='{
-  "classes": {
-    "header": "bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg",
-    "dayCell": "hover:bg-blue-100 transition-colors",
-    "todayButton": "bg-green-500 hover:bg-green-600 text-white",
-    "calendarButton": "bg-blue-500 hover:bg-blue-600 text-white rounded"
-  }
-}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
+### State-Driven Templates
+Templates automatically respond to state changes through the unified state management system:
+- **Dynamic Content:** Template content updates based on component state
+- **Conditional Rendering:** Templates adapt to different selection modes
+- **Real-time Updates:** UI updates automatically when state changes
 
-<!-- Responsive design with classes -->
-<div data-kt-datepicker="true" data-kt-datepicker-config='{
-  "classes": {
-    "container": "max-w-sm mx-auto",
-    "dropdown": "shadow-xl border-2 border-gray-200",
-    "calendarGrid": "w-full text-sm"
-  }
-}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
+### Observer Pattern Integration
+The template system integrates with the observer pattern for seamless state synchronization:
+- **Automatic Updates:** Templates update when relevant state changes
+- **Priority-Based Updates:** Template updates follow observer priority
+- **Clean Synchronization:** Proper cleanup prevents update conflicts
 
-<!-- Styling base classes directly -->
-<style>
-.kt-datepicker-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem;
-  border-radius: 0.5rem 0.5rem 0 0;
-}
+## Best Practices
 
-.kt-datepicker-day-cell {
-  border-radius: 0.25rem;
-  transition: all 0.2s ease;
-}
+### Template Design
+- **Semantic Structure:** Use semantic HTML elements and attributes
+- **Accessibility First:** Include ARIA attributes and keyboard navigation
+- **Consistent Naming:** Follow established naming conventions
+- **Modular Design:** Keep templates focused and reusable
 
-.kt-datepicker-day-cell:hover {
-  background-color: #e3f2fd;
-  transform: scale(1.05);
-}
-</style>
-```
+### Customization Guidelines
+- **Preserve Structure:** Maintain essential data attributes and structure
+- **Use Base Classes:** Leverage the base class system for consistency
+- **Test Thoroughly:** Validate custom templates across different scenarios
+- **Document Changes:** Document any template modifications
 
-## 9. Consistency with Alert Component
-- The template customization and merging logic follows the same pattern as the alert component. See the alert component's templates for reference.
-- Both components use the base class + overrideable class pattern: `class="kt-{component}-{element} {{class}}"`
+### Performance Optimization
+- **Minimize DOM Queries:** Use efficient template structures
+- **Batch Updates:** Group related template changes
+- **Reuse Templates:** Leverage template caching and reuse
+- **Monitor Performance:** Track template rendering performance
 
-## 10. Multi-Month Display
-
-KTDatepicker supports displaying multiple months side by side using the `visibleMonths` config option (default: 1). When set to 2 or more, the datepicker will render that many consecutive months horizontally in the dropdown, wrapped in the `multiMonthContainer` template.
-
-### Multi-Month Configuration
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"visibleMonths": 3}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
-
-### Multi-Month Template Customization
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{
-  "visibleMonths": 2,
-  "classes": {
-    "multiMonthContainer": "grid grid-cols-2 gap-4"
-  }
-}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
-
-### Notes
-- The multi-month view is always horizontal by default.
-- Each month uses the same template structure as single-month view.
-- The `multiMonthContainer` template wraps all calendar months.
-
-## 11. Multi-Month Rendering: Event Listeners & Debugging
-
-### Real DOM Node Rendering
-- Each calendar month is rendered as a real DOM node, not a string.
-- Event listeners are properly attached to each month's elements.
-- State changes are synchronized across all visible months.
-
-### Debugging Multi-Month Issues
-- Check that `visibleMonths` is set correctly in config
-- Verify that `multiMonthContainer` template is properly structured
-- Ensure event listeners are attached to all month elements
-- Test navigation between months in multi-month view
+## References
+- See [configuration.md](./configuration.md) for template configuration options
+- See [state-management.md](./state-management.md) for state-driven template updates
+- See [usage-examples.md](./usage-examples.md) for template customization examples

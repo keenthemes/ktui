@@ -1,166 +1,132 @@
-# KTDatepicker Usage Examples
+# Usage Examples and Scenarios
 
 ## Overview
-This document provides a variety of usage examples for KTDatepicker, demonstrating different features and configuration methods. Each example is a standalone HTML snippet.
+This document provides comprehensive guidance on implementing KTDatepicker across various use cases and scenarios. Each example demonstrates different features and configuration approaches, from basic implementations to advanced customization.
 
----
+## Basic Implementation Scenarios
 
-### 1. Minimal Example (Single Date)
-```html
-<div data-kt-datepicker="true">
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Single Date Selection
+The most common use case involves selecting a single date from a calendar interface. This mode provides a straightforward user experience with immediate selection feedback and automatic input population.
 
----
+### Date Range Selection
+Range selection enables users to choose start and end dates, with visual highlighting of the selected range. This mode is ideal for booking systems, date filtering, and period selection scenarios.
 
-### 2. Date Range Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-range="true">
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Multi-Date Selection
+Multi-date mode allows selection of multiple non-contiguous dates, useful for scheduling multiple events, availability selection, or complex date requirements. The interface includes an Apply button for confirming selections.
 
----
+### Time-Enhanced Selection
+Time selection adds precise time picking to any date selection mode, supporting various granularities and formats. This is essential for scheduling applications, appointment booking, and precise datetime requirements.
 
-### 3. Multi-Date Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-multi-date="true">
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+## Advanced Configuration Scenarios
 
----
+### Template Customization
+Advanced users can customize the appearance and behavior through template overrides. This includes modifying individual UI elements, changing styling classes, and implementing custom rendering logic.
 
-### 4. Time Selection Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-enable-time="true">
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Internationalization
+Locale support enables global deployment with proper date formatting, language-specific text, and cultural considerations. The system supports multiple locales with automatic format adaptation.
 
----
+### Validation and Constraints
+Complex applications often require sophisticated validation rules, including date range limits, disabled date sets, and custom validation logic. The system provides comprehensive validation capabilities.
 
-### 4a. Time with Granularity Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeGranularity": "second"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+## Integration Patterns
 
----
+### Form Integration
+Datepicker components integrate seamlessly with HTML forms, providing proper form submission, validation integration, and accessibility compliance. The system supports standard form patterns and custom validation.
 
-### 4b. Time with 12-Hour Format Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "timeFormat": "12h"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Framework Integration
+The component is designed for framework-agnostic usage while providing integration patterns for popular frameworks. This includes proper lifecycle management, event handling, and state synchronization.
 
----
+### API Integration
+Programmatic control enables dynamic configuration, state management, and event handling. The API provides comprehensive control over component behavior and state.
 
-### 4c. Time with Constraints Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime": true, "minTime": "09:00", "maxTime": "17:00"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+## Performance Optimization
 
----
+### Efficient Rendering
+Large-scale applications benefit from optimized rendering strategies, including template caching, selective updates, and efficient DOM manipulation. The system provides built-in performance optimizations.
 
-### 5. Template Customization Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"dayCell": "<td class=\"rounded bg-blue-100\">{{day}}</td>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Memory Management
+Proper cleanup and disposal prevent memory leaks in long-running applications. The system includes automatic cleanup mechanisms and manual disposal options.
 
----
+### State Management
+Efficient state management ensures responsive user interfaces with minimal re-rendering. The unified state system provides optimal performance for complex state scenarios.
 
-### 6. Disabled Example
-```html
-<div data-kt-datepicker="true">
-  <input type="text" data-kt-datepicker-input disabled />
-</div>
-```
+## Accessibility Implementation
 
----
+### Keyboard Navigation
+Full keyboard accessibility ensures the component is usable by all users, including those using assistive technologies. The system provides comprehensive keyboard navigation support.
 
-### 7. Internationalization (i18n) Example
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-locale="fr-FR">
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+#### Segmented Input Keyboard Navigation
+- **Arrow Left/Right**: Move between date and time segments
+- **Arrow Up/Down**: Increment/decrement segment values
+  - Numeric segments (day, month, year, hour, minute, second): Increment/decrement by 1
+  - AM/PM segment: Toggle between AM and PM
+- **Tab/Shift+Tab**: Move between segments
+- **Enter**: Move to next segment
+- **Number keys**: Direct input with validation and auto-advance
 
----
+#### Time Picker Keyboard Navigation
+- **Tab/Shift+Tab**: Navigate between time units (hour, minute, second)
+- **Arrow Up/Down**: Increment/decrement focused time unit
+- **Click**: Focus specific time unit for keyboard navigation
+- **Time validation**: Respects min/max time constraints
 
-### 8. All Features Example
-```html
-<div
-  data-kt-datepicker="true"
-  data-kt-datepicker-range="true"
-  data-kt-datepicker-multi-date="true"
-  data-kt-datepicker-enable-time="true"
-  data-kt-datepicker-locale="fr-FR"
-  data-kt-datepicker-config='{"header": "<div class=\"custom-header\">{{month}} {{year}}</div>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+#### Calendar Keyboard Navigation
+- **Arrow keys**: Navigate between dates
+- **Enter/Space**: Select date
+- **Page Up/Down**: Change month
+- **Home/End**: Jump to first/last day of week
 
----
+### Screen Reader Support
+ARIA attributes and semantic markup enable proper screen reader integration. The component includes built-in accessibility features and customization options.
 
-## Segmented Input & Advanced Features Examples
+### Focus Management
+Proper focus management ensures logical navigation flow and prevents focus traps. The system handles focus automatically while providing customization options.
 
-### 9. Segmented Input with Custom Segment Highlighting
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"segmentOverlay": "<span class=\"absolute inset-0 bg-yellow-200 opacity-40 pointer-events-none rounded\"></span>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+## Error Handling and Edge Cases
 
----
+### Invalid Input Handling
+Robust error handling manages invalid user input, network errors, and system failures. The system provides graceful degradation and user-friendly error messages.
 
-### 10. Segmented Input with Time Segments
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-enable-time="true" data-kt-datepicker-config='{"dateSegment": "<span class=\"segment {{isActive}}\">{{segmentValue}}</span>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-```
+### Boundary Conditions
+Edge cases such as date range limits, timezone considerations, and format conflicts are handled automatically. The system provides comprehensive boundary condition management.
 
----
+### Fallback Behavior
+When advanced features are unavailable or fail, the system provides sensible fallback behavior. This ensures the component remains functional in all scenarios.
 
-### 11. Segmented Input with Advanced Keyboard Navigation
-```html
-<div data-kt-datepicker="true" data-kt-datepicker-config='{"dateSegment": "<span class=\"segment {{isActive}}\">{{segmentValue}}</span>"}'>
-  <input type="text" data-kt-datepicker-input />
-</div>
-<!--
-  Keyboard navigation:
-  - Arrow Left/Right: Move between segments
-  - Arrow Up/Down: Increment/decrement segment value
-  - Typing: Overwrite active segment, auto-advance
-  - Home/End: Jump to first/last segment
--->
-```
+## Testing and Quality Assurance
 
----
+### Unit Testing
+Comprehensive unit tests ensure component reliability and maintainability. The modular architecture enables thorough testing of individual features and integration scenarios.
+
+### Integration Testing
+End-to-end testing validates complete user workflows and integration scenarios. The system provides testing utilities and mock implementations.
+
+### Performance Testing
+Performance benchmarks ensure the component meets performance requirements in various scenarios. The system includes performance monitoring and optimization tools.
+
+## Deployment Considerations
+
+### Production Optimization
+Production deployments benefit from optimized builds, caching strategies, and performance monitoring. The system provides production-ready configurations and optimization options.
+
+### Browser Compatibility
+Cross-browser compatibility ensures consistent behavior across different browsers and versions. The system includes compatibility testing and polyfill support.
+
+### Mobile Responsiveness
+Mobile-friendly design ensures optimal user experience on various screen sizes and devices. The component includes responsive design patterns and touch optimization.
+
+## Best Practices
+
+### User Experience Design
+Following UX best practices ensures intuitive and efficient user interactions. The component includes built-in UX patterns and customization options.
+
+### Code Organization
+Proper code organization and documentation facilitate maintenance and extension. The modular architecture supports clean code practices and team collaboration.
+
+### Version Management
+Proper version management ensures compatibility and provides migration paths for updates. The system includes versioning strategies and migration documentation.
 
 ## References
-- See [selection-types.md](./selection-types.md) for feature details.
-- See [configuration.md](./configuration.md) for config options.
-- See [template-customization.md](./template-customization.md) for template overrides.
-
----
-
-## Production Build
-
-To generate a production-ready, minified bundle of KTUI (including the datepicker), run:
-
-```bash
-npm run build:prod
-```
-
-This will output optimized files in the `dist/` directory, including both `ktui.js` and `ktui.min.js`.
-
----
+- See [configuration.md](./configuration.md) for detailed configuration options
+- See [template-customization.md](./template-customization.md) for customization examples
+- See [state-management.md](./state-management.md) for state management patterns

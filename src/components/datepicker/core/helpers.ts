@@ -7,6 +7,37 @@ import { SegmentedInput } from '../ui/input/segmented-input';
 import { getTimeSegments } from '../utils/time-utils';
 import { getSegmentOrderFromFormat } from '../utils/date-utils';
 
+/**
+ * Get segments array based on configuration (date + optional time)
+ * @param config Datepicker configuration
+ * @returns Array of segment types
+ */
+export function getSegmentsForConfig(config: KTDatepickerConfig): Array<'day' | 'month' | 'year' | 'hour' | 'minute' | 'second' | 'ampm'> {
+  // Determine date segments based on format
+  let segments: Array<'day' | 'month' | 'year' | 'hour' | 'minute' | 'second' | 'ampm'>;
+
+  if (config.format && typeof config.format === 'string') {
+    // Use format-derived segment order for date parts
+    segments = getSegmentOrderFromFormat(config.format);
+  } else {
+    // Default fallback
+    segments = ['month', 'day', 'year'];
+  }
+
+  // Add time segments if time is enabled
+  if (config.enableTime) {
+    const timeSegments = getTimeSegments(config.timeGranularity || 'minute');
+    segments = [...segments, ...timeSegments];
+
+    // Add AM/PM for 12-hour format
+    if (config.timeFormat === '12h') {
+      segments.push('ampm');
+    }
+  }
+
+  return segments;
+}
+
 export {};
 
 export function renderSingleSegmentedInputUI(
@@ -78,31 +109,8 @@ export function instantiateSingleSegmentedInput(
   console.log('[instantiateSingleSegmentedInput] Starting with container:', container);
   console.log('[instantiateSingleSegmentedInput] Container HTML before:', container.innerHTML);
 
-  // Determine segments based on format and time configuration
-  let segments: Array<'day' | 'month' | 'year' | 'hour' | 'minute' | 'second' | 'ampm'>;
-
-  if (config.format && typeof config.format === 'string') {
-    // Use format-derived segment order for date parts
-    segments = getSegmentOrderFromFormat(config.format);
-    console.log('[instantiateSingleSegmentedInput] Using format-derived segments:', segments);
-  } else {
-    // Default fallback
-    segments = ['month', 'day', 'year'];
-    console.log('[instantiateSingleSegmentedInput] Using default segments:', segments);
-  }
-
-  if (config.enableTime) {
-    const timeSegments = getTimeSegments(config.timeGranularity || 'minute');
-    segments = [...segments, ...timeSegments];
-    console.log('[instantiateSingleSegmentedInput] Added time segments:', timeSegments);
-
-    // Add AM/PM for 12-hour format
-    if (config.timeFormat === '12h') {
-      segments.push('ampm');
-      console.log('[instantiateSingleSegmentedInput] Added AM/PM segment');
-    }
-  }
-
+  // Use shared utility to determine segments
+  const segments = getSegmentsForConfig(config);
   console.log('[instantiateSingleSegmentedInput] Final segments:', segments);
   console.log('[instantiateSingleSegmentedInput] Calling SegmentedInput with options:', {
     value: state.selectedDate || state.currentDate || new Date(),
@@ -136,16 +144,8 @@ export function instantiateRangeSegmentedInputs(
   onStartChange: (date: Date) => void,
   onEndChange: (date: Date) => void
 ): void {
-  // Determine segments based on format
-  let segments: Array<'day' | 'month' | 'year'>;
-
-  if (config.format && typeof config.format === 'string') {
-    // Use format-derived segment order for date parts
-    segments = getSegmentOrderFromFormat(config.format);
-  } else {
-    // Default fallback
-    segments = ['month', 'day', 'year'];
-  }
+  // Use shared utility to determine segments (includes time if enabled)
+  const segments = getSegmentsForConfig(config);
 
   SegmentedInput(startContainer, {
     value: state.selectedRange?.start || new Date(),
