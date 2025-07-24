@@ -13,36 +13,34 @@
 
 	.kt-alert-modal {
 		@apply relative flex flex-col w-full max-w-md mx-auto;
-		@apply bg-white text-gray-900 rounded-xl;
-		@apply shadow-[0_0_1px_rgba(0,0,0,0.075),0_1px_2px_rgba(0,0,0,0.075),1px_2px_4px_rgba(0,0,0,0.075),1px_3px_8px_rgba(0,0,0,0.075),2px_4px_16px_rgba(0,0,0,0.075)];
+		@apply bg-popover text-popover-foreground rounded-xl;
+		@apply shadow-md border border-border;
 		@apply transition-all duration-300 ease-out;
-		@apply duration-300;
 		animation: fadeIn 0.3s ease-out, zoomIn 0.3s ease-out;
 	}
 
 	.kt-alert-container {
 		@apply relative flex flex-col w-full;
-		@apply bg-white text-gray-900 rounded-xl;
-		@apply shadow-[0_0_1px_rgba(0,0,0,0.075),0_1px_2px_rgba(0,0,0,0.075),1px_2px_4px_rgba(0,0,0,0.075),1px_3px_8px_rgba(0,0,0,0.075),2px_4px_16px_rgba(0,0,0,0.075)];
+		@apply bg-popover text-popover-foreground rounded-xl;
+		@apply shadow-md border border-border;
 		@apply transition-all duration-300 ease-out;
-		@apply duration-300;
 		animation: fadeIn 0.3s ease-out, zoomIn 0.3s ease-out;
 	}
 
 	/* Content layout with proper padding */
 	.kt-alert-modal > *:not(.kt-alert-close-button),
 	.kt-alert-container > *:not(.kt-alert-close-button) {
-		@apply px-6;
+		@apply px-5;
 	}
 
 	.kt-alert-modal > *:first-child:not(.kt-alert-close-button),
 	.kt-alert-container > *:first-child:not(.kt-alert-close-button) {
-		@apply pt-6;
+		@apply pt-5;
 	}
 
 	.kt-alert-modal > *:last-child:not(.kt-alert-close-button),
 	.kt-alert-container > *:last-child:not(.kt-alert-close-button) {
-		@apply pb-6;
+		@apply pb-5;
 	}
 
 	.kt-alert-icon {
@@ -54,12 +52,12 @@
 	}
 
 	.kt-alert-title {
-		@apply text-xl font-semibold text-gray-900 mb-3 text-center;
+		@apply text-xl font-semibold text-popover-foreground mb-3 text-center;
 		@apply leading-tight;
 	}
 
 	.kt-alert-message {
-		@apply text-base text-gray-600 mb-6 text-center;
+		@apply text-base text-muted-foreground mb-6 text-center;
 		@apply leading-relaxed;
 	}
 
@@ -69,40 +67,40 @@
 
 	.kt-alert-confirm-button {
 		@apply px-6 py-3 text-sm font-medium rounded-lg;
-		@apply bg-blue-600 text-white;
-		@apply hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800;
-		@apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2;
+		@apply bg-primary text-primary-foreground;
+		@apply hover:bg-primary/90 focus:bg-primary/90 active:bg-primary/80;
+		@apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 		@apply transition-all duration-200 ease-in-out;
 		@apply shadow-sm hover:shadow-md;
 	}
 
 	.kt-alert-cancel-button {
 		@apply px-6 py-3 text-sm font-medium rounded-lg;
-		@apply bg-gray-100 text-gray-700;
-		@apply hover:bg-gray-200 focus:bg-gray-200 active:bg-gray-300;
-		@apply focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2;
+		@apply bg-secondary text-secondary-foreground;
+		@apply hover:bg-secondary/80 focus:bg-secondary/80 active:bg-secondary/70;
+		@apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 		@apply transition-all duration-200 ease-in-out;
 		@apply shadow-sm hover:shadow-md;
 	}
 
 	.kt-alert-close-button {
 		@apply absolute top-4 right-4 size-8 rounded-lg;
-		@apply text-gray-400 hover:text-gray-600;
-		@apply hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2;
+		@apply text-muted-foreground hover:text-popover-foreground;
+		@apply hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 		@apply transition-all duration-200 ease-in-out;
 		@apply flex items-center justify-center;
 	}
 
 	.kt-alert-input {
 		@apply w-full px-4 py-3 text-base;
-		@apply bg-white border border-gray-300 rounded-lg;
-		@apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:border-blue-500;
+		@apply bg-background border border-input rounded-lg;
+		@apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:border-ring;
 		@apply transition-all duration-200 ease-in-out;
-		@apply placeholder:text-gray-400;
+		@apply placeholder:text-muted-foreground;
 	}
 
 	.kt-alert-input-label {
-		@apply block text-sm font-medium text-gray-700 mb-3;
+		@apply block text-sm font-medium text-popover-foreground mb-3;
 	}
 
 	.kt-alert-custom-content {
@@ -117,7 +115,7 @@
 
 	.kt-alert-loader::before {
 		content: '';
-		@apply size-6 border-2 border-gray-200 border-t-blue-600 rounded-full;
+		@apply size-6 border-2 border-muted border-t-primary rounded-full;
 		@apply animate-spin;
 	}
 
@@ -130,7 +128,7 @@
 	.kt-alert-confirm-button:disabled::after {
 		content: '';
 		@apply absolute inset-0 flex items-center justify-center;
-		@apply size-4 border-2 border-white border-t-transparent rounded-full;
+		@apply size-4 border-2 border-primary-foreground border-t-transparent rounded-full;
 		@apply animate-spin;
 	}
 }
@@ -145,17 +143,17 @@
 	.kt-alert-input[type="url"],
 	textarea.kt-alert-input {
 		@apply w-full px-4 py-3 text-base;
-		@apply bg-white border border-gray-300 rounded-lg;
-		@apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:border-blue-500;
+		@apply bg-background border border-input rounded-lg;
+		@apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:border-ring;
 		@apply transition-all duration-200 ease-in-out;
-		@apply placeholder:text-gray-400;
+		@apply placeholder:text-muted-foreground;
 	}
 
 	/* Select input */
 	select.kt-alert-input {
 		@apply w-full px-4 py-3 text-base;
-		@apply bg-white border border-gray-300 rounded-lg;
-		@apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:border-blue-500;
+		@apply bg-background border border-input rounded-lg;
+		@apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:border-ring;
 		@apply transition-all duration-200 ease-in-out;
 		@apply appearance-none;
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
@@ -169,13 +167,13 @@
 	.kt-alert-input-label input[type="radio"],
 	.kt-alert-input-label input[type="checkbox"] {
 		@apply mr-3 size-4;
-		@apply text-blue-600 border-gray-300 rounded;
-		@apply focus:ring-blue-500 focus:ring-2;
+		@apply text-primary border-input rounded;
+		@apply focus:ring-ring focus:ring-2;
 	}
 
 	.kt-alert-input-label label {
-		@apply flex items-center text-base text-gray-700 cursor-pointer;
-		@apply hover:text-gray-900 transition-colors duration-200;
+		@apply flex items-center text-base text-popover-foreground cursor-pointer;
+		@apply hover:text-popover-foreground transition-colors duration-200;
 		@apply py-2;
 	}
 
@@ -185,25 +183,25 @@
 	}
 
 	.kt-alert-input-label legend {
-		@apply text-sm font-medium text-gray-700 mb-3;
+		@apply text-sm font-medium text-popover-foreground mb-3;
 	}
 
 	/* Validation Error Styling */
 	.kt-alert-input-error {
-		@apply mt-2 text-sm text-red-600;
+		@apply mt-2 text-sm text-destructive;
 		@apply flex items-center gap-2;
 		@apply animate-in fade-in-0 duration-200;
 	}
 
 	.kt-alert-input-error::before {
 		content: '⚠';
-		@apply text-red-500;
+		@apply text-destructive;
 	}
 
 	/* Input error state */
 	.kt-alert-input-error + .kt-alert-input-label .kt-alert-input,
 	.kt-alert-input-label .kt-alert-input[aria-invalid="true"] {
-		@apply border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500;
+		@apply border-destructive focus-visible:ring-destructive focus-visible:border-destructive;
 	}
 }
 
@@ -305,7 +303,7 @@
 @layer components {
 	.kt-alert-modal:focus-within,
 	.kt-alert-container:focus-within {
-		@apply ring-2 ring-blue-500 ring-offset-2;
+		@apply ring-2 ring-ring ring-offset-2;
 	}
 
 	.kt-alert-confirm-button:disabled,
@@ -314,7 +312,7 @@
 	}
 
 	.kt-alert-input:disabled {
-		@apply opacity-75 cursor-not-allowed bg-gray-50;
+		@apply opacity-75 cursor-not-allowed bg-muted;
 	}
 
 	/* Micro-interactions */
@@ -386,48 +384,11 @@
 
 		.kt-alert-modal,
 		.kt-alert-container {
-			@apply bg-gray-900 text-gray-100;
-			@apply shadow-[0_0_1px_rgba(255,255,255,0.075),0_1px_2px_rgba(255,255,255,0.075),1px_2px_4px_rgba(255,255,255,0.075),1px_3px_8px_rgba(255,255,255,0.075),2px_4px_16px_rgba(255,255,255,0.075)];
-		}
-
-		.kt-alert-title {
-			@apply text-gray-100;
-		}
-
-		.kt-alert-message {
-			@apply text-gray-300;
-		}
-
-		.kt-alert-close-button {
-			@apply text-gray-400 hover:text-gray-200 hover:bg-gray-800;
-		}
-
-		.kt-alert-cancel-button {
-			@apply bg-gray-800 text-gray-200 hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-600;
-			@apply focus-visible:ring-gray-500;
+			@apply bg-popover text-popover-foreground;
 		}
 
 		.kt-alert-input {
-			@apply bg-gray-800 border-gray-600 text-gray-100;
-			@apply focus-visible:border-blue-400;
-		}
-
-		.kt-alert-input-label {
-			@apply text-gray-200;
-		}
-
-		.kt-alert-input-label label {
-			@apply text-gray-200 hover:text-gray-100;
-		}
-
-		.kt-alert-input-label legend {
-			@apply text-gray-200;
-		}
-
-		.kt-alert-input-label input[type="radio"],
-		.kt-alert-input-label input[type="checkbox"] {
-			@apply text-blue-400 border-gray-600;
-			@apply focus:ring-blue-400;
+			@apply bg-background border-input;
 		}
 
 		select.kt-alert-input {
