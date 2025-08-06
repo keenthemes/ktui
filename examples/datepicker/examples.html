@@ -71,6 +71,48 @@
         <input id="datepicker-disabled" placeholder="Datepicker is disabled" />
       </div>
     </div>
+    <!-- DateTime Selection -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">DateTime Selection</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-enable-time="true">
+        <input id="datepicker-datetime" placeholder="Select date and time" />
+      </div>
+    </div>
+    <!-- DateTime with 12-Hour Format -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">DateTime (12-Hour Format)</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime":true,"timeFormat":"12h"}'>
+        <input id="datepicker-datetime-12h" placeholder="Select date and time (12h)" />
+      </div>
+    </div>
+    <!-- DateTime with Seconds -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">DateTime with Seconds</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime":true,"timeGranularity":"second"}'>
+        <input id="datepicker-datetime-seconds" placeholder="Select date and time with seconds" />
+      </div>
+    </div>
+    <!-- DateTime with Time Constraints -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">DateTime with Time Constraints</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"enableTime":true,"minTime":"09:00","maxTime":"17:00","timeStep":30}'>
+        <input id="datepicker-datetime-constrained" placeholder="Select time (9 AM - 5 PM, 30min steps)" />
+      </div>
+    </div>
+    <!-- DateTime Range -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">DateTime Range</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"range":true,"enableTime":true,"timeFormat":"12h"}'>
+        <input id="datepicker-datetime-range" placeholder="Select date and time range" />
+      </div>
+    </div>
+    <!-- Multi-Month DateTime Range -->
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <h3 class="text-lg font-semibold mb-2">Multi-Month DateTime Range</h3>
+      <div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-config='{"range":true,"visibleMonths":2,"enableTime":true,"timeGranularity":"minute"}'>
+        <input id="datepicker-multimonth-datetime-range" placeholder="Select multi-month date and time range" />
+      </div>
+    </div>
   </div>
   <!-- Load KTUI JS once at the end -->
   <script src="../../dist/ktui.js"></script>
