@@ -8,6 +8,12 @@ import KTEventHandler from '../../helpers/event-handler';
 import KTComponent from '../component';
 import { KTImageInputInterface, KTImageInputConfigInterface } from './types';
 
+enum ImageInputMode {
+	NEW = 'new',
+	SAVED = 'saved',
+	PLACEHOLDER = 'placeholder'
+}
+
 declare global {
 	interface Window {
 		KT_IMAGE_INPUT_INITIALIZED: boolean;
@@ -25,7 +31,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 	protected _removeElement: HTMLElement;
 	protected _previewElement: HTMLElement;
 	protected _previewUrl: string = '';
-	protected _lastMode: string;
+	protected _lastMode: ImageInputMode;
 
 	constructor(
 		element: HTMLElement,
@@ -87,9 +93,9 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		};
 
 		reader.readAsDataURL(this._inputElement.files[0]);
-		this._inputElement.value = '';
+		// Removed: this._inputElement.value = ''; // This was preventing form submission
 		this._hiddenElement.value = '';
-		this._lastMode = 'new';
+		this._lastMode = ImageInputMode.NEW;
 
 		this._element.classList.add('changed');
 		this._removeElement.classList.remove('hidden');
@@ -110,56 +116,72 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		this._element.classList.remove('empty');
 		this._element.classList.remove('changed');
 
-		if (this._lastMode == 'new') {
-			if (this._previewUrl == '')
-				this._removeElement.classList.add(
-					this._getOption('hiddenClass') as string,
-				);
-
-			if (this._previewUrl) {
-				this._previewElement.style.backgroundImage = `url(${this._previewUrl})`;
-			} else {
-				this._previewElement.style.backgroundImage = 'none';
-				this._element.classList.add('empty');
-			}
-
-			this._inputElement.value = '';
-			this._hiddenElement.value = '';
-
-			this._lastMode = 'saved';
-		} else if (this._lastMode == 'saved') {
-			if (this._previewUrl == '')
-				this._removeElement.classList.add(
-					this._getOption('hiddenClass') as string,
-				);
-
-			this._previewElement.style.backgroundImage = 'none';
-			this._element.classList.add('empty');
-
-			this._hiddenElement.value = '1';
-			this._inputElement.value = '';
-
-			this._lastMode = 'placeholder';
-		} else if (this._lastMode == 'placeholder') {
-			if (this._previewUrl == '')
-				this._removeElement.classList.add(
-					this._getOption('hiddenClass') as string,
-				);
-
-			if (this._previewUrl) {
-				this._previewElement.style.backgroundImage = `url(${this._previewUrl})`;
-			} else {
-				this._element.classList.add('empty');
-			}
-
-			this._inputElement.value = '';
-			this._hiddenElement.value = '';
-
-			this._lastMode = 'saved';
-		}
+		this._handleStateTransition();
 
 		this._fireEvent('remove');
 		this._dispatchEvent('remove');
+	}
+
+	protected _handleStateTransition(): void {
+		if (this._lastMode == ImageInputMode.NEW) {
+			this._handleNewModeTransition();
+		} else if (this._lastMode == ImageInputMode.SAVED) {
+			this._handleSavedModeTransition();
+		} else if (this._lastMode == ImageInputMode.PLACEHOLDER) {
+			this._handlePlaceholderModeTransition();
+		}
+	}
+
+	protected _handleNewModeTransition(): void {
+		if (this._previewUrl == '')
+			this._removeElement.classList.add(
+				this._getOption('hiddenClass') as string,
+			);
+
+		if (this._previewUrl) {
+			this._previewElement.style.backgroundImage = `url(${this._previewUrl})`;
+		} else {
+			this._previewElement.style.backgroundImage = 'none';
+			this._element.classList.add('empty');
+		}
+
+		this._inputElement.value = '';
+		this._hiddenElement.value = '';
+
+		this._lastMode = ImageInputMode.SAVED;
+	}
+
+	protected _handleSavedModeTransition(): void {
+		if (this._previewUrl == '')
+			this._removeElement.classList.add(
+				this._getOption('hiddenClass') as string,
+			);
+
+		this._previewElement.style.backgroundImage = 'none';
+		this._element.classList.add('empty');
+
+		this._hiddenElement.value = '1';
+		this._inputElement.value = '';
+
+		this._lastMode = ImageInputMode.PLACEHOLDER;
+	}
+
+	protected _handlePlaceholderModeTransition(): void {
+		if (this._previewUrl == '')
+			this._removeElement.classList.add(
+				this._getOption('hiddenClass') as string,
+			);
+
+		if (this._previewUrl) {
+			this._previewElement.style.backgroundImage = `url(${this._previewUrl})`;
+		} else {
+			this._element.classList.add('empty');
+		}
+
+		this._inputElement.value = '';
+		this._hiddenElement.value = '';
+
+		this._lastMode = ImageInputMode.SAVED;
 	}
 
 	protected _update() {
@@ -168,13 +190,13 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 			this._removeElement.classList.remove(
 				this._getOption('hiddenClass') as string,
 			);
-			this._lastMode = 'saved';
+			this._lastMode = ImageInputMode.SAVED;
 		} else {
 			this._removeElement.classList.add(
 				this._getOption('hiddenClass') as string,
 			);
 			this._element.classList.add('empty');
-			this._lastMode = 'placeholder';
+			this._lastMode = ImageInputMode.PLACEHOLDER;
 		}
 	}
 
