@@ -80,7 +80,7 @@
 		"mini-svg-data-uri": "^1.4.4",
 		"prettier": "^3.5.3",
 		"source-map-loader": "^5.0.0",
-		"tailwindcss": "^4.1.7",
+		"tailwindcss": "^4.1.11",
 		"terser-webpack-plugin": "^5.3.14",
 		"ts-loader": "^9.5.2",
 		"typescript": "^5.8.3",
