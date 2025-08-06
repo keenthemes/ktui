@@ -12,6 +12,7 @@ import {
 	KTDataTableStateInterface,
 	KTDataTableColumnFilterInterface,
 	KTDataTableAttributeInterface,
+	KTDataTableCSVExportConfigInterface,
 } from './types';
 import KTUtils from '../../helpers/utils';
 import KTComponents from '../../index';
@@ -21,6 +22,7 @@ import {
 	KTDataTableCheckboxAPI,
 } from './datatable-checkbox';
 import { createSortHandler, KTDataTableSortAPI } from './datatable-sort';
+import { KTDataTableExport } from './datatable-export';
 
 /**
  * Custom DataTable plugin class with server-side API, pagination, and sorting
@@ -964,8 +966,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					}
 
 					if (dataRowAttributes && dataRowAttributes[colIndex]) {
-						for (const attr in dataRowAttributes[colIndex]) {
-							td.setAttribute(attr, dataRowAttributes[colIndex][attr]);
+						const attributes = dataRowAttributes[colIndex];
+						if (attributes && typeof attributes === 'object' && !Array.isArray(attributes)) {
+							Object.keys(attributes).forEach(attr => {
+								const value = (attributes as any)[attr];
+								if (typeof value === 'string') {
+									td.setAttribute(attr, value);
+								}
+							});
 						}
 					}
 
@@ -1694,6 +1702,87 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	public update(): void {
 		this._checkbox.updateState();
+	}
+
+	/**
+	 * Export data to CSV.
+	 * @param options Optional configuration for CSV export.
+	 * @returns {Promise<void>} A promise that resolves when the export is complete.
+	 */
+	public async exportCSV(options?: Partial<KTDataTableCSVExportConfigInterface>): Promise<void> {
+		try {
+			// Fire export start event
+			this._fireEvent('export', { type: 'csv', options });
+			this._dispatchEvent('export', { type: 'csv', options });
+
+			// Get export configuration
+			const exportConfig = {
+				...(this._config.csvExport || {}),
+				...options,
+			};
+
+			// Get data based on export scope
+			const currentData = this._data;
+			const originalData = this.getState().originalData || [];
+			const selectedRows = this.getState().selectedRows || [];
+			const scope = exportConfig.scope || 'current';
+
+			const exportData = KTDataTableExport.getExportData(
+				currentData,
+				originalData,
+				selectedRows,
+				scope,
+			);
+
+			if (exportData.length === 0) {
+				this._noticeOnTable('No data available for export');
+				return;
+			}
+
+			// Generate CSV content
+			const csvContent = KTDataTableExport.generateCSV(
+				exportData,
+				exportConfig,
+				this._config,
+			);
+
+			// Generate filename
+			const filename = KTDataTableExport.generateFilename(
+				exportConfig.filename || 'datatable-export',
+				exportConfig.includeTimestamp !== false,
+			);
+
+			// Download the CSV file
+			KTDataTableExport.downloadCSV(csvContent, filename);
+
+			// Fire export success event
+			this._fireEvent('exported', {
+				type: 'csv',
+				filename,
+				rowCount: exportData.length,
+				scope
+			});
+			this._dispatchEvent('exported', {
+				type: 'csv',
+				filename,
+				rowCount: exportData.length,
+				scope
+			});
+
+		} catch (error) {
+			// Fire export error event
+			this._fireEvent('exportError', {
+				type: 'csv',
+				error: error instanceof Error ? error.message : String(error)
+			});
+			this._dispatchEvent('exportError', {
+				type: 'csv',
+				error: error instanceof Error ? error.message : String(error)
+			});
+
+			this._noticeOnTable('Export failed: ' + (error instanceof Error ? error.message : String(error)));
+			throw error;
+		}
 	}
 
 	// Other plugin methods can be added here

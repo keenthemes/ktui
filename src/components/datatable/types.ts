@@ -11,7 +11,7 @@ export interface KTDataTableDataInterface {
 }
 
 export interface KTDataTableAttributeInterface {
-	[index: number]: { [key: string]: string };
+	[key: string]: string;
 }
 
 export interface KTDataTableStateInterface {
@@ -28,6 +28,74 @@ export interface KTDataTableStateInterface {
 	originalDataAttributes: KTDataTableAttributeInterface[];
 	_contentChecksum?: string;
 	_configChecksum?: string;
+}
+
+/**
+ * CSV Export configuration options
+ */
+export interface KTDataTableCSVExportConfigInterface {
+	/**
+	 * Enable CSV export functionality
+	 * @default false
+	 */
+	enabled?: boolean;
+
+	/**
+	 * Export scope - current page data or all data
+	 * @default 'current'
+	 */
+	scope?: 'current' | 'all' | 'selected';
+
+	/**
+	 * Include table headers in CSV export
+	 * @default true
+	 */
+	includeHeaders?: boolean;
+
+	/**
+	 * CSV delimiter character
+	 * @default ','
+	 */
+	delimiter?: string;
+
+	/**
+	 * Custom filename for the exported CSV file
+	 * @default 'datatable-export'
+	 */
+	filename?: string;
+
+	/**
+	 * Include timestamp in filename
+	 * @default true
+	 */
+	includeTimestamp?: boolean;
+
+	/**
+	 * Columns to include in export (if empty, all columns are included)
+	 * @default []
+	 */
+	includeColumns?: string[];
+
+	/**
+	 * Columns to exclude from export
+	 * @default []
+	 */
+	excludeColumns?: string[];
+
+	/**
+	 * Custom header mapping (column key -> display name)
+	 * @default {}
+	 */
+	headerMapping?: Record<string, string>;
+
+	/**
+	 * Custom data transformation function for each cell
+	 * @param value Cell value
+	 * @param column Column key
+	 * @param row Row data
+	 * @returns Transformed value
+	 */
+	transformValue?: (value: any, column: string, row: any) => string;
 }
 
 /**
@@ -57,14 +125,44 @@ export interface KTDataTableInterface {
 	 */
 	setPageSize: (pageSize: number) => void;
 
+	/**
+	 * Show loading spinner
+	 */
 	showSpinner(): void;
 
+	/**
+	 * Hide loading spinner
+	 */
 	hideSpinner(): void;
+
+	/**
+	 * Export table data as CSV
+	 * @param options Optional export configuration
+	 * @returns Promise that resolves when export is complete
+	 */
+	exportCSV(options?: Partial<KTDataTableCSVExportConfigInterface>): Promise<void>;
+
+	/**
+	 * Get the current state of the datatable
+	 * @returns Current state object
+	 */
+	getState(): KTDataTableStateInterface;
 }
 
 export interface KTDataTableResponseDataInterface {
 	data: KTDataTableDataInterface[];
 	totalCount: number;
+}
+
+export type KTDataTableColumnFilterTypeInterface =
+	| 'text'
+	| 'numeric'
+	| 'dateRange';
+
+export interface KTDataTableColumnFilterInterface {
+	column: string;
+	type: string;
+	value: string;
 }
 
 // Define the DataTable options type
@@ -163,27 +261,24 @@ export interface KTDataTableConfigInterface {
 		checkbox?: string;
 	};
 
+	/**
+	 * CSV Export configuration
+	 */
+	csvExport?: KTDataTableCSVExportConfigInterface;
+
 	checkbox?: {
 		checkedClass?: string;
 		preserveSelection?: boolean;
 	};
 
+	/**
+	 * Private properties
+	 */
 	_state?: KTDataTableStateInterface;
 	_data?: KTDataTableDataInterface[];
 
 	loadingClass?: string;
 }
-
-export type KTDataTableColumnFilterTypeInterface =
-	| 'text'
-	| 'numeric'
-	| 'dateRange';
-
-export type KTDataTableColumnFilterInterface = {
-	column: keyof KTDataTableDataInterface;
-	type: KTDataTableColumnFilterTypeInterface;
-	value: string;
-};
 
 export interface KTDataTableCheckConfigInterface {
 	target: string;
