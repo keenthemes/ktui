@@ -9,7 +9,10 @@ export interface KTStickyConfigInterface {
 	class: string;
 	zindex: string;
 	top: string;
+	middle: boolean;
+	bottom: string;
 	start: string;
+	center: boolean;
 	end: string;
 	width: string | number | object;
 	offset: number;

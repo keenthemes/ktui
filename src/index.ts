@@ -112,6 +112,6 @@ declare global {
 
 export default KTComponents;
 
-KTDom.ready(() => {
+KTDom.readyEl(() => {
 	KTComponents.init();
 });

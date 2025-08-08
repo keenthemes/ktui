@@ -23,7 +23,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		name: '',
 		class: '',
 		top: '',
+		middle: false,
+		bottom: '',
 		start: '',
+		center: false,
 		end: '',
 		width: '',
 		zindex: '',
@@ -212,7 +215,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 		let width = this._getOption('width') as string;
 		const top = this._getOption('top') as string;
+		const middle = this._getOption('middle') as boolean;
+		const bottom = this._getOption('bottom') as string;
 		const start = this._getOption('start') as string;
+		const center = this._getOption('center') as boolean;
 		const end = this._getOption('end') as string;
 		const height = this._calculateHeight();
 		const zindex = this._getOption('zindex') as string;
@@ -233,32 +239,52 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 			this._element.style.width = `${Math.round(parseFloat(width))}px`;
 		}
 
-		if (top) {
-			this._element.style.top = `${top}px`;
-		}
-
-		if (start) {
-			if (start === 'auto') {
-				const offsetLeft = KTDom.offset(this._element).left;
-				if (offsetLeft >= 0) {
-					this._element.style.insetInlineStart = `${offsetLeft}px`;
+		if (middle === true) {
+			this._element.style.insetBlockStart = `50%`;
+		}else{
+			if (top) {
+				if (top === 'auto') {
+					this._element.style.insetBlockStart = `0px`;
+				} else {
+					this._element.style.insetBlockStart = `${top}px`;
 				}
-			} else {
-				this._element.style.insetInlineStart = `${start}px`;
+			}else{
+				if (bottom) {
+					if (bottom === 'auto') {
+						this._element.style.insetBlockEnd = `0px`;
+					} else {
+						this._element.style.insetBlockEnd = `${bottom}px`;
+					}
+				}
 			}
 		}
 
-		if (end) {
-			if (end === 'auto') {
-				const offseRight = KTDom.offset(this._element).right;
-				if (offseRight >= 0) {
-					this._element.style.insetInlineEnd = `${offseRight}px`;
+		if(center === true){
+			this._element.style.insetInlineStart = `50%`;
+		}else{
+			if (start) {
+				if (start === 'auto') {
+					const offsetLeft = KTDom.offset(this._element).left;
+					if (offsetLeft >= 0) {
+						this._element.style.insetInlineStart = `${offsetLeft}px`;
+					}
+				} else {
+					this._element.style.insetInlineStart = `${start}px`;
 				}
-			} else {
-				this._element.style.insetInlineEnd = `${end}px`;
+			}else{
+				if (end) {
+					if (end === 'auto') {
+						const offsetRight = KTDom.offset(this._element).right;
+						if (offsetRight >= 0) {
+							this._element.style.insetInlineEnd = `${offsetRight}px`;
+						}
+					} else {
+						this._element.style.insetInlineEnd = `${end}px`;
+					}
+				}
 			}
 		}
-
+		
 		if (zindex) {
 			this._element.style.zIndex = zindex;
 			this._element.style.position = 'fixed';
@@ -282,6 +308,11 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		if (!this._element) return;
 
 		this._element.style.top = '';
+		this._element.style.bottom = '';
+		this._element.style.insetInlineStart = '';
+		this._element.style.insetInlineEnd = '';
+		this._element.style.insetBlockStart = '';
+		this._element.style.insetBlockEnd = '';
 		this._element.style.width = '';
 		this._element.style.left = '';
 		this._element.style.right = '';
