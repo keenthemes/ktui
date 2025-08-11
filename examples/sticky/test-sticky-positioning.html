@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTUI Sticky Component - Positioning Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-section {
+            min-height: 100vh;
+            padding: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sticky-element {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .sticky-element.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .position-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            z-index: 9999;
+        }
+
+        .test-info {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Position Indicator -->
+    <div class="position-indicator" id="positionIndicator">
+        Scroll to test positioning
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator">
+        Scroll: 0px
+    </div>
+
+    <!-- Test 1: Top positioning -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 1: Top Positioning</h2>
+            <p>Element should stick to top: 20px when scrolling</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-top="20"
+             data-kt-sticky-offset="100"
+             data-kt-sticky-zindex="1000"
+             data-kt-sticky-name="top-test">
+            Top: 20px
+        </div>
+        <div class="mt-8">
+            <p>Scroll down to see the element stick to the top with 20px offset.</p>
+        </div>
+    </div>
+
+    <!-- Test 2: Middle positioning -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 2: Middle (Vertical Center) Positioning</h2>
+            <p>Element should be vertically centered when sticky</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-middle="true"
+             data-kt-sticky-offset="200"
+             data-kt-sticky-zindex="1001"
+             data-kt-sticky-name="middle-test">
+            Middle (Vertical Center)
+        </div>
+        <div class="mt-8">
+            <p>Scroll down to see the element stick to the vertical center of the viewport.</p>
+        </div>
+    </div>
+
+    <!-- Test 3: Center positioning -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 3: Center (Horizontal Center) Positioning</h2>
+            <p>Element should be horizontally centered when sticky</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-center="true"
+             data-kt-sticky-offset="300"
+             data-kt-sticky-zindex="1002"
+             data-kt-sticky-name="center-test">
+            Center (Horizontal)
+        </div>
+        <div class="mt-8">
+            <p>Scroll down to see the element stick to the horizontal center of the viewport.</p>
+        </div>
+    </div>
+
+    <!-- Test 4: Middle + Center positioning -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 4: Middle + Center (Fully Centered)</h2>
+            <p>Element should be both vertically and horizontally centered when sticky</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-middle="true"
+             data-kt-sticky-center="true"
+             data-kt-sticky-offset="400"
+             data-kt-sticky-zindex="1003"
+             data-kt-sticky-name="middle-center-test">
+            Middle + Center
+        </div>
+        <div class="mt-8">
+            <p>Scroll down to see the element stick to the center of the viewport (both axes).</p>
+        </div>
+    </div>
+
+    <!-- Test 5: Bottom positioning -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 5: Bottom Positioning</h2>
+            <p>Element should stick to bottom: 20px when scrolling</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-bottom="20"
+             data-kt-sticky-offset="500"
+             data-kt-sticky-zindex="1004"
+             data-kt-sticky-name="bottom-test">
+            Bottom: 20px
+        </div>
+        <div class="mt-8">
+            <p>Scroll down to see the element stick to the bottom with 20px offset.</p>
+        </div>
+    </div>
+
+    <!-- Test 6: Auto positioning with offset calculation -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 6: Auto Positioning with Offset</h2>
+            <p>Element should use calculated offset when start/end is 'auto'</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-start="auto"
+             data-kt-sticky-top="50"
+             data-kt-sticky-offset="600"
+             data-kt-sticky-zindex="1005"
+             data-kt-sticky-name="auto-test">
+            Auto Start + Top: 50px
+        </div>
+        <div class="mt-8">
+            <p>Scroll down to see the element stick with auto-calculated horizontal position.</p>
+        </div>
+    </div>
+
+    <!-- Test 7: Exclusive positioning (top vs bottom) -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 7: Exclusive Positioning Logic</h2>
+            <p>Only one of top/bottom should be applied (top takes precedence)</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-top="30"
+             data-kt-sticky-bottom="30"
+             data-kt-sticky-offset="700"
+             data-kt-sticky-zindex="1006"
+             data-kt-sticky-name="exclusive-test">
+            Top: 30px (should ignore bottom)
+        </div>
+        <div class="mt-8">
+            <p>This element has both top and bottom set - only top should be applied.</p>
+        </div>
+    </div>
+
+    <!-- Test 8: RTL Support Test -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test 8: RTL Support (Logical Properties)</h2>
+            <p>Element should work correctly in RTL layouts using logical properties</p>
+        </div>
+        <div class="sticky-element"
+             data-kt-sticky="true"
+             data-kt-sticky-end="20"
+             data-kt-sticky-top="40"
+             data-kt-sticky-offset="800"
+             data-kt-sticky-zindex="1007"
+             data-kt-sticky-name="rtl-test">
+            End: 20px, Top: 40px (RTL Ready)
+        </div>
+        <div class="mt-8">
+            <p>This element uses logical properties (end instead of right) for RTL compatibility.</p>
+        </div>
+    </div>
+
+    <!-- Additional content for scrolling -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Additional Content</h2>
+            <p>Scroll through this content to test all sticky elements</p>
+        </div>
+        <div class="space-y-4">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        </div>
+    </div>
+
+    <!-- Test Controls -->
+    <div class="test-section">
+        <div class="test-info">
+            <h2 class="text-xl font-bold mb-2">Test Controls</h2>
+            <div class="space-y-2">
+                <button onclick="toggleRTL()" class="bg-blue-500 text-white px-4 py-2 rounded">
+                    Toggle RTL Layout
+                </button>
+                <button onclick="resetAll()" class="bg-green-500 text-white px-4 py-2 rounded">
+                    Reset All Sticky Elements
+                </button>
+                <button onclick="scrollToTop()" class="bg-purple-500 text-white px-4 py-2 rounded">
+                    Scroll to Top
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load KTUI -->
+    <script src="../../dist/ktui.js"></script>
+    <script>
+                // Wait for KTUI to load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, checking KTUI...');
+            console.log('window.KTSticky:', window.KTSticky);
+
+            if (window.KTSticky) {
+                console.log('KTSticky found, initializing...');
+
+                // Check sticky elements before initialization
+                const stickyElements = document.querySelectorAll('[data-kt-sticky]');
+                console.log('Found sticky elements:', stickyElements.length);
+
+                // Initialize all sticky elements
+                window.KTSticky.init();
+                console.log('KTSticky initialized');
+
+                // Check if elements were initialized
+                const initializedElements = document.querySelectorAll('[data-kt-sticky-initialized]');
+                console.log('Initialized sticky elements:', initializedElements.length);
+
+                // Log viewport height
+                console.log('Viewport height:', window.innerHeight);
+
+                // Check each sticky element
+                stickyElements.forEach((element, index) => {
+                    const computedStyle = window.getComputedStyle(element);
+                    const height = element.offsetHeight;
+                    const top = element.getAttribute('data-kt-sticky-top') || '0';
+                    console.log(`Sticky ${index + 1}: height=${height}, top=${top}, height+top=${height + parseInt(top)}`);
+                });
+            } else {
+                console.error('KTSticky not found!');
+            }
+        });
+
+        // Initialize sticky components
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all sticky elements
+            if (window.KTSticky) {
+                window.KTSticky.init();
+            }
+
+            // Update scroll indicator
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                document.getElementById('scrollIndicator').textContent = `Scroll: ${scrollTop}px`;
+
+                // Update position indicator
+                const activeSticky = document.querySelector('[data-kt-sticky-initialized].active');
+                if (activeSticky) {
+                    const name = activeSticky.getAttribute('data-kt-sticky-name');
+                    const computedStyle = window.getComputedStyle(activeSticky);
+                    const position = {
+                        top: computedStyle.top,
+                        bottom: computedStyle.bottom,
+                        left: computedStyle.left,
+                        right: computedStyle.right,
+                        insetBlockStart: computedStyle.insetBlockStart,
+                        insetInlineStart: computedStyle.insetInlineStart,
+                        insetInlineEnd: computedStyle.insetInlineEnd
+                    };
+
+                    document.getElementById('positionIndicator').innerHTML = `
+                        Active: ${name}<br>
+                        Top: ${position.top}<br>
+                        Bottom: ${position.bottom}<br>
+                        Left: ${position.left}<br>
+                        Right: ${position.right}<br>
+                        InsetBlockStart: ${position.insetBlockStart}<br>
+                        InsetInlineStart: ${position.insetInlineStart}<br>
+                        InsetInlineEnd: ${position.insetInlineEnd}
+                    `;
+                } else {
+                    document.getElementById('positionIndicator').textContent = 'No active sticky elements';
+                }
+            });
+        });
+
+        // Test functions
+        window.toggleRTL = function() {
+            const html = document.documentElement;
+            const currentDir = html.getAttribute('dir');
+            const newDir = currentDir === 'rtl' ? 'ltr' : 'rtl';
+            html.setAttribute('dir', newDir);
+
+            // Reinitialize sticky elements
+            if (window.KTSticky) {
+                window.KTSticky.init();
+            }
+        };
+
+        window.resetAll = function() {
+            // Remove all sticky instances
+            document.querySelectorAll('[data-kt-sticky-initialized]').forEach(element => {
+                const instance = window.KTSticky ? window.KTSticky.getInstance(element) : null;
+                if (instance) {
+                    // Force disable
+                    element.classList.remove('active');
+                    element.style.position = '';
+                    element.style.top = '';
+                    element.style.bottom = '';
+                    element.style.left = '';
+                    element.style.right = '';
+                    element.style.insetBlockStart = '';
+                    element.style.insetInlineStart = '';
+                    element.style.insetInlineEnd = '';
+                }
+            });
+
+            // Reinitialize
+            if (window.KTSticky) {
+                window.KTSticky.init();
+            }
+        };
+
+        window.scrollToTop = function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        };
+    </script>
+</body>
+</html>

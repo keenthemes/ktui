@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Sticky Component</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .debug-sticky {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            text-align: center;
+            width: 200px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .debug-sticky.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 400px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="debug-info" id="debugInfo">
+        Loading...
+    </div>
+
+    <!-- Simple test section -->
+    <div style="height: 100vh; padding: 2rem;">
+        <h1>Debug Sticky Component</h1>
+        <p>Scroll down to test the sticky element</p>
+    </div>
+
+    <!-- Single sticky element for testing -->
+    <div class="debug-sticky"
+         data-kt-sticky="true"
+         data-kt-sticky-top="20"
+         data-kt-sticky-offset="100"
+         data-kt-sticky-zindex="1000"
+         data-kt-sticky-name="debug-test">
+        Debug Sticky
+    </div>
+
+    <!-- Content to scroll through -->
+    <div style="height: 200vh; padding: 2rem;">
+        <h2>Scroll Content</h2>
+        <p>This content is here to allow scrolling and test the sticky element.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+        <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </div>
+
+    <!-- Load KTUI -->
+    <script src="../../dist/ktui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugInfo = document.getElementById('debugInfo');
+
+            function updateDebugInfo() {
+                const stickyElement = document.querySelector('[data-kt-sticky]');
+                const initializedElement = document.querySelector('[data-kt-sticky-initialized]');
+                const activeElement = document.querySelector('[data-kt-sticky-initialized].active');
+
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                const viewportHeight = window.innerHeight;
+
+                let info = `
+                    <strong>Debug Info:</strong><br>
+                    Scroll: ${scrollTop}px<br>
+                    Viewport Height: ${viewportHeight}px<br>
+                    KTSticky Available: ${!!window.KTSticky}<br>
+                    Sticky Elements: ${document.querySelectorAll('[data-kt-sticky]').length}<br>
+                    Initialized Elements: ${document.querySelectorAll('[data-kt-sticky-initialized]').length}<br>
+                    Active Elements: ${document.querySelectorAll('[data-kt-sticky-initialized].active').length}<br>
+                `;
+
+                if (stickyElement) {
+                    const computedStyle = window.getComputedStyle(stickyElement);
+                    const height = stickyElement.offsetHeight;
+                    const top = stickyElement.getAttribute('data-kt-sticky-top') || '0';
+                    const offset = stickyElement.getAttribute('data-kt-sticky-offset') || '0';
+
+                    info += `
+                        <br><strong>Sticky Element:</strong><br>
+                        Height: ${height}px<br>
+                        Top: ${top}px<br>
+                        Offset: ${offset}px<br>
+                        Height + Top: ${height + parseInt(top)}px<br>
+                        Position: ${computedStyle.position}<br>
+                        Z-Index: ${computedStyle.zIndex}<br>
+                        InsetBlockStart: ${computedStyle.insetBlockStart}<br>
+                    `;
+                }
+
+                if (initializedElement) {
+                    info += `<br><strong>Initialized Element:</strong><br>`;
+                    info += `Classes: ${initializedElement.className}<br>`;
+                    info += `Data Attributes: ${Array.from(initializedElement.attributes).filter(attr => attr.name.startsWith('data-kt-sticky')).map(attr => `${attr.name}="${attr.value}"`).join(', ')}<br>`;
+                }
+
+                debugInfo.innerHTML = info;
+            }
+
+            // Initialize KTUI
+            if (window.KTSticky) {
+                console.log('Initializing KTSticky...');
+                window.KTSticky.init();
+                console.log('KTSticky initialized');
+            } else {
+                console.error('KTSticky not found!');
+            }
+
+            // Update debug info initially and on scroll
+            updateDebugInfo();
+            window.addEventListener('scroll', updateDebugInfo);
+            window.addEventListener('resize', updateDebugInfo);
+
+            // Update every second to catch any changes
+            setInterval(updateDebugInfo, 1000);
+        });
+    </script>
+</body>
+</html>
