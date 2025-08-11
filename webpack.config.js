@@ -102,12 +102,12 @@ module.exports = (env) => {
 	const minifiedConfig = {
 		...baseConfig,
 		output: {
-			path: path.resolve(__dirname, '..', 'assets', 'js', 'keenui'),
+			path: path.resolve(__dirname, 'dist'),
 			filename: '[name].min.js',
 			sourceMapFilename: '[name].min.js.map',
 			library: { type: 'umd' },
 		},
-		devtool: false,
+		devtool: 'source-map', // Enable sourcemaps for minified JS files
 		optimization: {
 			...baseConfig.optimization,
 			minimize: true, // Enable minimization for minified JS files

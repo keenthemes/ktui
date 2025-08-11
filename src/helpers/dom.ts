@@ -399,19 +399,6 @@ const KTDom = {
 		} else {
 			callback();
 		}
-	},	
-	
-	readyEl(callback: CallableFunction): void {
-
-		console.log("readyEl")
-
-		if (document.readyState === 'loading') {
-			document.addEventListener('DOMContentLoaded', () => {
-				callback();
-			});
-		} else {
-			callback();
-		}
 	},
 };
 
