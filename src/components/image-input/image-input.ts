@@ -26,6 +26,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 	protected _previewElement: HTMLElement;
 	protected _previewUrl: string = '';
 	protected _lastMode: string;
+	protected _selectedFile: File | null = null;
 
 	constructor(
 		element: HTMLElement,
@@ -87,6 +88,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		};
 
 		reader.readAsDataURL(this._inputElement.files[0]);
+		this._selectedFile = this._inputElement.files[0];
 		this._inputElement.value = '';
 		this._hiddenElement.value = '';
 		this._lastMode = 'new';
@@ -125,6 +127,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 			this._inputElement.value = '';
 			this._hiddenElement.value = '';
+			this._selectedFile = null;
 
 			this._lastMode = 'saved';
 		} else if (this._lastMode == 'saved') {
@@ -138,6 +141,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 			this._hiddenElement.value = '1';
 			this._inputElement.value = '';
+			this._selectedFile = null;
 
 			this._lastMode = 'placeholder';
 		} else if (this._lastMode == 'placeholder') {
@@ -154,6 +158,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 			this._inputElement.value = '';
 			this._hiddenElement.value = '';
+			this._selectedFile = null;
 
 			this._lastMode = 'saved';
 		}
@@ -187,11 +192,11 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 	}
 
 	public isEmpty(): boolean {
-		return this._inputElement.value.length === 0;
+		return this._selectedFile === null;
 	}
 
 	public isChanged(): boolean {
-		return this._inputElement.value.length > 0;
+		return this._selectedFile !== null;
 	}
 
 	public remove(): void {
@@ -208,6 +213,10 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 	public getPreviewUrl(): string {
 		return this._getPreviewUrl();
+	}
+
+	public getSelectedFile(): File | null {
+		return this._selectedFile;
 	}
 
 	public static getInstance(element: HTMLElement): KTImageInput {

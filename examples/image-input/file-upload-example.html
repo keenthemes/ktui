@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTUI Image Input - File Upload Example</title>
+    <link rel="stylesheet" href="../../dist/styles.css">
+    <style>
+        body { padding: 2rem; font-family: Arial, sans-serif; }
+        .example-section { margin: 2rem 0; padding: 1rem; border: 1px solid #ddd; }
+        .test-result { margin: 0.5rem 0; padding: 0.5rem; background: #f5f5f5; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .code-block { background: #f8f9fa; padding: 1rem; border-radius: 4px; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <h1>KTUI Image Input - File Upload Example</h1>
+    <p>This example demonstrates how to use the KTUI Image Input component with proper file upload functionality.</p>
+
+    <div class="example-section">
+        <h2>Image Input Component</h2>
+        <div class="kt-image-input size-16" data-kt-image-input="true">
+            <input accept=".png, .jpg, .jpeg" name="avatar" type="file">
+            <input name="avatar_remove" type="hidden"/>
+            <button class="kt-image-input-remove" data-kt-image-input-remove="true" type="button">
+                <i class="ki-filled ki-cross"></i>
+            </button>
+            <div class="kt-image-input-placeholder" data-kt-image-input-placeholder="true">
+                <div class="kt-image-input-preview" data-kt-image-input-preview="true"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="example-section">
+        <h2>Testing Controls</h2>
+        <button onclick="testFileAccess()">Test File Access</button>
+        <button onclick="testPublicMethods()">Test Public Methods</button>
+        <button onclick="testFormSubmission()">Test Form Submission</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div class="example-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="example-section">
+        <h2>Form Submission Example</h2>
+        <p>This form demonstrates how to properly handle file uploads with KTUI Image Input:</p>
+        <form id="test-form" onsubmit="handleFormSubmit(event)">
+            <div class="kt-image-input size-16" data-kt-image-input="true">
+                <input accept=".png, .jpg, .jpeg" name="test_image" type="file">
+                <input name="test_image_remove" type="hidden"/>
+                <button class="kt-image-input-remove" data-kt-image-input-remove="true" type="button">
+                    <i class="ki-filled ki-cross"></i>
+                </button>
+                <div class="kt-image-input-placeholder" data-kt-image-input-placeholder="true">
+                    <div class="kt-image-input-preview" data-kt-image-input-preview="true"></div>
+                </div>
+            </div>
+            <button type="submit">Submit Form</button>
+        </form>
+    </div>
+
+    <div class="example-section">
+        <h2>Usage Code Example</h2>
+        <div class="code-block">
+            <h3>HTML Structure</h3>
+            <pre><code>&lt;div class="kt-image-input size-16" data-kt-image-input="true"&gt;
+    &lt;input accept=".png, .jpg, .jpeg" name="avatar" type="file"&gt;
+    &lt;input name="avatar_remove" type="hidden"/&gt;
+    &lt;button class="kt-image-input-remove" data-kt-image-input-remove="true" type="button"&gt;
+        &lt;i class="ki-filled ki-cross"&gt;&lt;/i&gt;
+    &lt;/button&gt;
+    &lt;div class="kt-image-input-placeholder" data-kt-image-input-placeholder="true"&gt;
+        &lt;div class="kt-image-input-preview" data-kt-image-input-preview="true"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+            <h3>JavaScript - File Upload</h3>
+            <pre><code>// Get the KTUI Image Input instance
+const imageInput = KTImageInput.getInstance(element);
+
+// Access the selected file for form submission
+const selectedFile = imageInput.getSelectedFile();
+if (selectedFile) {
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+    // Submit formData to server
+}
+
+// Check component state
+if (imageInput.isEmpty()) {
+    console.log('No file selected');
+}
+
+if (imageInput.isChanged()) {
+    console.log('File has been selected');
+}</code></pre>
+        </div>
+    </div>
+
+    <script src="../../dist/ktui.min.js"></script>
+    <script>
+        let imageInputInstance = null;
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const element = document.querySelector('[data-kt-image-input]');
+            if (element) {
+                imageInputInstance = KTImageInput.getInstance(element);
+                addResult('Component initialized successfully', 'success');
+            }
+        });
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+        }
+
+        function testFileAccess() {
+            if (!imageInputInstance) {
+                addResult('Image input instance not found', 'error');
+                return;
+            }
+
+            const file = imageInputInstance.getSelectedFile();
+            if (file) {
+                addResult(`File access successful: ${file.name} (${file.size} bytes)`, 'success');
+            } else {
+                addResult('No file selected', 'info');
+            }
+        }
+
+        function testPublicMethods() {
+            if (!imageInputInstance) {
+                addResult('Image input instance not found', 'error');
+                return;
+            }
+
+            const isEmpty = imageInputInstance.isEmpty();
+            const isChanged = imageInputInstance.isChanged();
+
+            addResult(`isEmpty(): ${isEmpty}`, isEmpty ? 'info' : 'success');
+            addResult(`isChanged(): ${isChanged}`, isChanged ? 'success' : 'info');
+        }
+
+        function testFormSubmission() {
+            const form = document.getElementById('test-form');
+            const fileInput = form.querySelector('input[type="file"]');
+            const formData = new FormData(form);
+
+            addResult('Form data created', 'info');
+
+            if (fileInput.files.length > 0) {
+                addResult(`File in form: ${fileInput.files[0].name}`, 'success');
+            } else {
+                addResult('No file in form data (expected - input is cleared for UI)', 'info');
+            }
+
+            // Test with KTUI instance
+            const formImageInput = KTImageInput.getInstance(form.querySelector('[data-kt-image-input]'));
+            if (formImageInput) {
+                const selectedFile = formImageInput.getSelectedFile();
+                if (selectedFile) {
+                    addResult(`KTUI file access: ${selectedFile.name}`, 'success');
+                } else {
+                    addResult('No file in KTUI instance', 'error');
+                }
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            addResult('Form submission intercepted for testing', 'info');
+            testFormSubmission();
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

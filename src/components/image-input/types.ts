@@ -9,4 +9,5 @@ export interface KTImageInputConfigInterface {
 
 export interface KTImageInputInterface {
 	remove(): void;
+	getSelectedFile(): File | null;
 }
