@@ -1638,7 +1638,7 @@ export class KTSelect extends KTComponent {
 			// For other keys (characters, space, backspace, delete), let the input field process them.
 			if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' &&
 			    event.key !== 'Escape' && event.key !== 'Enter' && event.key !== 'Tab' &&
-			    event.key !== 'Home' && event.key !== 'End') {
+			    event.key !== 'Home' && event.key !== 'End' && event.key !== ' ') {
 				// If it's a character key and we are NOT type-to-searching (because search has focus)
 				// then let the input field handle it for its own value.
 				// The search module's 'input' event will handle filtering based on the input's value.
