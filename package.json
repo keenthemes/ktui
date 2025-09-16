@@ -85,8 +85,7 @@
 	},
 	"files": [
 		"lib/",
-		"dist/",
-		"styles.css"
+		"dist/"
 	],
 	"license": "MIT",
 	"scripts": {
