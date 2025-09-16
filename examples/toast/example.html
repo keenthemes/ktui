@@ -54,10 +54,24 @@
     <button id="toast-pos-top-end" class="kt-btn">Top End (Right)</button>
     <button id="toast-pos-top-center" class="kt-btn">Top Center</button>
     <button id="toast-pos-top-start" class="kt-btn">Top Start (Left)</button>
+    <button id="toast-pos-middle-end" class="kt-btn">Middle End (Right)</button>
+    <button id="toast-pos-middle-center" class="kt-btn">Middle Center</button>
+    <button id="toast-pos-middle-start" class="kt-btn">Middle Start (Left)</button>
     <button id="toast-pos-bottom-end" class="kt-btn">Bottom End (Right)</button>
     <button id="toast-pos-bottom-center" class="kt-btn">Bottom Center</button>
     <button id="toast-pos-bottom-start" class="kt-btn">Bottom Start (Left)</button>
   </div>
+</div>
+
+<!-- RTL Testing -->
+<div class="mb-6">
+  <h3 class="font-semibold mb-2">RTL Testing</h3>
+  <div class="flex flex-wrap gap-2 mb-2">
+    <button id="toast-rtl-toggle" class="kt-btn kt-btn-primary">Toggle RTL Mode</button>
+    <button id="toast-rtl-test-center" class="kt-btn">Test RTL Top Center</button>
+    <button id="toast-rtl-test-middle-center" class="kt-btn">Test RTL Middle Center</button>
+  </div>
+  <div class="text-xs text-gray-500">Toggle RTL mode to test centering behavior.</div>
 </div>
 
 <!-- Global Config Example -->
@@ -114,6 +128,9 @@ const posExamples = [
   { id: 'toast-pos-top-end', position: 'top-end', label: 'Top End (Right)' },
   { id: 'toast-pos-top-center', position: 'top-center', label: 'Top Center' },
   { id: 'toast-pos-top-start', position: 'top-start', label: 'Top Start (Left)' },
+  { id: 'toast-pos-middle-end', position: 'middle-end', label: 'Middle End (Right)' },
+  { id: 'toast-pos-middle-center', position: 'middle-center', label: 'Middle Center' },
+  { id: 'toast-pos-middle-start', position: 'middle-start', label: 'Middle Start (Left)' },
   { id: 'toast-pos-bottom-end', position: 'bottom-end', label: 'Bottom End (Right)' },
   { id: 'toast-pos-bottom-center', position: 'bottom-center', label: 'Bottom Center' },
   { id: 'toast-pos-bottom-start', position: 'bottom-start', label: 'Bottom Start (Left)' }
@@ -130,6 +147,41 @@ posExamples.forEach(({ id, position, label }) => {
     });
   }
 });
+
+// --- RTL Testing ---
+let isRTL = false;
+const rtlToggleBtn = document.getElementById('toast-rtl-toggle');
+const rtlTestCenterBtn = document.getElementById('toast-rtl-test-center');
+const rtlTestMiddleCenterBtn = document.getElementById('toast-rtl-test-middle-center');
+
+if (rtlToggleBtn) {
+  rtlToggleBtn.addEventListener('click', () => {
+    isRTL = !isRTL;
+    document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+    rtlToggleBtn.textContent = isRTL ? 'Switch to LTR' : 'Switch to RTL';
+    rtlToggleBtn.className = isRTL ? 'kt-btn kt-btn-secondary' : 'kt-btn kt-btn-primary';
+  });
+}
+
+if (rtlTestCenterBtn) {
+  rtlTestCenterBtn.addEventListener('click', () => {
+    KTToast.show({
+      message: `RTL Test: Top Center (${isRTL ? 'RTL' : 'LTR'} mode)`,
+      position: 'top-center',
+      variant: 'info'
+    });
+  });
+}
+
+if (rtlTestMiddleCenterBtn) {
+  rtlTestMiddleCenterBtn.addEventListener('click', () => {
+    KTToast.show({
+      message: `RTL Test: Middle Center (${isRTL ? 'RTL' : 'LTR'} mode)`,
+      position: 'middle-center',
+      variant: 'success'
+    });
+  });
+}
 
 // --- Global Config Example ---
 const defaultGlobalConfig = {

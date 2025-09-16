@@ -33,6 +33,9 @@ export type KTToastPosition =
 	| 'top-end'
 	| 'top-center'
 	| 'top-start'
+	| 'middle-end'
+	| 'middle-center'
+	| 'middle-start'
 	| 'bottom-end'
 	| 'bottom-center'
 	| 'bottom-start';
