@@ -38,6 +38,9 @@ export class KTSelect extends KTComponent {
 	private _dropdownContentElement: HTMLElement;
 	private _searchInputElement: HTMLInputElement | null;
 	private _options: NodeListOf<HTMLElement>;
+	
+	// Cached DOM references for performance
+	private _optionsContainer: HTMLElement | null = null;
 
 	// State
 	private _dropdownIsOpen: boolean = false;
@@ -167,44 +170,80 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
-	 * Update dropdown with new options from the original select element
+	 * Unified method to render options in dropdown - eliminates code duplication
 	 */
-	private _updateDropdownWithNewOptions() {
+	private _renderOptionsInDropdown(optionsData: KTSelectOptionData[] | HTMLOptionElement[], clearContainer: boolean = true): void {
 		if (!this._dropdownContentElement) return;
 
-		const optionsContainer = this._dropdownContentElement.querySelector('[data-kt-select-options]');
+		// Use cached options container for better performance
+		const optionsContainer = this._optionsContainer || this._dropdownContentElement.querySelector('[data-kt-select-options]');
 		if (!optionsContainer) return;
 
-		// Clear the loading state and any existing options
-		optionsContainer.innerHTML = '';
+		// Clear container if requested
+		if (clearContainer) {
+			optionsContainer.innerHTML = '';
+		}
 
-		// Get all options from the original select element
-		const options = Array.from(this._element.querySelectorAll('option'));
+		// Use DocumentFragment for efficient DOM manipulation
+		const fragment = document.createDocumentFragment();
 
-		// Add each option to the dropdown
-		options.forEach((optionElement) => {
-			// Skip empty placeholder options
-			if (
-				optionElement.value === '' &&
-				optionElement.textContent.trim() === ''
-			) {
-				return;
+		// Process options data
+		optionsData.forEach((optionData) => {
+			let optionElement: HTMLOptionElement;
+
+			// Handle different input types
+			if (optionData instanceof HTMLOptionElement) {
+				// Skip empty placeholder options
+				if (
+					optionData.value === '' &&
+					optionData.textContent.trim() === ''
+				) {
+					return;
+				}
+				optionElement = optionData;
+			} else {
+				// Handle KTSelectOptionData objects - cast to ensure type safety
+				const dataItem = optionData as KTSelectOptionData;
+				optionElement = document.createElement('option');
+				optionElement.value = dataItem.id || '';
+				optionElement.textContent = dataItem.title || '';
+				
+				if (dataItem.selected) {
+					optionElement.setAttribute('selected', 'selected');
+				}
+				if (dataItem.disabled) {
+					optionElement.setAttribute('disabled', 'disabled');
+				}
 			}
 
-			// Create new KTSelectOption instance for proper rendering
+			// Create KTSelectOption instance for proper rendering
 			const selectOption = new KTSelectOption(optionElement, this._config);
 			const renderedOption = selectOption.render();
 
-			// Append to dropdown container
-			optionsContainer.appendChild(renderedOption);
+			// Add to fragment for batch DOM operation
+			fragment.appendChild(renderedOption);
 		});
+
+		// Batch append all options at once
+		optionsContainer.appendChild(fragment);
 
 		// Update options NodeList
 		this._options = this._wrapperElement.querySelectorAll('[data-kt-select-option]') as NodeListOf<HTMLElement>;
 
 		if (this._config.debug) {
-			console.log(`Updated dropdown with ${options.length} options`);
+			console.log(`Rendered ${optionsData.length} options in dropdown`);
 		}
+	}
+
+	/**
+	 * Update dropdown with new options from the original select element
+	 */
+	private _updateDropdownWithNewOptions() {
+		// Get all options from the original select element
+		const options = Array.from(this._element.querySelectorAll('option'));
+		
+		// Use unified renderer
+		this._renderOptionsInDropdown(options, true);
 	}
 
 	/**
@@ -656,6 +695,9 @@ export class KTSelect extends KTComponent {
 		this._selectAllButton = this._wrapperElement.querySelector(
 			'[data-kt-select-select-all]',
 		) as HTMLElement;
+
+		// Cache the options container for performance
+		this._optionsContainer = this._dropdownContentElement.querySelector('[data-kt-select-options]') as HTMLElement;
 
 		this._options = this._wrapperElement.querySelectorAll(
 			`[data-kt-select-option]`,
@@ -1670,7 +1712,8 @@ export class KTSelect extends KTComponent {
 	private _restoreOriginalOptions() {
 		if (!this._dropdownContentElement || !this._originalOptionsHtml) return;
 
-		const optionsContainer = this._dropdownContentElement.querySelector('[data-kt-select-options]');
+		// Use cached options container for better performance
+		const optionsContainer = this._optionsContainer || this._dropdownContentElement.querySelector('[data-kt-select-options]');
 		if (!optionsContainer) return;
 
 		// Restore original options
@@ -1697,58 +1740,24 @@ export class KTSelect extends KTComponent {
 	private _updateSearchResults(items: KTSelectOptionData[]) {
 		if (!this._dropdownContentElement) return;
 
-		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options]',
-		);
+		// Use cached options container for better performance
+		const optionsContainer = this._optionsContainer || this._dropdownContentElement.querySelector('[data-kt-select-options]');
 		if (!optionsContainer) return;
 
-		// Clear current options
-		optionsContainer.innerHTML = '';
-
+		// Handle empty results
 		if (items.length === 0) {
-			// Show no results message using template for consistency and customization
+			optionsContainer.innerHTML = '';
 			const noResultsElement = defaultTemplates.searchEmpty(this._config);
 			optionsContainer.appendChild(noResultsElement);
 			return;
 		}
 
-		// Process each item individually to create properly rendered options
-		items.forEach((item) => {
-			// Create a temporary HTMLOptionElement to pass to KTSelectOption
-			const tempOption = document.createElement('option');
-			tempOption.value = item.id || '';
-			tempOption.textContent = item.title || '';
-
-			// Set selected state if applicable
-			if (item.selected) {
-				tempOption.setAttribute('selected', 'selected');
-			}
-
-			// Set disabled state if applicable
-			if (item.disabled) {
-				tempOption.setAttribute('disabled', 'disabled');
-			}
-
-			// Create KTSelectOption instance for proper rendering
-			const selectOption = new KTSelectOption(tempOption, this._config);
-			const renderedOption = selectOption.render();
-
-			// Append to dropdown container
-			optionsContainer.appendChild(renderedOption);
-		});
+		// Use unified renderer for search results
+		this._renderOptionsInDropdown(items, true);
 
 		// Add pagination "Load More" button if needed
 		if (this._config.pagination && this._remoteModule.hasMorePages()) {
 			this._addLoadMoreButton();
-		}
-
-		// Update options NodeList to include the new options
-		this._options = this._wrapperElement.querySelectorAll(
-			`[data-kt-select-option]`,
-		) as NodeListOf<HTMLElement>;
-
-		if (this._config.debug) {
-			console.log(`Updated search results with ${items.length} options`);
 		}
 	}
 
