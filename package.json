@@ -60,12 +60,26 @@
 			"types": "./lib/esm/index.d.ts",
 			"import": "./lib/esm/index.js",
 			"require": "./lib/cjs/index.js"
+		},
+		"./styles.css": "./dist/styles.css",
+		"./styles": "./dist/styles.css",
+		"./dist/styles.css": "./dist/styles.css",
+		"./lib/*": {
+			"types": "./lib/esm/*.d.ts",
+			"import": "./lib/esm/*.js",
+			"require": "./lib/cjs/*.js"
 		}
 	},
 	"typesVersions": {
 		"*": {
 			"*": [
 				"lib/esm/*"
+			],
+			"styles.css": [
+				"dist/styles.css"
+			],
+			"styles": [
+				"dist/styles.css"
 			]
 		}
 	},
