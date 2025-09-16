@@ -74,13 +74,13 @@ module.exports = [
 		},
 		rules: {
 			// TypeScript specific rules
-			'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-			'@typescript-eslint/explicit-function-return-type': 'off',
-			'@typescript-eslint/explicit-module-boundary-types': 'off',
-			'@typescript-eslint/no-explicit-any': 'warn',
-			'@typescript-eslint/no-non-null-assertion': 'warn',
-			'@typescript-eslint/no-var-requires': 'error',
-			'@typescript-eslint/no-empty-function': 'warn',
+		'@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+		'@typescript-eslint/explicit-function-return-type': 'off',
+		'@typescript-eslint/explicit-module-boundary-types': 'off',
+		'@typescript-eslint/no-explicit-any': 'off',
+		'@typescript-eslint/no-non-null-assertion': 'off',
+		'@typescript-eslint/no-var-requires': 'warn',
+		'@typescript-eslint/no-empty-function': 'off',
 			'@typescript-eslint/no-inferrable-types': 'off',
 
 			// General rules

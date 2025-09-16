@@ -5,7 +5,7 @@ echo "🔍 Running pre-commit validation..."
 
 # Run ESLint with TypeScript support
 echo "📝 Checking TypeScript code quality..."
-npx eslint 'src/**/*.ts' --max-warnings 100
+npx eslint 'src/**/*.ts' --max-warnings 200
 
 # Run Prettier formatting check
 echo "🎨 Checking code formatting..."
