@@ -195,7 +195,7 @@ export class KTSelectState {
 	}
 
 	private _initDefaultConfig(
-		config: KTSelectConfigInterface,
+		config: KTSelectConfigInterface
 	): KTSelectConfigInterface {
 		return {
 			...DefaultConfig,
@@ -252,7 +252,7 @@ export class KTSelectState {
 					} else {
 						console.error(
 							'Error fetching data:',
-							`Property '${this._config.apiDataProperty}' not found in response`,
+							`Property '${this._config.apiDataProperty}' not found in response`
 						);
 						return;
 					}

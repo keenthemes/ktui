@@ -85,7 +85,7 @@ export class KTDatepicker extends KTComponent {
 		this._element.classList.add(
 			'kt-datepicker',
 			'relative',
-			'focus:outline-none',
+			'focus:outline-none'
 		);
 
 		// Mark as initialized
@@ -121,7 +121,7 @@ export class KTDatepicker extends KTComponent {
 	private _initializeInputElements(): void {
 		// Get main input element - will be hidden
 		this._dateInputElement = this._element.querySelector(
-			'[data-kt-datepicker-input]',
+			'[data-kt-datepicker-input]'
 		);
 
 		// Hide the input element and make it only for data storage
@@ -133,15 +133,15 @@ export class KTDatepicker extends KTComponent {
 
 		// Get range input elements if applicable
 		this._startDateInputElement = this._element.querySelector(
-			'[data-kt-datepicker-start]',
+			'[data-kt-datepicker-start]'
 		);
 		this._endDateInputElement = this._element.querySelector(
-			'[data-kt-datepicker-end]',
+			'[data-kt-datepicker-end]'
 		);
 
 		// Get display element if exists
 		this._displayElement = this._element.querySelector(
-			'[data-kt-datepicker-display]',
+			'[data-kt-datepicker-display]'
 		);
 
 		// Check if we should use segmented display
@@ -185,11 +185,11 @@ export class KTDatepicker extends KTComponent {
 			// Add segmented template based on range mode
 			if (this._config.range) {
 				displayContainer.innerHTML = segmentedDateRangeInputTemplate(
-					this._config.format || 'mm/dd/yyyy',
+					this._config.format || 'mm/dd/yyyy'
 				);
 			} else {
 				displayContainer.innerHTML = segmentedDateInputTemplate(
-					this._config.format || 'mm/dd/yyyy',
+					this._config.format || 'mm/dd/yyyy'
 				);
 			}
 
@@ -267,7 +267,7 @@ export class KTDatepicker extends KTComponent {
 		// Add highlight to clicked segment
 		if (this._displayElement) {
 			const segment = this._displayElement.querySelector(
-				`[data-segment="${segmentType}"]`,
+				`[data-segment="${segmentType}"]`
 			);
 			if (segment) {
 				segment.classList.add('kt-datepicker-segment-focused');
@@ -304,7 +304,7 @@ export class KTDatepicker extends KTComponent {
 				if (this._displayWrapper) {
 					this._displayWrapper.setAttribute(
 						'aria-expanded',
-						state.isOpen.toString(),
+						state.isOpen.toString()
 					);
 				}
 
@@ -312,13 +312,13 @@ export class KTDatepicker extends KTComponent {
 				if (!state.isOpen && state.prevIsOpen) {
 					this._syncDisplayWithSelectedDate();
 				}
-			},
+			}
 		);
 
 		// Set up change event listener to update input values
 		this._eventManager.addEventListener(
 			KTDatepickerEventName.DATE_CHANGE,
-			this._handleDateChange.bind(this),
+			this._handleDateChange.bind(this)
 		);
 
 		// Add keyboard events to the root element
@@ -336,7 +336,7 @@ export class KTDatepicker extends KTComponent {
 		if (this._displayElement && this._useSegmentedDisplay) {
 			this._displayElement.addEventListener(
 				'keydown',
-				this._handleSegmentKeydown.bind(this),
+				this._handleSegmentKeydown.bind(this)
 			);
 		}
 	}
@@ -388,7 +388,7 @@ export class KTDatepicker extends KTComponent {
 	 */
 	private _navigateSegments(
 		direction: 'prev' | 'next',
-		currentSegment: string,
+		currentSegment: string
 	): void {
 		if (!this._displayElement) return;
 
@@ -421,7 +421,7 @@ export class KTDatepicker extends KTComponent {
 
 		// Find new segment element
 		const newSegment = this._displayElement.querySelector(
-			`[data-segment="${segments[newIndex]}"]`,
+			`[data-segment="${segments[newIndex]}"]`
 		) as HTMLElement;
 		if (!newSegment) return;
 
@@ -463,13 +463,13 @@ export class KTDatepicker extends KTComponent {
 			if (selectedDate) {
 				// Single date
 				const daySegment = this._displayElement.querySelector(
-					'[data-segment="day"]',
+					'[data-segment="day"]'
 				);
 				const monthSegment = this._displayElement.querySelector(
-					'[data-segment="month"]',
+					'[data-segment="month"]'
 				);
 				const yearSegment = this._displayElement.querySelector(
-					'[data-segment="year"]',
+					'[data-segment="year"]'
 				);
 
 				if (daySegment) {
@@ -489,13 +489,13 @@ export class KTDatepicker extends KTComponent {
 			} else if (selectedDateRange && selectedDateRange.startDate) {
 				// Range selection
 				const startDay = this._displayElement.querySelector(
-					'[data-segment="start-day"]',
+					'[data-segment="start-day"]'
 				);
 				const startMonth = this._displayElement.querySelector(
-					'[data-segment="start-month"]',
+					'[data-segment="start-month"]'
 				);
 				const startYear = this._displayElement.querySelector(
-					'[data-segment="start-year"]',
+					'[data-segment="start-year"]'
 				);
 
 				if (startDay) {
@@ -517,13 +517,13 @@ export class KTDatepicker extends KTComponent {
 
 				if (selectedDateRange.endDate) {
 					const endDay = this._displayElement.querySelector(
-						'[data-segment="end-day"]',
+						'[data-segment="end-day"]'
 					);
 					const endMonth = this._displayElement.querySelector(
-						'[data-segment="end-month"]',
+						'[data-segment="end-month"]'
 					);
 					const endYear = this._displayElement.querySelector(
-						'[data-segment="end-year"]',
+						'[data-segment="end-year"]'
 					);
 
 					if (endDay) {
@@ -560,17 +560,17 @@ export class KTDatepicker extends KTComponent {
 					this._displayText.textContent = `${formatDate(
 						selectedDateRange.startDate,
 						this._config.format,
-						this._config,
+						this._config
 					)} - ${formatDate(
 						selectedDateRange.endDate,
 						this._config.format,
-						this._config,
+						this._config
 					)}`;
 				} else {
 					this._displayText.textContent = formatDate(
 						selectedDate,
 						this._config.format,
-						this._config,
+						this._config
 					);
 				}
 			} else {
@@ -598,7 +598,7 @@ export class KTDatepicker extends KTComponent {
 			const formattedDate = formatDate(
 				detail.selectedDate,
 				this._config.format,
-				this._config,
+				this._config
 			);
 
 			// Update hidden input value
@@ -606,7 +606,7 @@ export class KTDatepicker extends KTComponent {
 				this._dateInputElement.value = formattedDate;
 				// Dispatch change event on input to trigger form validation
 				this._dateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
@@ -626,14 +626,14 @@ export class KTDatepicker extends KTComponent {
 					displayValue = formatDate(
 						startDate,
 						this._config.format,
-						this._config,
+						this._config
 					);
 
 					if (endDate) {
 						const endFormatted = formatDate(
 							endDate,
 							this._config.format,
-							this._config,
+							this._config
 						);
 						displayValue += `${this._config.rangeSeparator}${endFormatted}`;
 					}
@@ -642,7 +642,7 @@ export class KTDatepicker extends KTComponent {
 				this._dateInputElement.value = displayValue;
 				// Dispatch change event on input
 				this._dateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
@@ -651,10 +651,10 @@ export class KTDatepicker extends KTComponent {
 				this._startDateInputElement.value = formatDate(
 					startDate,
 					this._config.format,
-					this._config,
+					this._config
 				);
 				this._startDateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
@@ -662,10 +662,10 @@ export class KTDatepicker extends KTComponent {
 				this._endDateInputElement.value = formatDate(
 					endDate,
 					this._config.format,
-					this._config,
+					this._config
 				);
 				this._endDateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
@@ -697,13 +697,13 @@ export class KTDatepicker extends KTComponent {
 			const year = date.getFullYear();
 
 			const daySegment = this._displayElement.querySelector(
-				'[data-segment="day"]',
+				'[data-segment="day"]'
 			);
 			const monthSegment = this._displayElement.querySelector(
-				'[data-segment="month"]',
+				'[data-segment="month"]'
 			);
 			const yearSegment = this._displayElement.querySelector(
-				'[data-segment="year"]',
+				'[data-segment="year"]'
 			);
 
 			if (daySegment) daySegment.textContent = day < 10 ? `0${day}` : `${day}`;
@@ -715,7 +715,7 @@ export class KTDatepicker extends KTComponent {
 			this._displayElement.textContent = formatDate(
 				date,
 				this._config.format,
-				this._config,
+				this._config
 			);
 		}
 	}
@@ -728,7 +728,7 @@ export class KTDatepicker extends KTComponent {
 	 */
 	private _updateRangeDisplayElement(
 		startDate: Date | null,
-		endDate: Date | null,
+		endDate: Date | null
 	): void {
 		if (!this._displayElement) return;
 
@@ -745,13 +745,13 @@ export class KTDatepicker extends KTComponent {
 			// Update segmented range display
 			// Start date segments
 			const startDay = this._displayElement.querySelector(
-				'[data-segment="start-day"]',
+				'[data-segment="start-day"]'
 			);
 			const startMonth = this._displayElement.querySelector(
-				'[data-segment="start-month"]',
+				'[data-segment="start-month"]'
 			);
 			const startYear = this._displayElement.querySelector(
-				'[data-segment="start-year"]',
+				'[data-segment="start-year"]'
 			);
 
 			if (startDay)
@@ -769,13 +769,13 @@ export class KTDatepicker extends KTComponent {
 			// End date segments
 			if (endDate) {
 				const endDay = this._displayElement.querySelector(
-					'[data-segment="end-day"]',
+					'[data-segment="end-day"]'
 				);
 				const endMonth = this._displayElement.querySelector(
-					'[data-segment="end-month"]',
+					'[data-segment="end-month"]'
 				);
 				const endYear = this._displayElement.querySelector(
-					'[data-segment="end-year"]',
+					'[data-segment="end-year"]'
 				);
 
 				if (endDay)
@@ -795,14 +795,14 @@ export class KTDatepicker extends KTComponent {
 			let displayText = formatDate(
 				startDate,
 				this._config.format,
-				this._config,
+				this._config
 			);
 
 			if (endDate) {
 				const endFormatted = formatDate(
 					endDate,
 					this._config.format,
-					this._config,
+					this._config
 				);
 				displayText += `${this._config.rangeSeparator}${endFormatted}`;
 			}
@@ -834,19 +834,19 @@ export class KTDatepicker extends KTComponent {
 				const startDate = parseDate(
 					rangeParts[0].trim(),
 					this._config.format,
-					this._config,
+					this._config
 				);
 				const endDate = parseDate(
 					rangeParts[1].trim(),
 					this._config.format,
-					this._config,
+					this._config
 				);
 
 				// Validate dates are within min/max constraints
 				if (startDate && isDateDisabled(startDate, this._config)) {
 					console.log(
 						'Start date from input is outside allowed range:',
-						startDate.toISOString(),
+						startDate.toISOString()
 					);
 					return;
 				}
@@ -854,7 +854,7 @@ export class KTDatepicker extends KTComponent {
 				if (endDate && isDateDisabled(endDate, this._config)) {
 					console.log(
 						'End date from input is outside allowed range:',
-						endDate.toISOString(),
+						endDate.toISOString()
 					);
 					return;
 				}
@@ -866,14 +866,14 @@ export class KTDatepicker extends KTComponent {
 				const singleDate = parseDate(
 					rangeParts[0].trim(),
 					this._config.format,
-					this._config,
+					this._config
 				);
 
 				// Validate date is within min/max constraints
 				if (singleDate && isDateDisabled(singleDate, this._config)) {
 					console.log(
 						'Date from input is outside allowed range:',
-						singleDate.toISOString(),
+						singleDate.toISOString()
 					);
 					return;
 				}
@@ -887,14 +887,14 @@ export class KTDatepicker extends KTComponent {
 			const parsedDate = parseDate(
 				inputValue,
 				this._config.format,
-				this._config,
+				this._config
 			);
 
 			// Validate date is within min/max constraints
 			if (parsedDate && isDateDisabled(parsedDate, this._config)) {
 				console.log(
 					'Date from input is outside allowed range:',
-					parsedDate.toISOString(),
+					parsedDate.toISOString()
 				);
 				return;
 			}
@@ -911,10 +911,10 @@ export class KTDatepicker extends KTComponent {
 	private _initializeDefaultValues(): void {
 		// Set min and max dates from attributes if they exist
 		const minDateAttr = this._element.getAttribute(
-			'data-kt-datepicker-min-date',
+			'data-kt-datepicker-min-date'
 		);
 		const maxDateAttr = this._element.getAttribute(
-			'data-kt-datepicker-max-date',
+			'data-kt-datepicker-max-date'
 		);
 
 		if (minDateAttr) {
@@ -946,7 +946,7 @@ export class KTDatepicker extends KTComponent {
 			const startDate = parseDate(
 				this._startDateInputElement.value,
 				this._config.format,
-				this._config,
+				this._config
 			);
 			let endDate = null;
 
@@ -954,7 +954,7 @@ export class KTDatepicker extends KTComponent {
 				endDate = parseDate(
 					this._endDateInputElement.value,
 					this._config.format,
-					this._config,
+					this._config
 				);
 			}
 
@@ -996,7 +996,7 @@ export class KTDatepicker extends KTComponent {
 		if (date && isDateDisabled(date, this._config)) {
 			console.log(
 				'Date is disabled in setDate, ignoring selection:',
-				date.toISOString(),
+				date.toISOString()
 			);
 			return;
 		}
@@ -1015,15 +1015,15 @@ export class KTDatepicker extends KTComponent {
 			this._dateInputElement.value = formatDate(
 				date,
 				this._config.format,
-				this._config,
+				this._config
 			);
 			this._dateInputElement.dispatchEvent(
-				new Event('change', { bubbles: true }),
+				new Event('change', { bubbles: true })
 			);
 		} else if (this._dateInputElement) {
 			this._dateInputElement.value = '';
 			this._dateInputElement.dispatchEvent(
-				new Event('change', { bubbles: true }),
+				new Event('change', { bubbles: true })
 			);
 		}
 	}
@@ -1057,7 +1057,7 @@ export class KTDatepicker extends KTComponent {
 		if (start && isDateDisabled(start, this._config)) {
 			console.log(
 				'Start date is disabled in setDateRange, ignoring selection:',
-				start.toISOString(),
+				start.toISOString()
 			);
 			return;
 		}
@@ -1065,7 +1065,7 @@ export class KTDatepicker extends KTComponent {
 		if (end && isDateDisabled(end, this._config)) {
 			console.log(
 				'End date is disabled in setDateRange, ignoring selection:',
-				end.toISOString(),
+				end.toISOString()
 			);
 			return;
 		}
@@ -1099,12 +1099,12 @@ export class KTDatepicker extends KTComponent {
 					inputValue += `${this._config.rangeSeparator}${formatDate(
 						end,
 						this._config.format,
-						this._config,
+						this._config
 					)}`;
 				}
 				this._dateInputElement.value = inputValue;
 				this._dateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
@@ -1112,10 +1112,10 @@ export class KTDatepicker extends KTComponent {
 				this._startDateInputElement.value = formatDate(
 					start,
 					this._config.format,
-					this._config,
+					this._config
 				);
 				this._startDateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
@@ -1123,10 +1123,10 @@ export class KTDatepicker extends KTComponent {
 				this._endDateInputElement.value = formatDate(
 					end,
 					this._config.format,
-					this._config,
+					this._config
 				);
 				this._endDateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			} else if (this._endDateInputElement) {
 				this._endDateInputElement.value = '';
@@ -1152,21 +1152,21 @@ export class KTDatepicker extends KTComponent {
 			if (this._dateInputElement) {
 				this._dateInputElement.value = '';
 				this._dateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
 			if (this._startDateInputElement) {
 				this._startDateInputElement.value = '';
 				this._startDateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
 			if (this._endDateInputElement) {
 				this._endDateInputElement.value = '';
 				this._endDateInputElement.dispatchEvent(
-					new Event('change', { bubbles: true }),
+					new Event('change', { bubbles: true })
 				);
 			}
 
@@ -1215,13 +1215,13 @@ export class KTDatepicker extends KTComponent {
 		// Remove event listeners
 		this._eventManager.removeEventListener(
 			KTDatepickerEventName.DATE_CHANGE,
-			this._handleDateChange.bind(this),
+			this._handleDateChange.bind(this)
 		);
 
 		if (this._dateInputElement) {
 			this._dateInputElement.removeEventListener(
 				'change',
-				this._handleInputChange.bind(this),
+				this._handleInputChange.bind(this)
 			);
 		}
 
@@ -1263,7 +1263,7 @@ export class KTDatepicker extends KTComponent {
 	 */
 	public static createInstances(): void {
 		const elements = document.querySelectorAll<HTMLElement>(
-			'[data-kt-datepicker]',
+			'[data-kt-datepicker]'
 		);
 
 		elements.forEach((element) => {

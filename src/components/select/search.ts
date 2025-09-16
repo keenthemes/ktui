@@ -6,11 +6,7 @@
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
-import {
-	filterOptions,
-	FocusManager,
-	EventManager,
-} from './utils';
+import { filterOptions, FocusManager, EventManager } from './utils';
 
 export class KTSelectSearch {
 	private _select: KTSelect;
@@ -31,7 +27,7 @@ export class KTSelectSearch {
 		this._focusManager = new FocusManager(
 			this._select.getDropdownElement(),
 			'[data-kt-select-option]',
-			select.getConfig(),
+			select.getConfig()
 		);
 		this.handleSearchInput = this._handleSearchInput.bind(this);
 		this._config = select.getConfig();
@@ -46,7 +42,7 @@ export class KTSelectSearch {
 				if (this._config.debug)
 					console.log(
 						'Initializing search module with input:',
-						this._searchInput,
+						this._searchInput
 					);
 
 				// First remove any existing listeners to prevent duplicates
@@ -56,7 +52,7 @@ export class KTSelectSearch {
 				this._eventManager.addListener(
 					this._searchInput,
 					'input',
-					this.handleSearchInput,
+					this.handleSearchInput
 				);
 
 				// Add keydown event listener for navigation, selection, and escape
@@ -96,18 +92,20 @@ export class KTSelectSearch {
 				}
 
 				// Listen for dropdown close to reset options - ATTACH TO WRAPPER
-				this._select.getWrapperElement().addEventListener('dropdown.close', () => {
-					this._focusManager.resetFocus();
-					// If clearSearchOnClose is false and there's a value, the search term and filtered state should persist.
-					// KTSelect's closeDropdown method already calls this._searchModule.clearSearch() (which clears highlights)
-					// and conditionally clears the input value based on KTSelect's config.clearSearchOnClose.
-					// This listener in search.ts seems to unconditionally clear everything.
-					// For now, keeping its original behavior:
-					this.clearSearch(); // Clears highlights from current options
-					this._searchInput.value = ''; // Clears the search input field
-					this._resetAllOptions(); // Shows all options, restores original text, removes highlights
-					this._clearNoResultsMessage(); // Clears any "no results" message
-				});
+				this._select
+					.getWrapperElement()
+					.addEventListener('dropdown.close', () => {
+						this._focusManager.resetFocus();
+						// If clearSearchOnClose is false and there's a value, the search term and filtered state should persist.
+						// KTSelect's closeDropdown method already calls this._searchModule.clearSearch() (which clears highlights)
+						// and conditionally clears the input value based on KTSelect's config.clearSearchOnClose.
+						// This listener in search.ts seems to unconditionally clear everything.
+						// For now, keeping its original behavior:
+						this.clearSearch(); // Clears highlights from current options
+						this._searchInput.value = ''; // Clears the search input field
+						this._resetAllOptions(); // Shows all options, restores original text, removes highlights
+						this._clearNoResultsMessage(); // Clears any "no results" message
+					});
 
 				// Clear highlights when an option is selected - ATTACH TO ORIGINAL SELECT (standard 'change' event)
 				this._select.getElement().addEventListener('change', () => {
@@ -121,30 +119,32 @@ export class KTSelectSearch {
 				});
 
 				// Consolidated 'dropdown.show' event listener - ATTACH TO WRAPPER
-				this._select.getWrapperElement().addEventListener('dropdown.show', () => {
-					this._focusManager.resetFocus(); // Always clear previous focus state
+				this._select
+					.getWrapperElement()
+					.addEventListener('dropdown.show', () => {
+						this._focusManager.resetFocus(); // Always clear previous focus state
 
-					if (this._searchInput?.value) {
-						// If there's an existing search term:
-						// 1. Re-filter options. This ensures the display (hidden/visible) is correct
-						//    and "no results" message is handled if query yields nothing.
-						this._filterOptions(this._searchInput.value);
-					} else {
-						// If search input is empty:
-						// 1. Reset all options to their full, unfiltered, original state.
-						this._resetAllOptions(); // Shows all, clears highlights from options, restores original text
-						// 2. Clear any "no results" message.
-						this._clearNoResultsMessage();
-					}
+						if (this._searchInput?.value) {
+							// If there's an existing search term:
+							// 1. Re-filter options. This ensures the display (hidden/visible) is correct
+							//    and "no results" message is handled if query yields nothing.
+							this._filterOptions(this._searchInput.value);
+						} else {
+							// If search input is empty:
+							// 1. Reset all options to their full, unfiltered, original state.
+							this._resetAllOptions(); // Shows all, clears highlights from options, restores original text
+							// 2. Clear any "no results" message.
+							this._clearNoResultsMessage();
+						}
 
-					// Handle autofocus for the search input (this was one of the original separate listeners)
-					if (this._select.getConfig().searchAutofocus) {
-						setTimeout(() => {
-							this._searchInput?.focus(); // Focus search input
-						}, 50); // Delay to ensure dropdown is visible
-					}
-					this._select.updateSelectAllButtonState();
-				});
+						// Handle autofocus for the search input (this was one of the original separate listeners)
+						if (this._select.getConfig().searchAutofocus) {
+							setTimeout(() => {
+								this._searchInput?.focus(); // Focus search input
+							}, 50); // Delay to ensure dropdown is visible
+						}
+						this._select.updateSelectAllButtonState();
+					});
 			}
 		}
 	}
@@ -229,8 +229,10 @@ export class KTSelectSearch {
 	 * This is typically called before applying new filters/highlights.
 	 */
 	private _restoreOptionContentsBeforeFilter(): void {
-		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
-		options.forEach(option => {
+		const options = Array.from(
+			this._select.getOptionsElement()
+		) as HTMLElement[];
+		options.forEach((option) => {
 			const value = option.getAttribute('data-value');
 			if (value && this._originalOptionContents.has(value)) {
 				const originalContent = this._originalOptionContents.get(value)!;
@@ -282,7 +284,7 @@ export class KTSelectSearch {
 
 	private _filterOptions(query: string) {
 		const options = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
@@ -295,8 +297,12 @@ export class KTSelectSearch {
 		// Restore original content before filtering, so highlighting is applied fresh.
 		this._restoreOptionContentsBeforeFilter();
 
-		const visibleCount = filterOptions(options, query, config, dropdownElement, (count) =>
-			this._handleNoResults(count),
+		const visibleCount = filterOptions(
+			options,
+			query,
+			config,
+			dropdownElement,
+			(count) => this._handleNoResults(count)
 		);
 
 		this._select.updateSelectAllButtonState();
@@ -308,7 +314,7 @@ export class KTSelectSearch {
 	private _resetAllOptions() {
 		// Show all options
 		const options = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 
 		// Ensure the cache is populated if it's somehow empty here
@@ -351,7 +357,7 @@ export class KTSelectSearch {
 
 		const dropdownElement = this._select.getDropdownElement();
 		const optionsContainer = dropdownElement.querySelector(
-			'[data-kt-select-options]',
+			'[data-kt-select-options]'
 		);
 		if (optionsContainer) {
 			optionsContainer.appendChild(this._noResultsElement);
@@ -374,7 +380,7 @@ export class KTSelectSearch {
 	public clearSearch() {
 		// Restore original option content (removes highlighting)
 		const optionsToClear = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 
 		// Ensure cache is available
@@ -401,7 +407,7 @@ export class KTSelectSearch {
 		// Re-cache all option contents
 		this._originalOptionContents.clear();
 		const currentOptions = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 
 		currentOptions.forEach((option) => {

@@ -25,7 +25,7 @@ export interface KTDataTableCheckboxAPI {
 export function createCheckboxHandler(
 	element: HTMLElement,
 	config: KTDataTableConfigInterface,
-	fireEvent: (eventName: string, eventData?: any) => void,
+	fireEvent: (eventName: string, eventData?: any) => void
 ): KTDataTableCheckboxAPI {
 	let headerChecked = false;
 	let headerCheckElement: HTMLInputElement | null = null;
@@ -63,12 +63,12 @@ export function createCheckboxHandler(
 
 	function init() {
 		headerCheckElement = element.querySelector<HTMLInputElement>(
-			config.attributes.check,
+			config.attributes.check
 		);
 		if (!headerCheckElement) return;
 		headerChecked = headerCheckElement.checked;
 		targetElements = element.querySelectorAll(
-			config.attributes.checkbox,
+			config.attributes.checkbox
 		) as NodeListOf<HTMLInputElement>;
 		checkboxHandler();
 		reapplyCheckedStates();
@@ -84,7 +84,7 @@ export function createCheckboxHandler(
 			'input',
 			(event: Event) => {
 				handleRowCheckboxChange(event as InputEvent);
-			},
+			}
 		);
 	}
 
@@ -218,7 +218,7 @@ export function createCheckboxHandler(
 	function updateState() {
 		// Called after redraw/pagination
 		targetElements = element.querySelectorAll(
-			config.attributes.checkbox,
+			config.attributes.checkbox
 		) as NodeListOf<HTMLInputElement>;
 		reapplyCheckedStates();
 		updateHeaderCheckboxState();

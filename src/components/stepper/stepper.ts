@@ -28,7 +28,7 @@ export class KTStepper extends KTComponent implements KTStepperInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTStepperConfigInterface | null = null,
+		config: KTStepperConfigInterface | null = null
 	) {
 		super();
 
@@ -90,7 +90,7 @@ export class KTStepper extends KTComponent implements KTStepperInterface {
 
 		this._getItemElements().forEach((element, index) => {
 			const contentElement = KTDom.getElement(
-				element.getAttribute('data-kt-stepper-item'),
+				element.getAttribute('data-kt-stepper-item')
 			);
 			if (!contentElement) return;
 
@@ -104,7 +104,7 @@ export class KTStepper extends KTComponent implements KTStepperInterface {
 			if (index + 1 == this._activeStep) {
 				element.classList.add('active');
 				contentElement.classList.remove(
-					this._getOption('hiddenClass') as string,
+					this._getOption('hiddenClass') as string
 				);
 			} else {
 				contentElement.classList.add(this._getOption('hiddenClass') as string);
@@ -285,7 +285,7 @@ export class KTStepper extends KTComponent implements KTStepperInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTStepperConfigInterface,
+		config?: KTStepperConfigInterface
 	): KTStepper | null {
 		return this.getInstance(element) || new KTStepper(element, config);
 	}

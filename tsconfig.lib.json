@@ -1,0 +1,22 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"declaration": true,
+		"declarationMap": true,
+		"outDir": "./lib",
+		"rootDir": "./src",
+		"module": "commonjs",
+		"target": "es5",
+		"strict": false,
+		"noImplicitAny": false,
+		"strictNullChecks": false,
+		"strictFunctionTypes": false,
+		"noImplicitReturns": false,
+		"noFallthroughCasesInSwitch": false,
+		"noUncheckedIndexedAccess": false,
+		"exactOptionalPropertyTypes": false,
+		"skipLibCheck": true
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist", "lib", "**/*.test.ts", "**/*.spec.ts"]
+}

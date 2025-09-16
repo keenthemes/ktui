@@ -223,7 +223,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	 * @returns Toast instance with dismiss method, or undefined if invalid input.
 	 */
 	static show(
-		inputOptions?: KTToastOptions,
+		inputOptions?: KTToastOptions
 	): (KTToastInstance & { dismiss: () => void }) | undefined {
 		const options = { ...DEFAULT_TOAST_OPTIONS, ...inputOptions };
 
@@ -313,7 +313,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 
 		// Assign event handlers to buttons by data attribute
 		const actionBtn = toast.querySelector(
-			'[data-kt-toast-action]',
+			'[data-kt-toast-action]'
 		) as HTMLButtonElement | null;
 
 		if (
@@ -332,7 +332,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		}
 
 		const cancelBtn = toast.querySelector(
-			'[data-kt-toast-cancel]',
+			'[data-kt-toast-cancel]'
 		) as HTMLButtonElement | null;
 
 		if (cancelBtn && options.cancel && typeof options.cancel === 'object') {
@@ -347,7 +347,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 
 		// Dismiss button handler
 		const dismissBtn = toast.querySelector(
-			'[data-kt-toast-dismiss]',
+			'[data-kt-toast-dismiss]'
 		) as HTMLButtonElement | null;
 
 		if (dismissBtn && options.dismiss !== false) {
@@ -386,7 +386,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			'bottom-start': 'kt-toast-bottom-start',
 		};
 		Object.values(directionClassMap).forEach((cls) =>
-			toast.classList.remove(cls),
+			toast.classList.remove(cls)
 		);
 		const dirClass = directionClassMap[position] || 'kt-toast-top-end';
 		toast.classList.add(dirClass);
@@ -586,7 +586,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	private static _fireEventOnElement(
 		element: HTMLElement,
 		eventType: string,
-		payload?: object,
+		payload?: object
 	) {
 		const event = new CustomEvent(`kt.toast.${eventType}`, { detail: payload });
 		element.dispatchEvent(event);
@@ -601,7 +601,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	private static _dispatchEventOnElement(
 		element: HTMLElement,
 		eventType: string,
-		payload?: object,
+		payload?: object
 	) {
 		const event = new CustomEvent(eventType, { detail: payload });
 		element.dispatchEvent(event);

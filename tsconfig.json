@@ -2,16 +2,21 @@
 	"compilerOptions": {
 		"lib": ["dom", "es2015"],
 		"rootDir": "./src",
-		"outDir": "./dist/",
+		"outDir": "./lib/",
 		"sourceMap": true,
-		"declaration": false,
+		"declaration": true,
+		"declarationMap": true,
 		"noImplicitAny": true,
 		"module": "commonjs",
 		"target": "es5",
 		"allowJs": true,
 		"resolveJsonModule": true,
-		"moduleResolution": "node"
+		"moduleResolution": "node",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
 	},
-	"include": ["src/components"],
-	"exclude": ["node_modules", "dist"]
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist", "lib"]
 }

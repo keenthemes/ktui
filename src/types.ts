@@ -5,7 +5,7 @@
 
 export declare type KTCallableType = (
 	event?: Event,
-	target?: HTMLElement,
+	target?: HTMLElement
 ) => void | boolean;
 
 export declare type KTViewPortType = {

@@ -87,7 +87,7 @@ const KTDom = {
 			for (let x = 0; x < classNames.length; x++) {
 				element.className = element.className.replace(
 					new RegExp('\\b' + classNames[x].trim() + '\\b', 'g'),
-					'',
+					''
 				);
 			}
 		}
@@ -190,7 +190,7 @@ const KTDom = {
 	},
 
 	isDisabled(
-		element: HTMLInputElement | HTMLSelectElement | HTMLButtonElement,
+		element: HTMLInputElement | HTMLSelectElement | HTMLButtonElement
 	): boolean {
 		if (!element || element.nodeType !== Node.ELEMENT_NODE) {
 			return true;
@@ -322,11 +322,11 @@ const KTDom = {
 		const y = element.getBoundingClientRect().top;
 		const ww = Math.max(
 			document.documentElement.clientWidth,
-			window.innerWidth || 0,
+			window.innerWidth || 0
 		);
 		const hw = Math.max(
 			document.documentElement.clientHeight,
-			window.innerHeight || 0,
+			window.innerHeight || 0
 		);
 		const w = element.clientWidth;
 		const h = element.clientHeight;
@@ -377,14 +377,14 @@ const KTDom = {
 
 		const attributes: { [key: string]: KTOptionType } = {};
 		const keys = Object.keys(element.dataset).filter((key) =>
-			key.startsWith(prefix),
+			key.startsWith(prefix)
 		);
 
 		for (const key of keys) {
 			let normalizedKey = key.replace(prefix, '');
 			normalizedKey = KTUtils.uncapitalize(normalizedKey);
 			attributes[normalizedKey] = KTUtils.parseDataAttribute(
-				element.dataset[key],
+				element.dataset[key]
 			);
 		}
 

@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit validation..."
+
+# Run ESLint with TypeScript support
+echo "📝 Checking TypeScript code quality..."
+npx eslint 'src/**/*.ts' --max-warnings 100
+
+# Run Prettier formatting check
+echo "🎨 Checking code formatting..."
+npx prettier --check 'src/**/*.ts'
+
+# Run TypeScript compilation check
+echo "🔧 Checking TypeScript compilation..."
+npx tsc --noEmit --project tsconfig.lib.json
+
+echo "✅ Pre-commit validation completed successfully!"

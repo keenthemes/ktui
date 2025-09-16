@@ -176,7 +176,7 @@ export class KTModal extends KTComponent implements KTModalInterface {
 	protected _autoFocus(): void {
 		if (!this._element) return;
 		const input: HTMLInputElement | null = this._element.querySelector(
-			'[data-kt-modal-input-focus]',
+			'[data-kt-modal-input-focus]'
 		);
 		if (!input) return;
 		else input.focus();
@@ -192,7 +192,7 @@ export class KTModal extends KTComponent implements KTModalInterface {
 		KTDom.reflow(this._backdropElement);
 		KTDom.addClass(
 			this._backdropElement,
-			this._getOption('backdropClass') as string,
+			this._getOption('backdropClass') as string
 		);
 	}
 
@@ -244,7 +244,7 @@ export class KTModal extends KTComponent implements KTModalInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTModalConfigInterface,
+		config?: KTModalConfigInterface
 	): KTModal {
 		return this.getInstance(element) || new KTModal(element, config);
 	}
@@ -277,7 +277,7 @@ export class KTModal extends KTComponent implements KTModalInterface {
 				if (modal) {
 					modal.toggle(target);
 				}
-			},
+			}
 		);
 	}
 
@@ -290,7 +290,7 @@ export class KTModal extends KTComponent implements KTModalInterface {
 				event.stopPropagation();
 
 				const modalElement = target.closest(
-					'[data-kt-modal-initialized]',
+					'[data-kt-modal-initialized]'
 				) as HTMLElement;
 				if (modalElement) {
 					const modal = KTModal.getInstance(modalElement);
@@ -298,14 +298,14 @@ export class KTModal extends KTComponent implements KTModalInterface {
 						modal.hide();
 					}
 				}
-			},
+			}
 		);
 	}
 
 	public static handleClickAway() {
 		document.addEventListener('click', (event: Event) => {
 			const modalElement = document.querySelector(
-				'.open[data-kt-modal-initialized]',
+				'.open[data-kt-modal-initialized]'
 			);
 			if (!modalElement) return;
 
@@ -330,7 +330,7 @@ export class KTModal extends KTComponent implements KTModalInterface {
 	public static handleKeyword() {
 		document.addEventListener('keydown', (event: KeyboardEvent) => {
 			const modalElement = document.querySelector(
-				'.open[data-kt-modal-initialized]',
+				'.open[data-kt-modal-initialized]'
 			);
 			const modal = KTModal.getInstance(modalElement as HTMLElement);
 			if (!modal) {

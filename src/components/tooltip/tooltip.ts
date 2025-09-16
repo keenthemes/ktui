@@ -48,7 +48,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTTooltipConfigInterface | null = null,
+		config: KTTooltipConfigInterface | null = null
 	) {
 		super();
 
@@ -68,7 +68,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 	private _getTargetElement(): HTMLElement | null {
 		return (
 			KTDom.getElement(
-				this._element.getAttribute('data-kt-tooltip') as string,
+				this._element.getAttribute('data-kt-tooltip') as string
 			) ||
 			this._element.querySelector('[data-kt-tooltip-content]') ||
 			KTDom.getElement(this._getOption('target') as string)
@@ -120,7 +120,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 
 				this._targetElement.classList.add('show');
 				this._targetElement.classList.remove(
-					this._getOption('hiddenClass') as string,
+					this._getOption('hiddenClass') as string
 				);
 				this._targetElement.style.opacity = '0';
 				KTDom.reflow(this._targetElement);
@@ -135,7 +135,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 					this._dispatchEvent('shown');
 				});
 			},
-			this._getOption('delayShow') as number,
+			this._getOption('delayShow') as number
 		);
 	}
 
@@ -169,7 +169,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 					this._popper.destroy();
 					this._targetElement.classList.remove('show');
 					this._targetElement.classList.add(
-						this._getOption('hiddenClass') as string,
+						this._getOption('hiddenClass') as string
 					);
 					this._targetElement.style.opacity = '';
 					this._transitioning = false;
@@ -177,7 +177,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 					this._dispatchEvent('hidden');
 				});
 			},
-			this._getOption('delayHide') as number,
+			this._getOption('delayHide') as number
 		);
 	}
 
@@ -335,7 +335,7 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTTooltipConfigInterface,
+		config?: KTTooltipConfigInterface
 	): KTTooltip {
 		return this.getInstance(element) || new KTTooltip(element, config);
 	}

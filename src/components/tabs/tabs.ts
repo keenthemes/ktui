@@ -40,12 +40,12 @@ export class KTTabs extends KTComponent implements KTTabsInterface {
 		if (!this._element) return;
 		this._tabElements = this._element.querySelectorAll('[data-kt-tab-toggle]');
 		this._currentTabElement = this._element.querySelector(
-			'.active[data-kt-tab-toggle]',
+			'.active[data-kt-tab-toggle]'
 		);
 		this._currentContentElement =
 			(this._currentTabElement &&
 				(KTDom.getElement(
-					this._currentTabElement.getAttribute('data-kt-tab-toggle'),
+					this._currentTabElement.getAttribute('data-kt-tab-toggle')
 				) ||
 					KTDom.getElement(this._currentTabElement.getAttribute('href')))) ||
 			null;
@@ -63,7 +63,7 @@ export class KTTabs extends KTComponent implements KTTabsInterface {
 			(event: Event, target: HTMLElement) => {
 				event.preventDefault();
 				this._show(target);
-			},
+			}
 		);
 	}
 
@@ -80,11 +80,11 @@ export class KTTabs extends KTComponent implements KTTabsInterface {
 		this._currentTabElement?.classList.remove('active');
 		this._currentTabElement?.classList.remove('selected');
 		this._currentContentElement?.classList.add(
-			this._getOption('hiddenClass') as string,
+			this._getOption('hiddenClass') as string
 		);
 		this._lastTabElement = this._currentTabElement;
 		this._getDropdownToggleElement(this._lastTabElement)?.classList.remove(
-			'active',
+			'active'
 		);
 
 		this._lastContentElement = this._currentContentElement;
@@ -95,10 +95,10 @@ export class KTTabs extends KTComponent implements KTTabsInterface {
 		this._currentTabElement?.classList.add('active');
 		this._currentTabElement?.classList.add('selected');
 		this._currentContentElement?.classList.remove(
-			this._getOption('hiddenClass') as string,
+			this._getOption('hiddenClass') as string
 		);
 		this._getDropdownToggleElement(this._currentTabElement)?.classList.add(
-			'active',
+			'active'
 		);
 
 		this._currentContentElement.style.opacity = '0';
@@ -116,12 +116,12 @@ export class KTTabs extends KTComponent implements KTTabsInterface {
 
 	protected _getDropdownToggleElement(element: HTMLElement): HTMLElement {
 		const containerElement = element.closest(
-			'[data-kt-dropdown-initialized],[data-kt-menu-initialized]',
+			'[data-kt-dropdown-initialized],[data-kt-menu-initialized]'
 		) as HTMLElement;
 
 		if (containerElement) {
 			return containerElement.querySelector(
-				'[data-kt-dropdown-toggle], [data-kt-menu-toggle]',
+				'[data-kt-dropdown-toggle], [data-kt-menu-toggle]'
 			);
 		} else {
 			return null;
@@ -162,7 +162,7 @@ export class KTTabs extends KTComponent implements KTTabsInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTTabsConfigInterface,
+		config?: KTTabsConfigInterface
 	): KTTabs {
 		return this.getInstance(element) || new KTTabs(element, config);
 	}

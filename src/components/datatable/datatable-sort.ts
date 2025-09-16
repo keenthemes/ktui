@@ -16,16 +16,16 @@ export interface KTDataTableSortAPI<T = KTDataTableDataInterface> {
 	sortData(
 		data: T[],
 		sortField: keyof T | number,
-		sortOrder: KTDataTableSortOrderInterface,
+		sortOrder: KTDataTableSortOrderInterface
 	): T[];
 	toggleSortOrder(
 		currentField: keyof T | number,
 		currentOrder: KTDataTableSortOrderInterface,
-		newField: keyof T | number,
+		newField: keyof T | number
 	): KTDataTableSortOrderInterface;
 	setSortIcon(
 		sortField: keyof T,
-		sortOrder: KTDataTableSortOrderInterface,
+		sortOrder: KTDataTableSortOrderInterface
 	): void;
 }
 
@@ -38,17 +38,17 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 	},
 	setState: (
 		field: keyof T | number,
-		order: KTDataTableSortOrderInterface,
+		order: KTDataTableSortOrderInterface
 	) => void,
 	fireEvent: (eventName: string, eventData?: any) => void,
 	dispatchEvent: (eventName: string, eventData?: any) => void,
-	updateData: () => void,
+	updateData: () => void
 ): KTDataTableSortAPI<T> {
 	// Helper to compare values for sorting
 	function compareValues(
 		a: unknown,
 		b: unknown,
-		sortOrder: KTDataTableSortOrderInterface,
+		sortOrder: KTDataTableSortOrderInterface
 	): number {
 		const aText = String(a).replace(/<[^>]*>|&nbsp;/g, '');
 		const bText = String(b).replace(/<[^>]*>|&nbsp;/g, '');
@@ -66,7 +66,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 	function sortData(
 		data: T[],
 		sortField: keyof T | number,
-		sortOrder: KTDataTableSortOrderInterface,
+		sortOrder: KTDataTableSortOrderInterface
 	): T[] {
 		return data.sort((a, b) => {
 			const aValue = a[sortField as keyof T] as unknown;
@@ -78,7 +78,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 	function toggleSortOrder(
 		currentField: keyof T | number,
 		currentOrder: KTDataTableSortOrderInterface,
-		newField: keyof T | number,
+		newField: keyof T | number
 	): KTDataTableSortOrderInterface {
 		if (currentField === newField) {
 			switch (currentOrder) {
@@ -95,7 +95,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 
 	function setSortIcon(
 		sortField: keyof T,
-		sortOrder: KTDataTableSortOrderInterface,
+		sortOrder: KTDataTableSortOrderInterface
 	): void {
 		const sortClass = sortOrder
 			? sortOrder === 'asc'
@@ -106,11 +106,11 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 			typeof sortField === 'number'
 				? theadElement.querySelectorAll('th')[sortField]
 				: (theadElement.querySelector(
-						`th[data-kt-datatable-column="${String(sortField)}"], th[data-kt-datatable-column-sort="${String(sortField)}"]`,
+						`th[data-kt-datatable-column="${String(sortField)}"], th[data-kt-datatable-column-sort="${String(sortField)}"]`
 					) as HTMLElement);
 		if (th) {
 			const sortElement = th.querySelector(
-				`.${config.sort?.classes?.base}`,
+				`.${config.sort?.classes?.base}`
 			) as HTMLElement;
 			if (sortElement) {
 				sortElement.className =
@@ -130,7 +130,8 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 			if (!header.querySelector(`.${config.sort?.classes?.base}`)) return;
 
 			// Check if sorting is disabled for this column
-			const sortDisabled = header.getAttribute('data-kt-datatable-column-sort') === 'false';
+			const sortDisabled =
+				header.getAttribute('data-kt-datatable-column-sort') === 'false';
 			if (sortDisabled) return;
 
 			const sortAttribute =
@@ -144,7 +145,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 				const sortOrder = toggleSortOrder(
 					state.sortField,
 					state.sortOrder,
-					sortField,
+					sortField
 				);
 				setSortIcon(sortField, sortOrder);
 				setState(sortField, sortOrder);

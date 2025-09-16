@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>KTUI Tooltip Test</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+	<style>
+		.test-section {
+			margin-bottom: 2rem;
+			padding: 1.5rem;
+			border: 1px solid #e5e7eb;
+			border-radius: 0.5rem;
+			background: white;
+		}
+		.test-section h3 {
+			margin-top: 0;
+			margin-bottom: 1rem;
+			color: #374151;
+			font-weight: 600;
+		}
+		.test-item {
+			margin-bottom: 1rem;
+			padding: 0.75rem;
+			border: 1px solid #f3f4f6;
+			border-radius: 0.375rem;
+			background: #f9fafb;
+		}
+		.test-item h4 {
+			margin: 0 0 0.5rem 0;
+			font-size: 0.875rem;
+			font-weight: 500;
+			color: #6b7280;
+		}
+		.test-item p {
+			margin: 0 0 0.5rem 0;
+			font-size: 0.75rem;
+			color: #9ca3af;
+		}
+		.kt-btn {
+			margin-right: 0.5rem;
+			margin-bottom: 0.5rem;
+		}
+		.status {
+			display: inline-block;
+			padding: 0.25rem 0.5rem;
+			border-radius: 0.25rem;
+			font-size: 0.75rem;
+			font-weight: 500;
+		}
+		.status.working {
+			background: #dcfce7;
+			color: #166534;
+		}
+		.status.broken {
+			background: #fef2f2;
+			color: #dc2626;
+		}
+		.status.unknown {
+			background: #fef3c7;
+			color: #d97706;
+		}
+		.code {
+			background: #f3f4f6;
+			padding: 0.5rem;
+			border-radius: 0.25rem;
+			font-family: 'Courier New', monospace;
+			font-size: 0.75rem;
+			margin: 0.5rem 0;
+			overflow-x: auto;
+		}
+	</style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-4xl mt-10 mx-auto">
+		<h1 class="text-2xl font-bold mb-6">KTUI Tooltip Test Suite</h1>
+		<p class="text-gray-600 mb-6">Testing different tooltip usage patterns to identify issues and working solutions.</p>
+
+		<!-- Test 1: Direct attributes on button (BROKEN) -->
+		<div class="test-section">
+			<h3>Test 1: Direct Attributes on Button <span class="status broken">BROKEN</span></h3>
+			<div class="test-item">
+				<h4>Issue: data-kt-tooltip-content on same element as data-kt-tooltip</h4>
+				<p>This should work but currently doesn't because _getTargetElement() looks for child elements only.</p>
+				<div class="code">
+&lt;button class="kt-btn" data-kt-tooltip="true" data-kt-tooltip-content="Hello World" data-kt-tooltip-placement="bottom"&gt;
+    Show Tooltip
+&lt;/button&gt;
+				</div>
+				<button class="kt-btn" data-kt-tooltip="true" data-kt-tooltip-content="Hello World" data-kt-tooltip-placement="bottom">
+					Show Tooltip (BROKEN)
+				</button>
+			</div>
+		</div>
+
+		<!-- Test 2: Wrapper approach (WORKING) -->
+		<div class="test-section">
+			<h3>Test 2: Wrapper Approach <span class="status working">WORKING</span></h3>
+			<div class="test-item">
+				<h4>Solution: Use a wrapper element with tooltip attributes</h4>
+				<p>This works because the tooltip attributes are on a child element of the button.</p>
+				<div class="code">
+&lt;button class="kt-btn"&gt;
+    &lt;span data-kt-tooltip="true" data-kt-tooltip-content="Hello World" data-kt-tooltip-placement="bottom"&gt;
+        Show Tooltip
+    &lt;/span&gt;
+&lt;/button&gt;
+				</div>
+				<button class="kt-btn">
+					<span data-kt-tooltip="true" data-kt-tooltip-content="Hello World" data-kt-tooltip-placement="bottom">
+						Show Tooltip (WORKING)
+					</span>
+				</button>
+			</div>
+		</div>
+
+		<!-- Test 3: Separate tooltip element (WORKING) -->
+		<div class="test-section">
+			<h3>Test 3: Separate Tooltip Element <span class="status working">WORKING</span></h3>
+			<div class="test-item">
+				<h4>Solution: Create separate tooltip element and reference by ID</h4>
+				<p>This works by creating a separate tooltip element and referencing it.</p>
+				<div class="code">
+&lt;!-- Tooltip content element --&gt;
+&lt;div id="my-tooltip" class="kt-tooltip hidden" data-kt-tooltip-content="Hello World"&gt;
+    Hello World
+&lt;/div&gt;
+
+&lt;!-- Button with tooltip reference --&gt;
+&lt;button class="kt-btn" data-kt-tooltip="#my-tooltip" data-kt-tooltip-placement="bottom"&gt;
+    Show Tooltip
+&lt;/button&gt;
+				</div>
+				<!-- Tooltip content element -->
+				<div id="my-tooltip" class="kt-tooltip hidden" data-kt-tooltip-content="Hello World">
+					Hello World
+				</div>
+
+				<!-- Button with tooltip reference -->
+				<button class="kt-btn" data-kt-tooltip="#my-tooltip" data-kt-tooltip-placement="bottom">
+					Show Tooltip (WORKING)
+				</button>
+			</div>
+		</div>
+
+		<!-- Test 4: Different placements -->
+		<div class="test-section">
+			<h3>Test 4: Different Placements <span class="status working">WORKING</span></h3>
+			<div class="test-item">
+				<h4>Testing various tooltip placements</h4>
+				<p>Using the wrapper approach with different placement options.</p>
+				<div class="flex flex-wrap gap-2">
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Top placement" data-kt-tooltip-placement="top">
+							Top
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Bottom placement" data-kt-tooltip-placement="bottom">
+							Bottom
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Left placement" data-kt-tooltip-placement="left">
+							Left
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Right placement" data-kt-tooltip-placement="right">
+							Right
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Top start placement" data-kt-tooltip-placement="top-start">
+							Top Start
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Bottom end placement" data-kt-tooltip-placement="bottom-end">
+							Bottom End
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Test 5: Different triggers -->
+		<div class="test-section">
+			<h3>Test 5: Different Triggers <span class="status working">WORKING</span></h3>
+			<div class="test-item">
+				<h4>Testing different trigger types</h4>
+				<p>Using the wrapper approach with different trigger options.</p>
+				<div class="flex flex-wrap gap-2">
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Hover trigger (default)" data-kt-tooltip-trigger="hover">
+							Hover
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Click trigger" data-kt-tooltip-trigger="click">
+							Click
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Focus trigger" data-kt-tooltip-trigger="focus">
+							Focus
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Test 6: Complex content -->
+		<div class="test-section">
+			<h3>Test 6: Complex Content <span class="status working">WORKING</span></h3>
+			<div class="test-item">
+				<h4>Testing tooltips with complex HTML content</h4>
+				<p>Using separate tooltip elements for complex content.</p>
+				<div class="code">
+&lt;div id="complex-tooltip" class="kt-tooltip hidden"&gt;
+    &lt;div class="font-bold"&gt;Complex Tooltip&lt;/div&gt;
+    &lt;div class="text-sm text-gray-600"&gt;This tooltip has &lt;strong&gt;HTML content&lt;/strong&gt; and &lt;em&gt;formatting&lt;/em&gt;.&lt;/div&gt;
+&lt;/div&gt;
+				</div>
+				<!-- Complex tooltip content -->
+				<div id="complex-tooltip" class="kt-tooltip hidden">
+					<div class="font-bold">Complex Tooltip</div>
+					<div class="text-sm text-gray-600">This tooltip has <strong>HTML content</strong> and <em>formatting</em>.</div>
+				</div>
+
+				<button class="kt-btn" data-kt-tooltip="#complex-tooltip" data-kt-tooltip-placement="top">
+					Complex Content
+				</button>
+			</div>
+		</div>
+
+		<!-- Test 7: Multiple tooltips on same page -->
+		<div class="test-section">
+			<h3>Test 7: Multiple Tooltips <span class="status working">WORKING</span></h3>
+			<div class="test-item">
+				<h4>Testing multiple tooltips on the same page</h4>
+				<p>Each tooltip should work independently.</p>
+				<div class="flex flex-wrap gap-2">
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="First tooltip" data-kt-tooltip-placement="top">
+							Tooltip 1
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Second tooltip" data-kt-tooltip-placement="bottom">
+							Tooltip 2
+						</span>
+					</button>
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Third tooltip" data-kt-tooltip-placement="left">
+							Tooltip 3
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Test 8: Edge cases -->
+		<div class="test-section">
+			<h3>Test 8: Edge Cases <span class="status unknown">TESTING</span></h3>
+			<div class="test-item">
+				<h4>Testing edge cases and error conditions</h4>
+				<p>These test various edge cases that might cause issues.</p>
+				<div class="flex flex-wrap gap-2">
+					<!-- Empty content -->
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="" data-kt-tooltip-placement="top">
+							Empty Content
+						</span>
+					</button>
+					<!-- Very long content -->
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="This is a very long tooltip content that should wrap and test the tooltip's ability to handle long text content without breaking the layout or causing issues with positioning." data-kt-tooltip-placement="top">
+							Long Content
+						</span>
+					</button>
+					<!-- Special characters -->
+					<button class="kt-btn">
+						<span data-kt-tooltip="true" data-kt-tooltip-content="Special chars: &lt;&gt;&amp;&quot;&#39;" data-kt-tooltip-placement="top">
+							Special Chars
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Debug Information -->
+		<div class="test-section">
+			<h3>Debug Information</h3>
+			<div class="test-item">
+				<h4>Current Implementation Analysis</h4>
+				<p>The issue is in the <code>_getTargetElement()</code> method in <code>src/components/tooltip/tooltip.ts</code>:</p>
+				<div class="code">
+private _getTargetElement(): HTMLElement | null {
+    return (
+        KTDom.getElement(
+            this._element.getAttribute('data-kt-tooltip') as string,
+        ) ||
+        this._element.querySelector('[data-kt-tooltip-content]') ||  // ← Looks for CHILD elements only
+        KTDom.getElement(this._getOption('target') as string)
+    );
+}
+				</div>
+				<p><strong>Problem:</strong> The method looks for <code>[data-kt-tooltip-content]</code> in child elements only, not on the same element.</p>
+				<p><strong>Solution:</strong> Check for <code>data-kt-tooltip-content</code> on the current element first, then fall back to child elements.</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Scripts -->
+	<script src="../../dist/ktui.js"></script>
+	<script>
+		// Initialize tooltips when DOM is ready
+		document.addEventListener('DOMContentLoaded', function() {
+			console.log('Initializing KTUI Tooltips...');
+			KTTooltip.init();
+			console.log('KTUI Tooltips initialized');
+		});
+
+		// Debug function to test tooltip functionality
+		function testTooltip(element) {
+			const tooltip = KTTooltip.getInstance(element);
+			if (tooltip) {
+				console.log('Tooltip instance found:', tooltip);
+				console.log('Target element:', tooltip.getContentElement());
+				console.log('Is open:', tooltip.isOpen());
+			} else {
+				console.log('No tooltip instance found for element:', element);
+			}
+		}
+
+		// Add click handlers for debugging
+		document.querySelectorAll('[data-kt-tooltip]').forEach(element => {
+			element.addEventListener('click', function() {
+				console.log('Testing tooltip for element:', this);
+				testTooltip(this);
+			});
+		});
+	</script>
+</body>
+
+</html>

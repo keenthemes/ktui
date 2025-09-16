@@ -25,7 +25,7 @@ export class KTReparent extends KTComponent implements KTReparentInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTReparentConfigInterface | null = null,
+		config: KTReparentConfigInterface | null = null
 	) {
 		super();
 
@@ -70,7 +70,7 @@ export class KTReparent extends KTComponent implements KTReparentInterface {
 							reparent?.update();
 						});
 				},
-				200,
+				200
 			);
 		});
 	}
@@ -81,7 +81,7 @@ export class KTReparent extends KTComponent implements KTReparentInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTReparentConfigInterface,
+		config?: KTReparentConfigInterface
 	): KTReparent {
 		return this.getInstance(element) || new KTReparent(element, config);
 	}

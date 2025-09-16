@@ -1,0 +1,306 @@
+# KTUI Component Classes for Tailwind CSS IntelliSense
+
+# Accordion
+kt-accordion-item
+kt-accordion-toggle
+kt-accordion-title
+kt-accordion-content
+kt-accordion-wrapper
+kt-accordion-indicator
+kt-accordion-indicator-on
+kt-accordion-indicator-off
+kt-accordion-outline
+
+# Accordion Menu
+kt-accordion-menu
+kt-accordion-menu-content
+kt-accordion-menu-sub
+kt-accordion-menu-item
+kt-accordion-menu-toggle
+kt-accordion-menu-link
+kt-accordion-menu-indicator
+
+# Alert
+kt-alert
+kt-alert-title
+kt-alert-toolbar
+kt-alert-actions
+kt-alert-description
+kt-alert-content
+kt-alert-icon
+kt-alert-close
+kt-alert-sm
+kt-alert-lg
+kt-alert-primary
+kt-alert-destructive
+kt-alert-success
+kt-alert-info
+kt-alert-warning
+kt-alert-mono
+kt-alert-outline
+kt-alert-light
+
+# Avatar
+kt-avatar
+kt-avatar-image
+kt-avatar-fallback
+kt-avatar-indicator
+kt-avatar-status
+
+# Badge
+kt-badge
+kt-badge-primary
+kt-badge-secondary
+kt-badge-success
+kt-badge-warning
+kt-badge-info
+kt-badge-mono
+kt-badge-destructive
+kt-badge-stroke
+kt-badge-disabled
+kt-badge-lg
+kt-badge-sm
+kt-badge-xs
+kt-badge-outline
+kt-badge-light
+kt-badge-ghost
+kt-badge-btn
+kt-badge-dot
+
+# Breadcrumb
+kt-breadcrumb
+kt-breadcrumb-item
+kt-breadcrumb-link
+kt-breadcrumb-page
+kt-breadcrumb-separator
+kt-breadcrumb-ellipsis
+
+# Button
+kt-btn
+kt-btn-lg
+kt-btn-sm
+kt-btn-primary
+kt-btn-secondary
+kt-btn-destructive
+kt-btn-outline
+kt-btn-ghost
+kt-btn-mono
+kt-btn-dim
+kt-btn-icon
+
+# Card
+kt-card
+kt-card-header
+kt-card-footer
+kt-card-content
+kt-card-table
+kt-card-grid
+kt-card-heading
+kt-card-toolbar
+kt-card-title
+kt-card-description
+kt-card-group
+kt-card-accent
+kt-card-border
+kt-card-rounded-t
+kt-card-rounded-b
+
+# Checkbox
+kt-checkbox
+kt-checkbox-mono
+kt-checkbox-sm
+kt-checkbox-lg
+
+# DataTable
+kt-datatable-toolbar
+kt-datatable-pagination
+kt-datatable-pagination-button
+kt-datatable-length
+kt-datatable-info
+kt-datatable-loading
+kt-datatable-overlay
+
+# Drawer
+kt-drawer
+kt-drawer-backdrop
+kt-drawer-header
+kt-drawer-title
+kt-drawer-close
+kt-drawer-content
+kt-drawer-footer
+kt-drawer-start
+kt-drawer-end
+kt-drawer-top
+kt-drawer-bottom
+
+# Dropdown
+kt-dropdown
+kt-dropdown-header
+kt-dropdown-body
+
+# Dropdown Menu
+kt-dropdown-menu
+kt-dropdown-menu-sub
+kt-dropdown-menu-toggle
+kt-dropdown-menu-indicator
+kt-dropdown-menu-link
+kt-dropdown-menu-separator
+
+# Form
+kt-form
+kt-form-item
+kt-form-control
+kt-form-control-inline
+kt-form-label
+kt-form-description
+kt-form-message
+kt-form-actions
+
+# Image Input
+kt-image-input
+kt-image-input-remove
+kt-image-input-placeholder
+kt-image-input-preview
+
+# Input
+kt-input
+kt-input-lg
+kt-input-sm
+kt-input-addon
+kt-input-addon-sm
+kt-input-addon-lg
+kt-input-addon-icon
+kt-input-ghost
+
+# Input Group
+kt-input-group
+
+# KBD
+kt-kbd
+kt-kbd-outline
+kt-kbd-xs
+kt-kbd-sm
+
+# Label
+kt-label
+kt-label-secondary
+
+# Link
+kt-link
+kt-link-inverse
+kt-link-mono
+kt-link-sm
+kt-link-lg
+kt-link-underline
+kt-link-underlined
+kt-link-dashed
+kt-link-disabled
+
+# Modal
+kt-modal
+kt-modal-backdrop
+kt-modal-close
+kt-modal-dialog
+kt-modal-content
+kt-modal-header
+kt-modal-title
+kt-modal-body
+kt-modal-footer
+kt-modal-center
+kt-modal-fit
+
+# Pagination
+kt-pagination
+kt-pagination-item
+kt-pagination-ellipsis
+
+# Popover
+kt-popover
+kt-popover-header
+kt-popover-content
+
+# Progress
+kt-progress
+kt-progress-indicator
+kt-progress-primary
+kt-progress-success
+kt-progress-warning
+kt-progress-info
+kt-progress-destructive
+kt-progress-mono
+
+# Radio
+kt-radio
+kt-radio-sm
+kt-radio-lg
+kt-radio-mono
+
+# Scrollable
+kt-scrollable
+
+# Select
+kt-select
+kt-select-label
+kt-select-arrow
+kt-select-search
+kt-select-search-empty
+kt-select-dropdown
+kt-select-select-all
+kt-select-select-all-button
+kt-select-options
+kt-select-wrapper
+kt-select-option
+kt-select-option-text
+kt-select-group
+kt-select-group-header
+kt-select-placeholder
+kt-select-display
+kt-select-sm
+kt-select-lg
+
+# Separator
+kt-separator
+kt-separator-vertical
+
+# Skeleton
+kt-skeleton
+
+# Switch
+kt-switch
+kt-switch-sm
+kt-switch-lg
+
+# Table
+kt-table-wrapper
+kt-table
+kt-table-highlight
+kt-table-col
+kt-table-col-label
+kt-table-col-sort
+kt-table-border
+kt-table-border-s
+kt-table-border-e
+kt-table-border-t
+kt-table-border-b
+
+# Tabs
+kt-tabs
+kt-tabs-line
+kt-tab-toggle
+
+# Textarea
+kt-textarea
+kt-textarea-lg
+kt-textarea-sm
+
+# Toast
+kt-toast-container
+kt-toast
+kt-toast-progress
+
+# Toggle Group
+kt-toggle-group
+
+# Tooltip
+kt-tooltip
+kt-tooltip-light

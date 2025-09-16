@@ -40,7 +40,7 @@ export class KTSelectRemote {
 	 */
 	public fetchData(
 		query?: string,
-		page: number = 1,
+		page: number = 1
 	): Promise<KTSelectOptionData[]> {
 		this._isLoading = true;
 		this._hasError = false;
@@ -156,7 +156,7 @@ export class KTSelectRemote {
 			if (this._config.apiDataProperty && data[this._config.apiDataProperty]) {
 				if (this._config.debug)
 					console.log(
-						`Extracting data from property: ${this._config.apiDataProperty}`,
+						`Extracting data from property: ${this._config.apiDataProperty}`
 					);
 
 				// If pagination metadata is available, extract it
@@ -168,11 +168,11 @@ export class KTSelectRemote {
 					}
 					if (data.total) {
 						this._totalPages = Math.ceil(
-							data.total / (this._config.paginationLimit || 10),
+							data.total / (this._config.paginationLimit || 10)
 						);
 						if (this._config.debug)
 							console.log(
-								`Calculated total pages: ${this._totalPages} from total: ${data.total}`,
+								`Calculated total pages: ${this._totalPages} from total: ${data.total}`
 							);
 					}
 				}
@@ -188,7 +188,7 @@ export class KTSelectRemote {
 
 			if (this._config.debug)
 				console.log(
-					`Mapping ${processedData.length} items to KTSelectOptionData format`,
+					`Mapping ${processedData.length} items to KTSelectOptionData format`
 				);
 
 			// Map data to KTSelectOptionData format
@@ -223,12 +223,12 @@ export class KTSelectRemote {
 						const expectedValue = String(nestedValue);
 						if (this._config.debug)
 							console.log(
-								`Data path verification for [${this._config.dataValueField}]: Expected: ${expectedValue}, Got: ${mappedItem.id}`,
+								`Data path verification for [${this._config.dataValueField}]: Expected: ${expectedValue}, Got: ${mappedItem.id}`
 							);
 
 						if (mappedItem.id !== expectedValue && expectedValue) {
 							console.warn(
-								`Value mismatch! Path: ${this._config.dataValueField}, Expected: ${expectedValue}, Got: ${mappedItem.id}`,
+								`Value mismatch! Path: ${this._config.dataValueField}, Expected: ${expectedValue}, Got: ${mappedItem.id}`
 							);
 						}
 					}
@@ -261,9 +261,7 @@ export class KTSelectRemote {
 		const labelField = this._config.dataFieldText || 'title';
 
 		if (this._config.debug)
-			console.log(
-				`Mapping fields: value=${valueField}, label=${labelField}`,
-			);
+			console.log(`Mapping fields: value=${valueField}, label=${labelField}`);
 		if (this._config.debug)
 			console.log('Item data:', JSON.stringify(item).substring(0, 200) + '...'); // Trimmed for readability
 
@@ -296,8 +294,8 @@ export class KTSelectRemote {
 								? typeof result === 'object'
 									? JSON.stringify(result).substring(0, 50)
 									: String(result).substring(0, 50)
-							: 'null'
-						}`,
+								: 'null'
+						}`
 					);
 
 				return result;
@@ -335,7 +333,7 @@ export class KTSelectRemote {
 		} else if (typeof id === 'object') {
 			// If ID is an object, log the issue and set to null to use title fallback
 			console.warn(
-				`ID for path ${valueField} is an object, will use title fallback instead`,
+				`ID for path ${valueField} is an object, will use title fallback instead`
 			);
 			id = null;
 		} else {

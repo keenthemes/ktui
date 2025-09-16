@@ -55,6 +55,25 @@
 	"types": "lib/esm/index.d.ts",
 	"main": "lib/cjs/index.js",
 	"module": "lib/esm/index.js",
+	"exports": {
+		".": {
+			"types": "./lib/esm/index.d.ts",
+			"import": "./lib/esm/index.js",
+			"require": "./lib/cjs/index.js"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			"*": [
+				"lib/esm/*"
+			]
+		}
+	},
+	"files": [
+		"lib/",
+		"dist/",
+		"styles.css"
+	],
 	"license": "MIT",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
@@ -62,21 +81,33 @@
 		"build:webpack": "webpack --mode=development",
 		"build:webpack:watch": "webpack --mode=development --watch",
 		"build:prod": "webpack --env production --mode=production",
-		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
+		"build:lib": "npm run build:lib:cjs && npm run build:lib:esm",
+		"build:lib:cjs": "tsc --project tsconfig.lib.json --outDir lib/cjs",
+		"build:lib:esm": "tsc --project tsconfig.esm.json --outDir lib/esm",
 		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
-		"lint": "eslint src --ext .ts",
-		"format": "prettier --write src"
+		"lint": "npx eslint 'src/**/*.ts' --max-warnings 100",
+		"lint:fix": "npx eslint 'src/**/*.ts' --fix",
+		"format": "npx prettier --write 'src/**/*.ts'",
+		"format:check": "npx prettier --check 'src/**/*.ts'",
+		"type-check": "npx tsc --noEmit --project tsconfig.lib.json",
+		"validate": "npm run lint && npm run format:check && npm run type-check",
+		"validate:fix": "npm run lint:fix && npm run format",
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.27.3",
 		"@babel/preset-env": "^7.27.2",
 		"@eslint/js": "^9.27.0",
 		"@types/node": "^22.15.23",
+		"@typescript-eslint/eslint-plugin": "^8.44.0",
+		"@typescript-eslint/parser": "^8.44.0",
 		"autoprefixer": "^10.4.21",
 		"babel-loader": "^10.0.0",
 		"clean-webpack-plugin": "^4.0.0",
 		"concurrently": "^9.1.2",
 		"eslint": "^9.27.0",
+		"eslint-plugin-prettier": "^5.5.4",
+		"husky": "^9.1.7",
 		"mini-svg-data-uri": "^1.4.4",
 		"prettier": "^3.5.3",
 		"source-map-loader": "^5.0.0",

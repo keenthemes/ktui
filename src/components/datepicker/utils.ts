@@ -16,7 +16,7 @@ import { KTDatepickerConfigInterface, LocaleConfigInterface } from './types';
 export function formatDate(
 	date: Date,
 	format: string,
-	config: KTDatepickerConfigInterface,
+	config: KTDatepickerConfigInterface
 ): string {
 	if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
 		return '';
@@ -37,7 +37,7 @@ export function formatDate(
 	format = format.replace(/MMM/g, locale.monthNamesShort[month]);
 	format = format.replace(
 		/MM/g,
-		isLeadingZero ? padZero(monthNum) : monthNum.toString(),
+		isLeadingZero ? padZero(monthNum) : monthNum.toString()
 	);
 	format = format.replace(/M/g, monthNum.toString());
 
@@ -61,7 +61,7 @@ export function formatDate(
 		// 24-hour format
 		format = format.replace(
 			/HH/g,
-			isLeadingZero ? padZero(hours) : hours.toString(),
+			isLeadingZero ? padZero(hours) : hours.toString()
 		);
 		format = format.replace(/H/g, hours.toString());
 
@@ -69,19 +69,19 @@ export function formatDate(
 		const hours12 = hours % 12 || 12;
 		format = format.replace(
 			/hh/g,
-			isLeadingZero ? padZero(hours12) : hours12.toString(),
+			isLeadingZero ? padZero(hours12) : hours12.toString()
 		);
 		format = format.replace(/h/g, hours12.toString());
 
 		// Minutes and seconds
 		format = format.replace(
 			/mm/g,
-			isLeadingZero ? padZero(minutes) : minutes.toString(),
+			isLeadingZero ? padZero(minutes) : minutes.toString()
 		);
 		format = format.replace(/m/g, minutes.toString());
 		format = format.replace(
 			/ss/g,
-			isLeadingZero ? padZero(seconds) : seconds.toString(),
+			isLeadingZero ? padZero(seconds) : seconds.toString()
 		);
 		format = format.replace(/s/g, seconds.toString());
 
@@ -114,7 +114,7 @@ export function formatDate(
 export function parseDate(
 	dateStr: string,
 	format: string,
-	config: KTDatepickerConfigInterface,
+	config: KTDatepickerConfigInterface
 ): Date | null {
 	if (!dateStr) return null;
 
@@ -200,11 +200,11 @@ export function parseDate(
 		const monthName = formatParts.MMMM || formatParts.MMM;
 		const locale = getLocaleConfig(config);
 		const monthIndex = locale.monthNames.findIndex(
-			(m) => m.toLowerCase() === monthName.toLowerCase(),
+			(m) => m.toLowerCase() === monthName.toLowerCase()
 		);
 		if (monthIndex === -1) {
 			const shortMonthIndex = locale.monthNamesShort.findIndex(
-				(m) => m.toLowerCase() === monthName.toLowerCase(),
+				(m) => m.toLowerCase() === monthName.toLowerCase()
 			);
 			if (shortMonthIndex !== -1) {
 				date.setMonth(shortMonthIndex);
@@ -303,7 +303,7 @@ function parseNaturalLanguageDate(input: string): Date | null {
 		default: {
 			// Handle relative dates like "next week", "last month", etc.
 			const relativeMatch = normalized.match(
-				/^(next|last|this)\s+(day|week|month|year)$/,
+				/^(next|last|this)\s+(day|week|month|year)$/
 			);
 			if (relativeMatch) {
 				const [_, direction, unit] = relativeMatch;
@@ -314,28 +314,28 @@ function parseNaturalLanguageDate(input: string): Date | null {
 					case 'day':
 						result.setDate(
 							result.getDate() +
-								(direction === 'next' ? 1 : direction === 'last' ? -1 : 0),
+								(direction === 'next' ? 1 : direction === 'last' ? -1 : 0)
 						);
 						break;
 
 					case 'week':
 						result.setDate(
 							result.getDate() +
-								(direction === 'next' ? 7 : direction === 'last' ? -7 : 0),
+								(direction === 'next' ? 7 : direction === 'last' ? -7 : 0)
 						);
 						break;
 
 					case 'month':
 						result.setMonth(
 							result.getMonth() +
-								(direction === 'next' ? 1 : direction === 'last' ? -1 : 0),
+								(direction === 'next' ? 1 : direction === 'last' ? -1 : 0)
 						);
 						break;
 
 					case 'year':
 						result.setFullYear(
 							result.getFullYear() +
-								(direction === 'next' ? 1 : direction === 'last' ? -1 : 0),
+								(direction === 'next' ? 1 : direction === 'last' ? -1 : 0)
 						);
 						break;
 				}
@@ -397,7 +397,7 @@ export function padZero(num: number): string {
  * @returns Locale configuration
  */
 export function getLocaleConfig(
-	config: KTDatepickerConfigInterface,
+	config: KTDatepickerConfigInterface
 ): LocaleConfigInterface {
 	return config.locales[config.locale] || config.locales['en-US'];
 }
@@ -450,7 +450,7 @@ export function isWeekend(date: Date): boolean {
  */
 export function isDateDisabled(
 	date: Date,
-	config: KTDatepickerConfigInterface,
+	config: KTDatepickerConfigInterface
 ): boolean {
 	if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
 		return true;
@@ -560,7 +560,7 @@ export function isDateDisabled(
 export function generateCalendarMonth(
 	year: number,
 	month: number,
-	config: KTDatepickerConfigInterface,
+	config: KTDatepickerConfigInterface
 ): Date[][] {
 	const daysInMonth = getDaysInMonth(year, month);
 	const firstDayOfMonth = getFirstDayOfMonth(year, month);
@@ -621,7 +621,7 @@ export function isDateEqual(date1: Date, date2: Date): boolean {
 export function isDateInRange(
 	date: Date,
 	startDate: Date,
-	endDate: Date,
+	endDate: Date
 ): boolean {
 	const time = date.getTime();
 	const startTime = startDate.getTime();
