@@ -39,7 +39,9 @@ export class KTSelectTags {
 		if (!wrapper) return;
 
 		// Remove all previous tags
-		Array.from(wrapper.querySelectorAll('[data-kt-select-tag]')).forEach(tag => tag.remove());
+		Array.from(wrapper.querySelectorAll('[data-kt-select-tag]')).forEach(
+			(tag) => tag.remove(),
+		);
 
 		// If no options selected, do nothing (let display show placeholder)
 		if (selectedOptions.length === 0) {
@@ -58,7 +60,9 @@ export class KTSelectTags {
 				}
 			}
 			if (!optionElement) {
-				const originalOptions = this._select.getElement().querySelectorAll('option');
+				const originalOptions = this._select
+					.getElement()
+					.querySelectorAll('option');
 				for (const opt of Array.from(originalOptions)) {
 					if ((opt as HTMLOptionElement).value === optionValue) {
 						optionElement = opt as HTMLOptionElement;
@@ -70,7 +74,9 @@ export class KTSelectTags {
 			const tag = defaultTemplates.tag(optionElement, this._config);
 
 			// Add event listener to the close button
-			const closeButton = tag.querySelector('[data-kt-select-remove-button]') as HTMLElement;
+			const closeButton = tag.querySelector(
+				'[data-kt-select-remove-button]',
+			) as HTMLElement;
 			if (closeButton) {
 				this._eventManager.addListener(closeButton, 'click', (event: Event) => {
 					event.stopPropagation();

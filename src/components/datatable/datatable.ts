@@ -499,7 +499,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		// Set search value
 		if (searchElement) {
 			searchElement.value =
-				search === undefined || search === null ? '' : typeof search === 'string' ? search : String(search);
+				search === undefined || search === null
+					? ''
+					: typeof search === 'string'
+						? search
+						: String(search);
 		}
 
 		if (searchElement) {
@@ -834,7 +838,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _createUrl(
 		pathOrUrl: string,
 		baseUrl: string | null = window.location.origin,
-	) : URL {
+	): URL {
 		// Regular expression to check if the input is a full URL
 		const isFullUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(pathOrUrl);
 
@@ -988,10 +992,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 						if (typeof columnDef.render === 'function') {
 							const result = columnDef.render.call(this, item[key], item, this);
-							if (result instanceof HTMLElement || result instanceof DocumentFragment) {
+							if (
+								result instanceof HTMLElement ||
+								result instanceof DocumentFragment
+							) {
 								td.appendChild(result);
-							}
-							else if (typeof result === 'string') {
+							} else if (typeof result === 'string') {
 								td.innerHTML = result as string;
 							}
 						} else {
@@ -1423,77 +1429,80 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		return id;
 	}
 
-    /**
-     * Clean up all event listeners, handlers, and DOM nodes created by this instance.
-     * This method is called before re-rendering or when disposing the component.
-     */
-    private _dispose() {
-        // --- 1. Remove search input event listener (debounced) ---
-        const tableId: string = this._tableId();
-        const searchElement: HTMLInputElement | null =
-            document.querySelector<HTMLInputElement>(
-                `[data-kt-datatable-search="#${tableId}"]`,
-            );
-        if (searchElement && (searchElement as any)._debouncedSearch) {
-            searchElement.removeEventListener(
-                'keyup',
-                (searchElement as any)._debouncedSearch,
-            );
-            delete (searchElement as any)._debouncedSearch;
-        }
+	/**
+	 * Clean up all event listeners, handlers, and DOM nodes created by this instance.
+	 * This method is called before re-rendering or when disposing the component.
+	 */
+	private _dispose() {
+		// --- 1. Remove search input event listener (debounced) ---
+		const tableId: string = this._tableId();
+		const searchElement: HTMLInputElement | null =
+			document.querySelector<HTMLInputElement>(
+				`[data-kt-datatable-search="#${tableId}"]`,
+			);
+		if (searchElement && (searchElement as any)._debouncedSearch) {
+			searchElement.removeEventListener(
+				'keyup',
+				(searchElement as any)._debouncedSearch,
+			);
+			delete (searchElement as any)._debouncedSearch;
+		}
 
-        // --- 2. Remove page size dropdown event listener ---
-        if (this._sizeElement && this._sizeElement.onchange) {
-            this._sizeElement.onchange = null;
-        }
+		// --- 2. Remove page size dropdown event listener ---
+		if (this._sizeElement && this._sizeElement.onchange) {
+			this._sizeElement.onchange = null;
+		}
 
-        // --- 3. Remove all pagination button event listeners ---
-        if (this._paginationElement) {
-            // Remove all child nodes (buttons) to ensure no lingering listeners
-            while (this._paginationElement.firstChild) {
-                this._paginationElement.removeChild(this._paginationElement.firstChild);
-            }
-        }
+		// --- 3. Remove all pagination button event listeners ---
+		if (this._paginationElement) {
+			// Remove all child nodes (buttons) to ensure no lingering listeners
+			while (this._paginationElement.firstChild) {
+				this._paginationElement.removeChild(this._paginationElement.firstChild);
+			}
+		}
 
-        // --- 4. Dispose of handler objects (checkbox, sort) ---
-        // KTDataTableCheckboxAPI does not have a dispose method, but we can remove header checkbox listener
-        if (this._checkbox && typeof (this._checkbox as any).dispose === 'function') {
-            (this._checkbox as any).dispose();
-        } else {
-            // Remove header checkbox event listener if possible
-            const headerCheckElement = this._element.querySelector<HTMLInputElement>(
-                this._config.attributes.check,
-            );
-            if (headerCheckElement) {
-                headerCheckElement.replaceWith(headerCheckElement.cloneNode(true));
-            }
-        }
-        // KTDataTableSortAPI does not have a dispose method, but we can remove th click listeners by replacing them
-        if (this._theadElement) {
-            const ths = this._theadElement.querySelectorAll('th');
-            ths.forEach((th) => {
-                th.replaceWith(th.cloneNode(true));
-            });
-        }
+		// --- 4. Dispose of handler objects (checkbox, sort) ---
+		// KTDataTableCheckboxAPI does not have a dispose method, but we can remove header checkbox listener
+		if (
+			this._checkbox &&
+			typeof (this._checkbox as any).dispose === 'function'
+		) {
+			(this._checkbox as any).dispose();
+		} else {
+			// Remove header checkbox event listener if possible
+			const headerCheckElement = this._element.querySelector<HTMLInputElement>(
+				this._config.attributes.check,
+			);
+			if (headerCheckElement) {
+				headerCheckElement.replaceWith(headerCheckElement.cloneNode(true));
+			}
+		}
+		// KTDataTableSortAPI does not have a dispose method, but we can remove th click listeners by replacing them
+		if (this._theadElement) {
+			const ths = this._theadElement.querySelectorAll('th');
+			ths.forEach((th) => {
+				th.replaceWith(th.cloneNode(true));
+			});
+		}
 
-        // --- 5. Remove spinner DOM node if it exists ---
-        const spinner = this._element.querySelector<HTMLElement>(
-            this._config.attributes.spinner,
-        );
-        if (spinner && spinner.parentNode) {
-            spinner.parentNode.removeChild(spinner);
-        }
-        this._element.classList.remove(this._config.loadingClass);
+		// --- 5. Remove spinner DOM node if it exists ---
+		const spinner = this._element.querySelector<HTMLElement>(
+			this._config.attributes.spinner,
+		);
+		if (spinner && spinner.parentNode) {
+			spinner.parentNode.removeChild(spinner);
+		}
+		this._element.classList.remove(this._config.loadingClass);
 
-        // --- 6. Remove instance reference from the DOM element ---
-        if ((this._element as any).instance) {
-            delete (this._element as any).instance;
-        }
+		// --- 6. Remove instance reference from the DOM element ---
+		if ((this._element as any).instance) {
+			delete (this._element as any).instance;
+		}
 
-        // --- 7. (Optional) Clear localStorage state ---
-        // Uncomment the following line if you want to clear state on dispose:
-        // this._deleteState();
-    }
+		// --- 7. (Optional) Clear localStorage state ---
+		// Uncomment the following line if you want to clear state on dispose:
+		// this._deleteState();
+	}
 
 	private _debounce(func: Function, wait: number) {
 		let timeout: number | undefined;
@@ -1770,9 +1779,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
  */
 
 export function initAllDataTables(): void {
-  if (typeof document !== 'undefined') {
-    KTDataTable.createInstances();
-    // Optionally assign to window for legacy support
-    window.KTDataTable = KTDataTable;
-  }
+	if (typeof document !== 'undefined') {
+		KTDataTable.createInstances();
+		// Optionally assign to window for legacy support
+		window.KTDataTable = KTDataTable;
+	}
 }

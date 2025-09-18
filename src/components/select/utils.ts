@@ -53,14 +53,17 @@ export function filterOptions(
 
 	for (const option of options) {
 		// Use data-text for matching if available, otherwise fall back to textContent
-		const optionText = (option.dataset.text || option.textContent || '').toLowerCase();
+		const optionText = (
+			option.dataset.text ||
+			option.textContent ||
+			''
+		).toLowerCase();
 		const isMatch = optionText.includes(queryLower);
 
 		if (isMatch) {
 			option.classList.remove('hidden');
 			if (option.style.display === 'none') option.style.display = ''; // Ensure visible
 			visibleOptionsCount++;
-
 		} else {
 			option.classList.add('hidden');
 		}
@@ -89,7 +92,9 @@ export class FocusManager {
 	private _focusClass: string;
 	private _hoverClass: string;
 	private _eventManager: EventManager;
-	private _onFocusChange: ((option: HTMLElement | null, index: number | null) => void) | null = null;
+	private _onFocusChange:
+		| ((option: HTMLElement | null, index: number | null) => void)
+		| null = null;
 
 	constructor(
 		element: HTMLElement,
@@ -149,7 +154,10 @@ export class FocusManager {
 		if (options.length === 0) return null;
 		for (let i = 0; i < options.length; i++) {
 			const option = options[i];
-			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+			if (
+				!option.classList.contains('disabled') &&
+				option.getAttribute('aria-disabled') !== 'true'
+			) {
 				this.resetFocus();
 				this._focusedOptionIndex = i;
 				this.applyFocus(option);
@@ -168,7 +176,10 @@ export class FocusManager {
 		if (options.length === 0) return null;
 		for (let i = options.length - 1; i >= 0; i--) {
 			const option = options[i];
-			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+			if (
+				!option.classList.contains('disabled') &&
+				option.getAttribute('aria-disabled') !== 'true'
+			) {
 				this.resetFocus();
 				this._focusedOptionIndex = i;
 				this.applyFocus(option);
@@ -193,7 +204,8 @@ export class FocusManager {
 			if (
 				!option.classList.contains('disabled') &&
 				option.getAttribute('aria-disabled') !== 'true' &&
-				(option.textContent?.toLowerCase().startsWith(lowerStr) || option.dataset.value?.toLowerCase().startsWith(lowerStr))
+				(option.textContent?.toLowerCase().startsWith(lowerStr) ||
+					option.dataset.value?.toLowerCase().startsWith(lowerStr))
 			) {
 				this.resetFocus();
 				this._focusedOptionIndex = idx;
@@ -211,11 +223,17 @@ export class FocusManager {
 	public focusNext(): HTMLElement | null {
 		const options = this.getVisibleOptions();
 		if (options.length === 0) return null;
-		let idx = this._focusedOptionIndex === null ? 0 : (this._focusedOptionIndex + 1) % options.length;
+		let idx =
+			this._focusedOptionIndex === null
+				? 0
+				: (this._focusedOptionIndex + 1) % options.length;
 		let startIdx = idx;
 		do {
 			const option = options[idx];
-			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+			if (
+				!option.classList.contains('disabled') &&
+				option.getAttribute('aria-disabled') !== 'true'
+			) {
 				this.resetFocus();
 				this._focusedOptionIndex = idx;
 				this.applyFocus(option);
@@ -233,11 +251,17 @@ export class FocusManager {
 	public focusPrevious(): HTMLElement | null {
 		const options = this.getVisibleOptions();
 		if (options.length === 0) return null;
-		let idx = this._focusedOptionIndex === null ? options.length - 1 : (this._focusedOptionIndex - 1 + options.length) % options.length;
+		let idx =
+			this._focusedOptionIndex === null
+				? options.length - 1
+				: (this._focusedOptionIndex - 1 + options.length) % options.length;
 		let startIdx = idx;
 		do {
 			const option = options[idx];
-			if (!option.classList.contains('disabled') && option.getAttribute('aria-disabled') !== 'true') {
+			if (
+				!option.classList.contains('disabled') &&
+				option.getAttribute('aria-disabled') !== 'true'
+			) {
 				this.resetFocus();
 				this._focusedOptionIndex = idx;
 				this.applyFocus(option);
@@ -255,7 +279,10 @@ export class FocusManager {
 	public applyFocus(option: HTMLElement): void {
 		if (!option) return;
 		// Ensure it's not disabled
-		if (option.classList.contains('disabled') || option.getAttribute('aria-disabled') === 'true') {
+		if (
+			option.classList.contains('disabled') ||
+			option.getAttribute('aria-disabled') === 'true'
+		) {
 			return;
 		}
 		// DO NOT CALL resetFocus() here. Caller's responsibility.
@@ -269,7 +296,9 @@ export class FocusManager {
 	 * Reset focus on all options
 	 */
 	public resetFocus(): void {
-		const focusedElements = this._element.querySelectorAll(`.${this._focusClass}, .${this._hoverClass}`);
+		const focusedElements = this._element.querySelectorAll(
+			`.${this._focusClass}, .${this._hoverClass}`,
+		);
 
 		// Remove focus and hover classes from all options
 		focusedElements.forEach((element) => {
@@ -285,9 +314,7 @@ export class FocusManager {
 	public scrollIntoView(option: HTMLElement): void {
 		if (!option) return;
 
-		const container = this._element.querySelector(
-			'[data-kt-select-options]',
-		);
+		const container = this._element.querySelector('[data-kt-select-options]');
 		if (!container) return;
 
 		const optionRect = option.getBoundingClientRect();
@@ -312,7 +339,10 @@ export class FocusManager {
 
 		if (index >= 0) {
 			const optionToFocus = options[index];
-			if (!optionToFocus.classList.contains('disabled') && optionToFocus.getAttribute('aria-disabled') !== 'true'){
+			if (
+				!optionToFocus.classList.contains('disabled') &&
+				optionToFocus.getAttribute('aria-disabled') !== 'true'
+			) {
 				this.resetFocus();
 				this._focusedOptionIndex = index;
 				this.applyFocus(optionToFocus);
@@ -357,7 +387,9 @@ export class FocusManager {
 	/**
 	 * Set a callback to be called when focus changes
 	 */
-	public setOnFocusChange(cb: (option: HTMLElement | null, index: number | null) => void) {
+	public setOnFocusChange(
+		cb: (option: HTMLElement | null, index: number | null) => void,
+	) {
 		this._onFocusChange = cb;
 	}
 
@@ -480,9 +512,12 @@ export function debounce(
  * Replaces all {{key}} in the template with the corresponding value from the data object.
  * If a key is missing in data, replaces with an empty string.
  */
-export function renderTemplateString(template: string, data: Record<string, any>): string {
+export function renderTemplateString(
+	template: string,
+	data: Record<string, any>,
+): string {
 	return template.replace(/{{(\w+)}}/g, (_, key) =>
-		data[key] !== undefined && data[key] !== null ? String(data[key]) : ''
+		data[key] !== undefined && data[key] !== null ? String(data[key]) : '',
 	);
 }
 

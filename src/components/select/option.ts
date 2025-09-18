@@ -4,9 +4,7 @@
  */
 
 import KTComponent from '../component';
-import {
-	KTSelectConfigInterface,
-} from './config';
+import { KTSelectConfigInterface } from './config';
 import { defaultTemplates } from './templates';
 
 export class KTSelectOption extends KTComponent {
@@ -15,7 +13,7 @@ export class KTSelectOption extends KTComponent {
 	protected override readonly _config: KTSelectConfigInterface; // Holds option-specific data from data-kt-*
 	private _globalConfig: KTSelectConfigInterface; // Main select's config
 
-	constructor(element: HTMLElement, config?: KTSelectConfigInterface,) {
+	constructor(element: HTMLElement, config?: KTSelectConfigInterface) {
 		super();
 
 		// Always initialize a new option instance
@@ -30,13 +28,16 @@ export class KTSelectOption extends KTComponent {
 		// Ensure optionsConfig is initialized
 		if (this._globalConfig) {
 			this._globalConfig.optionsConfig = this._globalConfig.optionsConfig || {};
-			this._globalConfig.optionsConfig[(element as HTMLInputElement).value] = this._config;
+			this._globalConfig.optionsConfig[(element as HTMLInputElement).value] =
+				this._config;
 			// console.log('[KTSelectOption] Populating _globalConfig.optionsConfig for value', (element as HTMLInputElement).value, 'with:', JSON.parse(JSON.stringify(this._config)));
 			// console.log('[KTSelectOption] _globalConfig.optionsConfig is now:', JSON.parse(JSON.stringify(this._globalConfig.optionsConfig)));
 		} else {
 			// Handle case where _globalConfig might be undefined, though constructor expects it.
 			// This might indicate a need to ensure config is always passed or has a default.
-			console.warn('KTSelectOption: _globalConfig is undefined during constructor.');
+			console.warn(
+				'KTSelectOption: _globalConfig is undefined during constructor.',
+			);
 		}
 
 		// Don't store in KTData to avoid Singleton pattern issues

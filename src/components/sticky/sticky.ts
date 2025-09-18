@@ -241,14 +241,14 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 		if (middle === true) {
 			this._element.style.insetBlockStart = `50%`;
-		}else{
+		} else {
 			if (top) {
 				if (top === 'auto') {
 					this._element.style.insetBlockStart = `0px`;
 				} else {
 					this._element.style.insetBlockStart = `${top}px`;
 				}
-			}else{
+			} else {
 				if (bottom) {
 					if (bottom === 'auto') {
 						this._element.style.insetBlockEnd = `0px`;
@@ -259,9 +259,9 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 			}
 		}
 
-		if(center === true){
+		if (center === true) {
 			this._element.style.insetInlineStart = `50%`;
-		}else{
+		} else {
 			if (start) {
 				if (start === 'auto') {
 					const offsetLeft = KTDom.offset(this._element).left;
@@ -271,7 +271,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				} else {
 					this._element.style.insetInlineStart = `${start}px`;
 				}
-			}else{
+			} else {
 				if (end) {
 					if (end === 'auto') {
 						const offsetRight = KTDom.offset(this._element).right;
@@ -284,7 +284,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				}
 			}
 		}
-		
+
 		if (zindex) {
 			this._element.style.zIndex = zindex;
 			this._element.style.position = 'fixed';

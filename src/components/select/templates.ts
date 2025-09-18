@@ -468,10 +468,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 	selectAll: (config: KTSelectConfigInterface): HTMLElement => {
 		const template = getTemplateStrings(config).selectAll;
 		const element = stringToElement(
-			template.replace(
-				'{{text}}',
-				config.selectAllText || 'Select All',
-			),
+			template.replace('{{text}}', config.selectAllText || 'Select All'),
 		);
 		return element;
 	},

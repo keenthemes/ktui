@@ -130,7 +130,8 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 			if (!header.querySelector(`.${config.sort?.classes?.base}`)) return;
 
 			// Check if sorting is disabled for this column
-			const sortDisabled = header.getAttribute('data-kt-datatable-column-sort') === 'false';
+			const sortDisabled =
+				header.getAttribute('data-kt-datatable-column-sort') === 'false';
 			if (sortDisabled) return;
 
 			const sortAttribute =

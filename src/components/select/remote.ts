@@ -261,9 +261,7 @@ export class KTSelectRemote {
 		const labelField = this._config.dataFieldText || 'title';
 
 		if (this._config.debug)
-			console.log(
-				`Mapping fields: value=${valueField}, label=${labelField}`,
-			);
+			console.log(`Mapping fields: value=${valueField}, label=${labelField}`);
 		if (this._config.debug)
 			console.log('Item data:', JSON.stringify(item).substring(0, 200) + '...'); // Trimmed for readability
 
@@ -277,7 +275,11 @@ export class KTSelectRemote {
 				let result = obj;
 
 				for (const part of parts) {
-					if (result === null || result === undefined || typeof result !== 'object') {
+					if (
+						result === null ||
+						result === undefined ||
+						typeof result !== 'object'
+					) {
 						return null;
 					}
 					result = result[part];
@@ -310,7 +312,8 @@ export class KTSelectRemote {
 			for (const field of fallbackFields) {
 				if (item[field] !== null && item[field] !== undefined) {
 					id = String(item[field]);
-					if (this._config.debug) console.log(`Using fallback field '${field}' for ID: ${id}`);
+					if (this._config.debug)
+						console.log(`Using fallback field '${field}' for ID: ${id}`);
 					break;
 				}
 			}
@@ -328,11 +331,19 @@ export class KTSelectRemote {
 		let title = getValue(item, labelField);
 		if (!title) {
 			// Try common fallback fields for title
-			const fallbackFields = ['name', 'title', 'label', 'text', 'displayName', 'description'];
+			const fallbackFields = [
+				'name',
+				'title',
+				'label',
+				'text',
+				'displayName',
+				'description',
+			];
 			for (const field of fallbackFields) {
 				if (item[field] !== null && item[field] !== undefined) {
 					title = String(item[field]);
-					if (this._config.debug) console.log(`Using fallback field '${field}' for title: ${title}`);
+					if (this._config.debug)
+						console.log(`Using fallback field '${field}' for title: ${title}`);
 					break;
 				}
 			}
@@ -343,7 +354,8 @@ export class KTSelectRemote {
 		// If still no title, use ID as fallback
 		if (!title) {
 			title = `Option ${id}`;
-			if (this._config.debug) console.log(`Using ID as fallback title: ${title}`);
+			if (this._config.debug)
+				console.log(`Using ID as fallback title: ${title}`);
 		}
 
 		// Create the option object with consistent structure
@@ -351,7 +363,7 @@ export class KTSelectRemote {
 			id: id,
 			title: title,
 			selected: Boolean(item.selected),
-			disabled: Boolean(item.disabled)
+			disabled: Boolean(item.disabled),
 		};
 
 		if (this._config.debug)
