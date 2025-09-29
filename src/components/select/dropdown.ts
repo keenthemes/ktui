@@ -428,7 +428,7 @@ export class KTSelectDropdown extends KTComponent {
 
 	private _resolveDropdownContainer(): HTMLElement | null {
 		const containerSelector = this._config.dropdownContainer;
-		if (containerSelector && containerSelector !== 'body') {
+		if (containerSelector) {
 			const containerElement = document.querySelector(
 				containerSelector,
 			) as HTMLElement | null;
@@ -438,8 +438,6 @@ export class KTSelectDropdown extends KTComponent {
 				);
 			}
 			return containerElement;
-		} else if (containerSelector === 'body') {
-			return document.body;
 		}
 		return null;
 	}

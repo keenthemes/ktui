@@ -30,12 +30,14 @@
 				class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none"
 				aria-label="Close Modal">&times;</button>
 			<h2 class="text-lg font-semibold mb-4">Select a Field</h2>
+			<!-- Note: dropdownContainer is set to "#selectModal" to attach dropdown to modal container -->
 			<select
 				class="kt-select"
 				data-kt-select="true"
 				data-kt-select-placeholder="Select a framework..."
 				data-kt-select-config='{
-					"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"
+					"optionsClass": "kt-scrollable overflow-auto max-h-[250px]",
+					"dropdownContainer": "#selectModal"
 				}'
 			>
 				<option value="react">React</option>
