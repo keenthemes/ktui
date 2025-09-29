@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KT DataTable Sorting Test - Official Structure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+    <style>
+        /* Custom styles for the test */
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .test-pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1 class="text-2xl font-bold mb-4">KT DataTable Sorting Test - Official Structure</h1>
+            <p class="text-gray-600 mb-4">
+                This test uses the official KTUI DataTable HTML structure from the documentation
+                and verifies that sorting functionality works correctly after table updates,
+                pagination, and search operations. The sorting fix should restore click handlers
+                after each table redraw.
+            </p>
+
+            <div class="test-controls">
+                <button class="test-button" onclick="testSorting()">Test Sorting</button>
+                <button class="test-button" onclick="testPagination()">Test Pagination</button>
+                <button class="test-button" onclick="testSearch()">Test Search</button>
+                <button class="test-button" onclick="testReload()">Test Reload</button>
+                <button class="test-button" onclick="clearStatus()">Clear Status</button>
+            </div>
+
+            <div id="test-status"></div>
+        </div>
+
+        <!-- Search Input -->
+        <div class="mb-4">
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Search data..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-kt-datatable-search="#sorting-test-table"
+            >
+        </div>
+
+        <!-- DataTable Container using official structure -->
+        <div class="kt-card">
+            <div class="kt-card-table" data-kt-datatable="true" data-kt-datatable-page-size="5" data-kt-datatable-state-save="true">
+                <div class="kt-table-wrapper kt-scrollable">
+                    <table id="sorting-test-table" class="kt-table" data-kt-datatable-table="true">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="w-20" data-kt-datatable-column="id">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">ID</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-32" data-kt-datatable-column="name">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Name</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-40" data-kt-datatable-column="email">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Email</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-32" data-kt-datatable-column="department">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Department</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-24" data-kt-datatable-column="salary">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Salary</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-24" data-kt-datatable-column="status">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Status</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>John Doe</td>
+                                <td>john.doe@example.com</td>
+                                <td>Engineering</td>
+                                <td>$75,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Jane Smith</td>
+                                <td>jane.smith@example.com</td>
+                                <td>Marketing</td>
+                                <td>$65,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Mike Johnson</td>
+                                <td>mike.johnson@example.com</td>
+                                <td>Engineering</td>
+                                <td>$80,000</td>
+                                <td><span class="kt-badge kt-badge-destructive">Inactive</span></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Sarah Wilson</td>
+                                <td>sarah.wilson@example.com</td>
+                                <td>Sales</td>
+                                <td>$70,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>David Brown</td>
+                                <td>david.brown@example.com</td>
+                                <td>HR</td>
+                                <td>$60,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Lisa Davis</td>
+                                <td>lisa.davis@example.com</td>
+                                <td>Engineering</td>
+                                <td>$85,000</td>
+                                <td><span class="kt-badge kt-badge-primary">Verified</span></td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>Tom Anderson</td>
+                                <td>tom.anderson@example.com</td>
+                                <td>Marketing</td>
+                                <td>$68,000</td>
+                                <td><span class="kt-badge kt-badge-destructive">Inactive</span></td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>Emma Taylor</td>
+                                <td>emma.taylor@example.com</td>
+                                <td>Sales</td>
+                                <td>$72,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>Chris Miller</td>
+                                <td>chris.miller@example.com</td>
+                                <td>Engineering</td>
+                                <td>$78,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>Amy Garcia</td>
+                                <td>amy.garcia@example.com</td>
+                                <td>HR</td>
+                                <td>$62,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Info -->
+                <div class="flex items-center justify-between mt-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-700">Show</span>
+                        <select data-kt-datatable-size="true" class="border border-gray-300 rounded px-2 py-1">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span class="text-sm text-gray-700">entries</span>
+                    </div>
+                    <div data-kt-datatable-info="true" class="text-sm text-gray-700"></div>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div class="flex justify-center mt-4">
+                    <div data-kt-datatable-pagination="true" class="flex space-x-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load KTUI -->
+    <script src="../../dist/ktui.js"></script>
+
+    <script>
+        let datatableInstance = null;
+
+        // Initialize the datatable when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for the DOM to be fully ready
+            setTimeout(() => {
+                try {
+                    // Initialize KTUI components using official method
+                    if (typeof KTDataTable !== 'undefined') {
+                        KTDataTable.init();
+                    }
+
+                    // Get the datatable instance using official API
+                    const container = document.querySelector('[data-kt-datatable="true"]');
+                    if (container) {
+                        datatableInstance = KTDataTable.getInstance(container);
+                        if (datatableInstance) {
+                            updateStatus('✅ DataTable initialized successfully using official API!', 'pass');
+                        } else {
+                            updateStatus('❌ Failed to get DataTable instance', 'fail');
+                        }
+                    } else {
+                        updateStatus('❌ DataTable container not found', 'fail');
+                    }
+                } catch (error) {
+                    updateStatus('❌ Error initializing DataTable: ' + error.message, 'fail');
+                }
+            }, 100);
+        });
+
+        // Test sorting functionality using official API
+        function testSorting() {
+            if (!datatableInstance) {
+                updateStatus('❌ DataTable not initialized', 'fail');
+                return;
+            }
+
+            try {
+                // Test sorting by name column using official API
+                datatableInstance.sort('name');
+                updateStatus('✅ Sorting test passed! Used official sort() API on name column.', 'pass');
+
+                // Test sorting by salary column
+                setTimeout(() => {
+                    datatableInstance.sort('salary');
+                    updateStatus('✅ Sorting test passed! Also tested salary column sorting with official API.', 'pass');
+                }, 1000);
+
+            } catch (error) {
+                updateStatus('❌ Sorting test failed: ' + error.message, 'fail');
+            }
+        }
+
+        // Test pagination using official API
+        function testPagination() {
+            if (!datatableInstance) {
+                updateStatus('❌ DataTable not initialized', 'fail');
+                return;
+            }
+
+            try {
+                // Set page size to 5 to enable pagination using official API
+                datatableInstance.setPageSize(5);
+                updateStatus('✅ Pagination test passed! Used official setPageSize(5) API. Now test sorting on different pages.', 'pass');
+
+                // Go to page 2 using official API
+                setTimeout(() => {
+                    datatableInstance.goPage(2);
+                    updateStatus('✅ Pagination test passed! Used official goPage(2) API. Try clicking column headers to sort.', 'pass');
+                }, 500);
+
+            } catch (error) {
+                updateStatus('❌ Pagination test failed: ' + error.message, 'fail');
+            }
+        }
+
+        // Test search functionality using official API
+        function testSearch() {
+            if (!datatableInstance) {
+                updateStatus('❌ DataTable not initialized', 'fail');
+                return;
+            }
+
+            try {
+                // Test search using official API
+                datatableInstance.search('John');
+                updateStatus('✅ Search test passed! Used official search("John") API. Try sorting the filtered results.', 'pass');
+
+                // Clear search after 3 seconds
+                setTimeout(() => {
+                    datatableInstance.search('');
+                    updateStatus('✅ Search test passed! Used official search("") API to clear. Sorting should still work.', 'pass');
+                }, 3000);
+
+            } catch (error) {
+                updateStatus('❌ Search test failed: ' + error.message, 'fail');
+            }
+        }
+
+        // Test reload functionality using official API
+        function testReload() {
+            if (!datatableInstance) {
+                updateStatus('❌ DataTable not initialized', 'fail');
+                return;
+            }
+
+            try {
+                // Reload the table using official API
+                datatableInstance.reload();
+                updateStatus('✅ Reload test passed! Used official reload() API. Try sorting now.', 'pass');
+
+            } catch (error) {
+                updateStatus('❌ Reload test failed: ' + error.message, 'fail');
+            }
+        }
+
+        // Update status display
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `test-status ${type === 'pass' ? 'test-pass' : 'test-fail'}`;
+        }
+
+        // Clear status
+        function clearStatus() {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.innerHTML = '';
+            statusDiv.className = 'test-status';
+        }
+
+        // Add manual testing instructions based on official documentation
+        console.log('🔧 Manual Testing Instructions (Official KTUI API):');
+        console.log('1. Click on any column header to test sorting');
+        console.log('2. Try pagination and then click headers to sort');
+        console.log('3. Use search and then try sorting filtered results');
+        console.log('4. All sorting should work consistently!');
+        console.log('5. Check browser dev tools for any console errors');
+        console.log('');
+        console.log('📚 This test uses the official KTUI DataTable structure from:');
+        console.log('   https://ktui.io/docs/datatable');
+        console.log('');
+        console.log('🔧 Official API Methods tested:');
+        console.log('   - KTDataTable.init()');
+        console.log('   - KTDataTable.getInstance()');
+        console.log('   - datatable.sort()');
+        console.log('   - datatable.setPageSize()');
+        console.log('   - datatable.goPage()');
+        console.log('   - datatable.search()');
+        console.log('   - datatable.reload()');
+    </script>
+</body>
+</html>

@@ -471,6 +471,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		// Initialize checkbox logic
 		this._checkbox.init();
 
+		// Re-initialize sort handler to restore click listeners after table redraw
+		if (this._sortHandler) {
+			this._sortHandler.initSort();
+		}
+
 		this._attachSearchEvent();
 
 		if (typeof KTComponents !== 'undefined') {
