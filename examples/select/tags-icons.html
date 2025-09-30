@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Tags Selected</title>
+	<title>Tags Icons</title>
 	<link rel="stylesheet" href="../../dist/styles.css">
 </head>
 
@@ -12,18 +12,16 @@
 	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
 		<form class="flex flex-col gap-6">
 			<div>
-				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Tags Selected</label>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Tags Icons</label>
 
 				<select
 					class="kt-select"
 					data-kt-select
 					data-kt-select-placeholder="Type or select a country..."
-					data-kt-select-pre-selected="de,fr"
 					data-kt-select-multiple="true"
 					data-kt-select-tags="true"
 					data-kt-select-config='{
-						"tagClass": "flex items-center gap-2 rounded bg-blue-100 text-blue-800 px-2 py-1 text-xs font-semibold",
-						"tagTemplate": "<span class=\"kt-select-tag\">{{text}}</span>",
+						"tagTemplate": "{{icon}} {{text}}",
 						"optionTemplate": "<div class=\"flex items-center gap-2\">{{icon}}<span class=\"text-gray-800\">{{text}}</span></div>",
 						"optionClass": "kt-select-option"
 					}'>

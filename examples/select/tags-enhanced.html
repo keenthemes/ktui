@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Enhanced Tags Styling</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-md mt-10 mx-auto">
+		<form class="flex flex-col gap-8">
+			<div>
+				<label class="block mb-3 font-semibold text-gray-800" for="select-team">Team Members</label>
+				<select
+					class="kt-select"
+					data-kt-select
+					data-kt-select-placeholder="Select team members..."
+					data-kt-select-multiple="true"
+					data-kt-select-tags="true"
+					data-kt-select-pre-selected="jenny,mike,david"
+					data-kt-select-config='{
+						"showSelectedCount": true,
+						"enableSelectAll": true,
+						"selectAllText": "Select All",
+						"clearAllText": "Clear All"
+					}'>
+					<option value="jenny">Jenny Wilson</option>
+					<option value="mike">Mike Johnson</option>
+					<option value="david">David Brown</option>
+					<option value="sarah">Sarah Davis</option>
+					<option value="alex">Alex Thompson</option>
+					<option value="lisa">Lisa Anderson</option>
+				</select>
+			</div>
+
+			<div>
+				<label class="block mb-3 font-semibold text-gray-800" for="select-countries">Countries</label>
+				<select
+					class="kt-select"
+					data-kt-select
+					data-kt-select-placeholder="Select countries..."
+					data-kt-select-multiple="true"
+					data-kt-select-tags="true"
+					data-kt-select-pre-selected="france,spain"
+					data-kt-select-config='{
+						"showSelectedCount": true
+					}'>
+					<option value="france">France</option>
+					<option value="spain">Spain</option>
+					<option value="germany">Germany</option>
+					<option value="italy">Italy</option>
+					<option value="japan">Japan</option>
+					<option value="canada">Canada</option>
+				</select>
+			</div>
+
+			<div>
+				<label class="block mb-3 font-semibold text-gray-800" for="select-skills">Skills</label>
+				<select
+					class="kt-select"
+					data-kt-select
+					data-kt-select-placeholder="Select your skills..."
+					data-kt-select-multiple="true"
+					data-kt-select-tags="true"
+					data-kt-select-config='{
+						"showSelectedCount": true,
+						"enableSelectAll": true
+					}'>
+					<option value="javascript">JavaScript</option>
+					<option value="typescript">TypeScript</option>
+					<option value="react">React</option>
+					<option value="vue">Vue.js</option>
+					<option value="angular">Angular</option>
+					<option value="node">Node.js</option>
+					<option value="python">Python</option>
+					<option value="java">Java</option>
+				</select>
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>
