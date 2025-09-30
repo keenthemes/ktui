@@ -64,6 +64,10 @@
 		@apply px-3.5 py-1 text-sm text-muted-foreground;
 	}
 
+	.kt-select-loading {
+		@apply px-3.5 py-1 text-sm text-muted-foreground;
+	}
+
 	.kt-select-dropdown {
 		@apply rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
 	}
