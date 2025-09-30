@@ -393,7 +393,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface,
 	): HTMLElement => {
 		let template = getTemplateStrings(config).tag;
-		let preparedContent = option.title; // Default content is the option's title
+		let preparedContent = option.textContent || option.innerText || option.value || ''; // Default content is the option's text
 
 		if (config.tagTemplate) {
 			let tagTemplateString = config.tagTemplate;

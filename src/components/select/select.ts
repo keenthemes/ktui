@@ -1143,8 +1143,10 @@ export class KTSelect extends KTComponent {
 				// Options are selected.
 				if (tagsEnabled) {
 					// Tags are enabled AND options are selected: tags module has rendered them.
-					// Clear valueDisplayEl as tags are the primary display.
-					valueDisplayEl.innerHTML = '';
+					// Completely clear all content to avoid redundancy with tags
+					// Don't touch the innerHTML here as tags module manages it
+					// Just ensure no text content is generated
+					return; // Exit early to prevent any text generation
 				} else {
 					// Tags are not enabled AND options are selected: render normal text display.
 					let content = '';
