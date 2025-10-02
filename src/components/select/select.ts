@@ -1228,6 +1228,12 @@ export class KTSelect extends KTComponent {
 	public clearSelection() {
 		// Clear the current selection
 		this._state.setSelectedOptions([]);
+
+		// Clear all native select options
+		Array.from(this._element.querySelectorAll('option')).forEach((opt) => {
+			(opt as HTMLOptionElement).selected = false;
+		});
+
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
 
