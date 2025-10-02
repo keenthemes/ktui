@@ -7,7 +7,7 @@
 	/* Base input group styles */
 	.kt-input-group {
 		@apply flex items-stretch relative;
-		
+
 		.kt-input {
 			@apply grow z-1;
 		}

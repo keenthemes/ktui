@@ -1,28 +1,247 @@
-<!--
-To view this example, start your dev server and open http://localhost:50505/examples/datepicker/multi-date.html
--->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Datepicker Multi-Date Selection</title>
-	<link rel="stylesheet" href="../../dist/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTUI Datepicker - Multi-Date Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../dist/ktui.js"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
 </head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">KTUI Datepicker - Multi-Date Selection</h1>
 
-<body class="bg-gray-50 min-h-screen">
-	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
-		<form class="flex flex-col gap-6">
-			<div>
-				<label class="block mb-2 font-medium text-gray-700" for="datepicker-multidate">Multi-Date</label>
-				<div class="kt-datepicker" data-kt-datepicker="true" data-kt-datepicker-multi-date="true">
-					<input id="datepicker-multidate" placeholder="Select multiple dates" />
-				</div>
-			</div>
-		</form>
-	</div>
-	<script src="../../dist/ktui.js"></script>
+        <!-- Basic Multi-Date Selection -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Basic Multi-Date Selection</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select multiple dates:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select dates" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date with Maximum Limit -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date with Maximum Limit</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select up to 5 dates:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select up to 5 dates" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date with Constraints -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date with Constraints</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select dates (within 2024):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select dates" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date with Disabled Dates -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date with Disabled Dates</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select dates (weekends disabled):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select dates" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date with Time -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date with Time</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select dates and times:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select dates & times" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date Event Handling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date Event Handling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select multiple dates (check console for events):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select dates" class="hidden">
+                </div>
+                <div id="multi-event-log" class="mt-4 p-3 bg-gray-100 rounded text-sm font-mono text-gray-700">
+                    <div>Multi-date event log will appear here...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date Display -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date Display</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select multiple dates:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select dates" class="hidden">
+                </div>
+                <div id="multi-display" class="mt-4 p-3 bg-green-50 rounded text-sm">
+                    <div class="text-green-800 font-medium">Selected Dates:</div>
+                    <div id="multi-dates-text" class="text-green-600">No dates selected</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date with Custom Format -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date with Custom Format</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select dates (MM/dd/yyyy format):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="mm/dd/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize basic multi-date selection
+        const basicMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[0],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                onChange: (dates) => {
+                    console.log('Multiple dates selected:', dates);
+                }
+            }
+        );
+
+        // Initialize multi-date with maximum limit
+        const limitedMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[1],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                maxDates: 5,
+                onChange: (dates) => {
+                    console.log('Limited dates selected:', dates);
+                }
+            }
+        );
+
+        // Initialize multi-date with constraints
+        const constrainedMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[2],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                minDate: new Date(2024, 0, 1), // January 1, 2024
+                maxDate: new Date(2024, 11, 31), // December 31, 2024
+                onChange: (dates) => {
+                    console.log('Constrained dates selected:', dates);
+                }
+            }
+        );
+
+        // Initialize multi-date with disabled dates
+        const disabledDatesMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[3],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                disabledDates: [
+                    new Date(2024, 8, 7),  // Saturday
+                    new Date(2024, 8, 8),   // Sunday
+                    new Date(2024, 8, 14),  // Saturday
+                    new Date(2024, 8, 15),  // Sunday
+                ],
+                onChange: (dates) => {
+                    console.log('Multi-dates with disabled dates selected:', dates);
+                }
+            }
+        );
+
+        // Initialize multi-date with time
+        const timeMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[4],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                enableTime: true,
+                timeFormat: 'hh:mm A',
+                onChange: (dates) => {
+                    console.log('Time dates selected:', dates);
+                }
+            }
+        );
+
+        // Initialize multi-date with event handling
+        const eventMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[5],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                onChange: (dates) => {
+                    logMultiEvent('Dates changed', dates);
+                },
+                onOpen: () => {
+                    logMultiEvent('Multi-date datepicker opened');
+                },
+                onClose: () => {
+                    logMultiEvent('Multi-date datepicker closed');
+                }
+            }
+        );
+
+        // Initialize multi-date with display
+        const displayMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[6],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                onChange: (dates) => {
+                    updateMultiDisplay(dates);
+                }
+            }
+        );
+
+        // Initialize multi-date with custom format
+        const customFormatMultiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[7],
+            {
+                multiDateSelection: true,
+                format: 'MM/dd/yyyy',
+                onChange: (dates) => {
+                    console.log('Custom format dates selected:', dates);
+                }
+            }
+        );
+
+        // Event logging function for multi-date
+        function logMultiEvent(message, data = null) {
+            const logElement = document.getElementById('multi-event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="text-green-600">[${timestamp}]</span> ${message}${data ? `: ${JSON.stringify(data)}` : ''}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Update multi-date display
+        function updateMultiDisplay(dates) {
+            const multiDatesTextElement = document.getElementById('multi-dates-text');
+            if (dates && dates.length > 0) {
+                const formattedDates = dates.map(date => date.toLocaleDateString()).join(', ');
+                multiDatesTextElement.textContent = formattedDates;
+            } else {
+                multiDatesTextElement.textContent = 'No dates selected';
+            }
+        }
+    </script>
 </body>
-
 </html>

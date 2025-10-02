@@ -26,9 +26,15 @@ export class KTSelectCombobox {
 
 		const displayElement = select.getDisplayElement(); // KTSelect's main display element for combobox
 
-		this._searchInputElement = displayElement.querySelector('input[data-kt-select-search]');
-		this._clearButtonElement = displayElement.querySelector('[data-kt-select-clear-button]');
-		this._valuesContainerElement = displayElement.querySelector('[data-kt-select-combobox-values]');
+		this._searchInputElement = displayElement.querySelector(
+			'input[data-kt-select-search]',
+		);
+		this._clearButtonElement = displayElement.querySelector(
+			'[data-kt-select-clear-button]',
+		);
+		this._valuesContainerElement = displayElement.querySelector(
+			'[data-kt-select-combobox-values]',
+		);
 
 		this._boundInputHandler = this._handleComboboxInput.bind(this);
 		this._boundClearHandler = this._handleClearButtonClick.bind(this);
@@ -42,7 +48,7 @@ export class KTSelectCombobox {
 				this.updateDisplay(this._select.getSelectedOptions());
 			} else {
 				// For tags or displayTemplate, the input should be clear for typing.
-			this._searchInputElement.value = '';
+				this._searchInputElement.value = '';
 			}
 			this._toggleClearButtonVisibility(this._searchInputElement.value);
 			// this._select.showAllOptions(); // showAllOptions might be too broad, filtering is managed by typing.
@@ -56,11 +62,18 @@ export class KTSelectCombobox {
 	 */
 	private _attachEventListeners(): void {
 		this._removeEventListeners();
-		if (this._searchInputElement) { // Ensure element exists
-			this._searchInputElement.addEventListener('input', this._boundInputHandler);
+		if (this._searchInputElement) {
+			// Ensure element exists
+			this._searchInputElement.addEventListener(
+				'input',
+				this._boundInputHandler,
+			);
 		}
 		if (this._clearButtonElement) {
-			this._clearButtonElement.addEventListener('click', this._boundClearHandler);
+			this._clearButtonElement.addEventListener(
+				'click',
+				this._boundClearHandler,
+			);
 		}
 	}
 
@@ -69,10 +82,16 @@ export class KTSelectCombobox {
 	 */
 	private _removeEventListeners(): void {
 		if (this._searchInputElement) {
-			this._searchInputElement.removeEventListener('input', this._boundInputHandler);
+			this._searchInputElement.removeEventListener(
+				'input',
+				this._boundInputHandler,
+			);
 		}
 		if (this._clearButtonElement) {
-			this._clearButtonElement.removeEventListener('click', this._boundClearHandler);
+			this._clearButtonElement.removeEventListener(
+				'click',
+				this._boundClearHandler,
+			);
 		}
 	}
 
@@ -85,7 +104,8 @@ export class KTSelectCombobox {
 
 		this._toggleClearButtonVisibility(query);
 
-		if (!(this._select as any).isDropdownOpen()) { // Use public getter
+		if (!(this._select as any).isDropdownOpen()) {
+			// Use public getter
 			this._select.openDropdown();
 		}
 		// For single select without displayTemplate, if user types, they are essentially clearing the previous selection text
@@ -127,7 +147,11 @@ export class KTSelectCombobox {
 		if (!this._clearButtonElement) return;
 		const hasSelectedItems = this._select.getSelectedOptions().length > 0;
 
-		if (inputValue.length > 0 || (hasSelectedItems && (this._config.multiple || this._config.displayTemplate))) {
+		if (
+			inputValue.length > 0 ||
+			(hasSelectedItems &&
+				(this._config.multiple || this._config.displayTemplate))
+		) {
 			this._clearButtonElement.classList.remove('hidden');
 		} else {
 			this._clearButtonElement.classList.add('hidden');
@@ -138,7 +162,9 @@ export class KTSelectCombobox {
 	 * Filter options for combobox based on input query
 	 */
 	private _filterOptionsForCombobox(query: string): void {
-		const options = Array.from(this._select.getOptionsElement()) as HTMLElement[];
+		const options = Array.from(
+			this._select.getOptionsElement(),
+		) as HTMLElement[];
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
 		filterOptions(options, query, config, dropdownElement);
@@ -160,41 +186,65 @@ export class KTSelectCombobox {
 			this._valuesContainerElement.innerHTML = '';
 		}
 
-		if (this._config.tags && this._valuesContainerElement) { // Combobox + Tags
-			selectedOptions.forEach(value => {
+		if (this._config.tags && this._valuesContainerElement) {
+			// Combobox + Tags
+			selectedOptions.forEach((value) => {
 				// Ensure value is properly escaped for querySelector
-				const optionElement = this._select.getElement().querySelector(`option[value="${CSS.escape(value)}"]`) as HTMLOptionElement;
+				const optionElement = this._select
+					.getElement()
+					.querySelector(
+						`option[value="${CSS.escape(value)}"]`,
+					) as HTMLOptionElement;
 				if (optionElement) {
 					const tagElement = defaultTemplates.tag(optionElement, this._config);
 					this._valuesContainerElement.appendChild(tagElement);
 				}
 			});
 			this._searchInputElement.value = ''; // Input field is for typing new searches
-			this._searchInputElement.placeholder = selectedOptions.length > 0 ? '' : (this._config.placeholder || 'Select...');
-
-		} else if (this._config.displayTemplate && this._valuesContainerElement) { // Combobox + DisplayTemplate (no tags)
-			this._valuesContainerElement.innerHTML = this._select.renderDisplayTemplateForSelected(selectedOptions);
+			this._searchInputElement.placeholder =
+				selectedOptions.length > 0
+					? ''
+					: this._config.placeholder || 'Select...';
+		} else if (this._config.displayTemplate && this._valuesContainerElement) {
+			// Combobox + DisplayTemplate (no tags)
+			this._valuesContainerElement.innerHTML =
+				this._select.renderDisplayTemplateForSelected(selectedOptions);
 			this._searchInputElement.value = ''; // Input field is for typing new searches
-			this._searchInputElement.placeholder = selectedOptions.length > 0 ? '' : (this._config.placeholder || 'Select...');
-
-		} else if (this._config.multiple && this._valuesContainerElement) { // Combobox + Multiple (no tags, no display template)
+			this._searchInputElement.placeholder =
+				selectedOptions.length > 0
+					? ''
+					: this._config.placeholder || 'Select...';
+		} else if (this._config.multiple && this._valuesContainerElement) {
+			// Combobox + Multiple (no tags, no display template)
 			// For simplicity, join text. A proper tag implementation would be more complex here.
-			this._valuesContainerElement.innerHTML = selectedOptions.map(value => {
-				const optionEl = this._select.getElement().querySelector(`option[value="${CSS.escape(value)}"]`);
-				return optionEl ? optionEl.textContent : '';
-			}).join(', '); // Basic comma separation
+			this._valuesContainerElement.innerHTML = selectedOptions
+				.map((value) => {
+					const optionEl = this._select
+						.getElement()
+						.querySelector(`option[value="${CSS.escape(value)}"]`);
+					return optionEl ? optionEl.textContent : '';
+				})
+				.join(', '); // Basic comma separation
 			this._searchInputElement.value = '';
-			this._searchInputElement.placeholder = selectedOptions.length > 0 ? '' : (this._config.placeholder || 'Select...');
-
-		} else if (!this._config.multiple && selectedOptions.length > 0) { // Single select combobox: display selected option's text in the input
+			this._searchInputElement.placeholder =
+				selectedOptions.length > 0
+					? ''
+					: this._config.placeholder || 'Select...';
+		} else if (!this._config.multiple && selectedOptions.length > 0) {
+			// Single select combobox: display selected option's text in the input
 			const selectedValue = selectedOptions[0];
-			const optionElement = this._select.getElement().querySelector(`option[value="${CSS.escape(selectedValue)}"]`);
-			this._searchInputElement.value = optionElement ? optionElement.textContent || '' : '';
+			const optionElement = this._select
+				.getElement()
+				.querySelector(`option[value="${CSS.escape(selectedValue)}"]`);
+			this._searchInputElement.value = optionElement
+				? optionElement.textContent || ''
+				: '';
 			// placeholder is implicitly handled by input value for single select
-
-		} else { // No selection or not fitting above categories (e.g. single select, no items)
+		} else {
+			// No selection or not fitting above categories (e.g. single select, no items)
 			this._searchInputElement.value = '';
-			this._searchInputElement.placeholder = this._config.placeholder || 'Select...';
+			this._searchInputElement.placeholder =
+				this._config.placeholder || 'Select...';
 			// _valuesContainerElement is already cleared if it exists
 		}
 		this._toggleClearButtonVisibility(this._searchInputElement.value);

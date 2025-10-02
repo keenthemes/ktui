@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTUI Sticky Component - Test Runner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-result {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .test-result.pass {
+            background: #f0fdf4;
+            border-left-color: #22c55e;
+        }
+
+        .test-result.fail {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+
+        .test-details {
+            font-family: monospace;
+            font-size: 0.875rem;
+            background: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">KTUI Sticky Component - Test Runner</h1>
+        <p class="text-gray-600 mb-8">Testing PR #27 changes: middle, center, bottom positioning with improved offset logic</p>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Test Controls</h2>
+            <div class="space-x-4">
+                <button id="runTests" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                    Run All Tests
+                </button>
+                <button id="clearResults" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                    Clear Results
+                </button>
+            </div>
+        </div>
+
+        <div id="testResults" class="space-y-4">
+            <div class="text-center text-gray-500 py-8">
+                Click "Run All Tests" to start testing the sticky component
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import StickyTestSuite from './test-sticky-logic.js';
+
+        const runTestsBtn = document.getElementById('runTests');
+        const clearResultsBtn = document.getElementById('clearResults');
+        const testResultsDiv = document.getElementById('testResults');
+
+        let testSuite = null;
+
+        runTestsBtn.addEventListener('click', async () => {
+            // Disable button during testing
+            runTestsBtn.disabled = true;
+            runTestsBtn.textContent = 'Running Tests...';
+
+            // Clear previous results
+            testResultsDiv.innerHTML = '<div class="text-center text-gray-500 py-8">Running tests...</div>';
+
+            try {
+                // Create and run test suite
+                testSuite = new StickyTestSuite();
+
+                // Override console.log to capture test output
+                const originalLog = console.log;
+                const testOutput = [];
+
+                console.log = (...args) => {
+                    originalLog.apply(console, args);
+                    testOutput.push(args.join(' '));
+                };
+
+                // Run tests
+                await testSuite.runAllTests();
+
+                // Restore console.log
+                console.log = originalLog;
+
+                // Display results
+                displayResults(testSuite.testResults, testOutput);
+
+            } catch (error) {
+                console.error('Test execution failed:', error);
+                testResultsDiv.innerHTML = `
+                    <div class="test-result fail">
+                        <h3 class="font-semibold">Test Execution Failed</h3>
+                        <p class="text-red-600">${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                // Re-enable button
+                runTestsBtn.disabled = false;
+                runTestsBtn.textContent = 'Run All Tests';
+            }
+        });
+
+        clearResultsBtn.addEventListener('click', () => {
+            testResultsDiv.innerHTML = '<div class="text-center text-gray-500 py-8">Click "Run All Tests" to start testing the sticky component</div>';
+        });
+
+        function displayResults(results, output) {
+            const passed = results.filter(r => r.passed).length;
+            const total = results.length;
+
+            let html = `
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-semibold mb-4">Test Summary</h2>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-2xl font-bold ${passed === total ? 'text-green-600' : 'text-red-600'}">
+                            ${passed}/${total}
+                        </div>
+                        <div class="text-gray-600">
+                            tests passed
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            ${((passed / total) * 100).toFixed(1)}% success rate
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            results.forEach((result, index) => {
+                const resultClass = result.passed ? 'pass' : 'fail';
+                const statusIcon = result.passed ? '✅' : '❌';
+
+                html += `
+                    <div class="test-result ${resultClass}">
+                        <h3 class="font-semibold">${statusIcon} ${result.test}</h3>
+                        <p class="text-sm text-gray-600 mt-1">${result.expected}</p>
+                        <div class="test-details">
+                            <div><strong>Actual:</strong> ${result.actual}</div>
+                            <div><strong>Position:</strong> ${result.styles.position}</div>
+                            <div><strong>InsetBlockStart:</strong> ${result.styles.insetBlockStart}</div>
+                            <div><strong>InsetBlockEnd:</strong> ${result.styles.insetBlockEnd}</div>
+                            <div><strong>InsetInlineStart:</strong> ${result.styles.insetInlineStart}</div>
+                            <div><strong>InsetInlineEnd:</strong> ${result.styles.insetInlineEnd}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Add console output
+            if (output.length > 0) {
+                html += `
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold mb-4">Console Output</h2>
+                        <div class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm overflow-auto max-h-96">
+                            ${output.map(line => `<div>${line}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            testResultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

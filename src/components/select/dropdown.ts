@@ -106,9 +106,7 @@ export class KTSelectDropdown extends KTComponent {
 
 		if (this._config.disabled) {
 			if (this._config.debug)
-				console.log(
-					'KTSelectDropdown._handleToggleClick: select is disabled',
-				);
+				console.log('KTSelectDropdown._handleToggleClick: select is disabled');
 			return;
 		}
 
@@ -251,9 +249,7 @@ export class KTSelectDropdown extends KTComponent {
 	public open(): void {
 		if (this._config.disabled) {
 			if (this._config.debug)
-				console.log(
-					'KTSelectDropdown.open: select is disabled, not opening',
-				);
+				console.log('KTSelectDropdown.open: select is disabled, not opening');
 			return;
 		}
 		if (this._isOpen || this._isTransitioning) return;
@@ -279,17 +275,26 @@ export class KTSelectDropdown extends KTComponent {
 		}
 
 		// Consider the dropdown's current z-index if it's already set and higher
-		const currentDropdownZIndexStr = KTDom.getCssProp(this._dropdownElement, 'z-index');
+		const currentDropdownZIndexStr = KTDom.getCssProp(
+			this._dropdownElement,
+			'z-index',
+		);
 		if (currentDropdownZIndexStr && currentDropdownZIndexStr !== 'auto') {
 			const currentDropdownZIndex = parseInt(currentDropdownZIndexStr);
-			if (!isNaN(currentDropdownZIndex) && currentDropdownZIndex > (zIndexToApply || 0)) {
+			if (
+				!isNaN(currentDropdownZIndex) &&
+				currentDropdownZIndex > (zIndexToApply || 0)
+			) {
 				zIndexToApply = currentDropdownZIndex;
 			}
 		}
 
 		// Ensure dropdown is above elements within its original toggle's parent context
 		const toggleParentContextZindex = KTDom.getHighestZindex(this._element); // _element is the select wrapper
-		if (toggleParentContextZindex !== null && toggleParentContextZindex >= (zIndexToApply || 0)) {
+		if (
+			toggleParentContextZindex !== null &&
+			toggleParentContextZindex >= (zIndexToApply || 0)
+		) {
 			zIndexToApply = toggleParentContextZindex + 1;
 		}
 
@@ -379,7 +384,9 @@ export class KTSelectDropdown extends KTComponent {
 
 		KTDom.transitionEnd(this._dropdownElement, completeTransition);
 
-		if (KTDom.getCssProp(this._dropdownElement, 'transition-duration') === '0s') {
+		if (
+			KTDom.getCssProp(this._dropdownElement, 'transition-duration') === '0s'
+		) {
 			completeTransition();
 		}
 	}
@@ -421,16 +428,16 @@ export class KTSelectDropdown extends KTComponent {
 
 	private _resolveDropdownContainer(): HTMLElement | null {
 		const containerSelector = this._config.dropdownContainer;
-		if (containerSelector && containerSelector !== 'body') {
-			const containerElement = document.querySelector(containerSelector) as HTMLElement | null;
+		if (containerSelector) {
+			const containerElement = document.querySelector(
+				containerSelector,
+			) as HTMLElement | null;
 			if (!containerElement && this._config.debug) {
 				console.warn(
 					`KTSelectDropdown: dropdownContainer selector "${containerSelector}" not found. Dropdown will remain in its default position.`,
 				);
 			}
 			return containerElement;
-		} else if (containerSelector === 'body') {
-			return document.body;
 		}
 		return null;
 	}

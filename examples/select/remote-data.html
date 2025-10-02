@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Remote Data</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Remote Data</label>
+
+				<select
+					class="kt-select"
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-enable-search="true"
+					data-kt-select-search-param="q"
+					data-kt-select-search-min-length="2"
+					data-kt-select-search-debounce="300"
+					data-kt-select-debug="true"
+					placeholder="Search users..."
+				></select>
+
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>

@@ -43,23 +43,24 @@ export default class KTComponent {
 		KTData.set(this._element, this._name, this);
 	}
 
-	protected async _fireEvent(eventType: string, payload: object = null): Promise<void> {
+	protected async _fireEvent(
+		eventType: string,
+		payload: object = null,
+	): Promise<void> {
 		const callbacks = this._events.get(eventType);
 
-		if ((callbacks instanceof Map) == false) {
+		if (callbacks instanceof Map == false) {
 			return;
 		}
 
 		await Promise.all(
-			Array.from(
-				callbacks.values()
-			).filter((callable) => {
-				return typeof callable === 'function';
-			}).map((callable) => {
-				return Promise.resolve(
-					callable(payload)
-				);
-			})
+			Array.from(callbacks.values())
+				.filter((callable) => {
+					return typeof callable === 'function';
+				})
+				.map((callable) => {
+					return Promise.resolve(callable(payload));
+				}),
 		);
 	}
 

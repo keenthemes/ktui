@@ -38,13 +38,17 @@ export class KTSelectTags {
 		const wrapper = this._valueDisplayElement.parentElement;
 		if (!wrapper) return;
 
-		// Remove all previous tags
-		Array.from(wrapper.querySelectorAll('[data-kt-select-tag]')).forEach(tag => tag.remove());
-
-		// If no options selected, do nothing (let display show placeholder)
+		// If no options selected, ensure placeholder is shown
 		if (selectedOptions.length === 0) {
+			// Clear any existing content and show placeholder
+			this._valueDisplayElement.innerHTML = '';
+			const placeholderEl = defaultTemplates.placeholder(this._config);
+			this._valueDisplayElement.appendChild(placeholderEl);
 			return;
 		}
+
+		// Clear all existing content before adding tags
+		this._valueDisplayElement.innerHTML = '';
 
 		// Insert each tag before the display element
 		selectedOptions.forEach((optionValue) => {
@@ -58,7 +62,9 @@ export class KTSelectTags {
 				}
 			}
 			if (!optionElement) {
-				const originalOptions = this._select.getElement().querySelectorAll('option');
+				const originalOptions = this._select
+					.getElement()
+					.querySelectorAll('option');
 				for (const opt of Array.from(originalOptions)) {
 					if ((opt as HTMLOptionElement).value === optionValue) {
 						optionElement = opt as HTMLOptionElement;
@@ -70,7 +76,9 @@ export class KTSelectTags {
 			const tag = defaultTemplates.tag(optionElement, this._config);
 
 			// Add event listener to the close button
-			const closeButton = tag.querySelector('[data-kt-select-remove-button]') as HTMLElement;
+			const closeButton = tag.querySelector(
+				'[data-kt-select-remove-button]',
+			) as HTMLElement;
 			if (closeButton) {
 				this._eventManager.addListener(closeButton, 'click', (event: Event) => {
 					event.stopPropagation();
@@ -78,8 +86,8 @@ export class KTSelectTags {
 				});
 			}
 
-			// Insert tag before the display element
-			wrapper.insertBefore(tag, this._valueDisplayElement);
+			// Insert tag inside the display element
+			this._valueDisplayElement.appendChild(tag);
 		});
 	}
 

@@ -128,6 +128,12 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		headers.forEach((header) => {
 			// If the sort class is not found, it's not a sortable column
 			if (!header.querySelector(`.${config.sort?.classes?.base}`)) return;
+
+			// Check if sorting is disabled for this column
+			const sortDisabled =
+				header.getAttribute('data-kt-datatable-column-sort') === 'false';
+			if (sortDisabled) return;
+
 			const sortAttribute =
 				header.getAttribute('data-kt-datatable-column-sort') ||
 				header.getAttribute('data-kt-datatable-column');

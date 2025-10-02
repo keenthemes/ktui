@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTUI Datepicker - Custom Styling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../dist/ktui.js"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+    <style>
+        /* Custom datepicker styles */
+        .custom-datepicker {
+            @apply border-2 border-blue-300 rounded-lg p-3 bg-blue-50;
+        }
+
+        .custom-datepicker:focus {
+            @apply border-blue-500 ring-2 ring-blue-200;
+        }
+
+        .custom-datepicker .kt-datepicker-display-element {
+            @apply bg-white border border-gray-300 rounded-md px-3 py-2 text-gray-700;
+        }
+
+        .custom-datepicker .kt-datepicker-display-element:focus {
+            @apply border-blue-500 ring-2 ring-blue-200;
+        }
+
+        .dark-datepicker {
+            @apply border-2 border-gray-600 rounded-lg p-3 bg-gray-800;
+        }
+
+        .dark-datepicker .kt-datepicker-display-element {
+            @apply bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200;
+        }
+
+        .dark-datepicker .kt-datepicker-display-element:focus {
+            @apply border-blue-400 ring-2 ring-blue-300;
+        }
+
+        .minimal-datepicker {
+            @apply border-b-2 border-gray-300 rounded-none p-2 bg-transparent;
+        }
+
+        .minimal-datepicker .kt-datepicker-display-element {
+            @apply bg-transparent border-0 rounded-none px-2 py-1 text-gray-600;
+        }
+
+        .minimal-datepicker .kt-datepicker-display-element:focus {
+            @apply border-b-blue-500;
+        }
+
+        .colorful-datepicker {
+            @apply border-2 border-purple-300 rounded-xl p-4 bg-gradient-to-r from-purple-50 to-pink-50;
+        }
+
+        .colorful-datepicker .kt-datepicker-display-element {
+            @apply bg-white border border-purple-300 rounded-lg px-4 py-3 text-purple-700 font-medium;
+        }
+
+        .colorful-datepicker .kt-datepicker-display-element:focus {
+            @apply border-purple-500 ring-2 ring-purple-200;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">KTUI Datepicker - Custom Styling</h1>
+
+        <!-- Default Styling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Default Styling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Default datepicker:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Blue Theme -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Custom Blue Theme</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Blue themed datepicker:</label>
+                <div class="kt-datepicker custom-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Dark Theme -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Dark Theme</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dark themed datepicker:</label>
+                <div class="kt-datepicker dark-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Minimal Style -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Minimal Style</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Minimal datepicker:</label>
+                <div class="kt-datepicker minimal-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Colorful Theme -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Colorful Theme</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Colorful datepicker:</label>
+                <div class="kt-datepicker colorful-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Format Styling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Custom Format Styling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Custom format (MM/dd/yyyy):</label>
+                <div class="kt-datepicker custom-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="mm/dd/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range Styling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range Styling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Styled date range:</label>
+                <div class="kt-datepicker colorful-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Date Styling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Multi-Date Styling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Styled multi-date:</label>
+                <div class="kt-datepicker dark-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="Select dates" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Picker Styling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Time Picker Styling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Styled time picker:</label>
+                <div class="kt-datepicker custom-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy hh:mm:ss" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Responsive Styling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Responsive Styling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Responsive datepicker:</label>
+                <div class="kt-datepicker custom-datepicker w-full sm:w-80 md:w-96" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize default datepicker
+        const defaultDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[0],
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    console.log('Default datepicker:', date);
+                }
+            }
+        );
+
+        // Initialize custom blue theme datepicker
+        const blueDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[1],
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    console.log('Blue theme datepicker:', date);
+                }
+            }
+        );
+
+        // Initialize dark theme datepicker
+        const darkDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[2],
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    console.log('Dark theme datepicker:', date);
+                }
+            }
+        );
+
+        // Initialize minimal style datepicker
+        const minimalDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[3],
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    console.log('Minimal datepicker:', date);
+                }
+            }
+        );
+
+        // Initialize colorful theme datepicker
+        const colorfulDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[4],
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    console.log('Colorful datepicker:', date);
+                }
+            }
+        );
+
+        // Initialize custom format datepicker
+        const customFormatDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[5],
+            {
+                format: 'MM/dd/yyyy',
+                onChange: (date) => {
+                    console.log('Custom format datepicker:', date);
+                }
+            }
+        );
+
+        // Initialize date range datepicker
+        const rangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[6],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' - ',
+                onChange: (dateRange) => {
+                    console.log('Range datepicker:', dateRange);
+                }
+            }
+        );
+
+        // Initialize multi-date datepicker
+        const multiDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[7],
+            {
+                multiDateSelection: true,
+                format: 'dd/MM/yyyy',
+                maxDates: 5,
+                onChange: (dates) => {
+                    console.log('Multi-date datepicker:', dates);
+                }
+            }
+        );
+
+        // Initialize time datepicker
+        const timeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[8],
+            {
+                format: 'dd/MM/yyyy',
+                enableTime: true,
+                timeFormat: 'hh:mm:ss A',
+                onChange: (date) => {
+                    console.log('Time datepicker:', date);
+                }
+            }
+        );
+
+        // Initialize responsive datepicker
+        const responsiveDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[9],
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    console.log('Responsive datepicker:', date);
+                }
+            }
+        );
+    </script>
+</body>
+</html>
