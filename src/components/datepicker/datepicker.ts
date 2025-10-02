@@ -75,6 +75,37 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _elementObserver: MutationObserver | null = null;
   private _instanceId: string;
 
+  // DOM element cache for performance optimization
+  private _cachedElements: {
+    calendarElement: HTMLElement | null;
+    timePickerElement: HTMLElement | null;
+    startContainer: HTMLElement | null;
+    endContainer: HTMLElement | null;
+    yearElement: HTMLElement | null;
+    monthElement: HTMLElement | null;
+    dayElement: HTMLElement | null;
+    hourElement: HTMLElement | null;
+    minuteElement: HTMLElement | null;
+    secondElement: HTMLElement | null;
+    ampmElement: HTMLElement | null;
+    monthYearElement: HTMLElement | null;
+    timeDisplay: HTMLElement | null;
+  } = {
+    calendarElement: null,
+    timePickerElement: null,
+    startContainer: null,
+    endContainer: null,
+    yearElement: null,
+    monthElement: null,
+    dayElement: null,
+    hourElement: null,
+    minuteElement: null,
+    secondElement: null,
+    ampmElement: null,
+    monthYearElement: null,
+    timeDisplay: null
+  };
+
     // --- StateObserver implementation ---
   public onStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
     // Update UI based on state changes
@@ -86,6 +117,39 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   }
 
   /**
+   * Initialize DOM element cache for performance optimization
+   */
+  private _initializeElementCache(): void {
+    // Cache main container elements
+    this._cachedElements.calendarElement = this._element.querySelector('[data-kt-datepicker-calendar-table]') as HTMLElement;
+    this._cachedElements.timePickerElement = this._element.querySelector('[data-kt-datepicker-time-container]') as HTMLElement;
+
+    // Cache range mode containers
+    this._cachedElements.startContainer = this._element.querySelector('[data-kt-datepicker-start-container]') as HTMLElement;
+    this._cachedElements.endContainer = this._element.querySelector('[data-kt-datepicker-end-container]') as HTMLElement;
+
+    // Cache segmented input elements
+    this._cachedElements.yearElement = this._element.querySelector('[data-segment="year"]') as HTMLElement;
+    this._cachedElements.monthElement = this._element.querySelector('[data-segment="month"]') as HTMLElement;
+    this._cachedElements.dayElement = this._element.querySelector('[data-segment="day"]') as HTMLElement;
+    this._cachedElements.hourElement = this._element.querySelector('[data-segment="hour"]') as HTMLElement;
+    this._cachedElements.minuteElement = this._element.querySelector('[data-segment="minute"]') as HTMLElement;
+    this._cachedElements.secondElement = this._element.querySelector('[data-segment="second"]') as HTMLElement;
+    this._cachedElements.ampmElement = this._element.querySelector('[data-segment="ampm"]') as HTMLElement;
+
+    // Cache navigation and display elements
+    this._cachedElements.monthYearElement = this._cachedElements.calendarElement?.querySelector('[data-kt-datepicker-month-year]') as HTMLElement;
+    this._cachedElements.timeDisplay = this._cachedElements.timePickerElement?.querySelector('[data-kt-datepicker-time-value]') as HTMLElement;
+  }
+
+  /**
+   * Refresh DOM element cache when structure changes
+   */
+  private _refreshElementCache(): void {
+    this._initializeElementCache();
+  }
+
+  /**
    * Update input field with current state
    */
   private _updateInput(state: KTDatepickerState): void {
@@ -93,11 +157,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // Update input value
     let value = '';
-    if (this._config.range && state.selectedRange) {
+        if (this._config.range && state.selectedRange) {
       value = this._formatRange(state.selectedRange.start, state.selectedRange.end);
-    } else if (this._config.multiDate && state.selectedDates.length > 0) {
+        } else if (this._config.multiDate && state.selectedDates.length > 0) {
       value = this._formatMultiDate(state.selectedDates);
-    } else if (state.selectedDate) {
+        } else if (state.selectedDate) {
       value = this._formatSingleDate(state.selectedDate);
     }
 
@@ -151,15 +215,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update range mode segmented inputs
    */
   private _updateRangeSegmentedInput(state: KTDatepickerState): void {
-    const startContainer = this._element.querySelector('[data-kt-datepicker-start-container]') as HTMLElement;
-    const endContainer = this._element.querySelector('[data-kt-datepicker-end-container]') as HTMLElement;
-
-    if (startContainer && state.selectedRange?.start) {
-      this._updateDateSegmentsInContainer(state.selectedRange.start, startContainer);
+    if (this._cachedElements.startContainer && state.selectedRange?.start) {
+      this._updateDateSegmentsInContainer(state.selectedRange.start, this._cachedElements.startContainer);
     }
 
-    if (endContainer && state.selectedRange?.end) {
-      this._updateDateSegmentsInContainer(state.selectedRange.end, endContainer);
+    if (this._cachedElements.endContainer && state.selectedRange?.end) {
+      this._updateDateSegmentsInContainer(state.selectedRange.end, this._cachedElements.endContainer);
     }
   }
 
@@ -167,6 +228,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update date segments in a specific container
    */
   private _updateDateSegmentsInContainer(date: Date, container: HTMLElement): void {
+    // For range mode, we need to query within the specific container
     const yearElement = container.querySelector('[data-segment="year"]') as HTMLElement;
     const monthElement = container.querySelector('[data-segment="month"]') as HTMLElement;
     const dayElement = container.querySelector('[data-segment="day"]') as HTMLElement;
@@ -193,22 +255,17 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update time segments
    */
   private _updateTimeSegments(time: TimeState): void {
-    const hourElement = this._element.querySelector('[data-segment="hour"]') as HTMLElement;
-    const minuteElement = this._element.querySelector('[data-segment="minute"]') as HTMLElement;
-    const secondElement = this._element.querySelector('[data-segment="second"]') as HTMLElement;
-    const ampmElement = this._element.querySelector('[data-segment="ampm"]') as HTMLElement;
-
-    if (hourElement) {
-      hourElement.textContent = time.hour.toString().padStart(2, '0');
+    if (this._cachedElements.hourElement) {
+      this._cachedElements.hourElement.textContent = time.hour.toString().padStart(2, '0');
     }
-    if (minuteElement) {
-      minuteElement.textContent = time.minute.toString().padStart(2, '0');
+    if (this._cachedElements.minuteElement) {
+      this._cachedElements.minuteElement.textContent = time.minute.toString().padStart(2, '0');
     }
-    if (secondElement) {
-      secondElement.textContent = time.second.toString().padStart(2, '0');
+    if (this._cachedElements.secondElement) {
+      this._cachedElements.secondElement.textContent = time.second.toString().padStart(2, '0');
     }
-    if (ampmElement) {
-      ampmElement.textContent = time.hour >= 12 ? 'PM' : 'AM';
+    if (this._cachedElements.ampmElement) {
+      this._cachedElements.ampmElement.textContent = time.hour >= 12 ? 'PM' : 'AM';
     }
   }
 
@@ -216,14 +273,13 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update calendar display
    */
   private _updateCalendar(state: KTDatepickerState): void {
-    const calendarElement = this._element.querySelector('[data-kt-datepicker-calendar-table]') as HTMLElement;
-    if (!calendarElement) return;
+    if (!this._cachedElements.calendarElement) return;
 
     // Update date selection highlighting
-    this._updateDateSelection(state, calendarElement);
+    this._updateDateSelection(state, this._cachedElements.calendarElement);
 
     // Update navigation (month/year display)
-    this._updateNavigation(state, calendarElement);
+    this._updateNavigation(state, this._cachedElements.calendarElement);
   }
 
   /**
@@ -287,11 +343,10 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update navigation display
    */
   private _updateNavigation(state: KTDatepickerState, calendarElement: HTMLElement): void {
-    const monthYearElement = calendarElement.querySelector('[data-kt-datepicker-month-year]') as HTMLElement;
-    if (monthYearElement) {
+    if (this._cachedElements.monthYearElement) {
       const month = state.currentDate.toLocaleDateString('en-US', { month: 'long' });
       const year = state.currentDate.getFullYear();
-      monthYearElement.textContent = `${month} ${year}`;
+      this._cachedElements.monthYearElement.textContent = `${month} ${year}`;
     }
   }
 
@@ -299,21 +354,21 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update time picker display
    */
   private _updateTimePicker(state: KTDatepickerState): void {
-    const timePickerElement = this._element.querySelector('[data-kt-datepicker-time-container]') as HTMLElement;
-    if (!timePickerElement || !state.selectedTime) return;
+    if (!this._cachedElements.timePickerElement || !state.selectedTime) return;
 
-    const timeDisplay = timePickerElement.querySelector('[data-kt-datepicker-time-value]') as HTMLElement;
-    if (timeDisplay) {
+    if (this._cachedElements.timeDisplay) {
       const timeString = `${state.selectedTime.hour.toString().padStart(2, '0')}:${state.selectedTime.minute.toString().padStart(2, '0')}:${state.selectedTime.second.toString().padStart(2, '0')}`;
-      timeDisplay.textContent = timeString;
+      this._cachedElements.timeDisplay.textContent = timeString;
     }
   }
 
-  private _handleStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
+    private _handleStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
     // Update dropdown state if open/closed changed
     if (newState.isOpen !== oldState.isOpen) {
       if (newState.isOpen) {
         this._render();
+        // Refresh cache after rendering new elements
+        this._refreshElementCache();
       } else {
         // Handle close logic
       }
@@ -1317,6 +1372,9 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       liveRegion.setAttribute('style', 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;');
       this._element.appendChild(liveRegion);
     }
+
+    // Initialize DOM element cache after rendering
+    this._initializeElementCache();
   }
 
   /**
@@ -1740,6 +1798,23 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       this._timePickerRenderer.cleanup();
       this._timePickerRenderer = null;
     }
+
+    // Clear DOM element cache
+    this._cachedElements = {
+      calendarElement: null,
+      timePickerElement: null,
+      startContainer: null,
+      endContainer: null,
+      yearElement: null,
+      monthElement: null,
+      dayElement: null,
+      hourElement: null,
+      minuteElement: null,
+      secondElement: null,
+      ampmElement: null,
+      monthYearElement: null,
+      timeDisplay: null
+    };
 
     (this._element as any).instance = null;
     console.log('🗓️ [KTDatepicker] destroy() completed');
