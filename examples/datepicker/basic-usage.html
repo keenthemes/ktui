@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTUI Datepicker - Basic Usage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../dist/ktui.js"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">KTUI Datepicker - Basic Usage</h1>
+
+        <!-- Basic Single Date Selection -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Basic Single Date Selection</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select a date:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date with Custom Format -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Custom Date Format</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date (MM/dd/yyyy):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="mm/dd/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date with Min/Max Constraints -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date with Constraints</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date (between Aug 20 - Sep 10, 2024):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date with Disabled Dates -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date with Disabled Dates</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date (weekends disabled):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date with Time Picker -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date with Time Picker</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date and time:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy hh:mm:ss" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Handling Example -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Event Handling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date (check console for events):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy" class="hidden">
+                </div>
+                <div id="event-log" class="mt-4 p-3 bg-gray-100 rounded text-sm font-mono text-gray-700">
+                    <div>Event log will appear here...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize basic datepicker
+        const basicDatepicker = new KTDatepicker(
+            document.querySelector('.kt-datepicker'),
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    console.log('Date selected:', date);
+                }
+            }
+        );
+
+        // Initialize custom format datepicker
+        const customFormatDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[1],
+            {
+                format: 'MM/dd/yyyy',
+                onChange: (date) => {
+                    console.log('Custom format date selected:', date);
+                }
+            }
+        );
+
+        // Initialize datepicker with constraints
+        const constrainedDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[2],
+            {
+                format: 'dd/MM/yyyy',
+                minDate: new Date(2024, 7, 20), // August 20, 2024
+                maxDate: new Date(2024, 8, 10),  // September 10, 2024
+                onChange: (date) => {
+                    console.log('Constrained date selected:', date);
+                }
+            }
+        );
+
+        // Initialize datepicker with disabled dates
+        const disabledDatesDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[3],
+            {
+                format: 'dd/MM/yyyy',
+                disabledDates: [
+                    new Date(2024, 8, 7),  // Saturday
+                    new Date(2024, 8, 8),   // Sunday
+                    new Date(2024, 8, 14),  // Saturday
+                    new Date(2024, 8, 15),  // Sunday
+                ],
+                onChange: (date) => {
+                    console.log('Date with disabled dates selected:', date);
+                }
+            }
+        );
+
+        // Initialize datepicker with time
+        const timeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[4],
+            {
+                format: 'dd/MM/yyyy',
+                enableTime: true,
+                timeFormat: 'hh:mm:ss A',
+                onChange: (date) => {
+                    console.log('Date with time selected:', date);
+                }
+            }
+        );
+
+        // Initialize datepicker with event handling
+        const eventDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[5],
+            {
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    logEvent('Date changed', date);
+                },
+                onOpen: () => {
+                    logEvent('Datepicker opened');
+                },
+                onClose: () => {
+                    logEvent('Datepicker closed');
+                }
+            }
+        );
+
+        // Event logging function
+        function logEvent(message, data = null) {
+            const logElement = document.getElementById('event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="text-blue-600">[${timestamp}]</span> ${message}${data ? `: ${JSON.stringify(data)}` : ''}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -9,51 +9,49 @@ import { LocaleConfigInterface } from './types';
  * Main container template for the datepicker dropdown
  */
 export const datepickerContainerTemplate = `
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-    <div class="border-b border-gray-200 pb-3 mb-3">
-      <div class="flex items-center justify-between px-3 pt-3">
-        <button type="button" class="p-1 rounded hover:bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Previous Month">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-        <div class="flex items-center justify-center">
-          <select class="bg-transparent border border-gray-200 rounded px-2 py-1 mr-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Select Month"></select>
-          <select class="bg-transparent border border-gray-200 rounded px-2 py-1 ml-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Select Year"></select>
-          <span class="font-medium px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"></span>
+  <div class="kt-datepicker-dropdown">
+    <div class="kt-datepicker-calendar-header">
+      <button type="button" class="kt-datepicker-calendar-left-nav-btn" aria-label="Previous Month">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <div class="kt-datepicker-datepicker-header-middle">
+        <select class="kt-datepicker-month-select" aria-label="Select Month"></select>
+        <select class="kt-datepicker-year-select" aria-label="Select Year"></select>
+        <span class="kt-datepicker-current-month-year"></span>
+      </div>
+      <button type="button" class="kt-dropdown-calendar-right-nav-btn" aria-label="Next Month">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+    <div class="kt-datepicker-calendar-grid"></div>
+    <div class="kt-datepicker-time-section hidden">
+      <div class="kt-datepicker-time-label">Time</div>
+      <div class="kt-datepicker-time-inputs">
+        <div class="relative w-12">
+          <input type="text" class="kt-datepicker-time-input" min="0" max="23" aria-label="Hour">
         </div>
-        <button type="button" class="p-1 rounded hover:bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Next Month">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
+        <span class="kt-datepicker-time-separator">:</span>
+        <div class="relative w-12">
+          <input type="text" class="kt-datepicker-time-input" min="0" max="59" aria-label="Minute">
+        </div>
+        <span class="kt-datepicker-time-separator">:</span>
+        <div class="relative w-12">
+          <input type="text" class="kt-datepicker-time-input" min="0" max="59" aria-label="Second">
+        </div>
+        <div class="kt-datepicker-ampm-buttons">
+          <button type="button" class="kt-datepicker-ampm-button" aria-label="AM">AM</button>
+          <button type="button" class="kt-datepicker-ampm-button" aria-label="PM">PM</button>
+        </div>
       </div>
     </div>
-    <div class="flex flex-wrap gap-4"></div>
-    <div class="py-3 border-t border-gray-200 mt-3 hidden">
-      <div class="text-sm font-medium text-gray-600 mb-2 text-center">Time</div>
-      <div class="flex items-center justify-center gap-2">
-        <div class="relative w-12">
-          <input type="text" class="w-full py-1.5 px-1.5 text-center border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" max="23" aria-label="Hour">
-        </div>
-        <span class="text-xl font-medium text-gray-500 leading-none">:</span>
-        <div class="relative w-12">
-          <input type="text" class="w-full py-1.5 px-1.5 text-center border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" max="59" aria-label="Minute">
-        </div>
-        <span class="text-xl font-medium text-gray-500 leading-none">:</span>
-        <div class="relative w-12">
-          <input type="text" class="w-full py-1.5 px-1.5 text-center border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" max="59" aria-label="Second">
-        </div>
-        <div class="flex flex-col gap-1">
-          <button type="button" class="px-2 py-1 text-xs border border-gray-300 rounded-t bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center" aria-label="AM"></button>
-          <button type="button" class="px-2 py-1 text-xs border border-gray-300 rounded-b bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center" aria-label="PM"></button>
-        </div>
-      </div>
-    </div>
-    <div class="flex justify-between pt-3 border-t border-gray-200 mt-3 px-3 pb-3">
-      <button type="button" class="px-3 py-1.5 text-sm border border-gray-300 rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">Today</button>
-      <button type="button" class="px-3 py-1.5 text-sm border border-gray-300 rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">Clear</button>
-      <button type="button" class="px-3 py-1.5 text-sm border border-blue-500 rounded bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Apply</button>
+    <div class="kt-datepicker-actions">
+      <button type="button" class="kt-datepicker-action-button">Today</button>
+      <button type="button" class="kt-datepicker-action-button">Clear</button>
+      <button type="button" class="kt-datepicker-action-button primary">Apply</button>
     </div>
   </div>
 `;
@@ -62,9 +60,9 @@ export const datepickerContainerTemplate = `
  * Input wrapper template with calendar icon
  */
 export const inputWrapperTemplate = `
-  <div class="relative flex items-center">
-    <div class="flex-grow segmented-input-container"></div>
-    <button type="button" class="absolute right-2 p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 calendar-toggle-btn" aria-label="Toggle Calendar">
+  <div class="kt-datepicker-input-wrapper">
+    <div class="kt-datepicker-segmented-input-container"></div>
+    <button type="button" class="kt-datepicker-calendar-toggle-btn" aria-label="Toggle Calendar">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -106,33 +104,33 @@ export function segmentedDateInputTemplate(format: string): string {
 
 	// Create the template based on the parsed format
 	return `
-    <div class="flex items-center bg-transparent text-sm">
+    <div class="kt-datepicker-segmented-input">
       <div
-        class="${getSegmentWidthClass(
+        class="kt-datepicker-segment ${getSegmentWidthClass(
 					segments[0].type,
-				)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
+				)}"
         data-segment="${getSegmentName(segments[0].type)}"
         tabindex="0"
         role="button"
         aria-label="${getSegmentLabel(segments[0].type)}">${
 					segments[0].placeholder
 				}</div>
-      <span class="text-gray-500 mx-0.5">${separators[0]}</span>
+      <span class="kt-datepicker-segment-separator">${separators[0]}</span>
       <div
-        class="${getSegmentWidthClass(
+        class="kt-datepicker-segment ${getSegmentWidthClass(
 					segments[1].type,
-				)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
+				)}"
         data-segment="${getSegmentName(segments[1].type)}"
         tabindex="0"
         role="button"
         aria-label="${getSegmentLabel(segments[1].type)}">${
 					segments[1].placeholder
 				}</div>
-      <span class="text-gray-500 mx-0.5">${separators[1]}</span>
+      <span class="kt-datepicker-segment-separator">${separators[1]}</span>
       <div
-        class="${getSegmentWidthClass(
+        class="kt-datepicker-segment ${getSegmentWidthClass(
 					segments[2].type,
-				)} bg-transparent text-center text-gray-900 cursor-pointer segment-part hover:bg-gray-100 rounded-sm px-1 py-0.5"
+				)}"
         data-segment="${getSegmentName(segments[2].type)}"
         tabindex="0"
         role="button"
@@ -507,19 +505,19 @@ export function calendarGridTemplate(
 	const headerCells = orderedDayNames
 		.map(
 			(day) =>
-				`<th class="py-2 text-center text-xs font-medium text-gray-500 uppercase w-10">${day}</th>`,
+				`<th class="kt-datepicker-calendar-day-header">${day}</th>`,
 		)
 		.join('');
 
 	return `
-    <div class="calendar-month-container">
-      <table class="w-full border-collapse calendar-grid" role="grid" aria-labelledby="datepicker-month">
+    <div class="kt-datepicker-calendar-month-container">
+      <table class="kt-datepicker-calendar-grid" role="grid" aria-labelledby="datepicker-month">
         <thead>
-          <tr class="border-b border-gray-200">
+          <tr class="kt-datepicker-calendar-header-row">
             ${headerCells}
           </tr>
         </thead>
-        <tbody class="border-none"></tbody>
+        <tbody class="kt-datepicker-calendar-body"></tbody>
       </table>
     </div>
   `;
@@ -555,28 +553,26 @@ export function dayTemplate(
 	isWeekend: boolean = false,
 ): string {
 	// Base classes for day button
-	let classes =
-		'w-full h-8 rounded-full flex items-center justify-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ';
+	let classes = 'kt-datepicker-calendar-day ';
 
 	// Apply conditional classes
 	if (!isCurrentMonth) {
-		classes += 'current';
+		classes += 'kt-datepicker-calendar-day-other-month ';
 	} else if (isDisabled) {
-		classes += 'text-gray-300 cursor-not-allowed ';
+		classes += 'kt-datepicker-calendar-day-disabled ';
 	} else if (isSelected || isRangeStart || isRangeEnd) {
-		classes += 'bg-blue-600 text-white hover:bg-blue-700 ';
+		classes += 'kt-datepicker-calendar-day-selected ';
 	} else if (isInRange) {
-		classes += 'bg-blue-100 text-blue-800 hover:bg-blue-200 ';
+		classes += 'kt-datepicker-calendar-day-in-range ';
 	} else if (isToday) {
-		classes += 'border border-blue-500 text-blue-600 hover:bg-blue-50 ';
+		classes += 'kt-datepicker-calendar-day-today ';
 	} else {
-		classes +=
-			'text-gray-700 hover:bg-gray-100 hover:bg-blue-50 hover:text-blue-600 ';
+		classes += 'kt-datepicker-calendar-day-default ';
 	}
 
 	// Add weekend-specific styling
 	if (isWeekend && !isSelected && !isRangeStart && !isRangeEnd && !isInRange) {
-		classes += 'text-gray-500 ';
+		classes += 'kt-datepicker-calendar-day-weekend ';
 	}
 
 	// Add attributes for hover states in range selection

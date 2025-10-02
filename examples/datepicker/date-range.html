@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTUI Datepicker - Date Range Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../../dist/ktui.js"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">KTUI Datepicker - Date Range Selection</h1>
+
+        <!-- Basic Date Range -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Basic Date Range Selection</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date range:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range with Custom Separator -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range with Custom Separator</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date range (custom separator):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range with Constraints -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range with Constraints</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date range (max 30 days):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range with Time -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range with Time</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date and time range:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date & time" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date & time" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range with Disabled Dates -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range with Disabled Dates</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date range (weekends disabled):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date" class="hidden">
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range Event Handling -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range Event Handling</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date range (check console for events):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date" class="hidden">
+                </div>
+                <div id="range-event-log" class="mt-4 p-3 bg-gray-100 rounded text-sm font-mono text-gray-700">
+                    <div>Range event log will appear here...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range Display -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range Display</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date range:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-start placeholder="Start date" class="hidden">
+                    <input type="text" data-kt-datepicker-end placeholder="End date" class="hidden">
+                </div>
+                <div id="range-display" class="mt-4 p-3 bg-blue-50 rounded text-sm">
+                    <div class="text-blue-800 font-medium">Selected Range:</div>
+                    <div id="range-text" class="text-blue-600">No range selected</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize basic date range
+        const basicRangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[0],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' - ',
+                onChange: (dateRange) => {
+                    console.log('Date range selected:', dateRange);
+                }
+            }
+        );
+
+        // Initialize date range with custom separator
+        const customSeparatorRangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[1],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' to ',
+                onChange: (dateRange) => {
+                    console.log('Custom separator range selected:', dateRange);
+                }
+            }
+        );
+
+        // Initialize date range with constraints
+        const constrainedRangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[2],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' - ',
+                minDate: new Date(2024, 0, 1), // January 1, 2024
+                maxDate: new Date(2024, 11, 31), // December 31, 2024
+                onChange: (dateRange) => {
+                    console.log('Constrained range selected:', dateRange);
+                }
+            }
+        );
+
+        // Initialize date range with time
+        const timeRangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[3],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' - ',
+                enableTime: true,
+                timeFormat: 'hh:mm A',
+                onChange: (dateRange) => {
+                    console.log('Time range selected:', dateRange);
+                }
+            }
+        );
+
+        // Initialize date range with disabled dates
+        const disabledDatesRangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[4],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' - ',
+                disabledDates: [
+                    new Date(2024, 8, 7),  // Saturday
+                    new Date(2024, 8, 8),   // Sunday
+                    new Date(2024, 8, 14),  // Saturday
+                    new Date(2024, 8, 15),  // Sunday
+                ],
+                onChange: (dateRange) => {
+                    console.log('Range with disabled dates selected:', dateRange);
+                }
+            }
+        );
+
+        // Initialize date range with event handling
+        const eventRangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[5],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' - ',
+                onChange: (dateRange) => {
+                    logRangeEvent('Range changed', dateRange);
+                },
+                onOpen: () => {
+                    logRangeEvent('Range datepicker opened');
+                },
+                onClose: () => {
+                    logRangeEvent('Range datepicker closed');
+                }
+            }
+        );
+
+        // Initialize date range with display
+        const displayRangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[6],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                rangeSeparator: ' - ',
+                onChange: (dateRange) => {
+                    updateRangeDisplay(dateRange);
+                }
+            }
+        );
+
+        // Event logging function for range
+        function logRangeEvent(message, data = null) {
+            const logElement = document.getElementById('range-event-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<span class="text-blue-600">[${timestamp}]</span> ${message}${data ? `: ${JSON.stringify(data)}` : ''}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Update range display
+        function updateRangeDisplay(dateRange) {
+            const rangeTextElement = document.getElementById('range-text');
+            if (dateRange && dateRange.startDate && dateRange.endDate) {
+                const startDate = dateRange.startDate.toLocaleDateString();
+                const endDate = dateRange.endDate.toLocaleDateString();
+                rangeTextElement.textContent = `${startDate} - ${endDate}`;
+            } else {
+                rangeTextElement.textContent = 'No range selected';
+            }
+        }
+    </script>
+</body>
+</html>
