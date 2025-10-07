@@ -1807,12 +1807,44 @@ export class KTSelect extends KTComponent {
 			return;
 		}
 
-		// Use unified renderer for search results
-		this._renderOptionsInDropdown(items, true);
+		// First update the original select element with search results
+		this._updateOriginalSelectWithSearchResults(items);
+
+		// Then update dropdown using the standard flow
+		this._updateDropdownWithNewOptions();
 
 		// Add pagination "Load More" button if needed
 		if (this._config.pagination && this._remoteModule.hasMorePages()) {
 			this._addLoadMoreButton();
+		}
+	}
+
+	/**
+	 * Update original select element with search results
+	 * @param items Search result items
+	 */
+	private _updateOriginalSelectWithSearchResults(items: KTSelectOptionData[]) {
+		// Clear existing options except placeholder
+		this._clearExistingOptions();
+
+		// Add search result items to original select element
+		items.forEach((item) => {
+			const optionElement = document.createElement('option');
+			optionElement.value = item.id || '';
+			optionElement.textContent = item.title || '';
+
+			if (item.selected) {
+				optionElement.setAttribute('selected', 'selected');
+			}
+			if (item.disabled) {
+				optionElement.setAttribute('disabled', 'disabled');
+			}
+
+			this._element.appendChild(optionElement);
+		});
+
+		if (this._config.debug) {
+			console.log(`Updated original select with ${items.length} search results`);
 		}
 	}
 

@@ -135,9 +135,8 @@
 	.kt-select-tag {
 		@apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium;
 		@apply bg-gray-50 text-gray-700 border border-gray-200;
-		@apply hover:bg-gray-100 hover:border-gray-300 transition-all duration-200;
 		@apply max-w-[200px] truncate flex-shrink-0;
-		@apply shadow-sm hover:shadow-md;
+		@apply shadow-sm;
 		@apply leading-tight;
 	}
 
@@ -145,12 +144,8 @@
 		@apply flex items-center justify-center w-5 h-5 rounded-full;
 		@apply hover:bg-gray-200 text-gray-500 hover:text-gray-700;
 		@apply transition-all duration-200 cursor-pointer;
-		@apply flex-shrink-0 opacity-70;
+		@apply flex-shrink-0 opacity-100;
 		@apply hover:scale-110;
-	}
-
-	.kt-select-tag:hover .kt-select-tag-remove {
-		@apply opacity-100;
 	}
 
 	.kt-select-tag-remove svg {
