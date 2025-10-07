@@ -1631,7 +1631,6 @@ export class KTSelect extends KTComponent {
 	 * ========================================================================
 	 */
 
-	private static readonly _instances = new Map<HTMLElement, KTSelect>();
 
 	/**
 	 * Create instances of KTSelect for all matching elements
@@ -1644,8 +1643,7 @@ export class KTSelect extends KTComponent {
 				element.hasAttribute('data-kt-select') &&
 				!element.classList.contains('data-kt-select-initialized')
 			) {
-				const instance = new KTSelect(element);
-				this._instances.set(element, instance);
+				new KTSelect(element);
 			}
 		});
 	}
@@ -1655,6 +1653,33 @@ export class KTSelect extends KTComponent {
 	 */
 	public static init(): void {
 		KTSelect.createInstances();
+	}
+
+	/**
+	 * Get an existing KTSelect instance from an element
+	 */
+	public static getInstance(element: HTMLElement): KTSelect | null {
+		if (!element) return null;
+
+		if (KTData.has(element, 'select')) {
+			return KTData.get(element, 'select') as KTSelect;
+		}
+
+		if (element.getAttribute('data-kt-select')) {
+			return new KTSelect(element);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get an existing KTSelect instance or create a new one
+	 */
+	public static getOrCreateInstance(
+		element: HTMLElement,
+		config?: KTSelectConfigInterface,
+	): KTSelect {
+		return this.getInstance(element) || new KTSelect(element, config);
 	}
 
 	/**
