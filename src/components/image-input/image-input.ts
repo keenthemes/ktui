@@ -30,7 +30,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTImageInputConfigInterface = null,
+		config?: KTImageInputConfigInterface,
 	) {
 		super();
 
@@ -39,14 +39,14 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		this._init(element);
 		this._buildConfig(config);
 
-		this._inputElement = this._element.querySelector('input[type="file"]');
-		this._hiddenElement = this._element.querySelector('input[type="hidden"]');
-		this._removeElement = this._element.querySelector(
-			'[data-kt-image-input-remove]',
-		);
-		this._previewElement = this._element.querySelector(
-			'[data-kt-image-input-preview]',
-		);
+	this._inputElement = this._element.querySelector('input[type="file"]')!;
+	this._hiddenElement = this._element.querySelector('input[type="hidden"]')!;
+	this._removeElement = this._element.querySelector(
+		'[data-kt-image-input-remove]',
+	)!;
+	this._previewElement = this._element.querySelector(
+		'[data-kt-image-input-preview]',
+	)!;
 
 		this._update();
 		this._handlers();
@@ -87,11 +87,9 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 			this._previewElement.style.backgroundImage = `url(${reader.result})`;
 		};
 
-		reader.readAsDataURL(this._inputElement.files[0]);
-		this._selectedFile = this._inputElement.files[0];
-		this._inputElement.value = '';
-		this._hiddenElement.value = '';
-		this._lastMode = 'new';
+	reader.readAsDataURL(this._inputElement.files[0]);
+	this._selectedFile = this._inputElement.files[0];
+	this._lastMode = 'new';
 
 		this._element.classList.add('changed');
 		this._removeElement.classList.remove('hidden');
@@ -219,7 +217,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		return this._selectedFile;
 	}
 
-	public static getInstance(element: HTMLElement): KTImageInput {
+	public static getInstance(element: HTMLElement): KTImageInput | null {
 		if (!element) return null;
 
 		if (KTData.has(element, 'image-input')) {
