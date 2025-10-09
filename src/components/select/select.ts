@@ -32,6 +32,9 @@ export class KTSelect extends KTComponent {
 	protected override readonly _config: KTSelectConfigInterface;
 	protected override _defaultConfig: KTSelectConfigInterface;
 
+	// Static global configuration
+	private static globalConfig: Partial<KTSelectConfigInterface> = {};
+
 	// DOM elements
 	private _wrapperElement: HTMLElement;
 	private _displayElement: HTMLElement;
@@ -96,6 +99,41 @@ export class KTSelect extends KTComponent {
 					// Handle the error, e.g., display an error message to the user
 				});
 		}
+	}
+
+	/**
+	 * Set global select configuration options.
+	 * This allows setting default configuration that will be applied to all new KTSelect instances.
+	 * @param options Partial select config to merge with global config.
+	 * @example
+	 * KTSelect.config({
+	 *   enableSearch: true,
+	 *   searchPlaceholder: 'Type to search...',
+	 *   dropdownZindex: 9999,
+	 *   height: 300
+	 * });
+	 */
+	static config(options: Partial<KTSelectConfigInterface>): void {
+		this.globalConfig = { ...this.globalConfig, ...options };
+	}
+
+	/**
+	 * Override _buildConfig to include static globalConfig in the merge chain
+	 */
+	protected override _buildConfig(config: object = {}): void {
+		if (!this._element) return;
+
+		// Cast to writable to allow assignment (config is readonly but needs initialization)
+		(this._config as any) = {
+			...this._defaultConfig,
+			...KTSelect.globalConfig,
+			...this._getGlobalConfig(),
+			...KTDom.getDataAttributes(
+				this._element,
+				this._dataOptionPrefix + this._name,
+			),
+			...config,
+		} as KTSelectConfigInterface;
 	}
 
 	/**
