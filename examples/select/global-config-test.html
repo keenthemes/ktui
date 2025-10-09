@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTSelect Global Config Test</title>
+    <link href="../../dist/styles.css" rel="stylesheet">
+    <script src="../../dist/ktui.js"></script>
+</head>
+<body class="p-8">
+    <div class="max-w-2xl mx-auto space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold mb-4">KTSelect.config() Test</h1>
+            <p class="text-gray-600 mb-6">
+                This page demonstrates the <code class="bg-gray-100 px-2 py-1 rounded">KTSelect.config()</code>
+                static method for setting global defaults.
+            </p>
+        </div>
+
+        <div class="space-y-4">
+            <h2 class="text-xl font-semibold">Test 1: Global Config Applied</h2>
+            <p class="text-sm text-gray-600">
+                All selects below should have search enabled and custom placeholder from global config.
+            </p>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Select 1 (inherits global config)</label>
+                <select class="kt-select" id="select1">
+                    <option value="">Select an option</option>
+                    <option value="1">Option 1</option>
+                    <option value="2">Option 2</option>
+                    <option value="3">Option 3</option>
+                    <option value="4">Option 4</option>
+                    <option value="5">Option 5</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Select 2 (inherits global config)</label>
+                <select class="kt-select" id="select2">
+                    <option value="">Select an option</option>
+                    <option value="apple">Apple</option>
+                    <option value="banana">Banana</option>
+                    <option value="cherry">Cherry</option>
+                    <option value="date">Date</option>
+                    <option value="elderberry">Elderberry</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Select 3 (overrides global config - no search)</label>
+                <select class="kt-select" id="select3">
+                    <option value="">Select an option</option>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set global defaults once
+        KTSelect.config({
+            enableSearch: true,
+            searchPlaceholder: 'Type to search...',
+            dropdownZindex: 9999,
+        });
+
+        // These selects inherit the global config
+        const select1 = new KTSelect(document.getElementById('select1'));
+        const select2 = new KTSelect(document.getElementById('select2'));
+
+        // This select overrides the global config
+        const select3 = new KTSelect(document.getElementById('select3'), {
+            enableSearch: false
+        });
+    </script>
+</body>
+</html>
+
