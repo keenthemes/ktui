@@ -60,6 +60,7 @@ export class KTSelect extends KTComponent {
 	private _eventManager: EventManager;
 	private _typeToSearchBuffer: TypeToSearchBuffer = new TypeToSearchBuffer();
 	private _mutationObserver: MutationObserver | null = null;
+	private _preSelectedValues: string[] = [];
 
 	/**
 	 * Constructor: Initializes the select component
@@ -200,6 +201,21 @@ export class KTSelect extends KTComponent {
 	 * Clear existing options from the select element
 	 */
 	private _clearExistingOptions() {
+		// Capture pre-selected values before clearing (for remote data)
+		const selectedOptions = Array.from(
+			this._element.querySelectorAll('option[selected]:not([value=""])'),
+		) as HTMLOptionElement[];
+
+		if (selectedOptions.length > 0) {
+			this._preSelectedValues = selectedOptions.map((opt) => opt.value);
+			if (this._config.debug) {
+				console.log(
+					'Captured pre-selected values before clearing:',
+					this._preSelectedValues,
+				);
+			}
+		}
+
 		// Keep only the empty/placeholder option and remove the rest
 		const options = Array.from(
 			this._element.querySelectorAll('option:not([value=""])'),
@@ -294,6 +310,67 @@ export class KTSelect extends KTComponent {
 	private _completeRemoteSetup() {
 		// Initialize options
 		this._preSelectOptions(this._element);
+
+		// Apply pre-selected values captured before remote data was loaded
+		if (this._preSelectedValues.length > 0) {
+			if (this._config.debug) {
+				console.log(
+					'Applying pre-selected values after remote data loaded:',
+					this._preSelectedValues,
+				);
+			}
+
+			// Get all available option values from the loaded remote data
+			const availableValues = Array.from(
+				this._element.querySelectorAll('option'),
+			).map((opt) => (opt as HTMLOptionElement).value);
+
+			// Filter pre-selected values to only those that exist in remote data
+			const validPreSelectedValues = this._preSelectedValues.filter((value) =>
+				availableValues.includes(value),
+			);
+
+			if (validPreSelectedValues.length > 0) {
+				// For single-select mode, only use the first value
+				const valuesToSelect = this._config.multiple
+					? validPreSelectedValues
+					: [validPreSelectedValues[0]];
+
+				if (this._config.debug) {
+					console.log('Selecting matched values:', valuesToSelect);
+				}
+
+				// Get any existing selections from _preSelectOptions (e.g., data-kt-select-pre-selected)
+				const existingSelections = this._state.getSelectedOptions();
+
+				// Merge existing selections with native pre-selected values (no duplicates)
+				const allSelections = this._config.multiple
+					? Array.from(new Set([...existingSelections, ...valuesToSelect]))
+					: valuesToSelect;
+
+				// Set all selections at once to avoid toggling issues
+				this._state.setSelectedOptions(allSelections);
+
+				// Update the native select element to match
+				Array.from(this._element.querySelectorAll('option')).forEach((opt) => {
+					(opt as HTMLOptionElement).selected = allSelections.includes(
+						opt.value,
+					);
+				});
+
+				// Update the visual display
+				this.updateSelectedOptionDisplay();
+				this._updateSelectedOptionClass();
+			} else if (this._config.debug) {
+				console.log(
+					'None of the pre-selected values matched remote data:',
+					this._preSelectedValues,
+				);
+			}
+
+			// Clear the pre-selected values array after processing
+			this._preSelectedValues = [];
+		}
 
 		// Apply disabled state if needed
 		this._applyInitialDisabledState();

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Remote Data with Pre-Selected Options</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen p-8">
+	<div class="max-w-4xl mx-auto">
+		<h1 class="text-3xl font-bold mb-8">Remote Data with Pre-Selected Options</h1>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<!-- Test 1: Native selected attribute with remote data -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 1: Native &lt;option selected&gt;</h2>
+				<p class="text-sm text-gray-600 mb-4">Single-select with native selected attribute (user ID 5)</p>
+
+				<select
+					id="test-1"
+					class="kt-select"
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select a user..."
+				>
+					<option value="5" selected>Loading...</option>
+				</select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> User with ID 5 should be selected after remote data loads
+				</div>
+			</div>
+
+			<!-- Test 2: data-kt-select-pre-selected attribute -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 2: data-kt-select-pre-selected</h2>
+				<p class="text-sm text-gray-600 mb-4">Using pre-selected attribute (user ID 3)</p>
+
+				<select
+					id="test-2"
+					class="kt-select"
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-pre-selected="3"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select a user..."
+				></select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> User with ID 3 should be selected after remote data loads
+				</div>
+			</div>
+
+			<!-- Test 3: Multiple pre-selected with native selected -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 3: Multiple Pre-Selected (Native)</h2>
+				<p class="text-sm text-gray-600 mb-4">Multiple select with native selected attributes</p>
+
+				<select
+					id="test-3"
+					class="kt-select"
+					multiple
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-multiple="true"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select users..."
+				>
+					<option value="2" selected>Loading...</option>
+					<option value="4" selected>Loading...</option>
+					<option value="7" selected>Loading...</option>
+				</select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> Users with IDs 2, 4, and 7 should be selected
+				</div>
+			</div>
+
+			<!-- Test 4: Multiple pre-selected with data attribute -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 4: Multiple Pre-Selected (Attribute)</h2>
+				<p class="text-sm text-gray-600 mb-4">Multiple select with data-kt-select-pre-selected</p>
+
+				<select
+					id="test-4"
+					class="kt-select"
+					multiple
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-multiple="true"
+					data-kt-select-pre-selected="1,6,9"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select users..."
+				></select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> Users with IDs 1, 6, and 9 should be selected
+				</div>
+			</div>
+
+			<!-- Test 5: Combination of both methods -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 5: Combined Methods</h2>
+				<p class="text-sm text-gray-600 mb-4">Both native selected and data attribute</p>
+
+				<select
+					id="test-5"
+					class="kt-select"
+					multiple
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-multiple="true"
+					data-kt-select-pre-selected="8,10"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select users..."
+				>
+					<option value="3" selected>Loading...</option>
+					<option value="5" selected>Loading...</option>
+				</select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> Users with IDs 3, 5, 8, and 10 should be selected
+				</div>
+			</div>
+
+			<!-- Test 6: Non-existent values -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 6: Non-Existent Values</h2>
+				<p class="text-sm text-gray-600 mb-4">Pre-selected values that don't exist in remote data</p>
+
+				<select
+					id="test-6"
+					class="kt-select"
+					multiple
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-multiple="true"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select users..."
+				>
+					<option value="999" selected>Non-existent user</option>
+					<option value="4" selected>Should work</option>
+					<option value="888" selected>Another fake</option>
+				</select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> Only user with ID 4 should be selected (IDs 999 and 888 don't exist)
+				</div>
+			</div>
+
+			<!-- Test 7: Single select with multiple native selected (edge case) -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 7: Single Select Edge Case</h2>
+				<p class="text-sm text-gray-600 mb-4">Single-select with multiple selected options (should use first)</p>
+
+				<select
+					id="test-7"
+					class="kt-select"
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select a user..."
+				>
+					<option value="6" selected>First selected</option>
+					<option value="8" selected>Second selected</option>
+					<option value="10" selected>Third selected</option>
+				</select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> Only user with ID 6 (first) should be selected in single-select mode
+				</div>
+			</div>
+
+			<!-- Test 8: With Tags enabled -->
+			<div class="bg-white rounded-lg shadow p-6">
+				<h2 class="text-xl font-semibold mb-4">Test 8: With Tags</h2>
+				<p class="text-sm text-gray-600 mb-4">Multiple select with tags and pre-selected values</p>
+
+				<select
+					id="test-8"
+					class="kt-select"
+					multiple
+					data-kt-select
+					data-kt-select-remote="true"
+					data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+					data-kt-select-data-field-value="id"
+					data-kt-select-data-field-text="name"
+					data-kt-select-multiple="true"
+					data-kt-select-tags="true"
+					data-kt-select-enable-search="true"
+					data-kt-select-debug="true"
+					placeholder="Select users..."
+				>
+					<option value="1" selected>Loading...</option>
+					<option value="5" selected>Loading...</option>
+					<option value="9" selected>Loading...</option>
+				</select>
+
+				<div class="mt-4 p-3 bg-gray-100 rounded text-sm">
+					<strong>Expected:</strong> Users with IDs 1, 5, and 9 should be selected and displayed as tags
+				</div>
+			</div>
+		</div>
+
+		<!-- Debug Console -->
+		<div class="bg-white rounded-lg shadow p-6 mt-8">
+			<h2 class="text-xl font-semibold mb-4">Debug Console</h2>
+			<p class="text-sm text-gray-600 mb-4">Check browser console (F12) for debug output</p>
+
+			<div class="space-y-2">
+				<button onclick="checkAllSelections()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+					Check All Selections
+				</button>
+				<button onclick="resetAll()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 ml-2">
+					Reset All
+				</button>
+			</div>
+
+			<pre id="debug-output" class="mt-4 p-4 bg-gray-900 text-green-400 rounded text-xs overflow-auto max-h-64"></pre>
+		</div>
+	</div>
+
+	<script src="../../dist/ktui.js"></script>
+	<script>
+		function checkAllSelections() {
+			const output = [];
+			for (let i = 1; i <= 8; i++) {
+				const select = document.getElementById(`test-${i}`);
+				if (select) {
+					const selectedOptions = Array.from(select.selectedOptions).map(opt => ({
+						value: opt.value,
+						text: opt.text
+					}));
+					output.push(`Test ${i}: ${selectedOptions.length > 0 ? JSON.stringify(selectedOptions, null, 2) : 'No selection'}`);
+				}
+			}
+			document.getElementById('debug-output').textContent = output.join('\n\n');
+		}
+
+		function resetAll() {
+			location.reload();
+		}
+
+		// Auto-check selections after remote data loads
+		setTimeout(() => {
+			checkAllSelections();
+		}, 3000);
+	</script>
+</body>
+
+</html>
+
