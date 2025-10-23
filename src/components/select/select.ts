@@ -1742,6 +1742,113 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * ========================================================================
+	 * DYNAMIC CONTROL METHODS
+	 * ========================================================================
+	 */
+
+	/**
+	 * Programmatically enable the select component
+	 * @public
+	 */
+	public enable(): void {
+		// Update config state
+		this._config.disabled = false;
+
+		// Remove disabled attribute from native select
+		this._element.removeAttribute('disabled');
+		this._element.classList.remove('disabled');
+
+		// Remove disabled state from wrapper and display elements
+		if (this._wrapperElement) {
+			this._wrapperElement.classList.remove('disabled');
+		}
+
+		if (this._displayElement) {
+			this._displayElement.removeAttribute('aria-disabled');
+		}
+
+		// Dispatch enabled event
+		this._dispatchEvent('enabled');
+		this._fireEvent('enabled');
+	}
+
+	/**
+	 * Programmatically disable the select component
+	 * @public
+	 */
+	public disable(): void {
+		// Update config state
+		this._config.disabled = true;
+
+		// Close dropdown if currently open
+		if (this._dropdownIsOpen) {
+			this.closeDropdown();
+		}
+
+		// Add disabled attribute to native select
+		this._element.setAttribute('disabled', 'disabled');
+		this._element.classList.add('disabled');
+
+		// Add disabled state to wrapper and display elements
+		if (this._wrapperElement) {
+			this._wrapperElement.classList.add('disabled');
+		}
+
+		if (this._displayElement) {
+			this._displayElement.setAttribute('aria-disabled', 'true');
+		}
+
+		// Dispatch disabled event
+		this._dispatchEvent('disabled');
+		this._fireEvent('disabled');
+	}
+
+	/**
+	 * Update the dropdown to sync with native select element changes
+	 * Optionally accepts new options to replace existing ones
+	 * @param newOptions Optional array of new options [{value, text}, ...]
+	 * @public
+	 */
+	public update(newOptions?: Array<{ value: string; text: string }>): void {
+		if (newOptions) {
+			// Clear existing options except placeholder
+			this._clearExistingOptions();
+
+			// Add new options to native select
+			newOptions.forEach((opt) => {
+				const option = document.createElement('option');
+				option.value = opt.value;
+				option.textContent = opt.text;
+				this._element.appendChild(option);
+			});
+		}
+
+		// Rebuild dropdown from native select
+		this._rebuildOptionsFromNative();
+
+		// Dispatch updated event
+		this._dispatchEvent('updated');
+		this._fireEvent('updated');
+	}
+
+	/**
+	 * Refresh the visual display and state without rebuilding options
+	 * @public
+	 */
+	public refresh(): void {
+		// Sync internal state from native select first
+		this._syncSelectionFromNative();
+
+		// Reapply ARIA attributes
+		this._setAriaAttributes();
+
+		// Dispatch refreshed event
+		this._dispatchEvent('refreshed');
+		this._fireEvent('refreshed');
+	}
+
+	/**
+	 * ========================================================================
 	 * STATIC METHODS
 	 * ========================================================================
 	 */
