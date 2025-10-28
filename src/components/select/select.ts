@@ -284,7 +284,7 @@ export class KTSelect extends KTComponent {
 		optionsContainer.appendChild(fragment);
 
 		// Update options NodeList
-		this._options = this._wrapperElement.querySelectorAll(
+		this._options = this._dropdownContentElement.querySelectorAll(
 			'[data-kt-select-option]',
 		) as NodeListOf<HTMLElement>;
 
@@ -613,7 +613,7 @@ export class KTSelect extends KTComponent {
 		});
 
 		// Update options NodeList to include the new options
-		this._options = this._wrapperElement.querySelectorAll(
+		this._options = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
 
@@ -832,7 +832,7 @@ export class KTSelect extends KTComponent {
 			'[data-kt-select-options]',
 		) as HTMLElement;
 
-		this._options = this._wrapperElement.querySelectorAll(
+		this._options = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
 	}
@@ -1292,7 +1292,7 @@ export class KTSelect extends KTComponent {
 	 * Update CSS classes for selected options
 	 */
 	private _updateSelectedOptionClass(): void {
-		const allOptions = this._wrapperElement.querySelectorAll(
+		const allOptions = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		);
 		const selectedValues = this._state.getSelectedOptions();
@@ -1553,7 +1553,7 @@ export class KTSelect extends KTComponent {
 	public showAllOptions() {
 		// Get all options in the dropdown
 		const options = Array.from(
-			this._wrapperElement.querySelectorAll(`[data-kt-select-option]`),
+			this._dropdownContentElement.querySelectorAll(`[data-kt-select-option]`),
 		);
 
 		// Show all options by removing the hidden class and any inline styles
@@ -2018,7 +2018,7 @@ export class KTSelect extends KTComponent {
 		optionsContainer.innerHTML = this._originalOptionsHtml;
 
 		// Update options NodeList
-		this._options = this._wrapperElement.querySelectorAll(
+		this._options = this._dropdownContentElement.querySelectorAll(
 			'[data-kt-select-option]',
 		) as NodeListOf<HTMLElement>;
 
@@ -2367,16 +2367,16 @@ export class KTSelect extends KTComponent {
 						return;
 					}
 					const selectOption = new KTSelectOption(optionElement, this._config);
-					const renderedOption = selectOption.render();
-					optionsContainer.appendChild(renderedOption);
-				});
-				// Update internal references
-				this._options = this._wrapperElement.querySelectorAll(
-					'[data-kt-select-option]',
-				) as NodeListOf<HTMLElement>;
-			}
+				const renderedOption = selectOption.render();
+				optionsContainer.appendChild(renderedOption);
+			});
+			// Update internal references
+			this._options = this._dropdownContentElement.querySelectorAll(
+				'[data-kt-select-option]',
+			) as NodeListOf<HTMLElement>;
 		}
-		// Sync selection after rebuilding
+	}
+	// Sync selection after rebuilding
 		this._syncSelectionFromNative();
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
