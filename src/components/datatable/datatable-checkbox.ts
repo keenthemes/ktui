@@ -94,22 +94,37 @@ export function createCheckboxHandler(
 		if (!input) return;
 		const value = input.value;
 		let selectedRows = getSelectedRows();
-		if (input.checked) {
-			if (!selectedRows.includes(value)) selectedRows.push(value);
+		const wasChecked = selectedRows.includes(value);
+		const isNowChecked = input.checked;
+
+		// Update state first
+		if (isNowChecked) {
+			if (!wasChecked) selectedRows.push(value);
 		} else {
 			selectedRows = selectedRows.filter((v) => v !== value);
 		}
 		setSelectedRows(selectedRows);
 		updateHeaderCheckboxState();
+
+		// Fire specific checked/unchecked events after state is updated
+		if (isNowChecked && !wasChecked) {
+			fireEvent('checked');
+		} else if (!isNowChecked && wasChecked) {
+			fireEvent('unchecked');
+		}
+
+		// Always fire changed event for backward compatibility
 		fireEvent('changed');
 	}
 
 	// When the header checkbox is toggled
 	function checkboxToggle(event?: Event) {
 		const checked = !isChecked();
+		// Update state first, then fire events
+		change(checked);
+		// Fire checked/unchecked events after state is updated
 		const eventType = checked ? 'checked' : 'unchecked';
 		fireEvent(eventType);
-		change(checked);
 	}
 
 	// Change all visible checkboxes and update selectedRows
