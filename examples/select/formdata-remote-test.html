@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Remote Select FormData Test</title>
+		<link rel="stylesheet" href="../../dist/styles.css" />
+	</head>
+
+	<body class="bg-gray-50 min-h-screen">
+		<div class="bg-white rounded-lg shadow p-8 w-full max-w-2xl mt-10 mx-auto">
+			<h1 class="text-xl font-semibold text-gray-900 mb-2">
+				Remote Select FormData Test
+			</h1>
+			<p class="text-sm text-gray-600 mb-6">
+				Verifies that remote KTSelect fields are included in FormData.
+			</p>
+
+			<form id="testForm" class="flex flex-col gap-6">
+				<div>
+					<label class="block mb-2 font-medium text-gray-700">
+						Regular Input (Control)
+					</label>
+					<input
+						type="text"
+						name="regularField"
+						value="test value"
+						class="w-full px-3 py-2 border border-gray-300 rounded"
+						placeholder="Regular input field" />
+				</div>
+
+				<div>
+					<label class="block mb-2 font-medium text-gray-700">
+						Local KTSelect (Control)
+					</label>
+					<select
+						name="localSelect"
+						data-kt-select="true"
+						class="kt-select">
+						<option value="">Select an option...</option>
+						<option value="option1">Option 1</option>
+						<option value="option2" selected>Option 2</option>
+						<option value="option3">Option 3</option>
+					</select>
+				</div>
+
+				<div>
+					<label class="block mb-2 font-medium text-gray-700">
+						Remote KTSelect (Test Subject)
+					</label>
+					<select
+						name="remoteSelect"
+						data-kt-select="true"
+						data-kt-select-remote="true"
+						data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+						data-kt-select-data-value-field="id"
+						data-kt-select-data-field-text="name"
+						data-kt-select-placeholder="Select a user..."
+						class="kt-select">
+						<option value="">Select a user...</option>
+					</select>
+				</div>
+
+				<div class="flex gap-3">
+					<button
+						type="submit"
+						class="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded hover:bg-gray-800">
+						Test FormData
+					</button>
+					<button
+						type="button"
+						id="checkNativeValue"
+						class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50">
+						Check Native Value
+					</button>
+				</div>
+			</form>
+
+			<div id="results" class="mt-6 space-y-3 text-sm"></div>
+
+			<div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded text-sm">
+				<div class="font-medium text-gray-900 mb-2">Test Steps:</div>
+				<ol class="list-decimal list-inside space-y-1 text-gray-700">
+					<li>Wait for remote data to load</li>
+					<li>Select a user from the remote dropdown</li>
+					<li>Click "Test FormData"</li>
+					<li>Verify remoteSelect field is included</li>
+				</ol>
+			</div>
+		</div>
+
+		<script src="../../dist/ktui.js"></script>
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				KTComponents.init();
+
+				const form = document.getElementById('testForm');
+				const resultsDiv = document.getElementById('results');
+				const remoteSelectEl = document.querySelector(
+					'select[name="remoteSelect"]',
+				);
+				const checkNativeBtn = document.getElementById('checkNativeValue');
+
+				checkNativeBtn.addEventListener('click', function () {
+					resultsDiv.innerHTML = '';
+					const div = document.createElement('div');
+					div.className = 'p-3 bg-white border border-gray-200 rounded';
+
+					const nativeValue = remoteSelectEl.value;
+					const selectedOption = remoteSelectEl.querySelector(
+						'option[selected]',
+					);
+
+					div.innerHTML = `
+						<div class="font-medium text-gray-900 mb-2">Native Select State</div>
+						<div class="space-y-1 text-gray-700">
+							<div>Value: <code class="bg-gray-100 px-1 rounded text-xs">"${nativeValue}"</code></div>
+							<div>Selected Option: ${selectedOption ? `"${selectedOption.value}"` : 'None'}</div>
+						</div>
+					`;
+					resultsDiv.appendChild(div);
+				});
+
+				form.addEventListener('submit', function (e) {
+					e.preventDefault();
+					resultsDiv.innerHTML = '';
+
+					const formData = new FormData(form);
+					const entries = Array.from(formData.entries());
+
+					const resultDiv = document.createElement('div');
+					resultDiv.className = 'p-3 bg-white border border-gray-200 rounded';
+					resultDiv.innerHTML = `
+						<div class="font-medium text-gray-900 mb-2">FormData Entries (${entries.length})</div>
+						<ul class="space-y-1">
+							${entries.map(([key, value]) => `<li class="text-xs font-mono text-gray-700"><span class="font-medium">${key}:</span> "${value}"</li>`).join('')}
+						</ul>
+					`;
+					resultsDiv.appendChild(resultDiv);
+
+					const remoteSelectValue = formData.get('remoteSelect');
+					const verdict = document.createElement('div');
+					verdict.className = `p-3 mt-3 rounded border ${
+						remoteSelectValue
+							? 'bg-white border-gray-900'
+							: 'bg-gray-100 border-gray-400'
+					}`;
+					verdict.innerHTML = `
+						<div class="font-medium ${remoteSelectValue ? 'text-gray-900' : 'text-gray-700'}">
+							${remoteSelectValue ? 'PASS' : 'FAIL'}: Remote Select Field
+						</div>
+					`;
+					resultsDiv.appendChild(verdict);
+				});
+			});
+		</script>
+	</body>
+</html>

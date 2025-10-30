@@ -153,6 +153,31 @@ export class KTSelectDropdown extends KTComponent {
 	}
 
 	/**
+	 * Detect if the select is inside a modal container
+	 * @returns The modal element if found, null otherwise
+	 */
+	private _getModalContainer(): HTMLElement | null {
+		return this._element.closest(
+			'[data-kt-modal], .kt-modal, .kt-modal-center',
+		) as HTMLElement | null;
+	}
+
+	/**
+	 * Get the appropriate positioning strategy based on context
+	 * @returns 'fixed' if inside modal, 'absolute' otherwise
+	 */
+	private _getPositioningStrategy(): 'fixed' | 'absolute' {
+		// Check if config explicitly sets strategy
+		if (this._config.dropdownStrategy) {
+			return this._config.dropdownStrategy as 'fixed' | 'absolute';
+		}
+
+		// Use fixed positioning if inside a modal (to handle transform-based centering)
+		const modalParent = this._getModalContainer();
+		return modalParent ? 'fixed' : 'absolute';
+	}
+
+	/**
 	 * Initialize the Popper instance for dropdown positioning
 	 */
 	private _initPopper(): void {
@@ -164,9 +189,13 @@ export class KTSelectDropdown extends KTComponent {
 
 		// Get configuration options
 		const placement = this._config.dropdownPlacement || 'bottom-start';
-		const strategy = this._config.dropdownStrategy || 'fixed';
+		const strategy = this._getPositioningStrategy();
 		const preventOverflow = this._config.dropdownPreventOverflow !== false;
 		const flip = this._config.dropdownFlip !== false;
+
+		// Detect modal container for boundary
+		const modalParent = this._getModalContainer();
+		const boundary = modalParent || 'clippingParents';
 
 		// Create new popper instance
 		this._popperInstance = createPopper(
@@ -174,7 +203,7 @@ export class KTSelectDropdown extends KTComponent {
 			this._dropdownElement,
 			{
 				placement: placement as Placement,
-				strategy: strategy as 'fixed' | 'absolute',
+				strategy: strategy,
 				modifiers: [
 					{
 						name: 'offset',
@@ -185,7 +214,7 @@ export class KTSelectDropdown extends KTComponent {
 					{
 						name: 'preventOverflow',
 						options: {
-							boundary: 'viewport',
+							boundary: boundary,
 							altAxis: preventOverflow,
 						},
 					},
