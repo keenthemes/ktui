@@ -291,6 +291,12 @@ export class KTSelectState {
 	}
 
 	public setSelectedOptions(value: string | string[]): void {
+		// Handle empty array case first to prevent undefined elements
+		if (Array.isArray(value) && value.length === 0) {
+			this._selectedOptions = [];
+			return;
+		}
+
 		if (
 			this._config.multiple &&
 			typeof value === 'string' &&

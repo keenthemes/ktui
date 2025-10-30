@@ -1832,6 +1832,67 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
+	 * Reload remote data and rebuild the dropdown
+	 * Only works with remote data enabled
+	 * @returns Promise that resolves when reload completes
+	 * @public
+	 */
+	public reload(): Promise<void> {
+		// Guard clause: only works with remote data
+		if (!this._config.remote || !this._remoteModule) {
+			console.warn('reload() only works with remote data enabled');
+			return Promise.resolve();
+		}
+
+		// Dispatch reload start event
+		this._dispatchEvent('reloadStart');
+		this._fireEvent('reloadStart');
+
+		// Fetch fresh remote data
+		return this._remoteModule
+			.fetchData()
+			.then((items) => {
+				// Clear existing options
+				this._clearExistingOptions();
+
+				// Update state with new items
+				return this._state.setItems(items).then(() => {
+					// Generate new options HTML
+					this._generateOptionsHtml(this._element);
+
+					// Update the dropdown
+					this._updateDropdownWithNewOptions();
+
+					// Sync selection state from native select
+					this._syncSelectionFromNative();
+
+					// Update visual display
+					this.updateSelectedOptionDisplay();
+					this._updateSelectedOptionClass();
+
+					// Update select all button state if applicable
+					if (this._config.multiple && this._config.enableSelectAll) {
+						this.updateSelectAllButtonState();
+					}
+
+					// Dispatch reload complete event
+					this._dispatchEvent('reloadComplete');
+					this._fireEvent('reloadComplete');
+				});
+			})
+			.catch((error) => {
+				console.error('Error reloading remote data:', error);
+
+				// Dispatch reload error event with error details
+				this._dispatchEvent('reloadError', { error });
+				this._fireEvent('reloadError', { error });
+
+				// Re-throw error so caller can handle it
+				throw error;
+			});
+	}
+
+	/**
 	 * Refresh the visual display and state without rebuilding options
 	 * @public
 	 */
