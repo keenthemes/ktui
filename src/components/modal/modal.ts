@@ -50,7 +50,11 @@ export class KTModal extends KTComponent implements KTModalInterface {
 		this._element.addEventListener('click', (event: Event) => {
 			if (this._element !== event.target) return;
 
-			if (this._getOption('backdropStatic') === false) {
+			// Only hide if both backdropStatic is false AND persistent is false
+			if (
+				this._getOption('backdropStatic') === false &&
+				KTUtils.stringToBoolean(this._getOption('persistent')) === false
+			) {
 				this._hide();
 			}
 		});

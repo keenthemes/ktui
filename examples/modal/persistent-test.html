@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Persistent Property Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+    <style>
+        .test-case {
+            margin: 1rem 0;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: #fafafa;
+        }
+        .expected {
+            color: #374151;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="p-8 bg-white min-h-screen flex items-start justify-center">
+    <div class="w-full max-w-3xl">
+        <h1 class="text-3xl font-bold mb-2 text-gray-900">Modal Persistent Property Test</h1>
+        <p class="text-gray-600 mb-8">Testing the interaction between <code class="bg-gray-100 px-2 py-1 rounded text-sm">persistent</code> and <code class="bg-gray-100 px-2 py-1 rounded text-sm">backdropStatic</code> properties.</p>
+
+        <div class="mb-8 p-4 border border-gray-200 rounded bg-gray-50">
+        <h2 class="text-lg font-semibold mb-3 text-gray-900">Test Instructions</h2>
+        <ol class="list-decimal list-inside space-y-2 text-gray-700">
+            <li>Click each "Open Modal" button below</li>
+            <li>Try clicking on the modal backdrop (gray area around the modal content)</li>
+            <li>Try clicking on the invisible area below the modal content</li>
+            <li>Verify the behavior matches the expected result</li>
+        </ol>
+    </div>
+
+    <!-- Test Case 1: persistent=false, backdropStatic=false -->
+    <div class="test-case">
+        <h3 class="text-base font-semibold mb-3 text-gray-900">Test Case 1</h3>
+        <p class="mb-2 text-sm text-gray-700">
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">persistent: false</code>,
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">backdropStatic: false</code>
+        </p>
+        <p class="expected mb-4 text-sm">✓ Expected: Modal SHOULD close when clicking on backdrop or invisible area</p>
+        <button
+            data-kt-modal-toggle="#modal-test-1"
+            class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm font-medium">
+            Open Modal
+        </button>
+    </div>
+
+    <!-- Test Case 2: persistent=true, backdropStatic=false -->
+    <div class="test-case">
+        <h3 class="text-base font-semibold mb-3 text-gray-900">Test Case 2 <span class="text-xs font-normal text-gray-500">(Bug Fix Verification)</span></h3>
+        <p class="mb-2 text-sm text-gray-700">
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">persistent: true</code>,
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">backdropStatic: false</code>
+        </p>
+        <p class="expected mb-4 text-sm">✓ Expected: Modal should NOT close when clicking on backdrop or invisible area</p>
+        <button
+            data-kt-modal-toggle="#modal-test-2"
+            class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm font-medium">
+            Open Modal
+        </button>
+    </div>
+
+    <!-- Test Case 3: persistent=false, backdropStatic=true -->
+    <div class="test-case">
+        <h3 class="text-base font-semibold mb-3 text-gray-900">Test Case 3</h3>
+        <p class="mb-2 text-sm text-gray-700">
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">persistent: false</code>,
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">backdropStatic: true</code>
+        </p>
+        <p class="expected mb-4 text-sm">✓ Expected: Modal should NOT close when clicking on backdrop (backdropStatic takes precedence)</p>
+        <button
+            data-kt-modal-toggle="#modal-test-3"
+            class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm font-medium">
+            Open Modal
+        </button>
+    </div>
+
+    <!-- Test Case 4: persistent=true, backdropStatic=true -->
+    <div class="test-case">
+        <h3 class="text-base font-semibold mb-3 text-gray-900">Test Case 4</h3>
+        <p class="mb-2 text-sm text-gray-700">
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">persistent: true</code>,
+            <code class="bg-white px-2 py-1 rounded border border-gray-200">backdropStatic: true</code>
+        </p>
+        <p class="expected mb-4 text-sm">✓ Expected: Modal should NOT close when clicking on backdrop or invisible area</p>
+        <button
+            data-kt-modal-toggle="#modal-test-4"
+            class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm font-medium">
+            Open Modal
+        </button>
+    </div>
+    </div>
+
+    <!-- Modal 1: persistent=false, backdropStatic=false -->
+    <div
+        id="modal-test-1"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center"
+        data-kt-modal="true"
+        data-kt-modal-persistent="false"
+        data-kt-modal-backdrop-static="false">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200">
+            <h2 class="text-lg font-semibold mb-4 text-gray-900">Test Case 1</h2>
+            <p class="mb-3 text-sm text-gray-700">
+                This modal has <code class="bg-gray-100 px-1 text-xs">persistent: false</code> and
+                <code class="bg-gray-100 px-1 text-xs">backdropStatic: false</code>.
+            </p>
+            <p class="mb-4 text-sm text-gray-600">
+                Click on the gray area around this modal or below it. The modal should close.
+            </p>
+            <button
+                data-kt-modal-dismiss="true"
+                class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 2: persistent=true, backdropStatic=false -->
+    <div
+        id="modal-test-2"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center"
+        data-kt-modal="true"
+        data-kt-modal-persistent="true"
+        data-kt-modal-backdrop-static="false">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200">
+            <h2 class="text-lg font-semibold mb-4 text-gray-900">Test Case 2 <span class="text-xs font-normal text-gray-500">(Bug Fix)</span></h2>
+            <p class="mb-3 text-sm text-gray-700">
+                This modal has <code class="bg-gray-100 px-1 text-xs">persistent: true</code> and
+                <code class="bg-gray-100 px-1 text-xs">backdropStatic: false</code>.
+            </p>
+            <p class="mb-4 text-sm text-gray-600 border-l-2 border-gray-400 pl-3">
+                Click on the gray area around this modal or below it. The modal should NOT close.
+            </p>
+            <button
+                data-kt-modal-dismiss="true"
+                class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 3: persistent=false, backdropStatic=true -->
+    <div
+        id="modal-test-3"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center"
+        data-kt-modal="true"
+        data-kt-modal-persistent="false"
+        data-kt-modal-backdrop-static="true">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200">
+            <h2 class="text-lg font-semibold mb-4 text-gray-900">Test Case 3</h2>
+            <p class="mb-3 text-sm text-gray-700">
+                This modal has <code class="bg-gray-100 px-1 text-xs">persistent: false</code> and
+                <code class="bg-gray-100 px-1 text-xs">backdropStatic: true</code>.
+            </p>
+            <p class="mb-4 text-sm text-gray-600">
+                Click on the gray area around this modal or below it. The modal should NOT close (backdropStatic prevents it).
+            </p>
+            <button
+                data-kt-modal-dismiss="true"
+                class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 4: persistent=true, backdropStatic=true -->
+    <div
+        id="modal-test-4"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center"
+        data-kt-modal="true"
+        data-kt-modal-persistent="true"
+        data-kt-modal-backdrop-static="true">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4 border border-gray-200">
+            <h2 class="text-lg font-semibold mb-4 text-gray-900">Test Case 4</h2>
+            <p class="mb-3 text-sm text-gray-700">
+                This modal has <code class="bg-gray-100 px-1 text-xs">persistent: true</code> and
+                <code class="bg-gray-100 px-1 text-xs">backdropStatic: true</code>.
+            </p>
+            <p class="mb-4 text-sm text-gray-600">
+                Click on the gray area around this modal or below it. The modal should NOT close (both properties prevent it).
+            </p>
+            <button
+                data-kt-modal-dismiss="true"
+                class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-700 text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script src="../../dist/ktui.js"></script>
+    <script>
+        // Initialize modals
+        document.addEventListener('DOMContentLoaded', function() {
+            KTModal.init();
+            console.log('Modal test page loaded. All modals initialized.');
+        });
+    </script>
+</body>
+</html>
+
