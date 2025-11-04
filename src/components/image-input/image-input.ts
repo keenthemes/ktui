@@ -28,10 +28,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 	protected _lastMode: string;
 	protected _selectedFile: File | null = null;
 
-	constructor(
-		element: HTMLElement,
-		config?: KTImageInputConfigInterface,
-	) {
+	constructor(element: HTMLElement, config?: KTImageInputConfigInterface) {
 		super();
 
 		if (KTData.has(element as HTMLElement, this._name)) return;
@@ -39,14 +36,14 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		this._init(element);
 		this._buildConfig(config);
 
-	this._inputElement = this._element.querySelector('input[type="file"]')!;
-	this._hiddenElement = this._element.querySelector('input[type="hidden"]')!;
-	this._removeElement = this._element.querySelector(
-		'[data-kt-image-input-remove]',
-	)!;
-	this._previewElement = this._element.querySelector(
-		'[data-kt-image-input-preview]',
-	)!;
+		this._inputElement = this._element.querySelector('input[type="file"]')!;
+		this._hiddenElement = this._element.querySelector('input[type="hidden"]')!;
+		this._removeElement = this._element.querySelector(
+			'[data-kt-image-input-remove]',
+		)!;
+		this._previewElement = this._element.querySelector(
+			'[data-kt-image-input-preview]',
+		)!;
 
 		this._update();
 		this._handlers();
@@ -87,9 +84,9 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 			this._previewElement.style.backgroundImage = `url(${reader.result})`;
 		};
 
-	reader.readAsDataURL(this._inputElement.files[0]);
-	this._selectedFile = this._inputElement.files[0];
-	this._lastMode = 'new';
+		reader.readAsDataURL(this._inputElement.files[0]);
+		this._selectedFile = this._inputElement.files[0];
+		this._lastMode = 'new';
 
 		this._element.classList.add('changed');
 		this._removeElement.classList.remove('hidden');

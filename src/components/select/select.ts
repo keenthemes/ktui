@@ -1235,7 +1235,8 @@ export class KTSelect extends KTComponent {
 			// FormData will include all selected values automatically
 		} else {
 			// For single select, set the value attribute explicitly
-			const selectedValue = selectedOptions.length > 0 ? selectedOptions[0] : '';
+			const selectedValue =
+				selectedOptions.length > 0 ? selectedOptions[0] : '';
 			(this._element as HTMLSelectElement).value = selectedValue;
 		}
 	}
@@ -2008,7 +2009,6 @@ export class KTSelect extends KTComponent {
 	 * ========================================================================
 	 */
 
-
 	/**
 	 * Create instances of KTSelect for all matching elements
 	 */
@@ -2246,7 +2246,9 @@ export class KTSelect extends KTComponent {
 		});
 
 		if (this._config.debug) {
-			console.log(`Updated original select with ${items.length} search results`);
+			console.log(
+				`Updated original select with ${items.length} search results`,
+			);
 		}
 	}
 
@@ -2522,16 +2524,16 @@ export class KTSelect extends KTComponent {
 						return;
 					}
 					const selectOption = new KTSelectOption(optionElement, this._config);
-				const renderedOption = selectOption.render();
-				optionsContainer.appendChild(renderedOption);
-			});
-			// Update internal references
-			this._options = this._dropdownContentElement.querySelectorAll(
-				'[data-kt-select-option]',
-			) as NodeListOf<HTMLElement>;
+					const renderedOption = selectOption.render();
+					optionsContainer.appendChild(renderedOption);
+				});
+				// Update internal references
+				this._options = this._dropdownContentElement.querySelectorAll(
+					'[data-kt-select-option]',
+				) as NodeListOf<HTMLElement>;
+			}
 		}
-	}
-	// Sync selection after rebuilding
+		// Sync selection after rebuilding
 		this._syncSelectionFromNative();
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
