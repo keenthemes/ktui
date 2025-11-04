@@ -92,7 +92,10 @@
 		<script src="../../dist/ktui.js"></script>
 		<script>
 			document.addEventListener('DOMContentLoaded', function () {
-				KTComponents.init();
+				// Initialize KTSelect components
+				if (typeof KTSelect !== 'undefined') {
+					KTSelect.init();
+				}
 
 				const form = document.getElementById('testForm');
 				const resultsDiv = document.getElementById('results');
