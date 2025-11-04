@@ -1224,12 +1224,32 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
+	 * Sync native select value attribute for FormData support
+	 */
+	private _syncNativeSelectValue(): void {
+		const selectedOptions = this.getSelectedOptions();
+
+		if (this._config.multiple) {
+			// For multiple select, the selected options are marked via option.selected
+			// The native select's value property will return the first selected option's value
+			// FormData will include all selected values automatically
+		} else {
+			// For single select, set the value attribute explicitly
+			const selectedValue = selectedOptions.length > 0 ? selectedOptions[0] : '';
+			(this._element as HTMLSelectElement).value = selectedValue;
+		}
+	}
+
+	/**
 	 * Update selected option display value
 	 */
 	public updateSelectedOptionDisplay() {
 		const selectedOptions = this.getSelectedOptions();
 		const tagsEnabled = this._config.tags && this._tagsModule;
 		const valueDisplayEl = this.getValueDisplayElement();
+
+		// Sync native select value for FormData support
+		this._syncNativeSelectValue();
 
 		if (tagsEnabled) {
 			// Tags module will render tags if selectedOptions > 0, or clear them if selectedOptions === 0.
@@ -1348,6 +1368,9 @@ export class KTSelect extends KTComponent {
 		Array.from(this._element.querySelectorAll('option')).forEach((opt) => {
 			(opt as HTMLOptionElement).selected = false;
 		});
+
+		// Clear native select value
+		(this._element as HTMLSelectElement).value = '';
 
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
@@ -1805,30 +1828,63 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * Update the dropdown to sync with native select element changes
-	 * Optionally accepts new options to replace existing ones
+	 * For remote selects, refetches data from the server
+	 * Optionally accepts new options to replace existing ones (static selects only)
 	 * @param newOptions Optional array of new options [{value, text}, ...]
 	 * @public
 	 */
 	public update(newOptions?: Array<{ value: string; text: string }>): void {
-		if (newOptions) {
-			// Clear existing options except placeholder
-			this._clearExistingOptions();
+		// For remote selects, refetch data
+		if (this._config.remote && this._remoteModule) {
+			this._remoteModule
+				.fetchData()
+				.then((items) => {
+					// Clear existing options
+					this._clearExistingOptions();
 
-			// Add new options to native select
-			newOptions.forEach((opt) => {
-				const option = document.createElement('option');
-				option.value = opt.value;
-				option.textContent = opt.text;
-				this._element.appendChild(option);
-			});
+					// Add new options from remote data
+					items.forEach((item) => {
+						const option = document.createElement('option');
+						option.value = item.id;
+						option.textContent = item.title;
+						if (item.disabled) option.disabled = true;
+						this._element.appendChild(option);
+					});
+
+					// Rebuild dropdown
+					this._rebuildOptionsFromNative();
+
+					// Dispatch updated event
+					this._dispatchEvent('updated');
+					this._fireEvent('updated');
+				})
+				.catch((error) => {
+					console.error('Error updating remote data:', error);
+					this._dispatchEvent('updateError');
+					this._fireEvent('updateError');
+				});
+		} else {
+			// For static selects, handle new options
+			if (newOptions) {
+				// Clear existing options except placeholder
+				this._clearExistingOptions();
+
+				// Add new options to native select
+				newOptions.forEach((opt) => {
+					const option = document.createElement('option');
+					option.value = opt.value;
+					option.textContent = opt.text;
+					this._element.appendChild(option);
+				});
+			}
+
+			// Rebuild dropdown from native select
+			this._rebuildOptionsFromNative();
+
+			// Dispatch updated event
+			this._dispatchEvent('updated');
+			this._fireEvent('updated');
 		}
-
-		// Rebuild dropdown from native select
-		this._rebuildOptionsFromNative();
-
-		// Dispatch updated event
-		this._dispatchEvent('updated');
-		this._fireEvent('updated');
 	}
 
 	/**
@@ -1894,18 +1950,56 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * Refresh the visual display and state without rebuilding options
+	 * For remote selects, refetches data from the server
 	 * @public
 	 */
 	public refresh(): void {
-		// Sync internal state from native select first
-		this._syncSelectionFromNative();
+		// For remote selects, refetch data
+		if (this._config.remote && this._remoteModule) {
+			this._remoteModule
+				.fetchData()
+				.then((items) => {
+					// Clear existing options
+					this._clearExistingOptions();
 
-		// Reapply ARIA attributes
-		this._setAriaAttributes();
+					// Add new options
+					items.forEach((item) => {
+						const option = document.createElement('option');
+						option.value = item.id;
+						option.textContent = item.title;
+						if (item.disabled) option.disabled = true;
+						this._element.appendChild(option);
+					});
 
-		// Dispatch refreshed event
-		this._dispatchEvent('refreshed');
-		this._fireEvent('refreshed');
+					// Rebuild dropdown
+					this._rebuildOptionsFromNative();
+
+					// Sync selection state
+					this._syncSelectionFromNative();
+
+					// Reapply ARIA attributes
+					this._setAriaAttributes();
+
+					// Dispatch refreshed event
+					this._dispatchEvent('refreshed');
+					this._fireEvent('refreshed');
+				})
+				.catch((error) => {
+					console.error('Error refreshing remote data:', error);
+					this._dispatchEvent('refreshError');
+					this._fireEvent('refreshError');
+				});
+		} else {
+			// For static selects, just sync visual state
+			this._syncSelectionFromNative();
+
+			// Reapply ARIA attributes
+			this._setAriaAttributes();
+
+			// Dispatch refreshed event
+			this._dispatchEvent('refreshed');
+			this._fireEvent('refreshed');
+		}
 	}
 
 	/**
