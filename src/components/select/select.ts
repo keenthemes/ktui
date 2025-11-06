@@ -311,6 +311,15 @@ export class KTSelect extends KTComponent {
 		// Initialize options
 		this._preSelectOptions(this._element);
 
+		// Prevent browser auto-selection when placeholder is configured
+		if (
+			this._config.placeholder &&
+			this._state.getSelectedOptions().length === 0 &&
+			this._preSelectedValues.length === 0
+		) {
+			(this._element as HTMLSelectElement).value = '';
+		}
+
 		// Apply pre-selected values captured before remote data was loaded
 		if (this._preSelectedValues.length > 0) {
 			if (this._config.debug) {
@@ -637,6 +646,14 @@ export class KTSelect extends KTComponent {
 
 		// Initialize options
 		this._preSelectOptions(this._element);
+
+		// Prevent browser auto-selection when placeholder is configured
+		if (
+			this._config.placeholder &&
+			this._state.getSelectedOptions().length === 0
+		) {
+			(this._element as HTMLSelectElement).value = '';
+		}
 
 		// Apply disabled state if needed
 		this._applyInitialDisabledState();
@@ -1829,10 +1846,18 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * Update the dropdown to sync with native select element changes
-	 * For remote selects, refetches data from the server
+	 * For remote selects, refetches data from the server and preserves selections
 	 * Optionally accepts new options to replace existing ones (static selects only)
-	 * @param newOptions Optional array of new options [{value, text}, ...]
+	 *
+	 * @param newOptions Optional array of new options [{value, text}, ...] (static selects only)
 	 * @public
+	 * @remarks
+	 * - For static selects: rebuilds dropdown from native select or new options
+	 * - For remote selects: fetches fresh data, preserves matching selections
+	 * - Selections are preserved if their values exist in new remote data
+	 * - Selections are cleared if their values don't exist in new data
+	 * @fires updated - After update completes successfully
+	 * @fires updateError - If remote data fetch fails
 	 */
 	public update(newOptions?: Array<{ value: string; text: string }>): void {
 		// For remote selects, refetch data
@@ -1840,20 +1865,47 @@ export class KTSelect extends KTComponent {
 			this._remoteModule
 				.fetchData()
 				.then((items) => {
-					// Clear existing options
+					// Capture currently selected values before clearing
+					const currentlySelected = this._state.getSelectedOptions();
+
+					// Clear existing options (also captures to _preSelectedValues)
 					this._clearExistingOptions();
 
-					// Add new options from remote data
+					// Get all available values from new remote data
+					const availableValues = items.map((item) => item.id);
+
+					// Filter to only values that exist in new data
+					const validSelections = currentlySelected.filter((value) =>
+						availableValues.includes(value),
+					);
+
+					if (this._config.debug && currentlySelected.length > 0) {
+						console.log(
+							'update(): Preserving selections that exist in new data:',
+							validSelections,
+						);
+					}
+
+					// Add new options from remote data and restore selection state
 					items.forEach((item) => {
 						const option = document.createElement('option');
 						option.value = item.id;
 						option.textContent = item.title;
 						if (item.disabled) option.disabled = true;
+
+						// Restore selected attribute for preserved selections
+						if (validSelections.includes(item.id)) {
+							option.selected = true;
+						}
+
 						this._element.appendChild(option);
 					});
 
 					// Rebuild dropdown
 					this._rebuildOptionsFromNative();
+
+					// Sync selection state from native select (now has selected attributes)
+					this._syncSelectionFromNative();
 
 					// Dispatch updated event
 					this._dispatchEvent('updated');
@@ -1905,11 +1957,14 @@ export class KTSelect extends KTComponent {
 		this._dispatchEvent('reloadStart');
 		this._fireEvent('reloadStart');
 
+		// Capture currently selected values before clearing
+		const currentlySelected = this._state.getSelectedOptions();
+
 		// Fetch fresh remote data
 		return this._remoteModule
 			.fetchData()
 			.then((items) => {
-				// Clear existing options
+				// Clear existing options (captures to _preSelectedValues)
 				this._clearExistingOptions();
 
 				// Update state with new items
@@ -1917,10 +1972,35 @@ export class KTSelect extends KTComponent {
 					// Generate new options HTML
 					this._generateOptionsHtml(this._element);
 
+					// Preserve selections by marking matching options as selected
+					const availableValues = items.map((item) =>
+						item.id !== undefined ? String(item.id) : '',
+					);
+					const validSelections = currentlySelected.filter((value) =>
+						availableValues.includes(value),
+					);
+
+					if (this._config.debug && currentlySelected.length > 0) {
+						console.log(
+							'reload(): Preserving selections that exist in new data:',
+							validSelections,
+						);
+					}
+
+					// Mark preserved selections on new options
+					validSelections.forEach((value) => {
+						const option = Array.from(
+							this._element.querySelectorAll('option'),
+						).find((opt) => opt.value === value) as HTMLOptionElement;
+						if (option) {
+							option.selected = true;
+						}
+					});
+
 					// Update the dropdown
 					this._updateDropdownWithNewOptions();
 
-					// Sync selection state from native select
+					// Sync selection state from native select (now has selected attributes)
 					this._syncSelectionFromNative();
 
 					// Update visual display
@@ -1951,8 +2031,17 @@ export class KTSelect extends KTComponent {
 
 	/**
 	 * Refresh the visual display and state without rebuilding options
-	 * For remote selects, refetches data from the server
+	 * For remote selects, refetches data from the server and preserves selections
+	 * that exist in the newly fetched data
+	 *
 	 * @public
+	 * @remarks
+	 * - For static selects: syncs visual state with native select
+	 * - For remote selects: fetches fresh data, preserves matching selections
+	 * - Selections are preserved if their values exist in new remote data
+	 * - Selections are cleared if their values don't exist in new data
+	 * @fires refreshed - After refresh completes successfully
+	 * @fires refreshError - If remote data fetch fails
 	 */
 	public refresh(): void {
 		// For remote selects, refetch data
@@ -1960,22 +2049,46 @@ export class KTSelect extends KTComponent {
 			this._remoteModule
 				.fetchData()
 				.then((items) => {
-					// Clear existing options
+					// Capture currently selected values before clearing
+					const currentlySelected = this._state.getSelectedOptions();
+
+					// Clear existing options (also captures to _preSelectedValues)
 					this._clearExistingOptions();
 
-					// Add new options
+					// Get all available values from new remote data
+					const availableValues = items.map((item) => item.id);
+
+					// Filter to only values that exist in new data
+					const validSelections = currentlySelected.filter((value) =>
+						availableValues.includes(value),
+					);
+
+					if (this._config.debug && currentlySelected.length > 0) {
+						console.log(
+							'refresh(): Preserving selections that exist in new data:',
+							validSelections,
+						);
+					}
+
+					// Add new options and restore selection state
 					items.forEach((item) => {
 						const option = document.createElement('option');
 						option.value = item.id;
 						option.textContent = item.title;
 						if (item.disabled) option.disabled = true;
+
+						// Restore selected attribute for preserved selections
+						if (validSelections.includes(item.id)) {
+							option.selected = true;
+						}
+
 						this._element.appendChild(option);
 					});
 
 					// Rebuild dropdown
 					this._rebuildOptionsFromNative();
 
-					// Sync selection state
+					// Sync selection state from native select (now has selected attributes)
 					this._syncSelectionFromNative();
 
 					// Reapply ARIA attributes

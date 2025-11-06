@@ -240,14 +240,15 @@
 			</div>
 		</div>
 
-		<script>
-			document.addEventListener('DOMContentLoaded', function () {
-				const form = document.getElementById('testForm');
-				const resultsDiv = document.getElementById('results');
-				const remoteSelectEl = document.querySelector(
-					'select[name="remoteSelect"]',
-				);
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const form = document.getElementById('testForm');
+			const resultsDiv = document.getElementById('results');
+			const remoteSelectEl = document.querySelector(
+				'select[name="remoteSelect"]',
+			);
 
+			if (form) {
 				form.addEventListener('submit', function (e) {
 					e.preventDefault();
 					resultsDiv.innerHTML = '';
@@ -282,8 +283,9 @@
 						: 'FAIL: Remote select missing';
 					resultsDiv.appendChild(verdict);
 				});
+			}
 
-				const modal = document.getElementById('modal-remote');
+			const modal = document.getElementById('modal-remote');
 				const remoteSelectInModal = document.getElementById(
 					'remoteSelectInModal',
 				);
