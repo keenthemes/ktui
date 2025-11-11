@@ -61,8 +61,16 @@ export class KTSelectDropdown extends KTComponent {
 		this._config = config;
 		this._ktSelectInstance = ktSelectInstance; // Assign instance
 
+		// For centered modals, don't move dropdown to container to preserve positioning context
+		// For other cases, move to container if specified
+		const modalParent = this._getModalContainer();
+		const isCenteredModal =
+			modalParent && modalParent.classList.contains('kt-modal-center');
+
+		// Only move dropdown if not in centered modal (regardless of strategy override)
+		// This prevents the positioning bug even if user sets dropdownStrategy: 'fixed'
 		const container = this._resolveDropdownContainer();
-		if (container) {
+		if (container && !isCenteredModal) {
 			if (container !== this._dropdownElement.parentElement) {
 				container.appendChild(this._dropdownElement);
 			}
@@ -163,8 +171,31 @@ export class KTSelectDropdown extends KTComponent {
 	}
 
 	/**
+	 * Get the appropriate boundary element for Popper positioning
+	 * For centered modals, use .kt-modal-content to avoid transform calculation issues
+	 * @returns The boundary element, or null if no modal found
+	 */
+	private _getModalBoundary(): HTMLElement | null {
+		const modalParent = this._getModalContainer();
+		if (!modalParent) {
+			return null;
+		}
+
+		// For centered modals, use .kt-modal-content as boundary to avoid transform issues
+		if (modalParent.classList.contains('kt-modal-center')) {
+			const modalContent = modalParent.querySelector(
+				'.kt-modal-content',
+			) as HTMLElement | null;
+			return modalContent || modalParent;
+		}
+
+		// For non-centered modals, use the modal element itself
+		return modalParent;
+	}
+
+	/**
 	 * Get the appropriate positioning strategy based on context
-	 * @returns 'fixed' if inside modal, 'absolute' otherwise
+	 * @returns 'fixed' if inside non-centered modal, 'absolute' for centered modals or no modal
 	 */
 	private _getPositioningStrategy(): 'fixed' | 'absolute' {
 		// Check if config explicitly sets strategy
@@ -172,8 +203,14 @@ export class KTSelectDropdown extends KTComponent {
 			return this._config.dropdownStrategy as 'fixed' | 'absolute';
 		}
 
-		// Use fixed positioning if inside a modal (to handle transform-based centering)
+		// For centered modals, use absolute positioning to avoid transform calculation issues
+		// For non-centered modals, use fixed positioning
 		const modalParent = this._getModalContainer();
+		if (modalParent && modalParent.classList.contains('kt-modal-center')) {
+			return 'absolute';
+		}
+
+		// Use fixed positioning for non-centered modals
 		return modalParent ? 'fixed' : 'absolute';
 	}
 
@@ -193,9 +230,8 @@ export class KTSelectDropdown extends KTComponent {
 		const preventOverflow = this._config.dropdownPreventOverflow !== false;
 		const flip = this._config.dropdownFlip !== false;
 
-		// Detect modal container for boundary
-		const modalParent = this._getModalContainer();
-		const boundary = modalParent || 'clippingParents';
+		// Get appropriate boundary element for modal context
+		const boundary = this._getModalBoundary() || 'clippingParents';
 
 		// Create new popper instance
 		this._popperInstance = createPopper(

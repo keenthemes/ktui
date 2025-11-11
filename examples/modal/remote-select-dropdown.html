@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Issue #63: Remote Select Dropdown in Centered Modal</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<!-- Test Case 1: Remote Select in Centered Modal (Issue #63) -->
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto mb-6">
+		<button class="px-3 py-1.5 bg-gray-900 text-white rounded text-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400" data-kt-modal-toggle="#remoteSelectModal">
+			Open Remote Select Modal (Issue #63)
+		</button>
+	</div>
+
+	<!-- Test Case 2: Remote Select with dropdownContainer -->
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mx-auto mb-6">
+		<button class="px-3 py-1.5 bg-gray-900 text-white rounded text-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400" data-kt-modal-toggle="#remoteSelectWithContainer">
+			Open Remote Select with Container
+		</button>
+	</div>
+
+	<!-- Test Case 3: Regular Select (Control) -->
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mx-auto mb-6">
+		<button class="px-3 py-1.5 bg-gray-900 text-white rounded text-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400" data-kt-modal-toggle="#regularSelectModal">
+			Open Regular Select Modal
+		</button>
+	</div>
+
+	<!-- Modal 1: Remote Select in Centered Modal (Issue #63) -->
+	<div class="kt-modal kt-modal-center" data-kt-modal="true" id="remoteSelectModal">
+		<div class="kt-modal-content max-w-md">
+			<div class="kt-modal-header">
+				<h3 class="kt-modal-title">Remote Select in Centered Modal</h3>
+				<button
+					type="button"
+					class="kt-modal-close"
+					aria-label="Close modal"
+					data-kt-modal-dismiss="#remoteSelectModal"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M18 6 6 18"/>
+						<path d="m6 6 12 12"/>
+					</svg>
+				</button>
+			</div>
+			<div class="kt-modal-body space-y-6">
+				<div>
+					<label class="block mb-2 font-medium text-gray-700">Remote Select (Issue #63 Test)</label>
+					<select
+						class="kt-select"
+						data-kt-select="true"
+						data-kt-select-remote="true"
+						data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+						data-kt-select-data-field-value="id"
+						data-kt-select-data-field-text="name"
+						data-kt-select-enable-search="true"
+						data-kt-select-search-param="q"
+						data-kt-select-search-min-length="2"
+						data-kt-select-search-debounce="300"
+						data-kt-select-placeholder="Search and select a user..."
+					></select>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal 2: Remote Select with dropdownContainer -->
+	<div class="kt-modal kt-modal-center" data-kt-modal="true" id="remoteSelectWithContainer">
+		<div class="kt-modal-content max-w-md">
+			<div class="kt-modal-header">
+				<h3 class="kt-modal-title">Remote Select with dropdownContainer</h3>
+				<button
+					type="button"
+					class="kt-modal-close"
+					aria-label="Close modal"
+					data-kt-modal-dismiss="#remoteSelectWithContainer"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M18 6 6 18"/>
+						<path d="m6 6 12 12"/>
+					</svg>
+				</button>
+			</div>
+			<div class="kt-modal-body space-y-6">
+				<div>
+					<label class="block mb-2 font-medium text-gray-700">Remote Select with dropdownContainer</label>
+					<select
+						class="kt-select"
+						data-kt-select="true"
+						data-kt-select-remote="true"
+						data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+						data-kt-select-data-field-value="id"
+						data-kt-select-data-field-text="name"
+						data-kt-select-enable-search="true"
+						data-kt-select-search-param="q"
+						data-kt-select-search-min-length="2"
+						data-kt-select-search-debounce="300"
+						data-kt-select-placeholder="Search and select a user..."
+						data-kt-select-config='{
+							"dropdownContainer": "#remoteSelectWithContainer"
+						}'
+					></select>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal 3: Regular Select (Control) -->
+	<div class="kt-modal kt-modal-center" data-kt-modal="true" id="regularSelectModal">
+		<div class="kt-modal-content max-w-md">
+			<div class="kt-modal-header">
+				<h3 class="kt-modal-title">Regular Select (Control)</h3>
+				<button
+					type="button"
+					class="kt-modal-close"
+					aria-label="Close modal"
+					data-kt-modal-dismiss="#regularSelectModal"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M18 6 6 18"/>
+						<path d="m6 6 12 12"/>
+					</svg>
+				</button>
+			</div>
+			<div class="kt-modal-body space-y-6">
+				<div>
+					<label class="block mb-2 font-medium text-gray-700">Regular Select (Control)</label>
+					<select
+						class="kt-select"
+						data-kt-select="true"
+						data-kt-select-placeholder="Select an option..."
+					>
+						<option value="">Select an option...</option>
+						<option value="1">Option 1</option>
+						<option value="2">Option 2</option>
+						<option value="3">Option 3</option>
+						<option value="4">Option 4</option>
+						<option value="5">Option 5</option>
+						<option value="6">Option 6</option>
+						<option value="7">Option 7</option>
+						<option value="8">Option 8</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="../../dist/ktui.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			if (window.KTModal) {
+				KTModal.init();
+			}
+			if (window.KTSelect) {
+				KTSelect.init();
+			}
+		});
+	</script>
+</body>
+
+</html>
+
