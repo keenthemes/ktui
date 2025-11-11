@@ -48,7 +48,21 @@ export class KTModal extends KTComponent implements KTModalInterface {
 
 	protected _handlers() {
 		this._element.addEventListener('click', (event: Event) => {
-			if (this._element !== event.target) return;
+			const target = event.target as HTMLElement;
+			const currentTarget = event.currentTarget as HTMLElement;
+
+			// Only proceed if clicking directly on the backdrop (modal element itself)
+			// This prevents closing when clicking inside modal content or any child elements
+			// (including dropdowns rendered via dropdownContainer pointing to modal)
+			if (target !== currentTarget) {
+				// Stop propagation for clicks inside dropdowns to prevent dropdown from closing
+				// Check if click is inside a dropdown element (KT Select dropdown)
+				const dropdownElement = target.closest('[data-kt-select-dropdown]');
+				if (dropdownElement) {
+					event.stopPropagation();
+				}
+				return;
+			}
 
 			// Only hide if both backdropStatic is false AND persistent is false
 			if (
