@@ -714,9 +714,19 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		try {
 			responseData = await response.json();
 		} catch (error) {
-			this._noticeOnTable(
-				'Error parsing API response as JSON: ' + String(error),
-			);
+			// Fire event with complete error context for application handling
+			this._fireEvent('parseError', {
+				response,
+				error: String(error),
+				status: response.status,
+				statusText: response.statusText
+			});
+			this._dispatchEvent('parseError', {
+				response,
+				error: String(error),
+				status: response.status,
+				statusText: response.statusText
+			});
 			return;
 		}
 
