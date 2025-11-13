@@ -47,7 +47,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 	constructor(
 		element: HTMLElement,
-		config: KTStickyConfigInterface | null = null,
+		config: KTStickyConfigInterface | null = null
 	) {
 		super();
 
@@ -57,10 +57,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		this._buildConfig(config);
 
 		this._releaseElement = KTDom.getElement(
-			this._getOption('release') as string,
+			this._getOption('release') as string
 		);
 		this._activateElement = KTDom.getElement(
-			this._getOption('activate') as string,
+			this._getOption('activate') as string
 		);
 		this._wrapperElement = this._element.closest('[data-kt-sticky-wrapper]');
 		this._attributeRoot = `data-kt-sticky-${this._getOption('name')}`;
@@ -96,7 +96,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				() => {
 					this._update();
 				},
-				200,
+				200
 			);
 		});
 
@@ -200,7 +200,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected _getOffset(): number {
 		let offset = parseInt(this._getOption('offset') as string);
 		const activateElement = KTDom.getElement(
-			this._getOption('activate') as string,
+			this._getOption('activate') as string
 		);
 
 		if (activateElement) {
@@ -389,7 +389,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTStickyConfigInterface,
+		config?: KTStickyConfigInterface
 	): KTSticky {
 		return this.getInstance(element) || new KTSticky(element, config);
 	}

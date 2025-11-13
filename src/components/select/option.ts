@@ -36,7 +36,7 @@ export class KTSelectOption extends KTComponent {
 			// Handle case where _globalConfig might be undefined, though constructor expects it.
 			// This might indicate a need to ensure config is always passed or has a default.
 			console.warn(
-				'KTSelectOption: _globalConfig is undefined during constructor.',
+'KTSelectOption: _globalConfig is undefined during constructor.',
 			);
 		}
 

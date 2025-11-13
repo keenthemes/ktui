@@ -51,7 +51,7 @@ export class KTSelectDropdown extends KTComponent {
 		toggleElement: HTMLElement,
 		dropdownElement: HTMLElement,
 		config: KTSelectConfigInterface,
-		ktSelectInstance: KTSelect, // Added parameter
+		ktSelectInstance: KTSelect // Added parameter
 	) {
 		super();
 
@@ -80,7 +80,7 @@ export class KTSelectDropdown extends KTComponent {
 		this._focusManager = new FocusManager(
 			dropdownElement,
 			'[data-kt-select-option]',
-			config,
+			config
 		);
 
 		this._setupEventListeners();
@@ -94,14 +94,14 @@ export class KTSelectDropdown extends KTComponent {
 		this._eventManager.addListener(
 			this._toggleElement,
 			'click',
-			this._handleToggleClick.bind(this),
+			this._handleToggleClick.bind(this)
 		);
 
 		// Close on outside click
 		this._eventManager.addListener(
 			document as unknown as HTMLElement,
 			'click',
-			this._handleOutsideClick.bind(this),
+			this._handleOutsideClick.bind(this)
 		);
 	}
 
@@ -278,7 +278,7 @@ export class KTSelectDropdown extends KTComponent {
 						},
 					},
 				],
-			},
+			}
 		);
 	}
 
@@ -342,7 +342,7 @@ export class KTSelectDropdown extends KTComponent {
 		// Consider the dropdown's current z-index if it's already set and higher
 		const currentDropdownZIndexStr = KTDom.getCssProp(
 			this._dropdownElement,
-			'z-index',
+'z-index',
 		);
 		if (currentDropdownZIndexStr && currentDropdownZIndexStr !== 'auto') {
 			const currentDropdownZIndex = parseInt(currentDropdownZIndexStr);
@@ -395,13 +395,13 @@ export class KTSelectDropdown extends KTComponent {
 				'KTSelectDropdown.close called - isOpen:',
 				this._isOpen,
 				'isTransitioning:',
-				this._isTransitioning,
+				this._isTransitioning
 			);
 
 		if (!this._isOpen || this._isTransitioning) {
 			if (this._config.debug)
 				console.log(
-					'KTSelectDropdown.close - early return: dropdown not open or is transitioning',
+					'KTSelectDropdown.close - early return: dropdown not open or is transitioning'
 				);
 			return;
 		}
@@ -493,13 +493,13 @@ export class KTSelectDropdown extends KTComponent {
 
 	private _resolveDropdownContainer(): HTMLElement | null {
 		const containerSelector = this._config.dropdownContainer;
-		if (containerSelector) {
+if (containerSelector) {
 			const containerElement = document.querySelector(
 				containerSelector,
 			) as HTMLElement | null;
 			if (!containerElement && this._config.debug) {
 				console.warn(
-					`KTSelectDropdown: dropdownContainer selector "${containerSelector}" not found. Dropdown will remain in its default position.`,
+					`KTSelectDropdown: dropdownContainer selector "${containerSelector}" not found. Dropdown will remain in its default position.`
 				);
 			}
 			return containerElement;

@@ -55,7 +55,12 @@ module.exports = (env) => {
 				},
 				{
 					test: /\.ts$/,
-					use: [{ loader: 'ts-loader' }],
+					use: [{
+						loader: 'ts-loader',
+						options: {
+							configFile: 'tsconfig.lib.json'
+						}
+					}],
 				},
 			],
 		},

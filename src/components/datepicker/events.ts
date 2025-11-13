@@ -41,7 +41,7 @@ export class KTDatepickerEventManager {
 	 */
 	public dispatchEvent(
 		eventName: KTDatepickerEventName | string,
-		payload?: any,
+		payload?: any
 	): void {
 		const event = new CustomEvent(eventName, {
 			bubbles: true,
@@ -61,7 +61,7 @@ export class KTDatepickerEventManager {
 	public addEventListener(
 		eventName: KTDatepickerEventName | string,
 		listener: EventListenerOrEventListenerObject,
-		options?: boolean | AddEventListenerOptions,
+		options?: boolean | AddEventListenerOptions
 	): void {
 		this._element.addEventListener(eventName, listener, options);
 	}
@@ -76,7 +76,7 @@ export class KTDatepickerEventManager {
 	public removeEventListener(
 		eventName: KTDatepickerEventName | string,
 		listener: EventListenerOrEventListenerObject,
-		options?: boolean | EventListenerOptions,
+		options?: boolean | EventListenerOptions
 	): void {
 		this._element.removeEventListener(eventName, listener, options);
 	}

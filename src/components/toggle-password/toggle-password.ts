@@ -32,7 +32,7 @@ export class KTTogglePassword
 
 	constructor(
 		element: HTMLElement,
-		config: KTTogglePasswordConfigInterface | null = null,
+		config: KTTogglePasswordConfigInterface | null = null
 	) {
 		super();
 
@@ -42,7 +42,7 @@ export class KTTogglePassword
 		this._buildConfig(config);
 
 		this._triggerElement = this._element.querySelector(
-			'[data-kt-toggle-password-trigger]',
+			'[data-kt-toggle-password-trigger]'
 		);
 		this._inputElement = this._element.querySelector('input');
 
@@ -136,7 +136,7 @@ export class KTTogglePassword
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTTogglePasswordConfigInterface,
+		config?: KTTogglePasswordConfigInterface
 	): KTTogglePassword {
 		return this.getInstance(element) || new KTTogglePassword(element, config);
 	}

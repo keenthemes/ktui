@@ -74,7 +74,7 @@ export interface KTDataTableConfigInterface {
 	requestCredentials?: RequestCredentials;
 	apiEndpoint?: string;
 	mapResponse?: (
-		data: KTDataTableResponseDataInterface,
+		data: KTDataTableResponseDataInterface
 	) => KTDataTableResponseDataInterface;
 	mapRequest?: (query: URLSearchParams) => URLSearchParams;
 
@@ -90,7 +90,7 @@ export interface KTDataTableConfigInterface {
 			render?: (
 				item: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string,
 				data: KTDataTableDataInterface,
-				context: KTDataTableInterface,
+				context: KTDataTableInterface
 			) => string | HTMLElement | DocumentFragment;
 			checkbox?: boolean;
 			createdCell?: (
@@ -99,7 +99,7 @@ export interface KTDataTableConfigInterface {
 					| KTDataTableDataInterface[keyof KTDataTableDataInterface]
 					| string,
 				rowData: KTDataTableDataInterface,
-				row: HTMLTableRowElement,
+				row: HTMLTableRowElement
 			) => void;
 		};
 	};
@@ -123,7 +123,7 @@ export interface KTDataTableConfigInterface {
 		callback?: (
 			data: KTDataTableDataInterface[],
 			sortField: keyof KTDataTableDataInterface | number,
-			sortOrder: KTDataTableSortOrderInterface,
+			sortOrder: KTDataTableSortOrderInterface
 		) => KTDataTableDataInterface[];
 	};
 
@@ -131,7 +131,7 @@ export interface KTDataTableConfigInterface {
 		delay?: number; // delay in milliseconds
 		callback?: (
 			data: KTDataTableDataInterface[],
-			search: string,
+			search: string
 		) => KTDataTableDataInterface[]; // search callback
 	};
 

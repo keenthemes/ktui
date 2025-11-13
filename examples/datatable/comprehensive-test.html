@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive DataTable UX Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+    <style>
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .event-log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .event-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            background: white;
+            border-radius: 3px;
+            border-left: 3px solid #007bff;
+        }
+        .event-entry.error { border-left-color: #dc3545; }
+        .event-entry.success { border-left-color: #28a745; }
+        .event-entry.warning { border-left-color: #ffc107; }
+        .test-result {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .test-pass { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .test-fail { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .test-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 2px;
+        }
+        .test-btn:hover { background: #0056b3; }
+        .test-btn:disabled { background: #6c757d; cursor: not-allowed; }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pass { background: #28a745; }
+        .status-fail { background: #dc3545; }
+        .status-pending { background: #ffc107; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="test-container">
+        <h1 class="text-3xl font-bold text-center mb-8">Comprehensive DataTable UX Test</h1>
+
+        <!-- Test Status Overview -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Test Status Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-blue-50 rounded">
+                    <div class="status-indicator status-pending" id="cursor-test-status"></div>
+                    <div class="font-semibold">Cursor Behavior</div>
+                    <div class="text-sm text-gray-600" id="cursor-test-detail">Not tested</div>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded">
+                    <div class="status-indicator status-pending" id="error-test-status"></div>
+                    <div class="font-semibold">Error Handling</div>
+                    <div class="text-sm text-gray-600" id="error-test-detail">Not tested</div>
+                </div>
+                <div class="text-center p-4 bg-purple-50 rounded">
+                    <div class="status-indicator status-pending" id="compat-test-status"></div>
+                    <div class="font-semibold">Backward Compatibility</div>
+                    <div class="text-sm text-gray-600" id="compat-test-detail">Not tested</div>
+                </div>
+                <div class="text-center p-4 bg-orange-50 rounded">
+                    <div class="status-indicator status-pending" id="integration-test-status"></div>
+                    <div class="font-semibold">Framework Integration</div>
+                    <div class="text-sm text-gray-600" id="integration-test-detail">Not tested</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-grid">
+            <!-- Cursor Behavior Test -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Test 1: Cursor Behavior</h2>
+                <p class="text-gray-700 mb-4">Test cursor behavior for sortable and disabled sorting columns.</p>
+
+                <div data-kt-datatable="true" id="cursor-test-datatable">
+                    <table class="kt-table" data-kt-datatable-table="true">
+                        <thead>
+                            <tr>
+                                <th data-kt-datatable-column="id">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">ID (Sortable)</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th data-kt-datatable-column="name" data-kt-datatable-column-sort="false">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Name (Disabled)</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th data-kt-datatable-column="email">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Email (Sortable)</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>John Doe</td><td>john@example.com</td></tr>
+                            <tr><td>2</td><td>Jane Smith</td><td>jane@example.com</td></tr>
+                            <tr><td>3</td><td>Bob Wilson</td><td>bob@example.com</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    <button class="test-btn" onclick="testCursorBehavior()">Test Cursor Behavior</button>
+                </div>
+                <div id="cursor-test-result"></div>
+            </div>
+
+            <!-- Error Handling Test -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Test 2: Error Handling</h2>
+                <p class="text-gray-700 mb-4">Test parseError event handling for various HTTP error scenarios.</p>
+
+                <div class="mb-4">
+                    <button class="test-btn" onclick="testErrorHandling('html')">Test HTML Response (200)</button>
+                    <button class="test-btn" onclick="testErrorHandling('404')">Test 404 Error</button>
+                    <button class="test-btn" onclick="testErrorHandling('500')">Test 500 Error</button>
+                    <button class="test-btn" onclick="testErrorHandling('401')">Test 401 Error</button>
+                </div>
+
+                <div id="error-test-result"></div>
+            </div>
+
+            <!-- Backward Compatibility Test -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Test 3: Backward Compatibility</h2>
+                <p class="text-gray-700 mb-4">Ensure existing DataTable functionality still works without modification.</p>
+
+                <div data-kt-datatable="true" id="compat-test-datatable">
+                    <table class="kt-table" data-kt-datatable-table="true">
+                        <thead>
+                            <tr>
+                                <th data-kt-datatable-column="product">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Product</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th data-kt-datatable-column="price">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Price</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Laptop</td><td>$999</td></tr>
+                            <tr><td>Mouse</td><td>$25</td></tr>
+                            <tr><td>Keyboard</td><td>$75</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="flex items-center justify-between mt-4">
+                        <div data-kt-datatable-info="true" class="text-sm text-gray-700"></div>
+                        <div data-kt-datatable-pagination="true" class="flex space-x-1"></div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button class="test-btn" onclick="testBackwardCompatibility()">Test Backward Compatibility</button>
+                </div>
+                <div id="compat-test-result"></div>
+            </div>
+
+            <!-- Framework Integration Test -->
+            <div class="test-section">
+                <h2 class="text-xl font-semibold mb-4">Test 4: Framework Integration</h2>
+                <p class="text-gray-700 mb-4">Test how applications can integrate with the new parseError events.</p>
+
+                <div class="bg-gray-50 p-4 rounded mb-4">
+                    <h3 class="font-semibold mb-2">Angular-style HTTP Interceptor:</h3>
+                    <pre class="text-xs bg-white p-2 rounded border overflow-x-auto"><code>// In your Angular service
+datatableElement.addEventListener('parseError', (event) => {
+  const { status, error } = event.detail.payload;
+  if (status === 401) {
+    // Redirect to login or refresh token
+    this.authService.handleUnauthorized();
+  }
+});</code></pre>
+                </div>
+
+                <div class="mt-4">
+                    <button class="test-btn" onclick="testFrameworkIntegration()">Test Framework Integration</button>
+                </div>
+                <div id="integration-test-result"></div>
+            </div>
+        </div>
+
+        <!-- Event Monitor -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Event Monitor</h2>
+            <div id="eventLog" class="event-log">
+                <div class="text-gray-500 text-center py-4">Waiting for events...</div>
+            </div>
+        </div>
+
+        <!-- Test Summary -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Test Summary</h2>
+            <div id="testSummary" class="test-result test-pending">
+                Run individual tests to see comprehensive results
+            </div>
+        </div>
+    </div>
+
+    <!-- Load KTUI -->
+    <script src="../../dist/ktui.js"></script>
+
+    <script>
+        // Global test state
+        let datatableInstances = {};
+        let testResults = {
+            cursor: null,
+            error: null,
+            compatibility: null,
+            integration: null
+        };
+
+        const eventLog = document.getElementById('eventLog');
+
+        function logEvent(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const eventEntry = document.createElement('div');
+            eventEntry.className = `event-entry ${type}`;
+            eventEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            eventLog.appendChild(eventEntry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+
+            // Remove "waiting" message if it exists
+            const waitingMsg = eventLog.querySelector('.text-gray-500');
+            if (waitingMsg) {
+                waitingMsg.remove();
+            }
+        }
+
+        function updateTestStatus(testName, status, detail) {
+            const statusElement = document.getElementById(`${testName}-test-status`);
+            const detailElement = document.getElementById(`${testName}-test-detail`);
+
+            statusElement.className = `status-indicator ${status === 'pass' ? 'status-pass' : status === 'fail' ? 'status-fail' : 'status-pending'}`;
+            detailElement.textContent = detail;
+            testResults[testName] = status;
+        }
+
+        function updateTestResult(testName, success, message) {
+            const resultElement = document.getElementById(`${testName}-test-result`);
+            resultElement.innerHTML = `<div class="test-result ${success ? 'test-pass' : 'test-fail'}">${success ? '✅' : '❌'} ${message}</div>`;
+            updateTestStatus(testName, success ? 'pass' : 'fail', message);
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const passed = Object.values(testResults).filter(r => r === 'pass').length;
+            const total = Object.keys(testResults).length;
+            const allPassed = passed === total;
+
+            document.getElementById('testSummary').innerHTML = `
+                <div class="test-result ${allPassed ? 'test-pass' : 'test-pending'}">
+                    ${allPassed ? '🎉' : '⏳'} ${passed}/${total} tests passed
+                    ${allPassed ? ' - All DataTable UX improvements working correctly!' : ' - Complete remaining tests'}
+                </div>
+            `;
+        }
+
+        // Test 1: Cursor Behavior
+        function testCursorBehavior() {
+            logEvent('🖱️ Testing cursor behavior...', 'info');
+
+            try {
+                const sortableHeaders = document.querySelectorAll('#cursor-test-datatable th:not([data-kt-datatable-column-sort="false"]) .kt-table-col');
+                const disabledHeaders = document.querySelectorAll('#cursor-test-datatable th[data-kt-datatable-column-sort="false"] .kt-table-col');
+
+                let cursorTestPassed = true;
+                let message = '';
+
+                // Check that disabled headers don't have pointer cursor
+                disabledHeaders.forEach(header => {
+                    const computedStyle = window.getComputedStyle(header);
+                    if (computedStyle.cursor === 'pointer') {
+                        cursorTestPassed = false;
+                        message += `❌ Disabled header has pointer cursor. `;
+                    }
+                });
+
+                // Check that enabled headers have pointer cursor
+                sortableHeaders.forEach(header => {
+                    const computedStyle = window.getComputedStyle(header);
+                    if (computedStyle.cursor !== 'pointer') {
+                        cursorTestPassed = false;
+                        message += `❌ Enabled header missing pointer cursor. `;
+                    }
+                });
+
+                if (cursorTestPassed) {
+                    message = '✅ Cursor styles applied correctly - disabled columns don\'t show pointer, enabled columns do';
+                }
+
+                updateTestResult('cursor', cursorTestPassed, message);
+                logEvent(`Cursor test ${cursorTestPassed ? 'PASSED' : 'FAILED'}`, cursorTestPassed ? 'success' : 'error');
+
+            } catch (error) {
+                updateTestResult('cursor', false, `❌ Test failed: ${error.message}`);
+                logEvent(`Cursor test ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 2: Error Handling
+        function testErrorHandling(scenario) {
+            logEvent(`🔥 Testing error handling scenario: ${scenario}...`, 'warning');
+
+            // Create a test datatable with error-prone endpoint
+            const testContainer = document.createElement('div');
+            testContainer.id = `error-test-${scenario}`;
+            testContainer.setAttribute('data-kt-datatable', 'true');
+
+            let endpoint;
+            switch(scenario) {
+                case 'html': endpoint = 'https://httpbin.org/html'; break;
+                case '404': endpoint = 'https://httpbin.org/status/404'; break;
+                case '500': endpoint = 'https://httpbin.org/status/500'; break;
+                case '401': endpoint = 'https://httpbin.org/status/401'; break;
+            }
+
+            testContainer.setAttribute('data-kt-datatable-api-endpoint', endpoint);
+
+            testContainer.innerHTML = `
+                <table class="kt-table" data-kt-datatable-table="true">
+                    <thead><tr><th data-kt-datatable-column="test"><span class="kt-table-col"><span class="kt-table-col-label">Test</span></span></th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            `;
+
+            document.body.appendChild(testContainer);
+
+            // Initialize the datatable
+            if (typeof KTDataTable !== 'undefined') {
+                KTDataTable.init();
+            }
+
+            // Get instance and set up listeners
+            setTimeout(() => {
+                const instance = KTDataTable.getInstance(testContainer);
+                if (instance) {
+                    // Set up event listener
+                    testContainer.addEventListener('parseError', function(e) {
+                        const { status, error } = e.detail.payload;
+                        logEvent(`🎯 parseError event for ${scenario}: Status ${status}, Error: ${error.substring(0, 50)}...`, 'success');
+                        updateTestResult('error', true, `✅ parseError event fired correctly for ${scenario} (Status: ${status})`);
+                        // Clean up
+                        testContainer.remove();
+                    });
+
+                    // Trigger data load
+                    instance.reload();
+                } else {
+                    updateTestResult('error', false, `❌ Failed to create DataTable instance for ${scenario}`);
+                    testContainer.remove();
+                }
+            }, 100);
+        }
+
+        // Test 3: Backward Compatibility
+        function testBackwardCompatibility() {
+            logEvent('🔄 Testing backward compatibility...', 'info');
+
+            try {
+                const instance = datatableInstances['compat-test-datatable'];
+                if (!instance) {
+                    updateTestResult('compat', false, '❌ Compatibility DataTable instance not found');
+                    return;
+                }
+
+                // Test basic functionality still works
+                let compatTestPassed = true;
+                let message = '';
+
+                // Check that the table renders
+                const table = document.querySelector('#compat-test-datatable table');
+                if (!table) {
+                    compatTestPassed = false;
+                    message += '❌ Table not rendered. ';
+                }
+
+                // Check that pagination info exists
+                const info = document.querySelector('#compat-test-datatable [data-kt-datatable-info]');
+                if (!info) {
+                    compatTestPassed = false;
+                    message += '❌ Pagination info missing. ';
+                }
+
+                // Check that pagination controls exist
+                const pagination = document.querySelector('#compat-test-datatable [data-kt-datatable-pagination]');
+                if (!pagination) {
+                    compatTestPassed = false;
+                    message += '❌ Pagination controls missing. ';
+                }
+
+                if (compatTestPassed) {
+                    message = '✅ All existing DataTable functionality works correctly';
+                }
+
+                updateTestResult('compat', compatTestPassed, message);
+                logEvent(`Compatibility test ${compatTestPassed ? 'PASSED' : 'FAILED'}`, compatTestPassed ? 'success' : 'error');
+
+            } catch (error) {
+                updateTestResult('compat', false, `❌ Test failed: ${error.message}`);
+                logEvent(`Compatibility test ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        // Test 4: Framework Integration
+        function testFrameworkIntegration() {
+            logEvent('🔗 Testing framework integration patterns...', 'info');
+
+            // Simulate how a framework would integrate
+            const testContainer = document.createElement('div');
+            testContainer.id = 'integration-test-container';
+            testContainer.setAttribute('data-kt-datatable', 'true');
+            testContainer.setAttribute('data-kt-datatable-api-endpoint', 'https://httpbin.org/html');
+
+            testContainer.innerHTML = `
+                <table class="kt-table" data-kt-datatable-table="true">
+                    <thead><tr><th data-kt-datatable-column="test"><span class="kt-table-col"><span class="kt-table-col-label">Integration Test</span></span></th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            `;
+
+            document.body.appendChild(testContainer);
+
+            // Simulate framework interceptor pattern
+            let interceptorCalled = false;
+            let errorHandled = false;
+
+            // Framework-style error handler
+            testContainer.addEventListener('parseError', function(e) {
+                interceptorCalled = true;
+                const { status, error } = e.detail.payload;
+
+                // Simulate framework interceptor logic
+                if (status === 401) {
+                    logEvent('🔐 Framework interceptor: Handling 401 - redirecting to login', 'success');
+                    errorHandled = true;
+                } else if (status === 200 && error.includes('JSON')) {
+                    logEvent('🔄 Framework interceptor: Handling JSON parse error - showing user-friendly message', 'success');
+                    errorHandled = true;
+                } else {
+                    logEvent(`🔧 Framework interceptor: Handling status ${status}`, 'success');
+                    errorHandled = true;
+                }
+            });
+
+            // Initialize and test
+            setTimeout(() => {
+                if (typeof KTDataTable !== 'undefined') {
+                    KTDataTable.init();
+                }
+
+                const instance = KTDataTable.getInstance(testContainer);
+                if (instance) {
+                    instance.reload();
+
+                    // Check results after a delay
+                    setTimeout(() => {
+                        const integrationPassed = interceptorCalled && errorHandled;
+                        const message = integrationPassed
+                            ? '✅ Framework integration works - interceptor can handle parseError events'
+                            : `❌ Framework integration failed - interceptor: ${interceptorCalled}, handled: ${errorHandled}`;
+
+                        updateTestResult('integration', integrationPassed, message);
+                        logEvent(`Framework integration test ${integrationPassed ? 'PASSED' : 'FAILED'}`, integrationPassed ? 'success' : 'error');
+
+                        testContainer.remove();
+                    }, 2000);
+                } else {
+                    updateTestResult('integration', false, '❌ Failed to create integration test DataTable');
+                    testContainer.remove();
+                }
+            }, 100);
+        }
+
+        // Initialize DataTables on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            logEvent('🚀 Initializing comprehensive DataTable UX tests...', 'info');
+
+            // Initialize KTUI components
+            if (typeof KTDataTable !== 'undefined') {
+                KTDataTable.init();
+
+                // Store references to datatable instances
+                setTimeout(() => {
+                    ['cursor-test-datatable', 'compat-test-datatable'].forEach(id => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            datatableInstances[id] = KTDataTable.getInstance(element);
+                        }
+                    });
+
+                    logEvent('✅ DataTable instances initialized and stored', 'success');
+                }, 500);
+            } else {
+                logEvent('❌ KTDataTable library not loaded!', 'error');
+            }
+        });
+
+        // Auto-run cursor test after initialization
+        setTimeout(() => {
+            testCursorBehavior();
+        }, 1000);
+    </script>
+</body>
+</html>

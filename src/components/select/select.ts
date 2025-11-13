@@ -29,35 +29,35 @@ export class KTSelect extends KTComponent {
 	// Core properties
 	protected override readonly _name: string = 'select';
 	protected override readonly _dataOptionPrefix: string = 'kt-'; // Use 'kt-' prefix to support data-kt-select-option attributes
-	protected override readonly _config: KTSelectConfigInterface;
-	protected override _defaultConfig: KTSelectConfigInterface;
+	protected override readonly _config!: KTSelectConfigInterface;
+	protected override _defaultConfig!: KTSelectConfigInterface;
 
 	// Static global configuration
 	private static globalConfig: Partial<KTSelectConfigInterface> = {};
 
 	// DOM elements
-	private _wrapperElement: HTMLElement;
-	private _displayElement: HTMLElement;
-	private _dropdownContentElement: HTMLElement;
-	private _searchInputElement: HTMLInputElement | null;
-	private _options: NodeListOf<HTMLElement>;
+	private _wrapperElement!: HTMLElement;
+	private _displayElement!: HTMLElement;
+	private _dropdownContentElement!: HTMLElement;
+	private _searchInputElement!: HTMLInputElement | null;
+	private _options!: NodeListOf<HTMLElement>;
 
 	// Cached DOM references for performance
 	private _optionsContainer: HTMLElement | null = null;
 
 	// State
 	private _dropdownIsOpen: boolean = false;
-	private _state: KTSelectState;
-	private _searchModule: KTSelectSearch;
-	private _remoteModule: KTSelectRemote;
+	private _state!: KTSelectState;
+	private _searchModule!: KTSelectSearch;
+	private _remoteModule!: KTSelectRemote;
 	private _comboboxModule: KTSelectCombobox | null = null;
 	private _tagsModule: KTSelectTags | null = null;
 	private _dropdownModule: KTSelectDropdown | null = null;
 	private _loadMoreIndicator: HTMLElement | null = null;
 	private _selectAllButton: HTMLElement | null = null;
 	private _selectAllButtonToggle: HTMLButtonElement | null = null;
-	private _focusManager: FocusManager;
-	private _eventManager: EventManager;
+	private _focusManager!: FocusManager;
+	private _eventManager!: EventManager;
 	private _typeToSearchBuffer: TypeToSearchBuffer = new TypeToSearchBuffer();
 	private _mutationObserver: MutationObserver | null = null;
 	private _preSelectedValues: string[] = [];
@@ -192,7 +192,7 @@ export class KTSelect extends KTComponent {
 			.catch((error) => {
 				console.error('Error fetching remote data:', error);
 				this._renderErrorState(
-					this._remoteModule.getErrorMessage() || 'Failed to load data',
+					this._remoteModule.getErrorMessage() || 'Failed to load data'
 				);
 			});
 	}
@@ -218,7 +218,7 @@ export class KTSelect extends KTComponent {
 
 		// Keep only the empty/placeholder option and remove the rest
 		const options = Array.from(
-			this._element.querySelectorAll('option:not([value=""])'),
+			this._element.querySelectorAll('option:not([value=""])')
 		);
 		options.forEach((option) => option.remove());
 	}
@@ -437,11 +437,11 @@ export class KTSelect extends KTComponent {
 	 */
 	private _showDropdownMessage(
 		type: 'error' | 'loading' | 'empty',
-		message?: string,
+		message?: string
 	) {
 		if (!this._dropdownContentElement) return;
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options]',
+			'[data-kt-select-options]'
 		);
 		if (!optionsContainer) return;
 
@@ -454,17 +454,17 @@ export class KTSelect extends KTComponent {
 					defaultTemplates.error({
 						...this._config,
 						errorMessage: message,
-					}),
+}),
 				);
 				break;
 			case 'loading':
 				optionsContainer.appendChild(
-					defaultTemplates.loading(this._config, message || 'Loading...'),
+defaultTemplates.loading(this._config, message || 'Loading...'),
 				);
 				break;
 			case 'empty':
 				optionsContainer.appendChild(
-					defaultTemplates.searchEmpty(this._config),
+defaultTemplates.searchEmpty(this._config),
 				);
 				break;
 		}
@@ -476,7 +476,7 @@ export class KTSelect extends KTComponent {
 	private _renderLoadingState() {
 		if (this._element.querySelectorAll('option').length <= 1) {
 			const existingLoadingOptions = this._element.querySelectorAll(
-				'option[disabled][selected][value=""]',
+				'option[disabled][selected][value=""]'
 			);
 			existingLoadingOptions.forEach((option) => option.remove());
 			this._showDropdownMessage('loading', 'Loading options...');
@@ -514,7 +514,7 @@ export class KTSelect extends KTComponent {
 
 		// Add to dropdown
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			'[data-kt-select-options]',
+			'[data-kt-select-options]'
 		);
 		if (optionsContainer) {
 			optionsContainer.appendChild(this._loadMoreIndicator);
@@ -525,7 +525,7 @@ export class KTSelect extends KTComponent {
 		// Add event listener
 		this._loadMoreIndicator.addEventListener(
 			'click',
-			this._handleLoadMore.bind(this),
+			this._handleLoadMore.bind(this)
 		);
 	}
 
@@ -596,13 +596,13 @@ export class KTSelect extends KTComponent {
 		if (!this._dropdownContentElement || !newItems.length) return;
 
 		const optionsContainer = this._dropdownContentElement.querySelector(
-			`[data-kt-select-options]`,
+			`[data-kt-select-options]`
 		);
 		if (!optionsContainer) return;
 
 		// Get the load more button
 		const loadMoreButton = optionsContainer.querySelector(
-			`[data-kt-select-load-more]`,
+			`[data-kt-select-load-more]`
 		);
 
 		// Process each new item
@@ -622,7 +622,7 @@ export class KTSelect extends KTComponent {
 		});
 
 		// Update options NodeList to include the new options
-		this._options = this._dropdownContentElement.querySelectorAll(
+this._options = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
 
@@ -677,7 +677,7 @@ export class KTSelect extends KTComponent {
 		this._focusManager = new FocusManager(
 			this._dropdownContentElement,
 			'[data-kt-select-option]',
-			this._config,
+			this._config
 		);
 
 		// Initialize dropdown module after all elements are created
@@ -686,7 +686,7 @@ export class KTSelect extends KTComponent {
 			this._displayElement,
 			this._dropdownContentElement,
 			this._config,
-			this, // Pass the KTSelect instance to KTSelectDropdown
+			this // Pass the KTSelect instance to KTSelectDropdown
 		);
 
 		// Update display and set ARIA attributes
@@ -738,7 +738,7 @@ export class KTSelect extends KTComponent {
 
 			// Move display-specific classes to display element
 			const classesForDisplay = originalClasses.filter((className) =>
-				displaySpecificClasses.includes(className),
+displaySpecificClasses.includes(className),
 			);
 			if (classesForDisplay.length > 0) {
 				displayElement.classList.add(...classesForDisplay);
@@ -814,16 +814,16 @@ export class KTSelect extends KTComponent {
 
 		// Get display element
 		this._displayElement = this._wrapperElement.querySelector(
-			`[data-kt-select-display]`,
+			`[data-kt-select-display]`
 		) as HTMLElement;
 
 		// Get dropdown content element - this is critical for dropdown functionality
 		this._dropdownContentElement = this._wrapperElement.querySelector(
-			`[data-kt-select-dropdown]`,
+			`[data-kt-select-dropdown]`
 		) as HTMLElement;
 
 		if (!this._dropdownContentElement) {
-			console.error(
+console.error(
 				'KTSelect: Dropdown content element not found',
 				this._wrapperElement,
 			);
@@ -832,7 +832,7 @@ export class KTSelect extends KTComponent {
 
 		// Get search input element - this is used for the search functionality
 		this._searchInputElement = this._dropdownContentElement.querySelector(
-			`[data-kt-select-search]`,
+			`[data-kt-select-search]`
 		) as HTMLInputElement;
 
 		// If not found in dropdown, check if it's the display element itself
@@ -841,10 +841,10 @@ export class KTSelect extends KTComponent {
 		}
 
 		this._selectAllButton = this._wrapperElement.querySelector(
-			'[data-kt-select-select-all]',
+			'[data-kt-select-select-all]'
 		) as HTMLElement;
 
-		// Cache the options container for performance
+// Cache the options container for performance
 		this._optionsContainer = this._dropdownContentElement.querySelector(
 			'[data-kt-select-options]',
 		) as HTMLElement;
@@ -865,7 +865,7 @@ export class KTSelect extends KTComponent {
 		this._eventManager.addListener(
 			this._dropdownContentElement,
 			'click',
-			this._handleDropdownOptionClick.bind(this),
+			this._handleDropdownOptionClick.bind(this)
 		);
 
 		if (this._selectAllButton) {
@@ -875,7 +875,7 @@ export class KTSelect extends KTComponent {
 				this._eventManager.addListener(
 					this._selectAllButtonToggle,
 					'click',
-					this._handleSelectAllClick.bind(this),
+					this._handleSelectAllClick.bind(this)
 				);
 			}
 		}
@@ -885,7 +885,7 @@ export class KTSelect extends KTComponent {
 		if (this._wrapperElement) {
 			this._wrapperElement.addEventListener(
 				'keydown',
-				this._handleKeyboardEvent.bind(this),
+this._handleKeyboardEvent.bind(this),
 			);
 		}
 	}
@@ -906,7 +906,7 @@ export class KTSelect extends KTComponent {
 			) {
 				this._searchInputElement.addEventListener(
 					'input',
-					this._handleRemoteSearch.bind(this),
+					this._handleRemoteSearch.bind(this)
 				);
 			}
 		}
@@ -957,7 +957,7 @@ export class KTSelect extends KTComponent {
 				} else if (this._config.dataValueField) {
 					const extractedValue = this._getValueByKey(
 						item,
-						this._config.dataValueField,
+						this._config.dataValueField
 					);
 					value = extractedValue !== null ? String(extractedValue) : '';
 				}
@@ -969,7 +969,7 @@ export class KTSelect extends KTComponent {
 				} else if (this._config.dataFieldText) {
 					const extractedLabel = this._getValueByKey(
 						item,
-						this._config.dataFieldText,
+						this._config.dataFieldText
 					);
 					label =
 						extractedLabel !== null ? String(extractedLabel) : 'Unnamed option';
@@ -1010,7 +1010,7 @@ export class KTSelect extends KTComponent {
 
 		if (this._config.debug)
 			console.log(
-				`Extracting [${key}] from object => ${result !== null ? JSON.stringify(result) : 'null'}`,
+				`Extracting [${key}] from object => ${result !== null ? JSON.stringify(result) : 'null'}`
 			);
 		return result;
 	}
@@ -1024,12 +1024,12 @@ export class KTSelect extends KTComponent {
 			(option) => {
 				const value = (option as HTMLOptionElement).value;
 				this._selectOption(value);
-			},
+			}
 		);
 
 		// Handle data-kt-select-pre-selected attribute for React compatibility
 		const preSelectedValues = element.getAttribute(
-			'data-kt-select-pre-selected',
+			'data-kt-select-pre-selected'
 		);
 		if (preSelectedValues) {
 			const values = preSelectedValues.split(',').map((v) => v.trim());
@@ -1059,7 +1059,7 @@ export class KTSelect extends KTComponent {
 		if (this._config.debug)
 			console.log(
 				'openDropdown called, dropdownModule exists:',
-				!!this._dropdownModule,
+				!!this._dropdownModule
 			);
 
 		if (!this._dropdownModule) {
@@ -1105,7 +1105,7 @@ export class KTSelect extends KTComponent {
 		if (this._config.debug)
 			console.log(
 				'closeDropdown called, dropdownModule exists:',
-				!!this._dropdownModule,
+				!!this._dropdownModule
 			);
 
 		// Only check if dropdown module exists, not dropdownIsOpen flag
@@ -1206,7 +1206,7 @@ export class KTSelect extends KTComponent {
 
 		// Update the original select element's option selected state
 		const optionEl = Array.from(this._element.querySelectorAll('option')).find(
-			(opt) => opt.value === value,
+			(opt) => opt.value === value
 		) as HTMLOptionElement;
 
 		if (optionEl) {
@@ -1278,7 +1278,7 @@ export class KTSelect extends KTComponent {
 		if (!valueDisplayEl) {
 			if (this._config.debug) {
 				console.warn(
-					'KTSelect: Value display element is null. Cannot update display or placeholder. Check template for [data-kt-select-value].',
+'KTSelect: Value display element is null. Cannot update display or placeholder. Check template for [data-kt-select-value].',
 				);
 			}
 			return; // Nothing to display on if the element is missing
@@ -1305,7 +1305,7 @@ export class KTSelect extends KTComponent {
 					let content = '';
 					if (this._config.displayTemplate) {
 						content = this.renderDisplayTemplateForSelected(
-							this.getSelectedOptions(),
+this.getSelectedOptions(),
 						);
 					} else {
 						content = this.getSelectedOptionsText();
@@ -1321,7 +1321,7 @@ export class KTSelect extends KTComponent {
 	 */
 	private _isOptionOriginallyDisabled(value: string): boolean {
 		const originalOption = Array.from(
-			this._element.querySelectorAll('option'),
+this._element.querySelectorAll('option'),
 		).find((opt) => opt.value === value) as HTMLOptionElement;
 		return originalOption ? originalOption.disabled : false;
 	}
@@ -1330,7 +1330,7 @@ export class KTSelect extends KTComponent {
 	 * Update CSS classes for selected options
 	 */
 	private _updateSelectedOptionClass(): void {
-		const allOptions = this._dropdownContentElement.querySelectorAll(
+const allOptions = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		);
 		const selectedValues = this._state.getSelectedOptions();
@@ -1341,7 +1341,7 @@ export class KTSelect extends KTComponent {
 		if (this._config.debug)
 			console.log(
 				'Updating selected classes for options, selected values:',
-				selectedValues,
+				selectedValues
 			);
 
 		allOptions.forEach((option) => {
@@ -1421,7 +1421,7 @@ export class KTSelect extends KTComponent {
 			// Extract just the title text, not including description
 			let selectedText = '';
 			const titleElement = focusedOption.querySelector(
-				'[data-kt-option-title]',
+				'[data-kt-option-title]'
 			);
 			if (titleElement) {
 				// If it has a structured content with title element
@@ -1449,7 +1449,7 @@ export class KTSelect extends KTComponent {
 	 */
 	private _handleDropdownOptionClick(event: Event) {
 		const optionElement = (event.target as HTMLElement).closest(
-			`[data-kt-select-option]`,
+			`[data-kt-select-option]`
 		);
 
 		// If an option is clicked, handle the option click
@@ -1469,7 +1469,7 @@ export class KTSelect extends KTComponent {
 
 		// Find the clicked option element
 		const clickedOption = (event.target as HTMLElement).closest(
-			`[data-kt-select-option]`,
+			`[data-kt-select-option]`
 		) as HTMLElement;
 
 		if (!clickedOption) {
@@ -1496,7 +1496,7 @@ export class KTSelect extends KTComponent {
 		if (!this._config.multiple && this._state.isSelected(optionValue)) {
 			if (this._config.debug)
 				console.log(
-					'Single select mode: clicked already selected option. Closing dropdown.',
+'Single select mode: clicked already selected option. Closing dropdown.',
 				);
 			this.closeDropdown();
 			return;
@@ -1529,7 +1529,7 @@ export class KTSelect extends KTComponent {
 	private _setAriaAttributes() {
 		this._displayElement.setAttribute(
 			'aria-expanded',
-			this._dropdownIsOpen.toString(),
+			this._dropdownIsOpen.toString()
 		);
 	}
 
@@ -1594,7 +1594,7 @@ export class KTSelect extends KTComponent {
 	public showAllOptions() {
 		// Get all options in the dropdown
 		const options = Array.from(
-			this._dropdownContentElement.querySelectorAll(`[data-kt-select-option]`),
+this._dropdownContentElement.querySelectorAll(`[data-kt-select-option]`),
 		);
 
 		// Show all options by removing the hidden class and any inline styles
@@ -1617,7 +1617,7 @@ export class KTSelect extends KTComponent {
 						// Otherwise, remove just the display property
 						option.setAttribute(
 							'style',
-							styleAttr?.replace(/display:\s*[^;]+;?/gi, '')?.trim(),
+							styleAttr?.replace(/display:\s*[^;]+;?/gi, '')?.trim()
 						);
 					}
 				}
@@ -1663,21 +1663,21 @@ export class KTSelect extends KTComponent {
 		const isSelected = this._state.isSelected(value);
 		if (this._config.debug)
 			console.log(
-				`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}`,
+`toggleSelection called for value: ${value}, isSelected: ${isSelected}, multiple: ${this._config.multiple}`,
 			);
 
 		// If already selected in single select mode, do nothing (can't deselect in single select)
 		if (isSelected && !this._config.multiple) {
 			if (this._config.debug)
 				console.log(
-					'Early return from toggleSelection - already selected in single select mode',
+'Early return from toggleSelection - already selected in single select mode',
 				);
 			return;
 		}
 
 		if (this._config.debug)
 			console.log(
-				`Toggling selection for option: ${value}, currently selected: ${isSelected}`,
+`Toggling selection for option: ${value}, currently selected: ${isSelected}`,
 			);
 
 		// Ensure any search input is cleared when selection changes
@@ -1690,7 +1690,7 @@ export class KTSelect extends KTComponent {
 
 		// Update the original select element's option selected state
 		const optionEl = Array.from(this._element.querySelectorAll('option')).find(
-			(opt) => opt.value === value,
+			(opt) => opt.value === value
 		) as HTMLOptionElement;
 
 		if (optionEl) {
@@ -1716,13 +1716,13 @@ export class KTSelect extends KTComponent {
 		if (!this._config.multiple) {
 			if (this._config.debug)
 				console.log(
-					'About to call closeDropdown() for single select mode - always close after selection',
+'About to call closeDropdown() for single select mode - always close after selection',
 				);
 			this.closeDropdown();
 		} else {
 			if (this._config.debug)
 				console.log(
-					'Multiple select mode - keeping dropdown open for additional selections',
+'Multiple select mode - keeping dropdown open for additional selections',
 				);
 			// Don't close dropdown in multiple select mode to allow multiple selections
 			this.updateSelectAllButtonState();
@@ -2222,7 +2222,7 @@ export class KTSelect extends KTComponent {
 						.catch((error) => {
 							console.error('Error updating search results:', error);
 							this._renderSearchErrorState(
-								error.message || 'Failed to load search results',
+								error.message || 'Failed to load search results'
 							);
 						});
 				})
@@ -2230,7 +2230,7 @@ export class KTSelect extends KTComponent {
 					console.error('Error fetching search results:', error);
 					this._renderSearchErrorState(
 						this._remoteModule.getErrorMessage() ||
-							'Failed to load search results',
+'Failed to load search results',
 					);
 				});
 		}, this._config.searchDebounce || 300);
@@ -2245,7 +2245,7 @@ export class KTSelect extends KTComponent {
 	private _renderSearchLoadingState() {
 		if (!this._originalOptionsHtml && this._dropdownContentElement) {
 			const optionsContainer = this._dropdownContentElement.querySelector(
-				'[data-kt-select-options]',
+				'[data-kt-select-options]'
 			);
 			if (optionsContainer) {
 				this._originalOptionsHtml = optionsContainer.innerHTML;
@@ -2308,7 +2308,7 @@ export class KTSelect extends KTComponent {
 	private _updateSearchResults(items: KTSelectOptionData[]) {
 		if (!this._dropdownContentElement) return;
 
-		// Use cached options container for better performance
+// Use cached options container for better performance
 		const optionsContainer =
 			this._optionsContainer ||
 			this._dropdownContentElement.querySelector('[data-kt-select-options]');
@@ -2334,7 +2334,7 @@ export class KTSelect extends KTComponent {
 		}
 	}
 
-	/**
+/**
 	 * Update original select element with search results
 	 * @param items Search result items
 	 */
@@ -2378,7 +2378,7 @@ export class KTSelect extends KTComponent {
 		const texts = selectedValues
 			.map((value) => {
 				const option = Array.from(this._options).find(
-					(opt) => opt.getAttribute('data-value') === value,
+(opt) => opt.getAttribute('data-value') === value,
 				);
 				return option?.getAttribute('data-text') || '';
 			})
@@ -2398,7 +2398,7 @@ export class KTSelect extends KTComponent {
 			(dropdownOption.classList.contains('disabled') ||
 				dropdownOption.getAttribute('aria-disabled') === 'true');
 		const selectOption = Array.from(
-			this._element.querySelectorAll('option'),
+this._element.querySelectorAll('option'),
 		).find((opt) => opt.value === value) as HTMLOptionElement;
 		const isNativeDisabled = selectOption && selectOption.disabled;
 		return Boolean(isDropdownDisabled || isNativeDisabled);
@@ -2504,7 +2504,7 @@ export class KTSelect extends KTComponent {
 						) {
 							if (this._config.debug)
 								console.log(
-									'Enter on already selected item in single-select mode. Closing.',
+'Enter on already selected item in single-select mode. Closing.',
 								);
 							this.closeDropdown();
 							event.preventDefault();
@@ -2550,7 +2550,7 @@ export class KTSelect extends KTComponent {
 				selectedValues
 					.map((value) => {
 						const option = Array.from(this._options).find(
-							(opt) => opt.getAttribute('data-value') === value,
+(opt) => opt.getAttribute('data-value') === value,
 						);
 						if (!option) return '';
 
@@ -2562,7 +2562,7 @@ export class KTSelect extends KTComponent {
 							if (['string', 'number', 'boolean'].includes(typeof val)) {
 								displayTemplate = displayTemplate.replace(
 									new RegExp(`{{${key}}}`, 'g'),
-									String(val),
+String(val),
 								);
 							}
 						});
@@ -2573,7 +2573,7 @@ export class KTSelect extends KTComponent {
 							text,
 						});
 					})
-					.filter(Boolean),
+.filter(Boolean),
 			),
 		);
 		return contentArray.join(displaySeparator);
@@ -2624,7 +2624,7 @@ export class KTSelect extends KTComponent {
 		// Remove and rebuild the custom dropdown options from the native select
 		if (this._dropdownContentElement) {
 			const optionsContainer = this._dropdownContentElement.querySelector(
-				'[data-kt-select-options]',
+'[data-kt-select-options]',
 			);
 			if (optionsContainer) {
 				optionsContainer.innerHTML = '';
@@ -2641,7 +2641,7 @@ export class KTSelect extends KTComponent {
 					optionsContainer.appendChild(renderedOption);
 				});
 				// Update internal references
-				this._options = this._dropdownContentElement.querySelectorAll(
+this._options = this._dropdownContentElement.querySelectorAll(
 					'[data-kt-select-option]',
 				) as NodeListOf<HTMLElement>;
 			}
@@ -2655,7 +2655,7 @@ export class KTSelect extends KTComponent {
 	private _syncSelectionFromNative() {
 		// Sync internal state from the native select's selected options
 		const selected = Array.from(
-			this._element.querySelectorAll('option:checked'),
+this._element.querySelectorAll('option:checked'),
 		).map((opt) => (opt as HTMLOptionElement).value);
 		this._state.setSelectedOptions(
 			this._config.multiple ? selected : selected[0] || '',
@@ -2675,11 +2675,11 @@ export class KTSelect extends KTComponent {
 		if (visibleOptions.length === 0) return;
 
 		const visibleValues = visibleOptions.map(
-			(opt) => opt.dataset.value as string,
+			(opt) => opt.dataset.value as string
 		);
 		const selectedValues = new Set(this.getSelectedOptions());
 		const isAllSelected = visibleOptions.every((opt) =>
-			selectedValues.has(opt.dataset.value as string),
+			selectedValues.has(opt.dataset.value as string)
 		);
 
 		if (isAllSelected) {
@@ -2721,7 +2721,7 @@ export class KTSelect extends KTComponent {
 
 		const selectedValues = new Set(this.getSelectedOptions());
 		const isAllSelected = visibleOptions.every((opt) =>
-			selectedValues.has(opt.dataset.value as string),
+			selectedValues.has(opt.dataset.value as string)
 		);
 
 		this._selectAllButtonToggle.textContent = isAllSelected

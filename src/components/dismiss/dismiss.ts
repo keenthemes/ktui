@@ -51,7 +51,7 @@ export class KTDismiss extends KTComponent implements KTDismissInterface {
 	private _getTargetElement(): HTMLElement | null {
 		return (
 			KTDom.getElement(
-				this._element.getAttribute('data-kt-dismiss') as string,
+				this._element.getAttribute('data-kt-dismiss') as string
 			) || KTDom.getElement(this._getOption('target') as string)
 		);
 	}
@@ -94,7 +94,7 @@ export class KTDismiss extends KTComponent implements KTDismissInterface {
 
 			if (this._getOption('mode').toString().toLowerCase() === 'hide') {
 				this._targetElement.classList.add(
-					this._getOption('hiddenClass') as string,
+					this._getOption('hiddenClass') as string
 				);
 			} else {
 				KTDom.remove(this._targetElement);
@@ -129,7 +129,7 @@ export class KTDismiss extends KTComponent implements KTDismissInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTDismissConfigInterface,
+		config?: KTDismissConfigInterface
 	): KTDismiss {
 		return this.getInstance(element) || new KTDismiss(element, config);
 	}

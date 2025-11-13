@@ -55,6 +55,38 @@
 	"types": "lib/esm/index.d.ts",
 	"main": "lib/cjs/index.js",
 	"module": "lib/esm/index.js",
+	"exports": {
+		".": {
+			"types": "./lib/esm/index.d.ts",
+			"import": "./lib/esm/index.js",
+			"require": "./lib/cjs/index.js"
+		},
+		"./styles.css": "./dist/styles.css",
+		"./styles": "./dist/styles.css",
+		"./dist/styles.css": "./dist/styles.css",
+		"./lib/*": {
+			"types": "./lib/esm/*.d.ts",
+			"import": "./lib/esm/*.js",
+			"require": "./lib/cjs/*.js"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			"*": [
+				"lib/esm/*"
+			],
+			"styles.css": [
+				"dist/styles.css"
+			],
+			"styles": [
+				"dist/styles.css"
+			]
+		}
+	},
+	"files": [
+		"lib/",
+		"dist/"
+	],
 	"license": "MIT",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
@@ -62,7 +94,9 @@
 		"build:webpack": "webpack --mode=development",
 		"build:webpack:watch": "webpack --env watch=true --mode=development",
 		"build:prod": "webpack --env production --mode=production",
-		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
+		"build:lib": "npm run build:lib:cjs && npm run build:lib:esm",
+		"build:lib:cjs": "tsc --project tsconfig.lib.json --outDir lib/cjs",
+		"build:lib:esm": "tsc --project tsconfig.esm.json --outDir lib/esm",
 		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
 		"build:css:once": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css",
 		"dev": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
@@ -79,6 +113,8 @@
 		"@babel/preset-env": "^7.27.2",
 		"@eslint/js": "^9.27.0",
 		"@types/node": "^22.15.23",
+		"@typescript-eslint/eslint-plugin": "^8.44.0",
+		"@typescript-eslint/parser": "^8.44.0",
 		"autoprefixer": "^10.4.21",
 		"babel-loader": "^10.0.0",
 		"clean-webpack-plugin": "^4.0.0",

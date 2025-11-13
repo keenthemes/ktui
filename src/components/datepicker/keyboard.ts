@@ -37,10 +37,10 @@ export class KTDatepickerKeyboard {
 	private _setupEventListeners(): void {
 		// Listen for open/close events to activate/deactivate keyboard navigation
 		this._eventManager.addEventListener(KTDatepickerEventName.OPEN, () =>
-			this._activateKeyboardNavigation(),
+			this._activateKeyboardNavigation()
 		);
 		this._eventManager.addEventListener(KTDatepickerEventName.CLOSE, () =>
-			this._deactivateKeyboardNavigation(),
+			this._deactivateKeyboardNavigation()
 		);
 
 		// Listen for custom keyboard-open event
@@ -65,7 +65,7 @@ export class KTDatepickerKeyboard {
 					// Focus the day
 					this._focusDay();
 				}, 150);
-			},
+			}
 		);
 
 		// Handle focus events
@@ -138,7 +138,7 @@ export class KTDatepickerKeyboard {
 
 		// Add an even more specific listener for Enter key on the display element
 		const displayElement = this._element.querySelector(
-			'[data-kt-datepicker-display]',
+			'[data-kt-datepicker-display]'
 		);
 		if (displayElement) {
 			displayElement.addEventListener(
@@ -166,7 +166,7 @@ export class KTDatepickerKeyboard {
 						}
 					}
 				},
-				true,
+				true
 			); // Use capture phase to ensure this runs first
 		}
 	}
@@ -244,14 +244,14 @@ export class KTDatepickerKeyboard {
 		const daysInMonth = new Date(
 			currentDate.getFullYear(),
 			currentDate.getMonth() + 1,
-			0,
+			0
 		).getDate();
 
 		// Get the day of week for the first day of the month to calculate grid positions
 		const firstDayOfMonth = new Date(
 			currentDate.getFullYear(),
 			currentDate.getMonth(),
-			1,
+			1
 		).getDay();
 		// Adjust for first day of week setting
 		const firstDayOffset =
@@ -280,7 +280,7 @@ export class KTDatepickerKeyboard {
 					const lastDayPrevMonth = new Date(
 						currentDate.getFullYear(),
 						currentDate.getMonth(),
-						0,
+						0
 					).getDate();
 					this._focusedDay = lastDayPrevMonth;
 				} else {
@@ -323,7 +323,7 @@ export class KTDatepickerKeyboard {
 					const lastDayPrevMonth = new Date(
 						currentDate.getFullYear(),
 						currentDate.getMonth(),
-						0,
+						0
 					).getDate();
 
 					// Calculate the corresponding day in the previous month's last row
@@ -358,7 +358,7 @@ export class KTDatepickerKeyboard {
 					const nextMonthDays = new Date(
 						newDate.getFullYear(),
 						newDate.getMonth() + 1,
-						0,
+						0
 					).getDate();
 					this._focusedDay = Math.min(this._focusedDay, nextMonthDays);
 				} else {
@@ -393,7 +393,7 @@ export class KTDatepickerKeyboard {
 				const prevMonthDays = new Date(
 					prevMonthDate.getFullYear(),
 					prevMonthDate.getMonth() + 1,
-					0,
+					0
 				).getDate();
 				if (this._focusedDay > prevMonthDays) {
 					this._focusedDay = prevMonthDays;
@@ -412,7 +412,7 @@ export class KTDatepickerKeyboard {
 				const nextMonthDays = new Date(
 					nextMonthDate.getFullYear(),
 					nextMonthDate.getMonth() + 1,
-					0,
+					0
 				).getDate();
 				if (this._focusedDay > nextMonthDays) {
 					this._focusedDay = nextMonthDays;
@@ -432,7 +432,7 @@ export class KTDatepickerKeyboard {
 						selectedDate.setHours(
 							state.selectedTime.hours,
 							state.selectedTime.minutes,
-							state.selectedTime.seconds,
+							state.selectedTime.seconds
 						);
 					} else {
 						selectedDate.setHours(0, 0, 0, 0);
@@ -614,7 +614,7 @@ export class KTDatepickerKeyboard {
 
 		// First try to find the day in the current month
 		let dayButton = dropdown.querySelector(
-			`button[data-date="${currentDay}"]:not(.text-gray-400)`,
+			`button[data-date="${currentDay}"]:not(.text-gray-400)`
 		);
 
 		// If not found, try to find any button with the day number

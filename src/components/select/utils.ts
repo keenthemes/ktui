@@ -26,7 +26,7 @@ export function filterOptions(
 	query: string,
 	config: KTSelectConfigInterface,
 	dropdownElement: HTMLElement,
-	onVisibleCount?: (count: number) => void,
+	onVisibleCount?: (count: number) => void
 ): number {
 	let visibleOptionsCount = 0;
 
@@ -99,7 +99,7 @@ export class FocusManager {
 	constructor(
 		element: HTMLElement,
 		optionsSelector: string = '[data-kt-select-option]',
-		config?: KTSelectConfigInterface,
+		config?: KTSelectConfigInterface
 	) {
 		this._element = element;
 		this._optionsSelector = optionsSelector;
@@ -131,7 +131,7 @@ export class FocusManager {
 	 */
 	public getVisibleOptions(): HTMLElement[] {
 		return Array.from(
-			this._element.querySelectorAll(this._optionsSelector),
+			this._element.querySelectorAll(this._optionsSelector)
 		).filter((option) => {
 			const element = option as HTMLElement;
 			// Check only for hidden class
@@ -425,7 +425,7 @@ export class EventManager {
 		element: HTMLElement,
 		event: string,
 		handler: EventListenerOrEventListenerObject,
-		context?: any,
+		context?: any
 	): void {
 		if (!element) return;
 
@@ -453,7 +453,7 @@ export class EventManager {
 	public removeListener(
 		element: HTMLElement,
 		event: string,
-		handler: EventListenerOrEventListenerObject,
+		handler: EventListenerOrEventListenerObject
 	): void {
 		if (!element) return;
 
@@ -498,7 +498,7 @@ export class EventManager {
  */
 export function debounce(
 	func: (...args: any[]) => void,
-	delay: number,
+	delay: number
 ): (...args: any[]) => void {
 	let timeout: ReturnType<typeof setTimeout>;
 

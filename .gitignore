@@ -5,6 +5,9 @@ lib
 
 # Dependencies
 node_modules
+dist
+.husky
+.vscode
 
 # Testing and coverage
 coverage

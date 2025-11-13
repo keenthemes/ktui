@@ -27,7 +27,7 @@ export class KTSelectSearch {
 		this._focusManager = new FocusManager(
 			this._select.getDropdownElement(),
 			'[data-kt-select-option]',
-			select.getConfig(),
+			select.getConfig()
 		);
 		this.handleSearchInput = this._handleSearchInput.bind(this);
 		this._config = select.getConfig();
@@ -42,7 +42,7 @@ export class KTSelectSearch {
 				if (this._config.debug)
 					console.log(
 						'Initializing search module with input:',
-						this._searchInput,
+						this._searchInput
 					);
 
 				// First remove any existing listeners to prevent duplicates
@@ -52,7 +52,7 @@ export class KTSelectSearch {
 				this._eventManager.addListener(
 					this._searchInput,
 					'input',
-					this.handleSearchInput,
+					this.handleSearchInput
 				);
 
 				// Add keydown event listener for navigation, selection, and escape
@@ -230,7 +230,7 @@ export class KTSelectSearch {
 	 */
 	private _restoreOptionContentsBeforeFilter(): void {
 		const options = Array.from(
-			this._select.getOptionsElement(),
+this._select.getOptionsElement(),
 		) as HTMLElement[];
 		options.forEach((option) => {
 			const value = option.getAttribute('data-value');
@@ -284,7 +284,7 @@ export class KTSelectSearch {
 
 	private _filterOptions(query: string) {
 		const options = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
@@ -302,7 +302,7 @@ export class KTSelectSearch {
 			query,
 			config,
 			dropdownElement,
-			(count) => this._handleNoResults(count),
+(count) => this._handleNoResults(count),
 		);
 
 		this._select.updateSelectAllButtonState();
@@ -314,7 +314,7 @@ export class KTSelectSearch {
 	private _resetAllOptions() {
 		// Show all options
 		const options = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 
 		// Ensure the cache is populated if it's somehow empty here
@@ -357,7 +357,7 @@ export class KTSelectSearch {
 
 		const dropdownElement = this._select.getDropdownElement();
 		const optionsContainer = dropdownElement.querySelector(
-			'[data-kt-select-options]',
+			'[data-kt-select-options]'
 		);
 		if (optionsContainer) {
 			optionsContainer.appendChild(this._noResultsElement);
@@ -380,7 +380,7 @@ export class KTSelectSearch {
 	public clearSearch() {
 		// Restore original option content (removes highlighting)
 		const optionsToClear = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 
 		// Ensure cache is available
@@ -407,7 +407,7 @@ export class KTSelectSearch {
 		// Re-cache all option contents
 		this._originalOptionContents.clear();
 		const currentOptions = Array.from(
-			this._select.getOptionsElement(),
+			this._select.getOptionsElement()
 		) as HTMLElement[];
 
 		currentOptions.forEach((option) => {

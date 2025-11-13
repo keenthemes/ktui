@@ -32,7 +32,7 @@ class FocusManager {
 	 */
 	public getVisibleOptions(): HTMLElement[] {
 		return Array.from(
-			this._element.querySelectorAll(this._focusableSelector),
+			this._element.querySelectorAll(this._focusableSelector)
 		).filter((el) => {
 			const element = el as HTMLElement;
 			return element.offsetParent !== null; // Only visible elements
@@ -116,7 +116,7 @@ class EventManager {
 	public addListener(
 		element: HTMLElement,
 		eventType: string,
-		handler: Function,
+		handler: Function
 	): void {
 		if (!this._listeners.has(element)) {
 			this._listeners.set(element, new Map());
@@ -182,12 +182,12 @@ class FocusTrap {
 	private _update(): void {
 		// Get all focusable elements
 		const focusableElements = this._element.querySelectorAll(
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
 		);
 
 		// Convert to array and filter out disabled elements
 		this._focusableElements = Array.from(focusableElements).filter(
-			(el) => !el.hasAttribute('disabled'),
+			(el) => !el.hasAttribute('disabled')
 		) as HTMLElement[];
 
 		// Get first and last focusable elements
@@ -273,7 +273,7 @@ export class KTDatepickerDropdown extends KTComponent {
 		element: HTMLElement,
 		toggleElement: HTMLElement,
 		dropdownElement: HTMLElement,
-		config: KTDatepickerConfigInterface,
+		config: KTDatepickerConfigInterface
 	) {
 		super();
 
@@ -295,21 +295,21 @@ export class KTDatepickerDropdown extends KTComponent {
 		this._eventManager.addListener(
 			this._toggleElement,
 			'click',
-			this._handleToggleClick.bind(this),
+			this._handleToggleClick.bind(this)
 		);
 
 		// Keyboard navigation
 		this._eventManager.addListener(
 			this._element,
 			'keydown',
-			this._handleKeyDown.bind(this),
+			this._handleKeyDown.bind(this)
 		);
 
 		// Close on outside click
 		this._eventManager.addListener(
 			document as unknown as HTMLElement,
 			'click',
-			this._handleOutsideClick.bind(this),
+			this._handleOutsideClick.bind(this)
 		);
 	}
 
@@ -390,7 +390,7 @@ export class KTDatepickerDropdown extends KTComponent {
 					// If we're in range mode and range selection is in progress, don't close
 					if (config.range && state.isRangeSelectionInProgress) {
 						console.log(
-							'Outside click detected but range selection in progress - keeping dropdown open',
+							'Outside click detected but range selection in progress - keeping dropdown open'
 						);
 						return;
 					}
@@ -486,7 +486,7 @@ export class KTDatepickerDropdown extends KTComponent {
 						},
 					},
 				],
-			},
+			}
 		);
 	}
 
@@ -513,7 +513,7 @@ export class KTDatepickerDropdown extends KTComponent {
 	public updatePosition(): void {
 		// Look for the display element rather than using the input directly
 		const displayElement = this._element.querySelector(
-			'[data-kt-datepicker-display]',
+			'[data-kt-datepicker-display]'
 		) as HTMLElement;
 		const triggerElement = displayElement || this._toggleElement;
 
@@ -659,7 +659,7 @@ export class KTDatepickerDropdown extends KTComponent {
 		}
 
 		const currentMonthDay = this._dropdownElement.querySelector(
-			'button[data-date]:not(.text-gray-400)',
+			'button[data-date]:not(.text-gray-400)'
 		) as HTMLElement;
 		if (currentMonthDay) {
 			currentMonthDay.focus();

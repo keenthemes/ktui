@@ -55,11 +55,11 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		this._buildConfig(config);
 
 		this._toggleElement = this._element.querySelector(
-			'[data-kt-dropdown-toggle]',
+			'[data-kt-dropdown-toggle]'
 		) as HTMLElement;
 		if (!this._toggleElement) return;
 		this._menuElement = this._element.querySelector(
-			'[data-kt-dropdown-menu]',
+			'[data-kt-dropdown-menu]'
 		) as HTMLElement;
 		if (!this._menuElement) return;
 
@@ -82,11 +82,11 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 
 	protected _setupNestedDropdowns(): void {
 		const subDropdowns = this._menuElement.querySelectorAll(
-			'[data-kt-dropdown-toggle]',
+			'[data-kt-dropdown-toggle]'
 		);
 		subDropdowns.forEach((subToggle) => {
 			const subItem = subToggle.closest(
-				'[data-kt-dropdown-item]',
+				'[data-kt-dropdown-item]'
 			) as HTMLElement;
 			const subMenu = subToggle
 				.closest('.kt-menu-item')
@@ -138,7 +138,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 					this._hide();
 				}
 			},
-			parseInt(this._getOption('hoverTimeout') as string),
+			parseInt(this._getOption('hoverTimeout') as string)
 		);
 
 		KTData.set(this._element, 'hover', '1');
@@ -179,7 +179,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		this._menuElement.style.opacity = '1';
 
 		this._menuElement.classList.remove(
-			this._getOption('hiddenClass') as string,
+			this._getOption('hiddenClass') as string
 		);
 		this._toggleElement.classList.add('active');
 		this._menuElement.classList.add('open');
@@ -244,7 +244,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 			const popper = createPopper(
 				reference as Element | VirtualElement,
 				this._menuElement,
-				this._getPopperConfig(),
+				this._getPopperConfig()
 			);
 			KTData.set(this._element, 'popper', popper);
 		}
@@ -401,7 +401,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTDropdownConfigInterface,
+		config?: KTDropdownConfigInterface
 	): KTDropdown {
 		return this.getInstance(element) || new KTDropdown(element, config);
 	}
@@ -421,7 +421,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 	public static hide(skipElement?: HTMLElement): void {
 		document
 			.querySelectorAll(
-				'.open[data-kt-dropdown-initialized]:not([data-kt-dropdown-permanent="true"])',
+				'.open[data-kt-dropdown-initialized]:not([data-kt-dropdown-permanent="true"])'
 			)
 			.forEach((item) => {
 				if (skipElement && (skipElement === item || item.contains(skipElement)))
@@ -436,7 +436,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		document.addEventListener('click', (event: Event) => {
 			document
 				.querySelectorAll(
-					'.open[data-kt-dropdown-initialized]:not([data-kt-dropdown-permanent="true"])',
+					'.open[data-kt-dropdown-initialized]:not([data-kt-dropdown-permanent="true"])'
 				)
 				.forEach((element) => {
 					const dropdown = KTDropdown.getInstance(element as HTMLElement);
@@ -462,7 +462,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 	public static handleKeyboard(): void {
 		document.addEventListener('keydown', (event: KeyboardEvent) => {
 			const dropdownEl = document.querySelector(
-				'.open[data-kt-dropdown-initialized]',
+				'.open[data-kt-dropdown-initialized]'
 			);
 			const dropdown = KTDropdown.getInstance(dropdownEl as HTMLElement);
 			if (!dropdown || !dropdown._getOption('keyboard')) return;
@@ -486,7 +486,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 				if (dropdown && dropdown._getOption('trigger') === 'hover') {
 					dropdown.mouseover(event as MouseEvent);
 				}
-			},
+			}
 		);
 	}
 
@@ -500,7 +500,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 				if (dropdown && dropdown._getOption('trigger') === 'hover') {
 					dropdown.mouseout(event as MouseEvent);
 				}
-			},
+			}
 		);
 	}
 
@@ -514,7 +514,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 				if (dropdown) {
 					dropdown.click(event);
 				}
-			},
+			}
 		);
 	}
 
@@ -528,7 +528,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 				if (dropdown) {
 					dropdown.hide();
 				}
-			},
+			}
 		);
 	}
 

@@ -46,7 +46,7 @@ export class KTScrollspy extends KTComponent implements KTScrollspyInterface {
 		this._targetElement = targetElement;
 
 		this._anchorElements = this._element.querySelectorAll(
-			'[data-kt-scrollspy-anchor]',
+			'[data-kt-scrollspy-anchor]'
 		);
 
 		if (!this._anchorElements) return;
@@ -78,7 +78,7 @@ export class KTScrollspy extends KTComponent implements KTScrollspyInterface {
 			(event: Event, target: HTMLElement) => {
 				event.preventDefault();
 				this._scrollTo(target);
-			},
+			}
 		);
 	}
 
@@ -95,7 +95,7 @@ export class KTScrollspy extends KTComponent implements KTScrollspyInterface {
 		let offset = parseInt(this._getOption('offset') as string);
 		if (anchorElement.getAttribute('data-kt-scrollspy-anchor-offset')) {
 			offset = parseInt(
-				anchorElement.getAttribute('data-kt-scrollspy-anchor-offset') as string,
+				anchorElement.getAttribute('data-kt-scrollspy-anchor-offset') as string
 			);
 		}
 
@@ -126,7 +126,7 @@ export class KTScrollspy extends KTComponent implements KTScrollspyInterface {
 		let offset = parseInt(this._getOption('offset') as string);
 		if (anchorElement.getAttribute('data-kt-scrollspy-anchor-offset')) {
 			offset = parseInt(
-				anchorElement.getAttribute('data-kt-scrollspy-anchor-offset') as string,
+				anchorElement.getAttribute('data-kt-scrollspy-anchor-offset') as string
 			);
 		}
 
@@ -145,7 +145,7 @@ export class KTScrollspy extends KTComponent implements KTScrollspyInterface {
 
 			const parentAnchorElements = KTDom.parents(
 				anchorElement,
-				'[data-kt-scrollspy-group]',
+				'[data-kt-scrollspy-group]'
 			);
 			if (parentAnchorElements) {
 				parentAnchorElements.forEach((parentAnchorElement) => {
@@ -201,7 +201,7 @@ export class KTScrollspy extends KTComponent implements KTScrollspyInterface {
 
 	public static getOrCreateInstance(
 		element: HTMLElement,
-		config?: KTScrollspyConfigInterface,
+		config?: KTScrollspyConfigInterface
 	): KTScrollspy {
 		return this.getInstance(element) || new KTScrollspy(element, config);
 	}
