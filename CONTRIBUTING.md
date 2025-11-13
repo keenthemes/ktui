@@ -31,6 +31,19 @@ If you need any help, feel free to reach out us via [@keenthemes](https://x.com/
    ```sh
    npm run lint
    ```
+4. Build the project:
+   ```sh
+   npm run build
+   ```
+5. Start development mode (watch for changes):
+   ```sh
+   npm run dev
+   ```
+
+### Build Commands
+
+- **`npm run build`**: Performs a one-off build and exits. Use this for production builds and CI/CD pipelines.
+- **`npm run dev`**: Starts development mode with file watching. Use this during development for live reloading when files change.
 
 ## Format and lint your code
 

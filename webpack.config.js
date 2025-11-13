@@ -5,7 +5,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = (env) => {
 	const baseConfig = {
 		mode: env.production ? 'production' : 'development',
-		watch: env.production ? false : true,
+		watch: env.watch === 'true' || false,
 		entry: {
 			ktui: './src/index.ts',
 			// '../index': './src/index.ts',

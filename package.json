@@ -92,7 +92,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "concurrently \"npm run build:webpack\" \"npm run build:css:once\"",
 		"build:webpack": "webpack --mode=development",
-		"build:webpack:watch": "webpack --mode=development --watch",
+		"build:webpack:watch": "webpack --env watch=true --mode=development",
 		"build:prod": "webpack --env production --mode=production",
 		"build:lib": "npm run build:lib:cjs && npm run build:lib:esm",
 		"build:lib:cjs": "tsc --project tsconfig.lib.json --outDir lib/cjs",
@@ -106,8 +106,7 @@
 		"format:check": "npx prettier --check 'src/**/*.ts'",
 		"type-check": "npx tsc --noEmit --project tsconfig.lib.json",
 		"validate": "npm run lint && npm run format:check && npm run type-check",
-		"validate:fix": "npm run lint:fix && npm run format",
-		"prepare": "husky"
+		"validate:fix": "npm run lint:fix && npm run format"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.27.3",
@@ -122,7 +121,6 @@
 		"concurrently": "^9.1.2",
 		"eslint": "^9.27.0",
 		"eslint-plugin-prettier": "^5.5.4",
-		"husky": "^9.1.7",
 		"mini-svg-data-uri": "^1.4.4",
 		"prettier": "^3.5.3",
 		"source-map-loader": "^5.0.0",
