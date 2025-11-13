@@ -166,3 +166,10 @@
 		@apply text-right;
 	}
 }
+
+/* DataTable cursor overrides */
+@layer component-overrides {
+	th[data-kt-datatable-column-sort="false"] .kt-table-col {
+		cursor: default;
+	}
+}
