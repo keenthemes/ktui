@@ -1,6 +1,6 @@
 {
 	"name": "@keenthemes/ktui",
-	"version": "1.0.20",
+	"version": "1.0.27",
 	"description": "Free & Open-Source Tailwind UI Components by Keenthemes",
 	"homepage": "https://ktui.io",
 	"repository": {
@@ -90,7 +90,7 @@
 	"license": "MIT",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
+		"build": "concurrently \"npm run build:webpack\" \"npm run build:css:once\"",
 		"build:webpack": "webpack --mode=development",
 		"build:webpack:watch": "webpack --mode=development --watch",
 		"build:prod": "webpack --env production --mode=production",
@@ -98,6 +98,8 @@
 		"build:lib:cjs": "tsc --project tsconfig.lib.json --outDir lib/cjs",
 		"build:lib:esm": "tsc --project tsconfig.esm.json --outDir lib/esm",
 		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
+		"build:css:once": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css",
+		"dev": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
 		"lint": "npx eslint 'src/**/*.ts' --max-warnings 100",
 		"lint:fix": "npx eslint 'src/**/*.ts' --fix",
 		"format": "npx prettier --write 'src/**/*.ts'",

@@ -471,6 +471,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		// Initialize checkbox logic
 		this._checkbox.init();
 
+		// Re-initialize sort handler to restore click listeners after table redraw
+		if (this._sortHandler) {
+			this._sortHandler.initSort();
+		}
+
 		this._attachSearchEvent();
 
 		if (typeof KTComponents !== 'undefined') {
@@ -810,6 +815,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			method: requestMethod,
 			body: requestBody,
 			headers: this._config.requestHeaders,
+			...(this._config.requestCredentials && {
+				credentials: this._config.requestCredentials,
+			}),
 		}).catch((error) => {
 			// Trigger an error event
 			this._fireEvent('error', { error });
@@ -837,7 +845,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _createUrl(
 		pathOrUrl: string,
-		baseUrl: string | null = window.location.origin
+		baseUrl: string | null = window.location.origin,
 	): URL {
 		// Regular expression to check if the input is a full URL
 		const isFullUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(pathOrUrl);
@@ -1438,12 +1446,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const tableId: string = this._tableId();
 		const searchElement: HTMLInputElement | null =
 			document.querySelector<HTMLInputElement>(
-				`[data-kt-datatable-search="#${tableId}"]`
+				`[data-kt-datatable-search="#${tableId}"]`,
 			);
 		if (searchElement && (searchElement as any)._debouncedSearch) {
 			searchElement.removeEventListener(
 				'keyup',
-				(searchElement as any)._debouncedSearch
+				(searchElement as any)._debouncedSearch,
 			);
 			delete (searchElement as any)._debouncedSearch;
 		}
@@ -1471,7 +1479,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		} else {
 			// Remove header checkbox event listener if possible
 			const headerCheckElement = this._element.querySelector<HTMLInputElement>(
-				this._config.attributes.check
+				this._config.attributes.check,
 			);
 			if (headerCheckElement) {
 				headerCheckElement.replaceWith(headerCheckElement.cloneNode(true));
@@ -1487,7 +1495,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		// --- 5. Remove spinner DOM node if it exists ---
 		const spinner = this._element.querySelector<HTMLElement>(
-			this._config.attributes.spinner
+			this._config.attributes.spinner,
 		);
 		if (spinner && spinner.parentNode) {
 			spinner.parentNode.removeChild(spinner);

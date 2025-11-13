@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTSelect Dynamic Methods Example</title>
+    <link href="../../dist/styles.css" rel="stylesheet">
+    <script src="../../dist/ktui.js"></script>
+</head>
+<body class="p-8">
+    <div class="max-w-4xl mx-auto space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold mb-4">KTSelect Dynamic Control Methods</h1>
+            <p class="text-gray-600 mb-6">
+                This example demonstrates the four dynamic control methods:
+                <code class="bg-gray-100 px-2 py-1 rounded">enable()</code>,
+                <code class="bg-gray-100 px-2 py-1 rounded">disable()</code>,
+                <code class="bg-gray-100 px-2 py-1 rounded">update()</code>, and
+                <code class="bg-gray-100 px-2 py-1 rounded">refresh()</code>
+            </p>
+        </div>
+
+        <!-- Example 1: Enable/Disable Methods -->
+        <div class="border border-gray-200 rounded-lg p-6 space-y-4">
+            <h2 class="text-xl font-semibold">1. Enable / Disable Methods</h2>
+            <p class="text-sm text-gray-600">
+                Programmatically enable or disable the select after initialization.
+            </p>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Fruit Selection</label>
+                <select class="kt-select" id="select1">
+                    <option value="">Select a fruit</option>
+                    <option value="apple">Apple</option>
+                    <option value="banana">Banana</option>
+                    <option value="cherry">Cherry</option>
+                    <option value="date">Date</option>
+                    <option value="elderberry">Elderberry</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="enableBtn" class="kt-btn">
+                    Enable Select
+                </button>
+                <button id="disableBtn" class="kt-btn kt-btn-secondary">
+                    Disable Select
+                </button>
+            </div>
+
+            <div id="enableDisableStatus" class="text-sm text-gray-600"></div>
+        </div>
+
+        <!-- Example 2: Update Method -->
+        <div class="border border-gray-200 rounded-lg p-6 space-y-4">
+            <h2 class="text-xl font-semibold">2. Update Method</h2>
+            <p class="text-sm text-gray-600">
+                Sync the dropdown when native select options are modified programmatically.
+            </p>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Programming Languages</label>
+                <select class="kt-select" id="select2">
+                    <option value="">Select a language</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="addOptionBtn" class="kt-btn">
+                    Add Option
+                </button>
+                <button id="removeOptionBtn" class="kt-btn kt-btn-destructive">
+                    Remove Last Option
+                </button>
+                <button id="replaceOptionsBtn" class="kt-btn kt-btn-outline">
+                    Replace All Options
+                </button>
+            </div>
+
+            <div id="updateStatus" class="text-sm text-gray-600"></div>
+        </div>
+
+        <!-- Example 3: Refresh Method -->
+        <div class="border border-gray-200 rounded-lg p-6 space-y-4">
+            <h2 class="text-xl font-semibold">3. Refresh Method</h2>
+            <p class="text-sm text-gray-600">
+                Refresh the visual display after programmatic selection changes.
+            </p>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Countries (Multiple)</label>
+                <select class="kt-select" id="select3" multiple>
+                    <option value="us">United States</option>
+                    <option value="uk">United Kingdom</option>
+                    <option value="ca">Canada</option>
+                    <option value="au">Australia</option>
+                    <option value="de">Germany</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="selectRandomBtn" class="kt-btn">
+                    Select Random Options
+                </button>
+                <button id="clearSelectionBtn" class="kt-btn kt-btn-secondary">
+                    Clear Selection
+                </button>
+                <button id="refreshBtn" class="kt-btn kt-btn-outline">
+                    Refresh Display
+                </button>
+            </div>
+
+            <div id="refreshStatus" class="text-sm text-gray-600"></div>
+        </div>
+
+        <!-- Example 4: Event Listeners -->
+        <div class="border border-gray-200 rounded-lg p-6 space-y-4">
+            <h2 class="text-xl font-semibold">4. Event Listeners</h2>
+            <p class="text-sm text-gray-600">
+                All dynamic methods dispatch custom events that you can listen to.
+            </p>
+
+            <div class="bg-gray-50 p-4 rounded">
+                <h3 class="font-medium mb-2">Event Log:</h3>
+                <div id="eventLog" class="text-sm font-mono space-y-1 max-h-48 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize all selects
+        const select1 = new KTSelect(document.getElementById('select1'));
+        const select2 = new KTSelect(document.getElementById('select2'));
+        const select3 = new KTSelect(document.getElementById('select3'), {
+            multiple: true,
+            enableSelectAll: true
+        });
+
+        // Helper to log events
+        const eventLog = document.getElementById('eventLog');
+        function logEvent(selectId, eventType) {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'text-gray-700';
+            entry.textContent = `[${timestamp}] ${selectId}: ${eventType}`;
+            eventLog.prepend(entry);
+
+            // Keep only last 10 events
+            while (eventLog.children.length > 10) {
+                eventLog.removeChild(eventLog.lastChild);
+            }
+        }
+
+        // Example 1: Enable/Disable Methods
+        const enableDisableStatus = document.getElementById('enableDisableStatus');
+
+        document.getElementById('enableBtn').addEventListener('click', () => {
+            select1.enable();
+            enableDisableStatus.textContent = '✅ Select enabled';
+        });
+
+        document.getElementById('disableBtn').addEventListener('click', () => {
+            select1.disable();
+            enableDisableStatus.textContent = '🚫 Select disabled';
+        });
+
+        // Listen to enabled/disabled events
+        document.getElementById('select1').addEventListener('enabled', () => {
+            logEvent('select1', 'enabled');
+        });
+
+        document.getElementById('select1').addEventListener('disabled', () => {
+            logEvent('select1', 'disabled');
+        });
+
+        // Example 2: Update Method
+        const updateStatus = document.getElementById('updateStatus');
+        let optionCounter = 1;
+
+        document.getElementById('addOptionBtn').addEventListener('click', () => {
+            const nativeSelect = document.getElementById('select2');
+            const newOption = document.createElement('option');
+            newOption.value = `lang${optionCounter}`;
+            newOption.textContent = `New Language ${optionCounter}`;
+            nativeSelect.appendChild(newOption);
+
+            // Call update to sync the dropdown
+            select2.update();
+
+            updateStatus.textContent = `✅ Added "New Language ${optionCounter}" - dropdown synced`;
+            optionCounter++;
+        });
+
+        document.getElementById('removeOptionBtn').addEventListener('click', () => {
+            const nativeSelect = document.getElementById('select2');
+            const options = nativeSelect.querySelectorAll('option:not([value=""])');
+
+            if (options.length > 0) {
+                options[options.length - 1].remove();
+                select2.update();
+                updateStatus.textContent = '✅ Removed last option - dropdown synced';
+            } else {
+                updateStatus.textContent = '⚠️ No options to remove';
+            }
+        });
+
+        document.getElementById('replaceOptionsBtn').addEventListener('click', () => {
+            // Use update() with newOptions parameter
+            select2.update([
+                { value: 'rust', text: 'Rust' },
+                { value: 'go', text: 'Go' },
+                { value: 'typescript', text: 'TypeScript' },
+                { value: 'kotlin', text: 'Kotlin' }
+            ]);
+
+            updateStatus.textContent = '✅ Replaced all options with new set';
+        });
+
+        // Listen to updated event
+        document.getElementById('select2').addEventListener('updated', () => {
+            logEvent('select2', 'updated');
+        });
+
+        // Example 3: Refresh Method
+        const refreshStatus = document.getElementById('refreshStatus');
+
+        document.getElementById('selectRandomBtn').addEventListener('click', () => {
+            const nativeSelect = document.getElementById('select3');
+            const options = Array.from(nativeSelect.options);
+
+            // Randomly select 2-3 options
+            const numToSelect = Math.floor(Math.random() * 2) + 2;
+            const shuffled = options.sort(() => 0.5 - Math.random());
+
+            // Clear all selections first
+            options.forEach(opt => opt.selected = false);
+
+            // Select random options
+            shuffled.slice(0, numToSelect).forEach(opt => opt.selected = true);
+
+            // Refresh to update the display
+            select3.refresh();
+
+            refreshStatus.textContent = `✅ Selected ${numToSelect} random options - display refreshed`;
+        });
+
+        document.getElementById('clearSelectionBtn').addEventListener('click', () => {
+            const nativeSelect = document.getElementById('select3');
+            Array.from(nativeSelect.options).forEach(opt => opt.selected = false);
+
+            select3.refresh();
+            refreshStatus.textContent = '✅ Cleared all selections - display refreshed';
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            select3.refresh();
+            refreshStatus.textContent = '✅ Display refreshed';
+        });
+
+        // Listen to refreshed event
+        document.getElementById('select3').addEventListener('refreshed', () => {
+            logEvent('select3', 'refreshed');
+        });
+
+        // Initial log message
+        logEvent('page', 'Examples initialized');
+    </script>
+</body>
+</html>
+

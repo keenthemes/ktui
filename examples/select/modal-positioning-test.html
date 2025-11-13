@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Modal Positioning Test</title>
+		<link rel="stylesheet" href="../../dist/styles.css" />
+	</head>
+
+	<body class="bg-gray-50 min-h-screen">
+		<div class="bg-white rounded-lg shadow p-8 w-full max-w-2xl mt-10 mx-auto">
+			<h1 class="text-xl font-semibold text-gray-900 mb-2">
+				Modal Positioning Test
+			</h1>
+			<p class="text-sm text-gray-600 mb-6">
+				Verifies KTSelect dropdowns position correctly inside modals.
+			</p>
+
+			<div class="flex flex-col gap-4">
+				<button
+					data-kt-modal-toggle="#modal-basic"
+					class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50 text-left">
+					<div class="font-medium">Basic Modal</div>
+					<div class="text-xs text-gray-500 mt-0.5">
+						Standard modal without centering
+					</div>
+				</button>
+
+				<button
+					data-kt-modal-toggle="#modal-centered"
+					class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50 text-left">
+					<div class="font-medium">Centered Modal (kt-modal-center)</div>
+					<div class="text-xs text-gray-500 mt-0.5">
+						Critical test - previously caused bottom-right bug
+					</div>
+				</button>
+
+				<button
+					data-kt-modal-toggle="#modal-remote"
+					class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded hover:bg-gray-50 text-left">
+					<div class="font-medium">Modal with Remote Select</div>
+					<div class="text-xs text-gray-500 mt-0.5">
+						Tests reload() and clearSelection() methods
+					</div>
+				</button>
+			</div>
+
+			<div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded">
+				<div class="font-medium text-gray-900 mb-2 text-sm">Control Test</div>
+				<select
+					data-kt-select="true"
+					class="kt-select"
+					data-kt-select-placeholder="Select an option...">
+					<option value="">Select an option...</option>
+					<option value="1">Option 1</option>
+					<option value="2">Option 2</option>
+					<option value="3">Option 3</option>
+					<option value="4">Option 4</option>
+					<option value="5">Option 5</option>
+				</select>
+				<p class="text-xs text-gray-500 mt-2">
+					Baseline - should position normally
+				</p>
+			</div>
+		</div>
+
+		<!-- Basic Modal -->
+		<div
+			id="modal-basic"
+			data-kt-modal="true"
+			class="hidden fixed inset-0 z-50 overflow-y-auto">
+			<div
+				class="flex min-h-full items-center justify-center p-4">
+				<div
+					data-kt-modal-backdrop="true"
+					class="fixed inset-0 bg-gray-900 bg-opacity-50"></div>
+
+				<div
+					class="relative bg-white rounded-lg shadow-xl w-full max-w-lg border border-gray-200">
+					<div class="border-b border-gray-200 px-6 py-4">
+						<h3 class="text-base font-semibold text-gray-900">Basic Modal</h3>
+					</div>
+
+					<div class="px-6 py-5">
+						<label class="block mb-2 font-medium text-gray-700">
+							Select in Basic Modal
+						</label>
+						<select
+							data-kt-select="true"
+							class="kt-select"
+							data-kt-select-placeholder="Choose option...">
+							<option value="">Choose option...</option>
+							<option value="1">Option 1</option>
+							<option value="2">Option 2</option>
+							<option value="3">Option 3</option>
+							<option value="4">Option 4</option>
+							<option value="5">Option 5</option>
+							<option value="6">Option 6</option>
+							<option value="7">Option 7</option>
+							<option value="8">Option 8</option>
+						</select>
+						<p class="text-xs text-gray-500 mt-3">
+							Expected: Dropdown appears below/above select
+						</p>
+					</div>
+
+					<div class="border-t border-gray-200 px-6 py-4 flex justify-end">
+						<button
+							type="button"
+							data-kt-modal-dismiss="true"
+							class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+							Close
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Centered Modal -->
+		<div
+			id="modal-centered"
+			data-kt-modal="true"
+			class="hidden fixed inset-0 z-50 overflow-y-auto">
+			<div
+				class="flex min-h-full items-center justify-center p-4 kt-modal-center">
+				<div
+					data-kt-modal-backdrop="true"
+					class="fixed inset-0 bg-gray-900 bg-opacity-50"></div>
+
+				<div
+					class="relative bg-white rounded-lg shadow-xl w-full max-w-lg border border-gray-200">
+					<div class="border-b border-gray-200 px-6 py-4">
+						<h3 class="text-base font-semibold text-gray-900">
+							Centered Modal (kt-modal-center)
+						</h3>
+					</div>
+
+					<div class="px-6 py-5">
+						<label class="block mb-2 font-medium text-gray-700">
+							Select in Centered Modal
+						</label>
+						<select
+							data-kt-select="true"
+							class="kt-select"
+							data-kt-select-placeholder="Choose option..."
+							data-kt-select-enable-search="true">
+							<option value="">Choose option...</option>
+							<option value="1">Option 1</option>
+							<option value="2">Option 2</option>
+							<option value="3">Option 3</option>
+							<option value="4">Option 4</option>
+							<option value="5">Option 5</option>
+							<option value="6">Option 6</option>
+							<option value="7">Option 7</option>
+							<option value="8">Option 8</option>
+							<option value="9">Option 9</option>
+							<option value="10">Option 10</option>
+						</select>
+						<p class="text-xs text-gray-500 mt-3 p-2 bg-gray-50 border border-gray-200 rounded">
+							<strong>Critical:</strong> Dropdown should NOT appear in
+							bottom-right corner
+						</p>
+					</div>
+
+					<div class="border-t border-gray-200 px-6 py-4 flex justify-end">
+						<button
+							type="button"
+							data-kt-modal-dismiss="true"
+							class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+							Close
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal with Remote Select -->
+		<div
+			id="modal-remote"
+			data-kt-modal="true"
+			class="hidden fixed inset-0 z-50 overflow-y-auto">
+			<div
+				class="flex min-h-full items-center justify-center p-4 kt-modal-center">
+				<div
+					data-kt-modal-backdrop="true"
+					class="fixed inset-0 bg-gray-900 bg-opacity-50"></div>
+
+				<div
+					class="relative bg-white rounded-lg shadow-xl w-full max-w-lg border border-gray-200">
+					<div class="border-b border-gray-200 px-6 py-4">
+						<h3 class="text-base font-semibold text-gray-900">
+							Remote Select in Modal
+						</h3>
+					</div>
+
+					<div class="px-6 py-5">
+						<label class="block mb-2 font-medium text-gray-700">
+							Remote Select
+						</label>
+						<select
+							id="remoteSelectInModal"
+							data-kt-select="true"
+							class="kt-select"
+							data-kt-select-remote="true"
+							data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+							data-kt-select-data-value-field="id"
+							data-kt-select-data-field-text="name"
+							data-kt-select-placeholder="Select a user..."
+							data-kt-select-enable-search="true">
+							<option value="">Select a user...</option>
+						</select>
+
+						<div class="mt-4 flex gap-2">
+							<button
+								id="reloadBtn"
+								type="button"
+								class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+								Test reload()
+							</button>
+							<button
+								id="clearBtn"
+								type="button"
+								class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+								Test clearSelection()
+							</button>
+						</div>
+
+						<div id="modalResults" class="mt-4 text-xs min-h-[3rem]"></div>
+					</div>
+
+					<div class="border-t border-gray-200 px-6 py-4 flex justify-end">
+						<button
+							type="button"
+							data-kt-modal-dismiss="true"
+							class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+							Close
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const form = document.getElementById('testForm');
+			const resultsDiv = document.getElementById('results');
+			const remoteSelectEl = document.querySelector(
+				'select[name="remoteSelect"]',
+			);
+
+			if (form) {
+				form.addEventListener('submit', function (e) {
+					e.preventDefault();
+					resultsDiv.innerHTML = '';
+
+					const formData = new FormData(form);
+					const entries = Array.from(formData.entries());
+
+					const resultDiv = document.createElement('div');
+					resultDiv.className = 'p-3 bg-white border border-gray-200 rounded';
+					resultDiv.innerHTML = `
+						<div class="font-medium text-gray-900 mb-2">FormData Entries (${entries.length})</div>
+						<ul class="space-y-1">
+							${entries
+								.map(
+									([key, value]) =>
+										`<li class="text-xs font-mono text-gray-700"><span class="font-medium">${key}:</span> "${value}"</li>`,
+								)
+								.join('')}
+						</ul>
+					`;
+					resultsDiv.appendChild(resultDiv);
+
+					const remoteSelectValue = formData.get('remoteSelect');
+					const verdict = document.createElement('div');
+					verdict.className = `p-3 mt-3 rounded border font-medium ${
+						remoteSelectValue
+							? 'bg-white border-gray-900 text-gray-900'
+							: 'bg-gray-100 border-gray-400 text-gray-700'
+					}`;
+					verdict.textContent = remoteSelectValue
+						? 'PASS: Remote select included'
+						: 'FAIL: Remote select missing';
+					resultsDiv.appendChild(verdict);
+				});
+			}
+
+			const modal = document.getElementById('modal-remote');
+				const remoteSelectInModal = document.getElementById(
+					'remoteSelectInModal',
+				);
+				const resultsModalDiv = document.getElementById('modalResults');
+				const reloadBtn = document.getElementById('reloadBtn');
+				const clearBtn = document.getElementById('clearBtn');
+
+				modal.addEventListener('kt.modal.show', function () {
+					const instance = KTSelect.getInstance(remoteSelectInModal);
+
+					if (instance) {
+						reloadBtn.addEventListener('click', async function () {
+							resultsModalDiv.innerHTML =
+								'<div class="p-2 bg-gray-100 border border-gray-200 rounded">Reloading...</div>';
+
+							try {
+								await instance.reload();
+								resultsModalDiv.innerHTML = `
+									<div class="p-2 bg-white border border-gray-200 rounded">
+										<div class="font-medium text-gray-900">reload() completed</div>
+									</div>
+								`;
+							} catch (error) {
+								resultsModalDiv.innerHTML = `
+									<div class="p-2 bg-gray-100 border border-gray-300 rounded">
+										<div class="font-medium text-gray-900">reload() failed</div>
+										<div class="text-gray-600">${error.message}</div>
+									</div>
+								`;
+							}
+						});
+
+						clearBtn.addEventListener('click', function () {
+							instance.clearSelection();
+							const selectedOptions = instance.getSelectedOptions();
+
+							resultsModalDiv.innerHTML = `
+								<div class="p-2 bg-white border border-gray-200 rounded">
+									<div class="font-medium text-gray-900">clearSelection() called</div>
+									<div class="text-gray-600">Placeholder visible: ${selectedOptions.length === 0 ? 'Yes' : 'No'}</div>
+								</div>
+							`;
+						});
+					}
+				});
+			});
+		</script>
+		<script src="../../dist/ktui.js"></script>
+	</body>
+</html>

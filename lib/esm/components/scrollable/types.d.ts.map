@@ -1,1 +1,0 @@
-{"version":3,"file":"types.d.ts","sourceRoot":"","sources":["../../../../src/components/scrollable/types.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,MAAM,WAAW,2BAA2B;IAC3C,IAAI,EAAE,OAAO,CAAC;IACd,YAAY,EAAE,MAAM,CAAC;IACrB,QAAQ,EAAE,MAAM,CAAC;IACjB,MAAM,EAAE,MAAM,CAAC;CACf;AAED,MAAM,WAAW,qBAAqB;IACrC,MAAM,IAAI,IAAI,CAAC;IACf,SAAS,IAAI,MAAM,CAAC;CACpB"}

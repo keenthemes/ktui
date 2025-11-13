@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Dark Mode Multi-Select Test</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+	<script>
+		// Toggle dark mode for testing
+		function toggleDarkMode() {
+			const html = document.documentElement;
+			const isDark = html.classList.toggle('dark');
+			const button = document.getElementById('darkModeToggle');
+			button.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+		}
+
+		// Set initial button text on load
+		window.addEventListener('DOMContentLoaded', () => {
+			const button = document.getElementById('darkModeToggle');
+			const isDark = document.documentElement.classList.contains('dark');
+			button.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+		});
+	</script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen p-4 transition-colors duration-200">
+	<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg dark:shadow-gray-900/50 p-8 w-full max-w-md mt-6 mx-auto border border-gray-200 dark:border-gray-700">
+		<div class="mb-6 flex items-center justify-between">
+			<h1 class="text-xl font-bold text-gray-900 dark:text-white">Dark Mode Test</h1>
+			<button
+				id="darkModeToggle"
+				onclick="toggleDarkMode()"
+				class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 font-medium">
+				Dark Mode
+			</button>
+		</div>
+
+		<form class="flex flex-col gap-8">
+			<!-- Multi-select with tags -->
+			<div>
+				<label class="block mb-3 font-semibold text-gray-800 dark:text-gray-200" for="select-team">
+					Team Members (Tags)
+				</label>
+				<select
+					class="kt-select"
+					data-kt-select
+					data-kt-select-placeholder="Select team members..."
+					data-kt-select-multiple="true"
+					data-kt-select-tags="true"
+					data-kt-select-pre-selected="jenny,mike"
+					data-kt-select-config='{
+						"showSelectedCount": true,
+						"enableSelectAll": true
+					}'>
+					<option value="jenny">Jenny Wilson</option>
+					<option value="mike">Mike Johnson</option>
+					<option value="david">David Brown</option>
+					<option value="sarah">Sarah Davis</option>
+					<option value="alex">Alex Thompson</option>
+					<option value="lisa">Lisa Anderson</option>
+				</select>
+			</div>
+
+			<!-- Multi-select without tags -->
+			<div>
+				<label class="block mb-3 font-semibold text-gray-800 dark:text-gray-200" for="select-cities">
+					Cities (Multiple)
+				</label>
+				<select
+					class="kt-select"
+					data-kt-select="true"
+					data-kt-select-multiple="true"
+					data-kt-select-max-selections="3"
+					data-kt-select-placeholder="Select cities..."
+					data-kt-select-pre-selected="london,paris">
+					<option value="amsterdam">Amsterdam</option>
+					<option value="barcelona">Barcelona</option>
+					<option value="london">London</option>
+					<option value="new-york">New York</option>
+					<option value="paris">Paris</option>
+					<option value="rome">Rome</option>
+					<option value="tokyo">Tokyo</option>
+				</select>
+			</div>
+		</form>
+
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>
+

@@ -28,10 +28,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 	protected _lastMode: string;
 	protected _selectedFile: File | null = null;
 
-	constructor(
-		element: HTMLElement,
-		config: KTImageInputConfigInterface = null
-	) {
+	constructor(element: HTMLElement, config?: KTImageInputConfigInterface) {
 		super();
 
 		if (KTData.has(element as HTMLElement, this._name)) return;
@@ -39,14 +36,14 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		this._init(element);
 		this._buildConfig(config);
 
-		this._inputElement = this._element.querySelector('input[type="file"]');
-		this._hiddenElement = this._element.querySelector('input[type="hidden"]');
+		this._inputElement = this._element.querySelector('input[type="file"]')!;
+		this._hiddenElement = this._element.querySelector('input[type="hidden"]')!;
 		this._removeElement = this._element.querySelector(
-			'[data-kt-image-input-remove]'
-		);
+			'[data-kt-image-input-remove]',
+		)!;
 		this._previewElement = this._element.querySelector(
-			'[data-kt-image-input-preview]'
-		);
+			'[data-kt-image-input-preview]',
+		)!;
 
 		this._update();
 		this._handlers();
@@ -89,8 +86,6 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 
 		reader.readAsDataURL(this._inputElement.files[0]);
 		this._selectedFile = this._inputElement.files[0];
-		this._inputElement.value = '';
-		this._hiddenElement.value = '';
 		this._lastMode = 'new';
 
 		this._element.classList.add('changed');
@@ -219,7 +214,7 @@ export class KTImageInput extends KTComponent implements KTImageInputInterface {
 		return this._selectedFile;
 	}
 
-	public static getInstance(element: HTMLElement): KTImageInput {
+	public static getInstance(element: HTMLElement): KTImageInput | null {
 		if (!element) return null;
 
 		if (KTData.has(element, 'image-input')) {

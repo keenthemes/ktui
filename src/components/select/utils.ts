@@ -297,7 +297,7 @@ export class FocusManager {
 	 */
 	public resetFocus(): void {
 		const focusedElements = this._element.querySelectorAll(
-			`.${this._focusClass}, .${this._hoverClass}`
+			`.${this._focusClass}, .${this._hoverClass}`,
 		);
 
 		// Remove focus and hover classes from all options
@@ -388,7 +388,7 @@ export class FocusManager {
 	 * Set a callback to be called when focus changes
 	 */
 	public setOnFocusChange(
-		cb: (option: HTMLElement | null, index: number | null) => void
+		cb: (option: HTMLElement | null, index: number | null) => void,
 	) {
 		this._onFocusChange = cb;
 	}
@@ -514,10 +514,10 @@ export function debounce(
  */
 export function renderTemplateString(
 	template: string,
-	data: Record<string, any>
+	data: Record<string, any>,
 ): string {
 	return template.replace(/{{(\w+)}}/g, (_, key) =>
-		data[key] !== undefined && data[key] !== null ? String(data[key]) : ''
+		data[key] !== undefined && data[key] !== null ? String(data[key]) : '',
 	);
 }
 

@@ -265,10 +265,9 @@ export class KTSelectRemote {
 		if (this._config.debug)
 			console.log('Item data:', JSON.stringify(item).substring(0, 200) + '...'); // Trimmed for readability
 
-		// Extract values using dot notation if needed
+		// Extract values using improved getValue function
 		const getValue = (obj: any, path: string): any => {
-			if (!path) return null;
-			if (!obj) return null;
+			if (!path || !obj) return null;
 
 			try {
 				// Handle dot notation to access nested properties
@@ -295,7 +294,7 @@ export class KTSelectRemote {
 									? JSON.stringify(result).substring(0, 50)
 									: String(result).substring(0, 50)
 								: 'null'
-						}`
+}`,
 					);
 
 				return result;
@@ -305,64 +304,66 @@ export class KTSelectRemote {
 			}
 		};
 
-		// Try to get a usable ID, with fallbacks
+		// Get ID and ensure it's a string
 		let id = getValue(item, valueField);
-
-		// Ensure id is always a proper string
 		if (id === null || id === undefined) {
-			// If no ID found, check for id.value or item.id as fallbacks
-			if (
-				item.id &&
-				typeof item.id === 'object' &&
-				'value' in item.id &&
-				item.id.value
-			) {
-				id = String(item.id.value);
-				if (this._config.debug)
-					console.log(`Using id.value as fallback: ${id}`);
-			} else if (item.id) {
-				id = String(item.id);
-				if (this._config.debug)
-					console.log(`Using direct item.id as fallback: ${id}`);
-			} else {
-				// If no ID found at all, use the title instead (will be extracted below)
-				if (this._config.debug)
-					console.log(`No ID found, will use title as fallback`);
-				id = null;
+			// Try common fallback fields for ID
+			const fallbackFields = ['id', 'value', 'key', 'pk'];
+			for (const field of fallbackFields) {
+				if (item[field] !== null && item[field] !== undefined) {
+					id = String(item[field]);
+					if (this._config.debug)
+						console.log(`Using fallback field '${field}' for ID: ${id}`);
+					break;
+				}
 			}
-		} else if (typeof id === 'object') {
-			// If ID is an object, log the issue and set to null to use title fallback
-			console.warn(
-				`ID for path ${valueField} is an object, will use title fallback instead`
-			);
-			id = null;
 		} else {
-			// Otherwise, ensure it's a string
 			id = String(id);
-			if (this._config.debug) console.log(`Final ID value: ${id}`);
 		}
 
-		// Try to get a usable title, with fallbacks
+		// If still no ID, generate one
+		if (!id) {
+			id = `option-${Math.random().toString(36).substr(2, 9)}`;
+			if (this._config.debug) console.log(`Generated fallback ID: ${id}`);
+		}
+
+		// Get label with proper fallbacks
 		let title = getValue(item, labelField);
-		title = title !== null ? String(title) : '';
-		if (this._config.debug)
-			console.log(`Title/label field [${labelField}]:`, title);
-
-		// If title is still empty, try common field names
 		if (!title) {
-			// Try common field names if the configured one doesn't work
-			if (item.name) title = String(item.name);
-			else if (item.title) title = String(item.title);
-			else if (item.label) title = String(item.label);
-			else if (item.text) title = String(item.text);
-			if (this._config.debug)
-				console.log('After fallback checks, title:', title);
+			// Try common fallback fields for title
+			const fallbackFields = [
+				'name',
+				'title',
+				'label',
+				'text',
+				'displayName',
+				'description',
+			];
+			for (const field of fallbackFields) {
+				if (item[field] !== null && item[field] !== undefined) {
+					title = String(item[field]);
+					if (this._config.debug)
+						console.log(`Using fallback field '${field}' for title: ${title}`);
+					break;
+				}
+			}
+		} else {
+			title = String(title);
 		}
 
-		// Create the option object with non-empty values
-		const result = {
-			id: id || title || 'id-' + Math.random().toString(36).substr(2, 9), // Ensure we always have an ID
-			title: title || 'Unnamed option',
+		// If still no title, use ID as fallback
+		if (!title) {
+			title = `Option ${id}`;
+			if (this._config.debug)
+				console.log(`Using ID as fallback title: ${title}`);
+		}
+
+		// Create the option object with consistent structure
+		const result: KTSelectOptionData = {
+			id: id,
+			title: title,
+			selected: Boolean(item.selected),
+			disabled: Boolean(item.disabled),
 		};
 
 		if (this._config.debug)

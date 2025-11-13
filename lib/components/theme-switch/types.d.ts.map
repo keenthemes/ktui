@@ -1,1 +1,0 @@
-{"version":3,"file":"types.d.ts","sourceRoot":"","sources":["../../../src/components/theme-switch/types.ts"],"names":[],"mappings":"AAAA;;;GAGG;AAEH,MAAM,CAAC,OAAO,MAAM,qBAAqB,GAAG,OAAO,GAAG,MAAM,GAAG,QAAQ,CAAC;AAExE,MAAM,WAAW,4BAA4B;IAC5C,IAAI,EAAE,qBAAqB,CAAC;CAC5B;AAED,MAAM,WAAW,sBAAsB;IACtC,OAAO,CAAC,IAAI,EAAE,qBAAqB,GAAG,IAAI,CAAC;IAC3C,OAAO,IAAI,qBAAqB,CAAC;CACjC"}

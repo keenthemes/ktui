@@ -60,7 +60,11 @@
 		}
 	}
 
-	.kt-select-search-empty  {
+	.kt-select-search-empty {
+		@apply px-3.5 py-1 text-sm text-muted-foreground;
+	}
+
+	.kt-select-loading {
 		@apply px-3.5 py-1 text-sm text-muted-foreground;
 	}
 
@@ -92,12 +96,13 @@
 		@apply grow flex items-center gap-2.5 py-1.75 px-2.5 rounded-md text-sm text-start cursor-pointer;
 		@apply hover:bg-accent hover:text-accent-foreground;
 
-		&[aria-disabled=true],
+		&[aria-disabled='true'],
 		&.disabled {
 			@apply opacity-60 pointer-events-none;
 		}
 
-		&.selected {}
+		&.selected {
+		}
 
 		&.focused,
 		&.hover,
@@ -122,8 +127,43 @@
 		@apply text-muted-foreground overflow-ellipsis truncate;
 	}
 
-	.kt-select-display:not([data-multiple=true]) {
+	.kt-select-display:not([data-multiple='true']) {
 		@apply w-full overflow-ellipsis truncate;
+	}
+
+	/* Enhanced Tag Styles */
+	.kt-select-tag {
+		@apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium;
+		@apply bg-accent/10 text-accent-foreground border border-border;
+		@apply max-w-[200px] truncate flex-shrink-0;
+		@apply shadow-sm;
+		@apply leading-tight;
+	}
+
+	.kt-select-tag-remove {
+		@apply flex items-center justify-center w-5 h-5 rounded-full;
+		@apply hover:bg-accent/20 text-muted-foreground hover:text-accent-foreground;
+		@apply transition-all duration-200 cursor-pointer;
+		@apply flex-shrink-0 opacity-100;
+		@apply hover:scale-110;
+	}
+
+	.kt-select-tag-remove svg {
+		@apply w-3.5 h-3.5;
+		@apply transition-transform duration-200;
+	}
+
+	.kt-select-tag-remove:hover svg {
+		@apply scale-110;
+	}
+
+	/* Enhanced Multi-select display container */
+	.kt-select-display[data-multiple='true'] {
+		@apply flex flex-wrap items-center gap-2 p-3 min-h-[3rem];
+		@apply w-full;
+		@apply bg-background border border-input rounded-md;
+		@apply focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20;
+		@apply transition-all duration-200;
 	}
 }
 
@@ -133,7 +173,7 @@
 		@apply h-8.5 gap-1 ps-3 pe-6 text-[0.8125rem] leading-(--text-sm--line-height) rounded-md;
 		background-position: right 0.5rem center;
 
-		&[data-multiple=true] {
+		&[data-multiple='true'] {
 			@apply h-auto min-h-8.5 py-1.5 flex-wrap;
 			background-position: right 0.5rem top 0.675rem;
 		}
@@ -143,7 +183,7 @@
 		@apply h-7 gap-1 ps-2.5 pe-5 text-xs rounded-md;
 		background-position: right 0.5rem center;
 
-		&[data-multiple=true] {
+		&[data-multiple='true'] {
 			@apply h-auto min-h-7;
 			background-position: right 0.5rem top 0.575rem;
 		}
@@ -153,7 +193,7 @@
 		@apply h-10 gap-1.5 ps-4 pe-8 py-1 text-sm rounded-md;
 		background-position: right 0.6rem center;
 
-		&[data-multiple=true] {
+		&[data-multiple='true'] {
 			@apply h-auto min-h-10 py-2;
 			background-position: right 0.6rem top 0.85rem;
 		}
@@ -166,7 +206,7 @@
 		.kt-select {
 			background-position: left 0.5rem center;
 
-			&[data-multiple=true] {
+			&[data-multiple='true'] {
 				background-position: left 0.5rem top 0.675rem;
 			}
 		}
@@ -174,7 +214,7 @@
 		.kt-select-sm {
 			background-position: left 0.5rem center;
 
-			&[data-multiple=true] {
+			&[data-multiple='true'] {
 				background-position: left 0.5rem top 0.575rem;
 			}
 		}
@@ -182,7 +222,7 @@
 		.kt-select-lg {
 			background-position: left 0.75rem center;
 
-			&[data-multiple=true] {
+			&[data-multiple='true'] {
 				background-position: left 0.75rem top 0.85rem;
 			}
 		}

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataTable Error Handling Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .event-log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .event-entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+        .event-entry.error {
+            border-left-color: #dc3545;
+        }
+        .event-entry.success {
+            border-left-color: #28a745;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .test-pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="test-container">
+        <h1 class="text-3xl font-bold text-center mb-8">DataTable Error Handling Test</h1>
+
+        <!-- Test Description -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Test Description</h2>
+            <p class="text-gray-700 mb-4">
+                This test verifies that the DataTable component properly fires <code class="bg-gray-100 px-2 py-1 rounded">parseError</code>
+                events when JSON parsing fails, enabling applications to handle authentication and other HTTP errors through their interceptors.
+            </p>
+            <div class="bg-blue-50 border border-blue-200 rounded p-4">
+                <h3 class="font-semibold text-blue-900 mb-2">Expected Behavior:</h3>
+                <ul class="text-blue-800 text-sm space-y-1">
+                    <li>• DataTable attempts to fetch from <code>https://httpbin.org/html</code> (returns HTML, not JSON)</li>
+                    <li>• <code>response.json()</code> fails with parsing error</li>
+                    <li>• <code>parseError</code> event fires with complete error context</li>
+                    <li>• Event includes: response status, statusText, and error message</li>
+                    <li>• Applications can handle 401/403 authentication errors</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DataTable with Error-Prone API -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">DataTable with Error-Prone API</h2>
+            <div data-kt-datatable="true" data-kt-datatable-api-endpoint="https://httpbin.org/html" id="error-datatable">
+                <table class="kt-table" data-kt-datatable-table="true">
+                    <thead>
+                        <tr>
+                            <th data-kt-datatable-column="id">
+                                <span class="kt-table-col">
+                                    <span class="kt-table-col-label">ID</span>
+                                </span>
+                            </th>
+                            <th data-kt-datatable-column="name">
+                                <span class="kt-table-col">
+                                    <span class="kt-table-col-label">Name</span>
+                                </span>
+                            </th>
+                            <th data-kt-datatable-column="email">
+                                <span class="kt-table-col">
+                                    <span class="kt-table-col-label">Email</span>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Will be populated by API or show error -->
+                    </tbody>
+                </table>
+
+                <!-- Pagination (required for datatable) -->
+                <div class="flex items-center justify-between mt-4">
+                    <div data-kt-datatable-info="true" class="text-sm text-gray-700"></div>
+                    <div data-kt-datatable-pagination="true" class="flex space-x-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Monitor -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Event Monitor</h2>
+            <div id="eventLog" class="event-log">
+                <div class="text-gray-500 text-center py-4">Waiting for events...</div>
+            </div>
+        </div>
+
+        <!-- Test Results -->
+        <div class="test-section">
+            <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+            <div id="testResults">
+                <div class="test-result test-fail">
+                    ⏳ Test in progress... (DataTable should auto-load on page load)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load KTUI -->
+    <script src="../../dist/ktui.js"></script>
+
+    <script>
+        let datatableInstance = null;
+        const eventLog = document.getElementById('eventLog');
+        const testResults = document.getElementById('testResults');
+
+        let parseErrorFired = false;
+        let domEventFired = false;
+        let eventDetails = null;
+
+        function logEvent(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const eventEntry = document.createElement('div');
+            eventEntry.className = `event-entry ${type}`;
+            eventEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            eventLog.appendChild(eventEntry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+
+            // Remove "waiting" message if it exists
+            const waitingMsg = eventLog.querySelector('.text-gray-500');
+            if (waitingMsg) {
+                waitingMsg.remove();
+            }
+        }
+
+        function updateTestResult(success, message) {
+            const resultClass = success ? 'test-pass' : 'test-fail';
+            const icon = success ? '✅' : '❌';
+            testResults.innerHTML = `<div class="test-result ${resultClass}">${icon} ${message}</div>`;
+        }
+
+        function testCompletion() {
+            if (parseErrorFired && domEventFired && eventDetails) {
+                const hasRequiredFields = eventDetails.status && eventDetails.error;
+                if (hasRequiredFields) {
+                    updateTestResult(true,
+                        `SUCCESS: parseError event fired correctly with status ${eventDetails.status} and error details!`
+                    );
+                    logEvent('🎉 Test completed successfully!', 'success');
+                } else {
+                    updateTestResult(false,
+                        `FAIL: parseError event missing required fields (status: ${eventDetails.status}, error: ${eventDetails.error})`
+                    );
+                }
+            } else {
+                updateTestResult(false,
+                    `FAIL: Missing events - parseError: ${parseErrorFired}, DOM event: ${domEventFired}`
+                );
+            }
+        }
+
+        // Initialize DataTable and set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            logEvent('Initializing DataTable and setting up event listeners...');
+
+            // Initialize KTUI components
+            if (typeof KTDataTable !== 'undefined') {
+                KTDataTable.init();
+                logEvent('KTDataTable.init() called');
+            } else {
+                logEvent('ERROR: KTDataTable not found!', 'error');
+                updateTestResult(false, 'FAIL: KTDataTable library not loaded');
+                return;
+            }
+
+            // Get DataTable instance
+            const container = document.getElementById('error-datatable');
+            if (container) {
+                datatableInstance = KTDataTable.getInstance(container);
+                if (datatableInstance) {
+                    logEvent('✅ DataTable instance obtained successfully');
+                } else {
+                    logEvent('❌ Failed to get DataTable instance', 'error');
+                    updateTestResult(false, 'FAIL: Could not get DataTable instance');
+                    return;
+                }
+            } else {
+                logEvent('❌ DataTable container not found', 'error');
+                updateTestResult(false, 'FAIL: DataTable container not found');
+                return;
+            }
+
+            // Debug instance properties
+            logEvent(`Instance type: ${typeof datatableInstance}`);
+            logEvent(`Instance has _element: ${!!datatableInstance._element}`);
+            if (datatableInstance._element) {
+                logEvent(`Element tagName: ${datatableInstance._element.tagName}`);
+                logEvent(`Element id: ${datatableInstance._element.id}`);
+            }
+
+            // Set up event listeners BEFORE any data loading
+            if (datatableInstance) {
+                logEvent('Setting up parseError event listeners...');
+
+                // Try to get the element if _element is not set
+                let element = datatableInstance._element;
+                if (!element) {
+                    element = container; // Fallback to the container we found earlier
+                    logEvent('Using container element as fallback for event listeners');
+                }
+
+                if (element) {
+                    // Listen for parseError event on the element
+                    element.addEventListener('parseError', function(e) {
+                        parseErrorFired = true;
+                        eventDetails = e.detail.payload;
+                        logEvent(`🎯 parseError event fired on element!`, 'success');
+                        logEvent(`   Status: ${eventDetails.status}`, 'success');
+                        logEvent(`   StatusText: ${eventDetails.statusText}`, 'success');
+                        logEvent(`   Error: ${eventDetails.error}`, 'success');
+                        testCompletion();
+                    });
+
+                    // Listen for kt.datatable.parseError DOM event on the container
+                    container.addEventListener('kt.datatable.parseError', function(e) {
+                        domEventFired = true;
+                        logEvent(`🌐 kt.datatable.parseError DOM event fired on container!`, 'success');
+                        logEvent(`   Payload status: ${e.detail.payload.status}`, 'success');
+                    });
+
+                    // Also try listening on document for completeness
+                    document.addEventListener('kt.datatable.parseError', function(e) {
+                        logEvent(`🌍 kt.datatable.parseError DOM event fired on document!`, 'success');
+                    });
+
+                    // Listen for other datatable events for debugging
+                    ['fetch', 'fetched', 'error'].forEach(eventName => {
+                        element.addEventListener(eventName, function(e) {
+                            logEvent(`📡 ${eventName} event fired`);
+                        });
+                    });
+
+                    logEvent('✅ Event listeners set up successfully');
+                    logEvent('⏳ Waiting for DataTable to auto-load and trigger parseError...');
+                } else {
+                    logEvent('❌ No element available for event listeners', 'error');
+                    updateTestResult(false, 'FAIL: No element available for event listeners');
+                }
+            } else {
+                logEvent('❌ DataTable instance is null', 'error');
+                updateTestResult(false, 'FAIL: DataTable instance is null');
+            }
+        });
+
+        // Fallback: manually trigger reload after 3 seconds if auto-load didn't work
+        setTimeout(() => {
+            if (!parseErrorFired && datatableInstance) {
+                logEvent('Auto-load may have failed, manually triggering reload...');
+                datatableInstance.reload();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

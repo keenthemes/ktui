@@ -59,7 +59,7 @@ export class KTSelectSearch {
 				this._eventManager.addListener(
 					this._searchInput,
 					'keydown',
-					this._handleSearchKeyDown.bind(this)
+					this._handleSearchKeyDown.bind(this),
 				);
 
 				// Add blur event listener to ensure highlights are cleared when focus is lost
@@ -230,7 +230,7 @@ export class KTSelectSearch {
 	 */
 	private _restoreOptionContentsBeforeFilter(): void {
 		const options = Array.from(
-			this._select.getOptionsElement()
+this._select.getOptionsElement(),
 		) as HTMLElement[];
 		options.forEach((option) => {
 			const value = option.getAttribute('data-value');
@@ -302,7 +302,7 @@ export class KTSelectSearch {
 			query,
 			config,
 			dropdownElement,
-			(count) => this._handleNoResults(count)
+(count) => this._handleNoResults(count),
 		);
 
 		this._select.updateSelectAllButtonState();

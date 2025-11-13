@@ -60,7 +60,7 @@ export default class KTComponent {
 				})
 				.map((callable) => {
 					return Promise.resolve(callable(payload));
-				})
+				}),
 		);
 	}
 

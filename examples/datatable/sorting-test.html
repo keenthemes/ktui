@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KT DataTable Sorting Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../../dist/styles.css">
+    <style>
+        /* Custom styles for the test */
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .test-pass {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <!-- Search Input -->
+        <div class="mb-4">
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Search data..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-kt-datatable-search="#sorting-test-table"
+            >
+        </div>
+
+        <!-- DataTable Container using official structure -->
+        <div class="kt-card">
+            <div class="kt-card-table" data-kt-datatable="true" data-kt-datatable-page-size="5" data-kt-datatable-state-save="true">
+                <div class="kt-table-wrapper kt-scrollable">
+                    <table id="sorting-test-table" class="kt-table" data-kt-datatable-table="true">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="w-20" data-kt-datatable-column="id">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">ID</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-32" data-kt-datatable-column="name">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Name</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-40" data-kt-datatable-column="email">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Email</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-32" data-kt-datatable-column="department">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Department</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-24" data-kt-datatable-column="salary">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Salary</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                                <th scope="col" class="w-24" data-kt-datatable-column="status">
+                                    <span class="kt-table-col">
+                                        <span class="kt-table-col-label">Status</span>
+                                        <span class="kt-table-col-sort"></span>
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>John Doe</td>
+                                <td>john.doe@example.com</td>
+                                <td>Engineering</td>
+                                <td>$75,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Jane Smith</td>
+                                <td>jane.smith@example.com</td>
+                                <td>Marketing</td>
+                                <td>$65,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Mike Johnson</td>
+                                <td>mike.johnson@example.com</td>
+                                <td>Engineering</td>
+                                <td>$80,000</td>
+                                <td><span class="kt-badge kt-badge-destructive">Inactive</span></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Sarah Wilson</td>
+                                <td>sarah.wilson@example.com</td>
+                                <td>Sales</td>
+                                <td>$70,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>David Brown</td>
+                                <td>david.brown@example.com</td>
+                                <td>HR</td>
+                                <td>$60,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Lisa Davis</td>
+                                <td>lisa.davis@example.com</td>
+                                <td>Engineering</td>
+                                <td>$85,000</td>
+                                <td><span class="kt-badge kt-badge-primary">Verified</span></td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td>Tom Anderson</td>
+                                <td>tom.anderson@example.com</td>
+                                <td>Marketing</td>
+                                <td>$68,000</td>
+                                <td><span class="kt-badge kt-badge-destructive">Inactive</span></td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td>Emma Taylor</td>
+                                <td>emma.taylor@example.com</td>
+                                <td>Sales</td>
+                                <td>$72,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td>Chris Miller</td>
+                                <td>chris.miller@example.com</td>
+                                <td>Engineering</td>
+                                <td>$78,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td>Amy Garcia</td>
+                                <td>amy.garcia@example.com</td>
+                                <td>HR</td>
+                                <td>$62,000</td>
+                                <td><span class="kt-badge kt-badge-success">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Info -->
+                <div class="flex items-center justify-between mt-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-700">Show</span>
+                        <select data-kt-datatable-size="true" class="border border-gray-300 rounded px-2 py-1">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span class="text-sm text-gray-700">entries</span>
+                    </div>
+                    <div data-kt-datatable-info="true" class="text-sm text-gray-700"></div>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div class="flex justify-center mt-4">
+                    <div data-kt-datatable-pagination="true" class="flex space-x-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load KTUI -->
+    <script src="../../dist/ktui.js"></script>
+
+    <script>
+        let datatableInstance = null;
+
+        // Initialize the datatable when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for the DOM to be fully ready
+            setTimeout(() => {
+                try {
+                    // Initialize KTUI components using official method
+                    if (typeof KTDataTable !== 'undefined') {
+                        KTDataTable.init();
+                    }
+
+                    // Get the datatable instance using official API
+                    const container = document.querySelector('[data-kt-datatable="true"]');
+                    if (container) {
+                        datatableInstance = KTDataTable.getInstance(container);
+                        if (datatableInstance) {
+                            console.log('✅ DataTable initialized successfully using official API!');
+                        } else {
+                            console.error('❌ Failed to get DataTable instance');
+                        }
+                    } else {
+                        console.error('❌ DataTable container not found');
+                    }
+                } catch (error) {
+                    console.error('❌ Error initializing DataTable: ' + error.message);
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -3,58 +3,95 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
- /* Base Styles */
- @layer components {
-  /* Container */
-  .kt-toast-container {
-    @apply fixed z-9999;
-  }
+/* Base Styles */
+@layer components {
+	/* Container */
+	.kt-toast-container {
+		@apply fixed z-9999;
+	}
 
-  /* Toast */
-  .kt-toast {
-    @apply fixed z-9999 max-w-[95%] w-76 shadow-sm pointer-events-auto overflow-hidden;
+	/* Toast */
+	.kt-toast {
+		@apply fixed z-9999 max-w-[95%] w-76 shadow-sm pointer-events-auto overflow-hidden;
 
-    opacity: 0;
-    animation: kt-toast-in 0.28s cubic-bezier(.4,0,.2,1) forwards;
-    transition: top 0.28s cubic-bezier(.4,0,.2,1), opacity 0.28s cubic-bezier(.4,0,.2,1);
+		opacity: 0;
+		animation: kt-toast-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+		transition:
+			top 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
-    &.kt-toast-top-end { @apply bottom-auto top-0 end-0; }
-    &.kt-toast-top-center { @apply bottom-auto top-0 start-1/2 -translate-x-1/2; }
-    &.kt-toast-top-start { @apply bottom-auto top-0 start-0; }
-    &.kt-toast-bottom-end { @apply top-auto bottom-0 end-0; }
-    &.kt-toast-bottom-center { @apply top-auto bottom-0 start-1/2 -translate-x-1/2; } 
-    &.kt-toast-bottom-start { @apply top-auto bottom-0 start-0; }
-  }
+		&.kt-toast-top-end {
+			@apply bottom-auto top-0 end-0;
+		}
+		&.kt-toast-top-center {
+			@apply bottom-auto top-0 left-1/2 -translate-x-1/2;
+		}
+		&.kt-toast-top-start {
+			@apply bottom-auto top-0 start-0;
+		}
+		&.kt-toast-middle-end {
+			@apply top-1/2 -translate-y-1/2 end-0;
+		}
+		&.kt-toast-middle-center {
+			@apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+		}
+		&.kt-toast-middle-start {
+			@apply top-1/2 -translate-y-1/2 start-0;
+		}
+		&.kt-toast-bottom-end {
+			@apply top-auto bottom-0 end-0;
+		}
+		&.kt-toast-bottom-center {
+			@apply top-auto bottom-0 left-1/2 -translate-x-1/2;
+		}
+		&.kt-toast-bottom-start {
+			@apply top-auto bottom-0 start-0;
+		}
+	}
 
-  /* Progress */
-  .kt-toast-progress {
-    @apply fixed start-0 bottom-0 w-full h-[3px] bg-primary;
-    transform-origin: left;
-    animation: kt-toast-progress-line linear forwards;
-  }
- }
+	/* Progress */
+	.kt-toast-progress {
+		@apply fixed start-0 bottom-0 w-full h-[3px] bg-primary;
+		transform-origin: left;
+		animation: kt-toast-progress-line linear forwards;
+	}
+}
 
 /* RTL Styles */
 @layer components {
 	[dir='rtl'] .kt-toast-progress {
-    transform-origin: right;
-  }
+		transform-origin: right;
+	}
 }
 
 /* Animations */
 @layer components {
-  @keyframes kt-toast-in {
-    from { opacity: 0; transform: translateY(-24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+	@keyframes kt-toast-in {
+		from {
+			opacity: 0;
+			transform: translateY(-24px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
-  @keyframes kt-toast-out {
-    from { opacity: 1;  }
-    to { opacity: 0;  }
-  }
+	@keyframes kt-toast-out {
+		from {
+			opacity: 1;
+		}
+		to {
+			opacity: 0;
+		}
+	}
 
-  @keyframes kt-toast-progress-line {
-    from { transform: scaleX(1); }
-    to { transform: scaleX(0); }
-  }
+	@keyframes kt-toast-progress-line {
+		from {
+			transform: scaleX(1);
+		}
+		to {
+			transform: scaleX(0);
+		}
+	}
 }

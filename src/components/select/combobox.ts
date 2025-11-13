@@ -27,13 +27,13 @@ export class KTSelectCombobox {
 		const displayElement = select.getDisplayElement(); // KTSelect's main display element for combobox
 
 		this._searchInputElement = displayElement.querySelector(
-			'input[data-kt-select-search]'
+'input[data-kt-select-search]',
 		);
 		this._clearButtonElement = displayElement.querySelector(
-			'[data-kt-select-clear-button]'
+			'[data-kt-select-clear-button]',
 		);
 		this._valuesContainerElement = displayElement.querySelector(
-			'[data-kt-select-combobox-values]'
+			'[data-kt-select-combobox-values]',
 		);
 
 		this._boundInputHandler = this._handleComboboxInput.bind(this);
@@ -66,13 +66,13 @@ export class KTSelectCombobox {
 			// Ensure element exists
 			this._searchInputElement.addEventListener(
 				'input',
-				this._boundInputHandler
+this._boundInputHandler,
 			);
 		}
 		if (this._clearButtonElement) {
 			this._clearButtonElement.addEventListener(
 				'click',
-				this._boundClearHandler
+this._boundClearHandler,
 			);
 		}
 	}
@@ -84,13 +84,13 @@ export class KTSelectCombobox {
 		if (this._searchInputElement) {
 			this._searchInputElement.removeEventListener(
 				'input',
-				this._boundInputHandler
+this._boundInputHandler,
 			);
 		}
 		if (this._clearButtonElement) {
 			this._clearButtonElement.removeEventListener(
 				'click',
-				this._boundClearHandler
+this._boundClearHandler,
 			);
 		}
 	}
@@ -163,7 +163,7 @@ export class KTSelectCombobox {
 	 */
 	private _filterOptionsForCombobox(query: string): void {
 		const options = Array.from(
-			this._select.getOptionsElement()
+this._select.getOptionsElement(),
 		) as HTMLElement[];
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
@@ -193,7 +193,7 @@ export class KTSelectCombobox {
 				const optionElement = this._select
 					.getElement()
 					.querySelector(
-						`option[value="${CSS.escape(value)}"]`
+`option[value="${CSS.escape(value)}"]`,
 					) as HTMLOptionElement;
 				if (optionElement) {
 					const tagElement = defaultTemplates.tag(optionElement, this._config);
