@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Remote Select Issue</title>
+    <link rel="stylesheet" href="../../dist/styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+        <form class="flex flex-col gap-6">
+            <div>
+                <label class="block mb-2 font-medium text-gray-700" for="select-remote">Remote Data Test</label>
+
+                <select
+                    id="select-remote"
+                    class="kt-select"
+                    data-kt-select
+                    data-kt-select-remote="true"
+                    data-kt-select-data-url="https://jsonplaceholder.typicode.com/users"
+                    data-kt-select-data-field-value="id"
+                    data-kt-select-data-field-text="name"
+                    data-kt-select-enable-search="true"
+                    data-kt-select-search-param="q"
+                    data-kt-select-search-min-length="2"
+                    data-kt-select-search-debounce="300"
+                    data-kt-select-debug="true"
+                    placeholder="Search users..."
+                ></select>
+
+                <div class="mt-4">
+                    <button type="button" id="check-value" class="px-4 py-2 bg-blue-500 text-white rounded">Check Select Value</button>
+                    <div id="value-display" class="mt-2 p-2 bg-gray-100 rounded"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="../../dist/ktui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectEl = document.getElementById('select-remote');
+            const checkBtn = document.getElementById('check-value');
+            const valueDisplay = document.getElementById('value-display');
+
+            // Wait for remote data to load
+
+            setTimeout(() => {
+                checkBtn.addEventListener('click', function() {
+                    const value = selectEl.value;
+                    const selectedText = selectEl.options[selectEl.selectedIndex]?.text || 'No selection';
+                    valueDisplay.innerHTML = `
+                        <strong>Select Value:</strong> "${value}"<br>
+                        <strong>Selected Text:</strong> "${selectedText}"<br>
+                        <strong>Options Count:</strong> ${selectEl.options.length}<br>
+                        <strong>Options:</strong><br>
+                        ${Array.from(selectEl.options).map(opt => `- ${opt.value}: ${opt.text}`).join('<br>')}
+                    `;
+                });
+            }, 3000); // Wait 3 seconds for remote data to load
+        });
+    </script>
+</body>
+</html>

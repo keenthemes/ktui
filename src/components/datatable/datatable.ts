@@ -815,6 +815,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			method: requestMethod,
 			body: requestBody,
 			headers: this._config.requestHeaders,
+			...(this._config.requestCredentials && {
+				credentials: this._config.requestCredentials,
+			}),
 		}).catch((error) => {
 			// Trigger an error event
 			this._fireEvent('error', { error });

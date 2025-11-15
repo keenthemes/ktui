@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DataTable Checkbox Events Test</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen p-4">
+	<div class="container mx-auto max-w-5xl">
+		<div class="bg-white rounded-lg shadow-lg p-8 mt-6 border border-gray-200">
+			<div class="mb-6">
+				<h1 class="text-xl font-bold text-gray-900">DataTable Checkbox Events Test</h1>
+			</div>
+
+			<!-- Current Selection Display -->
+			<div class="mb-6">
+				<h2 class="text-lg font-semibold text-gray-800 mb-3">Current Selection</h2>
+				<div id="selectionDisplay" class="bg-blue-50 border border-blue-200 rounded-md p-4">
+					<div class="text-gray-700">
+						<strong>Checked IDs:</strong> <span id="checkedIds" class="font-mono">[]</span>
+					</div>
+					<div class="text-gray-700 mt-2">
+						<strong>Count:</strong> <span id="checkedCount" class="font-semibold">0</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Test Controls -->
+			<div class="mb-6 flex gap-3 flex-wrap">
+				<button
+					onclick="testCheckAll()"
+					class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium">
+					Check All
+				</button>
+				<button
+					onclick="testUncheckAll()"
+					class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium">
+					Uncheck All
+				</button>
+				<button
+					onclick="testToggle()"
+					class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium">
+					Toggle All
+				</button>
+			</div>
+
+		<!-- DataTable Container -->
+		<div class="kt-card">
+			<div class="kt-card-table" data-kt-datatable="true" data-kt-datatable-page-size="5">
+				<div class="kt-table-wrapper kt-scrollable">
+					<table id="checkbox-test-table" class="kt-table" data-kt-datatable-table="true">
+						<thead>
+							<tr>
+								<th scope="col" class="w-12">
+									<input
+										type="checkbox"
+										data-kt-datatable-check="true"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</th>
+								<th scope="col" class="w-20" data-kt-datatable-column="id">
+									<span class="kt-table-col">
+										<span class="kt-table-col-label">ID</span>
+									</span>
+								</th>
+								<th scope="col" class="w-40" data-kt-datatable-column="name">
+									<span class="kt-table-col">
+										<span class="kt-table-col-label">Name</span>
+									</span>
+								</th>
+								<th scope="col" class="w-48" data-kt-datatable-column="email">
+									<span class="kt-table-col">
+										<span class="kt-table-col-label">Email</span>
+									</span>
+								</th>
+								<th scope="col" class="w-32" data-kt-datatable-column="department">
+									<span class="kt-table-col">
+										<span class="kt-table-col-label">Department</span>
+									</span>
+								</th>
+								<th scope="col" class="w-24" data-kt-datatable-column="status">
+									<span class="kt-table-col">
+										<span class="kt-table-col-label">Status</span>
+									</span>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="1"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>1</td>
+								<td>John Doe</td>
+								<td>john.doe@example.com</td>
+								<td>Engineering</td>
+								<td><span class="kt-badge kt-badge-success">Active</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="2"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>2</td>
+								<td>Jane Smith</td>
+								<td>jane.smith@example.com</td>
+								<td>Marketing</td>
+								<td><span class="kt-badge kt-badge-success">Active</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="3"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>3</td>
+								<td>Mike Johnson</td>
+								<td>mike.johnson@example.com</td>
+								<td>Engineering</td>
+								<td><span class="kt-badge kt-badge-destructive">Inactive</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="4"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>4</td>
+								<td>Sarah Wilson</td>
+								<td>sarah.wilson@example.com</td>
+								<td>Sales</td>
+								<td><span class="kt-badge kt-badge-success">Active</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="5"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>5</td>
+								<td>David Brown</td>
+								<td>david.brown@example.com</td>
+								<td>HR</td>
+								<td><span class="kt-badge kt-badge-success">Active</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="6"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>6</td>
+								<td>Lisa Davis</td>
+								<td>lisa.davis@example.com</td>
+								<td>Engineering</td>
+								<td><span class="kt-badge kt-badge-primary">Verified</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="7"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>7</td>
+								<td>Tom Anderson</td>
+								<td>tom.anderson@example.com</td>
+								<td>Marketing</td>
+								<td><span class="kt-badge kt-badge-destructive">Inactive</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="8"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>8</td>
+								<td>Emma Taylor</td>
+								<td>emma.taylor@example.com</td>
+								<td>Sales</td>
+								<td><span class="kt-badge kt-badge-success">Active</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="9"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>9</td>
+								<td>Chris Miller</td>
+								<td>chris.miller@example.com</td>
+								<td>Engineering</td>
+								<td><span class="kt-badge kt-badge-success">Active</span></td>
+							</tr>
+							<tr>
+								<td>
+									<input
+										type="checkbox"
+										data-kt-datatable-row-check="true"
+										value="10"
+										class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+								</td>
+								<td>10</td>
+								<td>Amy Garcia</td>
+								<td>amy.garcia@example.com</td>
+								<td>HR</td>
+								<td><span class="kt-badge kt-badge-success">Active</span></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<!-- Pagination Info -->
+				<div class="flex items-center justify-between mt-4">
+					<div class="flex items-center space-x-2">
+						<span class="text-sm text-gray-700">Show</span>
+						<select data-kt-datatable-size="true" class="border border-gray-300 rounded px-2 py-1 bg-white text-gray-900">
+							<option value="5">5</option>
+							<option value="10" selected>10</option>
+							<option value="20">20</option>
+							<option value="50">50</option>
+						</select>
+						<span class="text-sm text-gray-700">entries</span>
+					</div>
+					<div data-kt-datatable-info="true" class="text-sm text-gray-700"></div>
+				</div>
+
+				<!-- Pagination Controls -->
+				<div class="flex justify-center mt-4">
+					<div data-kt-datatable-pagination="true" class="flex space-x-1"></div>
+				</div>
+			</div>
+		</div>
+		</div>
+
+		<!-- Event Log Section -->
+		<div class="bg-white rounded-lg shadow-lg p-8 mt-6 border border-gray-200">
+			<div class="flex items-center justify-between mb-3">
+				<h2 class="text-lg font-semibold text-gray-800">Event Log</h2>
+				<button
+					id="clearLog"
+					onclick="clearEventLog()"
+					class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+					Clear Log
+				</button>
+			</div>
+			<div id="eventLog" class="bg-gray-50 border border-gray-200 rounded-md p-4 h-64 overflow-y-auto font-mono text-sm">
+				<div class="text-gray-500">No events yet. Interact with checkboxes to see events...</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="../../dist/ktui.js"></script>
+	<script>
+		let datatableInstance = null;
+
+		// Event log helper functions
+		function addEventLog(eventName, details = '') {
+			const logElement = document.getElementById('eventLog');
+			const timestamp = new Date().toLocaleTimeString();
+			const logEntry = document.createElement('div');
+			logEntry.className = 'mb-2 pb-2 border-b border-gray-200';
+
+			let eventColor = 'text-gray-700';
+			if (eventName === 'checked') {
+				eventColor = 'text-green-600';
+			} else if (eventName === 'unchecked') {
+				eventColor = 'text-red-600';
+			} else if (eventName === 'changed') {
+				eventColor = 'text-blue-600';
+			}
+
+			logEntry.innerHTML = `
+				<div class="flex items-start gap-2">
+					<span class="text-gray-500 text-xs">[${timestamp}]</span>
+					<span class="font-semibold ${eventColor}">${eventName.toUpperCase()}</span>
+					${details ? `<span class="text-gray-600">${details}</span>` : ''}
+				</div>
+			`;
+
+			// Remove "No events yet" message if it exists
+			const firstChild = logElement.firstChild;
+			if (firstChild && firstChild.textContent.includes('No events yet')) {
+				logElement.removeChild(firstChild);
+			}
+
+			logElement.insertBefore(logEntry, logElement.firstChild);
+
+			// Keep only last 50 entries
+			while (logElement.children.length > 50) {
+				logElement.removeChild(logElement.lastChild);
+			}
+		}
+
+		function clearEventLog() {
+			const logElement = document.getElementById('eventLog');
+			logElement.innerHTML = '<div class="text-gray-500">No events yet. Interact with checkboxes to see events...</div>';
+		}
+
+		function updateSelectionDisplay() {
+			if (!datatableInstance) return;
+			const checkedIds = datatableInstance.getChecked();
+			document.getElementById('checkedIds').textContent = JSON.stringify(checkedIds);
+			document.getElementById('checkedCount').textContent = checkedIds.length;
+		}
+
+		// Test functions
+		function testCheckAll() {
+			if (datatableInstance) {
+				datatableInstance.check();
+			}
+		}
+
+		function testUncheckAll() {
+			if (datatableInstance) {
+				datatableInstance.uncheck();
+			}
+		}
+
+		function testToggle() {
+			if (datatableInstance) {
+				datatableInstance.toggle();
+			}
+		}
+
+		// Initialize the datatable when page loads
+		document.addEventListener('DOMContentLoaded', function() {
+			setTimeout(() => {
+				try {
+					// Initialize KTUI components
+					if (typeof KTDataTable !== 'undefined') {
+						KTDataTable.init();
+					}
+
+					// Get the datatable instance
+					const container = document.querySelector('[data-kt-datatable="true"]');
+					if (container) {
+						datatableInstance = KTDataTable.getInstance(container);
+						if (datatableInstance) {
+							console.log('✅ DataTable initialized successfully!');
+
+							// Attach event listeners for all checkbox events
+							datatableInstance.on('checked', function(event) {
+								const checkedIds = datatableInstance.getChecked();
+								addEventLog('checked', `Selected ${checkedIds.length} rows: [${checkedIds.join(', ')}]`);
+								updateSelectionDisplay();
+							});
+
+							datatableInstance.on('unchecked', function(event) {
+								const checkedIds = datatableInstance.getChecked();
+								addEventLog('unchecked', `Deselected. Remaining: ${checkedIds.length} rows: [${checkedIds.join(', ')}]`);
+								updateSelectionDisplay();
+							});
+
+							datatableInstance.on('changed', function(event) {
+								const checkedIds = datatableInstance.getChecked();
+								addEventLog('changed', `Selection changed. Total: ${checkedIds.length} rows: [${checkedIds.join(', ')}]`);
+								updateSelectionDisplay();
+							});
+
+							// Initial display update
+							updateSelectionDisplay();
+						} else {
+							console.error('❌ Failed to get DataTable instance');
+						}
+					} else {
+						console.error('❌ DataTable container not found');
+					}
+				} catch (error) {
+					console.error('❌ Error initializing DataTable: ' + error.message);
+				}
+			}, 100);
+		});
+	</script>
+</body>
+
+</html>
+

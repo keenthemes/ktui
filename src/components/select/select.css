@@ -134,23 +134,18 @@
 	/* Enhanced Tag Styles */
 	.kt-select-tag {
 		@apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium;
-		@apply bg-gray-50 text-gray-700 border border-gray-200;
-		@apply hover:bg-gray-100 hover:border-gray-300 transition-all duration-200;
+		@apply bg-accent/10 text-accent-foreground border border-border;
 		@apply max-w-[200px] truncate flex-shrink-0;
-		@apply shadow-sm hover:shadow-md;
+		@apply shadow-sm;
 		@apply leading-tight;
 	}
 
 	.kt-select-tag-remove {
 		@apply flex items-center justify-center w-5 h-5 rounded-full;
-		@apply hover:bg-gray-200 text-gray-500 hover:text-gray-700;
+		@apply hover:bg-accent/20 text-muted-foreground hover:text-accent-foreground;
 		@apply transition-all duration-200 cursor-pointer;
-		@apply flex-shrink-0 opacity-70;
+		@apply flex-shrink-0 opacity-100;
 		@apply hover:scale-110;
-	}
-
-	.kt-select-tag:hover .kt-select-tag-remove {
-		@apply opacity-100;
 	}
 
 	.kt-select-tag-remove svg {
@@ -166,8 +161,8 @@
 	.kt-select-display[data-multiple='true'] {
 		@apply flex flex-wrap items-center gap-2 p-3 min-h-[3rem];
 		@apply w-full;
-		@apply bg-white border border-gray-200 rounded-md;
-		@apply focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100;
+		@apply bg-background border border-input rounded-md;
+		@apply focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20;
 		@apply transition-all duration-200;
 	}
 }

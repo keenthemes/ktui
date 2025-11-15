@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DataTable Remote Data with Checkboxes Test</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen p-4">
+	<div class="container mx-auto max-w-5xl">
+		<div class="bg-white rounded-lg shadow-lg p-8 mt-6 border border-gray-200">
+			<div class="mb-6">
+				<h1 class="text-xl font-bold text-gray-900">DataTable Remote Data with Checkboxes Test</h1>
+				<p class="text-sm text-gray-600 mt-2">Tests checkbox events with server-side data from JSONPlaceholder API</p>
+			</div>
+
+			<!-- Current Selection Display -->
+			<div class="mb-6">
+				<h2 class="text-lg font-semibold text-gray-800 mb-3">Current Selection</h2>
+				<div id="selectionDisplay" class="bg-blue-50 border border-blue-200 rounded-md p-4">
+					<div class="text-gray-700">
+						<strong>Checked IDs:</strong> <span id="checkedIds" class="font-mono">[]</span>
+					</div>
+					<div class="text-gray-700 mt-2">
+						<strong>Count:</strong> <span id="checkedCount" class="font-semibold">0</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Test Controls -->
+			<div class="mb-6 flex gap-3 flex-wrap">
+				<button
+					onclick="testCheckAll()"
+					class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium">
+					Check All
+				</button>
+				<button
+					onclick="testUncheckAll()"
+					class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium">
+					Uncheck All
+				</button>
+				<button
+					onclick="testToggle()"
+					class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors font-medium">
+					Toggle All
+				</button>
+				<button
+					onclick="testGetChecked()"
+					class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium">
+					Get Checked
+				</button>
+			</div>
+
+		<!-- DataTable Container -->
+		<div class="kt-card">
+			<div class="kt-card-table" id="remote-datatable-container">
+					<div class="kt-table-wrapper kt-scrollable">
+						<table id="remote-checkbox-table" class="kt-table" data-kt-datatable-table="true">
+							<thead>
+								<tr>
+									<th scope="col" class="w-12" data-kt-datatable-column="checkbox">
+										<input
+											type="checkbox"
+											data-kt-datatable-check="true"
+											class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+									</th>
+									<th scope="col" class="w-20" data-kt-datatable-column="id">
+										<span class="kt-table-col">
+											<span class="kt-table-col-label">ID</span>
+											<span class="kt-table-col-sort"></span>
+										</span>
+									</th>
+									<th scope="col" class="w-48" data-kt-datatable-column="name">
+										<span class="kt-table-col">
+											<span class="kt-table-col-label">Name</span>
+											<span class="kt-table-col-sort"></span>
+										</span>
+									</th>
+									<th scope="col" class="w-64" data-kt-datatable-column="email">
+										<span class="kt-table-col">
+											<span class="kt-table-col-label">Email</span>
+											<span class="kt-table-col-sort"></span>
+										</span>
+									</th>
+									<th scope="col" class="w-40" data-kt-datatable-column="company">
+										<span class="kt-table-col">
+											<span class="kt-table-col-label">Company</span>
+											<span class="kt-table-col-sort"></span>
+										</span>
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<!-- Data will be loaded from API -->
+							</tbody>
+						</table>
+					</div>
+
+					<!-- Pagination Info -->
+					<div class="flex items-center justify-between mt-4">
+						<div class="flex items-center space-x-2">
+							<span class="text-sm text-gray-700">Show</span>
+							<select data-kt-datatable-size="true" class="border border-gray-300 rounded px-2 py-1 bg-white text-gray-900">
+								<option value="5" selected>5</option>
+								<option value="10">10</option>
+							</select>
+							<span class="text-sm text-gray-700">entries</span>
+						</div>
+						<div data-kt-datatable-info="true" class="text-sm text-gray-700"></div>
+					</div>
+
+					<!-- Pagination Controls -->
+					<div class="flex justify-center mt-4">
+						<div data-kt-datatable-pagination="true" class="flex space-x-1"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Event Log Section -->
+		<div class="bg-white rounded-lg shadow-lg p-8 mt-6 border border-gray-200">
+			<div class="flex items-center justify-between mb-3">
+				<h2 class="text-lg font-semibold text-gray-800">Event Log</h2>
+				<button
+					id="clearLog"
+					onclick="clearEventLog()"
+					class="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+					Clear Log
+				</button>
+			</div>
+			<div id="eventLog" class="bg-gray-50 border border-gray-200 rounded-md p-4 h-64 overflow-y-auto font-mono text-sm">
+				<div class="text-gray-500">No events yet. Interact with checkboxes to see events...</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="../../dist/ktui.js"></script>
+	<script>
+		let datatableInstance = null;
+
+		// Event log helper functions
+		function addEventLog(eventName, details = '') {
+			const logElement = document.getElementById('eventLog');
+			const timestamp = new Date().toLocaleTimeString();
+			const logEntry = document.createElement('div');
+			logEntry.className = 'mb-2 pb-2 border-b border-gray-200';
+
+			let eventColor = 'text-gray-700';
+			if (eventName === 'checked') {
+				eventColor = 'text-green-600';
+			} else if (eventName === 'unchecked') {
+				eventColor = 'text-red-600';
+			} else if (eventName === 'changed') {
+				eventColor = 'text-blue-600';
+			} else if (eventName === 'fetch' || eventName === 'fetched') {
+				eventColor = 'text-purple-600';
+			}
+
+			logEntry.innerHTML = `
+				<div class="flex items-start gap-2">
+					<span class="text-gray-500 text-xs">[${timestamp}]</span>
+					<span class="font-semibold ${eventColor}">${eventName.toUpperCase()}</span>
+					${details ? `<span class="text-gray-600">${details}</span>` : ''}
+				</div>
+			`;
+
+			// Remove "No events yet" message if it exists
+			const firstChild = logElement.firstChild;
+			if (firstChild && firstChild.textContent.includes('No events yet')) {
+				logElement.removeChild(firstChild);
+			}
+
+			logElement.insertBefore(logEntry, logElement.firstChild);
+
+			// Keep only last 50 entries
+			while (logElement.children.length > 50) {
+				logElement.removeChild(logElement.lastChild);
+			}
+		}
+
+		function clearEventLog() {
+			const logElement = document.getElementById('eventLog');
+			logElement.innerHTML = '<div class="text-gray-500">No events yet. Interact with checkboxes to see events...</div>';
+		}
+
+		function updateSelectionDisplay() {
+			if (!datatableInstance || typeof datatableInstance.getChecked !== 'function') {
+				return;
+			}
+			try {
+				const checkedIds = datatableInstance.getChecked();
+				document.getElementById('checkedIds').textContent = JSON.stringify(checkedIds);
+				document.getElementById('checkedCount').textContent = checkedIds.length;
+			} catch (e) {
+				console.error('Error updating selection display:', e);
+			}
+		}
+
+		// Test functions
+		function testCheckAll() {
+			if (datatableInstance) {
+				datatableInstance.check();
+			}
+		}
+
+		function testUncheckAll() {
+			if (datatableInstance) {
+				datatableInstance.uncheck();
+			}
+		}
+
+		function testToggle() {
+			if (datatableInstance) {
+				datatableInstance.toggle();
+			}
+		}
+
+		function testGetChecked() {
+			if (datatableInstance) {
+				const checkedIds = datatableInstance.getChecked();
+				addEventLog('info', `Manual getChecked() call returned: [${checkedIds.join(', ')}]`);
+			}
+		}
+
+		// Initialize the datatable when page loads
+		document.addEventListener('DOMContentLoaded', function() {
+			setTimeout(() => {
+				try {
+					// Initialize KTUI components
+					if (typeof KTDataTable !== 'undefined') {
+						const container = document.getElementById('remote-datatable-container');
+						if (container) {
+							// Set data attributes for datatable initialization
+							container.setAttribute('data-kt-datatable', 'true');
+							container.setAttribute('data-kt-datatable-page-size', '5');
+							container.setAttribute('data-kt-datatable-api-endpoint', 'https://jsonplaceholder.typicode.com/users');
+
+							datatableInstance = new KTDataTable(container, {
+								apiEndpoint: 'https://jsonplaceholder.typicode.com/users',
+								requestMethod: 'GET',
+								requestHeaders: {
+									'Content-Type': 'application/json'
+								},
+								columns: {
+									'checkbox': {
+										render: function(cellData, rowData, context) {
+											const checkbox = document.createElement('input');
+											checkbox.type = 'checkbox';
+											checkbox.value = rowData.id;
+											checkbox.setAttribute('data-kt-datatable-row-check', 'true');
+											checkbox.className = 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2';
+											return checkbox;
+										}
+									},
+									'id': {
+										render: function(cellData, rowData, context) {
+											return String(cellData);
+										}
+									},
+									'name': {
+										render: function(cellData, rowData, context) {
+											return String(cellData);
+										}
+									},
+									'email': {
+										render: function(cellData, rowData, context) {
+											return String(cellData);
+										}
+									},
+									'company': {
+										render: function(cellData, rowData, context) {
+											return String(cellData);
+										}
+									}
+								},
+								mapResponse: function(response) {
+									// JSONPlaceholder returns an array directly
+									// Transform nested objects to flat structure and format for datatable
+									if (Array.isArray(response)) {
+										const transformedData = response.map(user => ({
+											checkbox: '', // Empty value for checkbox column
+											id: user.id,
+											name: user.name,
+											email: user.email,
+											company: user.company ? user.company.name : ''
+										}));
+
+										// Get current pagination state for client-side pagination
+										// Since JSONPlaceholder doesn't support server-side pagination
+										// Use 'this' context which refers to the datatable instance
+										const state = this.getState();
+										const page = state.page || 1;
+										const pageSize = state.pageSize || 10;
+
+										// Slice data for current page (client-side pagination)
+										const startIndex = (page - 1) * pageSize;
+										const endIndex = startIndex + pageSize;
+										const paginatedData = transformedData.slice(startIndex, endIndex);
+
+										return {
+											data: paginatedData,
+											totalCount: transformedData.length
+										};
+									}
+									// If already in correct format, return as is
+									return response;
+								},
+								checkbox: {
+									preserveSelection: true
+								}
+							});
+
+							console.log('✅ Remote DataTable with Checkboxes initialized successfully!');
+
+							// Attach event listeners using DOM events (without kt-datatable- prefix)
+							container.addEventListener('checked', function(event) {
+								const checkedIds = datatableInstance.getChecked();
+								addEventLog('checked', `Selected ${checkedIds.length} rows: [${checkedIds.join(', ')}]`);
+								updateSelectionDisplay();
+							});
+
+							container.addEventListener('unchecked', function(event) {
+								const checkedIds = datatableInstance.getChecked();
+								addEventLog('unchecked', `Deselected. Remaining: ${checkedIds.length} rows: [${checkedIds.join(', ')}]`);
+								updateSelectionDisplay();
+							});
+
+							container.addEventListener('changed', function(event) {
+								const checkedIds = datatableInstance.getChecked();
+								addEventLog('changed', `Selection changed. Total: ${checkedIds.length} rows: [${checkedIds.join(', ')}]`);
+								updateSelectionDisplay();
+							});
+
+							container.addEventListener('fetch', function() {
+								addEventLog('fetch', 'Fetching data from server...');
+							});
+
+							container.addEventListener('fetched', function() {
+								try {
+									const state = datatableInstance.getState();
+									addEventLog('fetched', `Loaded ${state.totalItems || 0} total records`);
+									// Update selection display after data is loaded
+									updateSelectionDisplay();
+								} catch (e) {
+									console.error('Error in fetched handler:', e);
+								}
+							});
+						} else {
+							console.error('❌ DataTable container not found');
+						}
+					} else {
+						console.error('❌ KTDataTable is not defined');
+					}
+				} catch (error) {
+					console.error('❌ Error initializing Remote DataTable: ' + error.message);
+				}
+			}, 100);
+		});
+	</script>
+</body>
+
+</html>
+

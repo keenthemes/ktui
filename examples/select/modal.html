@@ -14,30 +14,41 @@
 			<div>
 				<label class="block mb-2 font-medium text-gray-700" for="select-basic">Modal</label>
 
-				<!-- Modal Trigger Button -->
-				<button id="openModalBtn" type="button"
-					class="mt-8 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">Open
-					Select Modal</button>
+	<!-- Modal Trigger Button -->
+	<button class="mt-8 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400" data-kt-modal-toggle="#selectModal">
+		Open Select Modal
+	</button>
 
-			</div>
-		</form>
 	</div>
+</form>
+</div>
 
-	<!-- Modal -->
-	<div id="selectModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-		<div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-			<button id="closeModalBtn"
-				class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none"
-				aria-label="Close Modal">&times;</button>
-			<h2 class="text-lg font-semibold mb-4">Select a Field</h2>
-			<!-- Note: dropdownContainer is set to "#selectModal" to attach dropdown to modal container -->
+<!-- Modal -->
+<div class="kt-modal kt-modal-center" data-kt-modal="true" id="selectModal">
+	<div class="kt-modal-content max-w-md">
+		<div class="kt-modal-header">
+			<h3 class="kt-modal-title">Select a Field</h3>
+			<button
+				type="button"
+				class="kt-modal-close"
+				aria-label="Close modal"
+				data-kt-modal-dismiss="#selectModal"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M18 6 6 18"/>
+					<path d="m6 6 12 12"/>
+				</svg>
+			</button>
+		</div>
+		<div class="kt-modal-body">
+			<!-- Note: dropdownStrategy is set to "absolute" for proper positioning inside transformed modal -->
 			<select
 				class="kt-select"
 				data-kt-select="true"
 				data-kt-select-placeholder="Select a framework..."
 				data-kt-select-config='{
 					"optionsClass": "kt-scrollable overflow-auto max-h-[250px]",
-					"dropdownContainer": "#selectModal"
+					"dropdownStrategy": "absolute"
 				}'
 			>
 				<option value="react">React</option>
@@ -51,21 +62,19 @@
 			</select>
 		</div>
 	</div>
-	<script>
-		document.getElementById('openModalBtn').addEventListener('click', function () {
-			document.getElementById('selectModal').classList.remove('hidden');
-		});
-		document.getElementById('closeModalBtn').addEventListener('click', function () {
-			document.getElementById('selectModal').classList.add('hidden');
-		});
-		// Optional: Close modal on backdrop click
-		document.getElementById('selectModal').addEventListener('click', function (e) {
-			if (e.target === this) {
-				this.classList.add('hidden');
-			}
-		});
-	</script>
-	<script src="../../dist/ktui.js"></script>
+</div>
+<script src="../../dist/ktui.js"></script>
+<script>
+	// Initialize modal component
+	document.addEventListener('DOMContentLoaded', function() {
+		if (window.KTModal) {
+			KTModal.init();
+		}
+		if (window.KTSelect) {
+			KTSelect.init();
+		}
+	});
+</script>
 </body>
 
 </html>

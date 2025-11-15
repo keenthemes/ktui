@@ -71,6 +71,7 @@ export interface KTDataTableResponseDataInterface {
 export interface KTDataTableConfigInterface {
 	requestMethod?: string;
 	requestHeaders?: { [key: string]: string };
+	requestCredentials?: RequestCredentials;
 	apiEndpoint?: string;
 	mapResponse?: (
 		data: KTDataTableResponseDataInterface,
