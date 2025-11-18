@@ -20,9 +20,9 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   monthYearSelect: `<div data-kt-datepicker-monthyear-select aria-live="polite" class="kt-datepicker-monthyear-select {{class}}">{{monthSelect}} {{yearSelect}}</div>`,
   monthSelection: `<div data-kt-datepicker-month-selection class="kt-datepicker-month-selection {{class}}">{{months}}</div>`,
   yearSelection: `<div data-kt-datepicker-year-selection class="kt-datepicker-year-selection {{class}}">{{years}}</div>`,
-  inputWrapper: `<div data-kt-datepicker-input-wrapper class="kt-datepicker-input-wrapper {{class}}">{{input}} {{icon}}</div>`,
+  inputWrapper: `<div data-kt-datepicker-input-wrapper class="kt-datepicker-input-wrapper flex items-center {{class}}">{{input}} {{icon}}</div>`,
   segmentedDateInput: `<div data-kt-datepicker-segmented-input class="kt-segmented-input flex items-center gap-1 {{class}}">{{segments}}</div>`,
-  segmentedDateRangeInput: `<div data-kt-datepicker-segmented-range-input class="kt-datepicker-segmented-range-input {{class}}">{{start}} {{separator}} {{end}}</div>`,
+  segmentedDateRangeInput: `<div data-kt-datepicker-segmented-range-input class="kt-datepicker-segmented-range-input flex items-center gap-1 {{class}}">{{start}} {{separator}} {{end}}</div>`,
   /**
    * Template for a single date segment (e.g., day, month, year)
    * Placeholders: segmentType, segmentValue, ariaLabel, ariaValueNow, ariaValueText, ariaValueMin, ariaValueMax, tabindex, contenteditable
