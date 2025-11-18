@@ -280,6 +280,57 @@ describe('KTDatepicker Integration', () => {
 
       expect(datepicker).toBeDefined();
     });
+
+    it('should preserve time when selecting dates from calendar after setting time via segmented inputs', () => {
+      // Set up datepicker with time enabled
+      const config: KTDatepickerConfig = {
+        enableTime: true,
+        timeFormat: '12h',
+        format: 'dd/MM/yyyy',
+        value: new Date(2024, 10, 15, 10, 30) // Nov 15, 2024, 10:30 AM
+      };
+
+      const datepickerElement = element.querySelector('.kt-datepicker')!;
+      const datepicker = new KTDatepicker(datepickerElement, config);
+
+      // Wait for initialization
+      expect(datepicker).toBeDefined();
+
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          // Simulate segmented input changing time to 3:45 PM
+          const newDateTime = new Date(2024, 10, 15, 15, 45); // Nov 15, 2024, 3:45 PM
+          (datepicker as any)._handleSegmentedInputChange(newDateTime);
+
+          // Wait for state update and verify selectedTime was updated
+          setTimeout(() => {
+            const updatedState = (datepicker as any)._unifiedStateManager.getState();
+            expect(updatedState.selectedTime).toBeTruthy();
+            expect(updatedState.selectedTime.hour).toBe(15); // 3 PM in 24-hour format
+            expect(updatedState.selectedTime.minute).toBe(45);
+            expect(updatedState.selectedDate.getHours()).toBe(15);
+            expect(updatedState.selectedDate.getMinutes()).toBe(45);
+
+            // Now simulate calendar date selection (November 20th)
+            const newDate = new Date(2024, 10, 20); // Nov 20, 2024
+            datepicker.setDate(newDate);
+
+            // Wait for update and verify time is still preserved
+            setTimeout(() => {
+              const finalState = (datepicker as any)._unifiedStateManager.getState();
+              expect(finalState.selectedTime).toBeTruthy();
+              expect(finalState.selectedTime.hour).toBe(15); // Time should still be 3:45 PM
+              expect(finalState.selectedTime.minute).toBe(45);
+              expect(finalState.selectedDate.getDate()).toBe(20); // Date should be 20th
+              expect(finalState.selectedDate.getHours()).toBe(15); // Time should be preserved
+              expect(finalState.selectedDate.getMinutes()).toBe(45);
+
+              resolve();
+            }, 50);
+          }, 50);
+        }, 100);
+      });
+    });
   });
 
   describe('Constraints', () => {

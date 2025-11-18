@@ -510,7 +510,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         eventHandler(...args);
       }
     } catch (error) {
-      console.warn(`[KTDatepicker] Error firing ${eventName} event:`, error);
       // Don't let event handler errors break the datepicker
     }
   }
@@ -628,7 +627,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
-    console.log('[KTDatepicker] Single date selected:', date);
   }
 
   /**
@@ -644,7 +642,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
-    console.log('[KTDatepicker] Range date selected:', newRange);
   }
 
   /** Select a multi-date */
@@ -666,19 +663,17 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
-    console.log('[KTDatepicker] Multi-date selected:', newDates);
   }
 
   /** Handler for Apply button in multi-date mode */
   private _onApplyMultiDate = (e: Event) => {
-    console.log('[KTDatepicker] Apply button clicked in multi-date mode');
+    // Apply button clicked in multi-date mode
   };
 
   private _onToday = (e: Event) => {
     e.preventDefault();
     const today = new Date();
     this.setDate(today);
-    console.log('[KTDatepicker] Today button clicked');
   };
 
   // Stub for _onClear (to be implemented next)
@@ -696,14 +691,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       const evt = new Event('change', { bubbles: true });
       this._input.dispatchEvent(evt);
     }
-    console.log('[KTDatepicker] Clear button clicked');
   };
 
   // Stub for _onApply (to be implemented next)
   private _onApply = (e: Event) => {
     e.preventDefault();
     // For multi-date, update input value (already handled by selection logic)
-    console.log('[KTDatepicker] Apply button clicked');
   };
 
   /**
@@ -2010,9 +2003,27 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _handleSegmentedInputChange(date: Date): void {
     console.log('🗓️ [KTDatepicker] Segmented input change:', date);
 
-    // Update the state manager with the new date
+    // When date changes from segmented input, also update the calendar view to show the selected date's month/year
+    const currentState = this._unifiedStateManager.getState();
+    const newCurrentDate = new Date(date.getFullYear(), date.getMonth(), 1); // First day of selected date's month
+
+    // Prepare state updates
+    const stateUpdates: Partial<KTDatepickerState> = {
+      selectedDate: date,
+      currentDate: newCurrentDate
+    };
+
+    // Update selectedTime if time is enabled
+    if (this._config.enableTime) {
+      stateUpdates.selectedTime = dateToTimeState(date);
+    }
+
+    // Update both selectedDate and currentDate to sync the calendar view
     // Use immediate update to ensure events fire synchronously
-    this._unifiedStateManager.updateState({ selectedDate: date }, 'segmented-input', true);
+    this._unifiedStateManager.updateState(stateUpdates, 'segmented-input', true);
+
+    // Update calendar content to sync dropdown even when closed
+    this._updateCalendarContent();
 
     // Fire onChange event
     this._fireDatepickerEvent('onChange', date, this);
@@ -2182,7 +2193,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     console.log('🗓️ [KTDatepicker] _handleStateChange called:', { newState, oldState });
 
     // Skip UI updates if this is from segmented input arrow navigation
-    if ((window as any).__ktui_segmented_input_arrow_navigation) {
+    if (typeof window !== 'undefined' && (window as any).__ktui_segmented_input_arrow_navigation) {
       console.log('🗓️ [KTDatepicker] Skipping UI update due to segmented input navigation');
       return;
     }

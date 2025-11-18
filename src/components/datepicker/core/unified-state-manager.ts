@@ -117,7 +117,6 @@ export class KTDatepickerUnifiedStateManager {
    */
   public updateState(updates: Partial<KTDatepickerState>, source: string = 'unknown', immediate: boolean = false): boolean {
     if (this._isUpdating) {
-      console.warn('[KTDatepicker] State update blocked - already updating');
       return false;
     }
 
@@ -154,7 +153,6 @@ export class KTDatepickerUnifiedStateManager {
     if (this._config.enableValidation) {
       const validation = this._validateState(newState);
       if (!validation.isValid) {
-        console.error('[KTDatepicker] State validation failed:', validation.errors);
         return false;
       }
       newState.validationErrors = validation.errors;
@@ -167,10 +165,6 @@ export class KTDatepickerUnifiedStateManager {
 
     // Notify observers
     this._notifyObservers(oldState, newState, source, changes);
-
-    if (this._config.enableDebugging) {
-      console.log(`[KTDatepicker] State updated by ${source}:`, changes);
-    }
 
     return true;
   }
