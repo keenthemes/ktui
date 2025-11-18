@@ -130,6 +130,7 @@ export function instantiateSingleSegmentedInput(
     required: !!config.required,
     readOnly: !!config.readOnly,
     locale: config.locale,
+    timeFormat: config.timeFormat,
     onChange,
   });
 
@@ -155,6 +156,7 @@ export function instantiateRangeSegmentedInputs(
     required: !!config.required,
     readOnly: !!config.readOnly,
     locale: config.locale,
+    timeFormat: config.timeFormat,
     onChange: onStartChange,
   });
   SegmentedInput(endContainer, {
@@ -165,6 +167,7 @@ export function instantiateRangeSegmentedInputs(
     required: !!config.required,
     readOnly: !!config.readOnly,
     locale: config.locale,
+    timeFormat: config.timeFormat,
     onChange: onEndChange,
   });
 }

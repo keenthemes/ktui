@@ -141,7 +141,8 @@
             {
                 format: 'dd/MM/yyyy',
                 enableTime: true,
-                timeFormat: 'hh:mm:ss A',
+                timeGranularity: 'minute',
+                timeFormat: '12h',
                 onChange: (date) => {
                     console.log('Date with time selected:', date);
                 }

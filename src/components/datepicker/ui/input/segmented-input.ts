@@ -42,6 +42,7 @@ export interface SegmentedInputOptions {
   locale?: string;
   onChange?: (value: Date) => void;
   segments?: Array<'day' | 'month' | 'year' | 'hour' | 'minute' | 'second' | 'ampm'>;
+  timeFormat?: '12h' | '24h'; // Time format for display
 }
 
 /**
@@ -81,6 +82,39 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     separatorTpl: typeof separatorTpl
   });
 
+  // --- Utility: get separator between segments ---
+  function getSeparatorBetweenSegments(segment1: string, segment2: string, format: string | undefined): string {
+    // Time segments use ":" as separator
+    const timeSegments = ['hour', 'minute', 'second'];
+    if (timeSegments.includes(segment1) && timeSegments.includes(segment2)) {
+      return ':';
+    }
+
+    // Space between date and time
+    const dateSegments = ['day', 'month', 'year'];
+    if (dateSegments.includes(segment1) && timeSegments.includes(segment2)) {
+      return ' ';
+    }
+
+    // AM/PM has space before it
+    if (segment2 === 'ampm') {
+      return ' ';
+    }
+
+    // Second to AM/PM has space
+    if (segment1 === 'second' && segment2 === 'ampm') {
+      return ' ';
+    }
+
+    // Date segments use separator from format
+    if (dateSegments.includes(segment1) && dateSegments.includes(segment2)) {
+      return getSeparatorFromFormat(format);
+    }
+
+    // Default fallback
+    return '';
+  }
+
   // --- Utility: get separator from format ---
   function getSeparatorFromFormat(format: string | undefined): string {
     if (!format) return '/'; // Default fallback
@@ -118,7 +152,15 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       case 'day': return date.getDate().toString().padStart(2, '0');
       case 'month': return (date.getMonth() + 1).toString().padStart(2, '0');
       case 'year': return date.getFullYear().toString();
-      case 'hour': return date.getHours().toString().padStart(2, '0');
+      case 'hour':
+        // For 12-hour format, convert to 1-12 range
+        if (options.timeFormat === '12h') {
+          const hour24 = date.getHours();
+          const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+          return hour12.toString().padStart(2, '0');
+        } else {
+          return date.getHours().toString().padStart(2, '0');
+        }
       case 'minute': return date.getMinutes().toString().padStart(2, '0');
       case 'second': return date.getSeconds().toString().padStart(2, '0');
       case 'ampm': return date.getHours() < 12 ? 'AM' : 'PM';
@@ -134,10 +176,22 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       case 'month': d.setMonth(Number(value) - 1); break;
       case 'year': d.setFullYear(Number(value)); break;
       case 'hour':
+        // Handle 12-hour vs 24-hour format
+        let hourValue = Number(value);
+        if (options.timeFormat === '12h') {
+          // In 12-hour mode, convert 12-hour input to 24-hour
+          const currentHour = d.getHours();
+          const isPM = currentHour >= 12;
+          if (hourValue === 12) {
+            hourValue = isPM ? 12 : 0; // 12 AM = 0, 12 PM = 12
+          } else if (isPM) {
+            hourValue += 12; // PM hours: add 12
+          }
+        }
         // Preserve existing minutes and seconds when setting hour
         const currentMinutes = d.getMinutes();
         const currentSecondsForHour = d.getSeconds();
-        d.setHours(Number(value), currentMinutes, currentSecondsForHour);
+        d.setHours(hourValue, currentMinutes, currentSecondsForHour);
         break;
       case 'minute':
         // Preserve existing seconds when setting minute
@@ -146,8 +200,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         break;
       case 'second': d.setSeconds(Number(value)); break;
       case 'ampm':
-        if (value === 'AM' && d.getHours() >= 12) d.setHours(d.getHours() - 12);
-        if (value === 'PM' && d.getHours() < 12) d.setHours(d.getHours() + 12);
+        if (value === 'AM' && d.getHours() >= 12) {
+          d.setHours(d.getHours() - 12);
+        } else if (value === 'PM' && d.getHours() < 12) {
+          d.setHours(d.getHours() + 12);
+        }
         break;
     }
     return d;
@@ -261,10 +318,6 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
 
     console.log('[SegmentedInput] Container prepared for rendering');
 
-    // Get separator from format
-    const separator = getSeparatorFromFormat(options.format);
-    console.log('[SegmentedInput] Separator from format:', separator);
-
     // Build segments HTML using templates
     let segmentsHtml = '';
     segments.forEach((segment, idx) => {
@@ -310,7 +363,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       segmentsHtml += segmentHtml;
 
       if (idx < segments.length - 1) {
-        // Use format-derived separator instead of hardcoded logic
+        // Get appropriate separator between these segments
+        const nextSegment = segments[idx + 1];
+        const separator = getSeparatorBetweenSegments(segment, nextSegment, options.format);
+        console.log(`[SegmentedInput] Separator between ${segment} and ${nextSegment}:`, separator);
+
         let sepHtml = '';
         if (typeof separatorTpl === 'function') {
           sepHtml = separatorTpl({ separator });
