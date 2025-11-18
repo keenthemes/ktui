@@ -132,23 +132,63 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     return '/'; // Default fallback
   }
 
+  // --- Utility: check if segment should be padded based on format ---
+  function shouldPadSegment(segment: string, format: string | undefined): boolean {
+    if (!format) return true; // Default to padded for backward compatibility
+
+    const tokenRegex = /(yyyy|yy|MM|M|dd|d|HH|H|mm|m|ss|s)/g;
+    let match;
+
+    while ((match = tokenRegex.exec(format)) !== null) {
+      switch (match[0]) {
+        case 'dd': if (segment === 'day') return true; break;
+        case 'd': if (segment === 'day') return false; break;
+        case 'MM': if (segment === 'month') return true; break;
+        case 'M': if (segment === 'month') return false; break;
+        case 'yyyy': if (segment === 'year') return true; break; // 4-digit year
+        case 'yy': if (segment === 'year') return false; break; // 2-digit year
+        case 'HH':
+        case 'H': if (segment === 'hour') return match[0] === 'HH'; break;
+        case 'mm':
+        case 'm': if (segment === 'minute') return match[0] === 'mm'; break;
+        case 'ss':
+        case 's': if (segment === 'second') return match[0] === 'ss'; break;
+      }
+    }
+
+    return true; // Default fallback
+  }
+
   // --- Utility: get segment value as string ---
   function getSegmentValue(segment: string, date: Date): string {
+    const shouldPad = shouldPadSegment(segment, options.format);
+
     switch (segment) {
-      case 'day': return date.getDate().toString().padStart(2, '0');
-      case 'month': return (date.getMonth() + 1).toString().padStart(2, '0');
-      case 'year': return date.getFullYear().toString();
+      case 'day':
+        const day = date.getDate();
+        return shouldPad ? day.toString().padStart(2, '0') : day.toString();
+      case 'month':
+        const month = date.getMonth() + 1;
+        return shouldPad ? month.toString().padStart(2, '0') : month.toString();
+      case 'year':
+        const year = date.getFullYear();
+        return shouldPad ? year.toString() : year.toString().slice(-2); // yy format shows last 2 digits
       case 'hour':
         // For 12-hour format, convert to 1-12 range
+        let hourValue: number;
         if (options.timeFormat === '12h') {
           const hour24 = date.getHours();
-          const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
-          return hour12.toString().padStart(2, '0');
+          hourValue = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
         } else {
-          return date.getHours().toString().padStart(2, '0');
+          hourValue = date.getHours();
         }
-      case 'minute': return date.getMinutes().toString().padStart(2, '0');
-      case 'second': return date.getSeconds().toString().padStart(2, '0');
+        return shouldPad ? hourValue.toString().padStart(2, '0') : hourValue.toString();
+      case 'minute':
+        const minute = date.getMinutes();
+        return shouldPad ? minute.toString().padStart(2, '0') : minute.toString();
+      case 'second':
+        const second = date.getSeconds();
+        return shouldPad ? second.toString().padStart(2, '0') : second.toString();
       case 'ampm': return date.getHours() < 12 ? 'AM' : 'PM';
       default: return '';
     }
@@ -433,9 +473,12 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
               current = Math.max(min, current - 1);
             }
             newValue = current.toString();
+            const shouldPad = shouldPadSegment(segments[idx], options.format);
             if (segments[idx] === 'year') {
-              newValue = newValue.padStart(4, '0');
-            } else {
+              if (shouldPad) {
+                newValue = newValue.padStart(4, '0');
+              }
+            } else if (shouldPad) {
               newValue = newValue.padStart(2, '0');
             }
           }
@@ -501,10 +544,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
 
           // Update content directly without re-rendering to preserve focus
           const oldText = span.textContent;
+          const shouldPad = shouldPadSegment(segments[idx], options.format);
           if (segments[idx] === 'year') {
-            span.textContent = num.toString().padStart(4, '0');
+            span.textContent = shouldPad ? num.toString().padStart(4, '0') : num.toString();
           } else {
-            span.textContent = num.toString().padStart(2, '0');
+            span.textContent = shouldPad ? num.toString().padStart(2, '0') : num.toString();
           }
 
           // Update internal value

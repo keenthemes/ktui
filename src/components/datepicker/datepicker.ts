@@ -926,32 +926,39 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Build config by merging defaults and user config
    */
   protected override _buildConfig(config?: KTDatepickerConfig) {
+    // First call parent to read data attributes
+    super._buildConfig(config);
+
     // Merge templates separately to ensure correct type
     const mergedTemplates = {
       ...defaultTemplates,
-      ...(config && config.templates) || {},
+      ...(this._config.templates || {}),
       ...(this._userTemplates || {})
     };
     // Determine closeOnSelect default based on mode and requirements
     let closeOnSelect: boolean;
-    if (typeof (config && config.closeOnSelect) !== 'undefined') {
+    if (typeof this._config.closeOnSelect !== 'undefined') {
       // User explicitly set closeOnSelect, respect their choice
-      closeOnSelect = config!.closeOnSelect!;
-    } else if (config?.enableTime) {
+      closeOnSelect = this._config.closeOnSelect!;
+    } else if (this._config.enableTime) {
       // Time-enabled: never close on date selection
       closeOnSelect = false;
-    } else if (config?.range) {
+    } else if (this._config.range) {
       // Range mode: handle clicks inside dropdown
       closeOnSelect = false;
-    } else if (config?.multiDate) {
+    } else if (this._config.multiDate) {
       // Multi-date mode: don't close on individual selections
       closeOnSelect = false;
     } else {
       // Single date only: close on date click
       closeOnSelect = true;
     }
+
+    // Merge with data attributes and passed config
+    // Important: data attributes (this._config) must come after defaults to override them
     this._config = {
       ...defaultDatepickerConfig,
+      ...this._config,  // Data attributes override defaults
       ...(config || {}),
       templates: mergedTemplates,
       closeOnSelect,
@@ -2167,6 +2174,16 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // Start observing for dynamic element creation
     this._startElementObservation();
+  }
+
+  // Static init method for auto-initialization
+  public static init(): void {
+    const elements = document.querySelectorAll<HTMLElement>('[data-kt-datepicker]');
+    elements.forEach((el) => {
+      if (!(el as any).instance) {
+        new KTDatepicker(el);
+      }
+    });
   }
 }
 
