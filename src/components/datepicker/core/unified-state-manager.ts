@@ -253,7 +253,7 @@ export class KTDatepickerUnifiedStateManager {
       try {
         observer.onStateChange(newState, oldState);
       } catch (error) {
-        console.error('[KTDatepicker] Observer error:', error);
+        // Observer error - continue with other observers
       }
     }
   }

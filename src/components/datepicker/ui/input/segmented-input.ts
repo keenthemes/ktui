@@ -52,9 +52,6 @@ export interface SegmentedInputOptions {
  * @returns cleanup function
  */
 export function SegmentedInput(container: HTMLElement, options: SegmentedInputOptions) {
-  console.log('[SegmentedInput] Starting with container:', container);
-  console.log('[SegmentedInput] Options:', options);
-
   // --- Internal state ---
   let currentValue = new Date(options.value);
   const segments = options.segments || ['month', 'day', 'year'];
@@ -65,22 +62,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     (window as any).__ktui_segmented_input_arrow_navigation = false;
   }
 
-  console.log('[SegmentedInput] Internal state:', {
-    currentValue,
-    segments,
-    locale
-  });
-
   // --- Get templates ---
   // Use a minimal config to get templates; in real usage, pass full config if available
   const templates = getTemplateStrings({} as KTDatepickerConfig);
   const segmentTpl = templates.dateSegment as string | ((data: any) => string) | undefined;
   const separatorTpl = templates.segmentSeparator as string | ((data: any) => string) | undefined;
-
-  console.log('[SegmentedInput] Templates loaded:', {
-    segmentTpl: typeof segmentTpl,
-    separatorTpl: typeof separatorTpl
-  });
 
   // --- Utility: get separator between segments ---
   function getSeparatorBetweenSegments(segment1: string, segment2: string, format: string | undefined): string {
@@ -288,7 +274,6 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         }
       }
     } catch (error) {
-      console.warn('Focus restoration failed:', error);
       // Fallback: focus first available segment
       const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
       if (segs[0]) segs[0].focus();
@@ -297,8 +282,6 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
 
   // --- Render segments using templates ---
   function render() {
-    console.log('[SegmentedInput] render() called');
-
     // Capture caret position before DOM update
     const prevSegs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
     if (prevSegs[focusedIdx] && document.activeElement === prevSegs[focusedIdx]) {
@@ -316,8 +299,6 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     container.setAttribute('aria-label', 'Date input');
     container.tabIndex = -1;
 
-    console.log('[SegmentedInput] Container prepared for rendering');
-
     // Build segments HTML using templates
     let segmentsHtml = '';
     segments.forEach((segment, idx) => {
@@ -334,15 +315,10 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         contenteditable: (!options.disabled && !options.readOnly).toString(),
       };
 
-      console.log(`[SegmentedInput] Processing segment ${segment}:`, segmentData);
-
       let segmentHtml = '';
       if (typeof segmentTpl === 'function') {
         segmentHtml = segmentTpl(segmentData);
       } else if (typeof segmentTpl === 'string') {
-        console.log(`[SegmentedInput] Template before replacement:`, segmentTpl);
-        console.log(`[SegmentedInput] Segment data for replacement:`, segmentData);
-
         segmentHtml = segmentTpl
           .replace(/{{segmentType}}/g, segmentData.segmentType)
           .replace(/{{segmentValue}}/g, segmentData.segmentValue)
@@ -353,20 +329,16 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           .replace(/{{ariaValueMax}}/g, segmentData.ariaValueMax)
           .replace(/{{tabindex}}/g, segmentData.tabindex)
           .replace(/{{contenteditable}}/g, segmentData.contenteditable);
-
-        console.log(`[SegmentedInput] Template after replacement:`, segmentHtml);
       } else {
         segmentHtml = '';
       }
 
-      console.log(`[SegmentedInput] Generated HTML for ${segment}:`, segmentHtml);
       segmentsHtml += segmentHtml;
 
       if (idx < segments.length - 1) {
         // Get appropriate separator between these segments
         const nextSegment = segments[idx + 1];
         const separator = getSeparatorBetweenSegments(segment, nextSegment, options.format);
-        console.log(`[SegmentedInput] Separator between ${segment} and ${nextSegment}:`, separator);
 
         let sepHtml = '';
         if (typeof separatorTpl === 'function') {
@@ -379,8 +351,6 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         segmentsHtml += sepHtml;
       }
     });
-
-    console.log('[SegmentedInput] All segments HTML generated:', segmentsHtml);
 
     // Wrap in segmentedDateInput template
     let segmentedInputHtml = segmentsHtml;
@@ -395,22 +365,16 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       }
     }
 
-    console.log('[SegmentedInput] Final HTML to insert:', segmentedInputHtml);
     container.innerHTML = segmentedInputHtml;
-    console.log('[SegmentedInput] HTML inserted, container HTML now:', container.innerHTML);
 
     // Verify template rendering was successful
-    console.log('[SegmentedInput] Verifying template rendering success');
     const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
-    console.log('[SegmentedInput] Found segments after template rendering:', segs.length, segs);
 
     if (segs.length === 0) {
-      console.error('[SegmentedInput] Template rendering failed - no segments found');
       throw new Error('Segmented input template rendering failed');
     }
 
     // Re-bind events to all segments
-    console.log('[SegmentedInput] Found segments after insertion:', segs.length, segs);
 
     segs.forEach((span, idx) => {
       span.addEventListener('keydown', (e) => {
@@ -484,7 +448,6 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
 
           // Call onChange immediately for Arrow Up/Down to update the main datepicker
           if (options.onChange) {
-            console.log('[SegmentedInput] Arrow navigation: calling onChange with new value');
             options.onChange(currentValue);
           }
 
@@ -586,10 +549,7 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           const updatedValue = setSegmentValue(segments[idx], span.textContent || '', currentValue);
           // Only call onChange if the value has actually changed
           if (updatedValue.getTime() !== currentValue.getTime()) {
-            console.log('[SegmentedInput] Blur event: value changed, calling onChange');
             options.onChange(updatedValue);
-          } else {
-            console.log('[SegmentedInput] Blur event: no value change, skipping onChange');
           }
         }
       });

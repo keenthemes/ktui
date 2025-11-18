@@ -28,7 +28,6 @@ import { KTDatepickerDropdown } from './ui/input/dropdown';
 
 import { KTDatepickerUnifiedStateManager, StateObserver } from './core/unified-state-manager';
 import { DropdownState } from './config/types';
-import { debugLogger } from './core/debug-utils';
 import { SegmentedInput, SegmentedInputOptions } from './ui/input/segmented-input';
 import { parseDateFromFormat } from './utils/date-utils';
 import { dateToTimeState, applyTimeToDate, validateTime } from './utils/time-utils';
@@ -65,12 +64,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._templateSet = getTemplateStrings(this._config);
     this._templateRenderer = createTemplateRenderer(this._templateSet);
 
-    // Initialize debug logger
-    debugLogger.updateConfig({
-      enabled: this._config.debug || false,
-      prefix: '[KTDatepicker]'
-    });
-
     // Initialize state manager
     this._unifiedStateManager = new KTDatepickerUnifiedStateManager({
       enableValidation: true,
@@ -95,13 +88,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Set placeholder from config if available
     if (this._input && this._config.placeholder) {
       this._input.setAttribute('placeholder', this._config.placeholder);
-      debugLogger.info('Placeholder set to:', this._config.placeholder);
     }
 
     // Set disabled state from config if available
     if (this._input && this._config.disabled) {
       this._input.setAttribute('disabled', 'true');
-      debugLogger.info('Input disabled from config');
       // Also set disabled state in unified state manager
       this._unifiedStateManager.setDropdownDisabled(true, 'config');
     }
@@ -823,12 +814,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._templateSet = getTemplateStrings(this._config);
     this._templateRenderer = createTemplateRenderer(this._templateSet);
 
-    // Initialize debug logger
-    debugLogger.updateConfig({
-      enabled: this._config.debug || false,
-      prefix: '[KTDatepicker]'
-    });
-
     // Initialize unified state manager
     this._unifiedStateManager = new KTDatepickerUnifiedStateManager({
       enableValidation: true,
@@ -847,12 +832,10 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Set placeholder from config if available
     if (this._input && this._config.placeholder) {
       this._input.setAttribute('placeholder', this._config.placeholder);
-      debugLogger.info('Placeholder set to:', this._config.placeholder);
     }
     // Set disabled state from config if available
     if (this._input && this._config.disabled) {
       this._input.setAttribute('disabled', 'true');
-      debugLogger.info('Input disabled from config');
 
       // Also set disabled state in unified state manager
       this._unifiedStateManager.setDropdownDisabled(true, 'config');
@@ -932,14 +915,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       if (firstInput) {
         firstInput.setAttribute('data-kt-datepicker-input', '');
         this._input = firstInput;
-        debugLogger.info('Auto-added data-kt-datepicker-input to input:', this._input);
       } else {
         // If no input exists, create one and append
         const newInput = document.createElement('input');
         newInput.setAttribute('data-kt-datepicker-input', '');
         this._element.appendChild(newInput);
         this._input = newInput;
-        debugLogger.info('Created and appended new input:', this._input);
       }
     }
   }

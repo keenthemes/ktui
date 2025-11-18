@@ -145,60 +145,36 @@ export function renderTimePicker(container: HTMLElement, options: TimePickerOpti
 
     // Add event listeners with UI update
     upButton.addEventListener('click', () => {
-      console.log(`🕐 [TimePicker] UP button clicked for unit: ${unit}`);
-      console.log(`🕐 [TimePicker] Current time state:`, currentTime);
-      console.log(`🕐 [TimePicker] Disabled: ${disabled}, onChange exists: ${!!onChange}`);
-
       if (!disabled && onChange) {
         const newTime = incrementTimeUnit(currentTime, unit, timeStep, format);
-        console.log(`🕐 [TimePicker] New time after increment:`, newTime);
 
         const validation = validateTime(newTime, minTime, maxTime);
-        console.log(`🕐 [TimePicker] Validation result:`, validation);
 
         if (validation.isValid) {
-          console.log(`🕐 [TimePicker] Updating UI with new time:`, newTime);
           // Update current time state
           currentTime = newTime;
           // Update UI immediately
           updateTimeDisplay(currentTime, updateableElements, timeDisplay, granularity, format);
           // Call onChange callback
-          console.log(`🕐 [TimePicker] Calling onChange callback with:`, currentTime);
           onChange(currentTime);
-        } else {
-          console.log(`🕐 [TimePicker] Validation failed:`, validation.error);
         }
-      } else {
-        console.log(`🕐 [TimePicker] Button click ignored - disabled: ${disabled}, onChange: ${!!onChange}`);
       }
     });
 
     downButton.addEventListener('click', () => {
-      console.log(`🕐 [TimePicker] DOWN button clicked for unit: ${unit}`);
-      console.log(`🕐 [TimePicker] Current time state:`, currentTime);
-      console.log(`🕐 [TimePicker] Disabled: ${disabled}, onChange exists: ${!!onChange}`);
-
       if (!disabled && onChange) {
         const newTime = decrementTimeUnit(currentTime, unit, timeStep, format);
-        console.log(`🕐 [TimePicker] New time after decrement:`, newTime);
 
         const validation = validateTime(newTime, minTime, maxTime);
-        console.log(`🕐 [TimePicker] Validation result:`, validation);
 
         if (validation.isValid) {
-          console.log(`🕐 [TimePicker] Updating UI with new time:`, newTime);
           // Update current time state
           currentTime = newTime;
           // Update UI immediately
           updateTimeDisplay(currentTime, updateableElements, timeDisplay, granularity, format);
           // Call onChange callback
-          console.log(`🕐 [TimePicker] Calling onChange callback with:`, currentTime);
           onChange(currentTime);
-        } else {
-          console.log(`🕐 [TimePicker] Validation failed:`, validation.error);
         }
-      } else {
-        console.log(`🕐 [TimePicker] Button click ignored - disabled: ${disabled}, onChange: ${!!onChange}`);
       }
     });
   });
@@ -314,7 +290,6 @@ export function renderTimePicker(container: HTMLElement, options: TimePickerOpti
 
   // Update function to sync with external state changes
   const update = (newTime: TimeState) => {
-    console.log(`🕐 [TimePicker] External update called with:`, newTime);
     currentTime = { ...newTime };
     updateTimeDisplay(currentTime, updateableElements, timeDisplay, granularity, format);
 
@@ -351,28 +326,19 @@ function updateTimeDisplay(
   granularity: 'second' | 'minute' | 'hour',
   format: '12h' | '24h'
 ): void {
-  console.log(`🕐 [updateTimeDisplay] Updating UI with time:`, time);
-  console.log(`🕐 [updateTimeDisplay] Granularity: ${granularity}, Format: ${format}`);
-  console.log(`🕐 [updateTimeDisplay] Updateable elements:`, Object.keys(updateableElements));
-
   // Update main time display
   const mainDisplayText = formatTime(time, granularity, format);
-  console.log(`🕐 [updateTimeDisplay] Main display text: "${mainDisplayText}"`);
   timeDisplay.textContent = mainDisplayText;
 
   // Update individual time unit displays
   const timeUnits = getTimeUnits(granularity);
-  console.log(`🕐 [updateTimeDisplay] Time units to update:`, timeUnits);
 
   timeUnits.forEach(unit => {
     const elementKey = `${unit}Value`;
     const element = updateableElements[elementKey];
     if (element) {
       const unitValue = getTimeUnitValue(time, unit, format);
-      console.log(`🕐 [updateTimeDisplay] Updating ${unit} element with value: "${unitValue}"`);
       element.textContent = unitValue;
-    } else {
-      console.log(`🕐 [updateTimeDisplay] Element not found for key: ${elementKey}`);
     }
   });
 }
@@ -429,30 +395,20 @@ function getTimeUnitValue(time: TimeState, unit: string, format: '12h' | '24h'):
  * @returns New time state
  */
 function incrementTimeUnit(time: TimeState, unit: string, step: number, format: '12h' | '24h'): TimeState {
-  console.log(`🕐 [incrementTimeUnit] Input - time:`, time, `unit: ${unit}, step: ${step}, format: ${format}`);
-
   const newTime = { ...time };
-  console.log(`🕐 [incrementTimeUnit] Initial newTime:`, newTime);
 
   switch (unit) {
     case 'hour':
-      const oldHour = newTime.hour;
       newTime.hour = (newTime.hour + step) % 24;
-      console.log(`🕐 [incrementTimeUnit] Hour: ${oldHour} + ${step} = ${newTime.hour} (mod 24)`);
       break;
     case 'minute':
-      const oldMinute = newTime.minute;
       newTime.minute = (newTime.minute + step) % 60;
-      console.log(`🕐 [incrementTimeUnit] Minute: ${oldMinute} + ${step} = ${newTime.minute} (mod 60)`);
       break;
     case 'second':
-      const oldSecond = newTime.second;
       newTime.second = (newTime.second + step) % 60;
-      console.log(`🕐 [incrementTimeUnit] Second: ${oldSecond} + ${step} = ${newTime.second} (mod 60)`);
       break;
   }
 
-  console.log(`🕐 [incrementTimeUnit] Output - newTime:`, newTime);
   return newTime;
 }
 
@@ -465,29 +421,19 @@ function incrementTimeUnit(time: TimeState, unit: string, step: number, format: 
  * @returns New time state
  */
 function decrementTimeUnit(time: TimeState, unit: string, step: number, format: '12h' | '24h'): TimeState {
-  console.log(`🕐 [decrementTimeUnit] Input - time:`, time, `unit: ${unit}, step: ${step}, format: ${format}`);
-
   const newTime = { ...time };
-  console.log(`🕐 [decrementTimeUnit] Initial newTime:`, newTime);
 
   switch (unit) {
     case 'hour':
-      const oldHour = newTime.hour;
       newTime.hour = (newTime.hour - step + 24) % 24;
-      console.log(`🕐 [decrementTimeUnit] Hour: ${oldHour} - ${step} = ${newTime.hour} (mod 24)`);
       break;
     case 'minute':
-      const oldMinute = newTime.minute;
       newTime.minute = (newTime.minute - step + 60) % 60;
-      console.log(`🕐 [decrementTimeUnit] Minute: ${oldMinute} - ${step} = ${newTime.minute} (mod 60)`);
       break;
     case 'second':
-      const oldSecond = newTime.second;
       newTime.second = (newTime.second - step + 60) % 60;
-      console.log(`🕐 [decrementTimeUnit] Second: ${oldSecond} - ${step} = ${newTime.second} (mod 60)`);
       break;
   }
 
-  console.log(`🕐 [decrementTimeUnit] Output - newTime:`, newTime);
   return newTime;
 }

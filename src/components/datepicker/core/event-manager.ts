@@ -54,10 +54,6 @@ export class EventManager {
     listeners.add(listener);
 
     element.addEventListener(eventType, listener, !this._config.enableEventBubbling);
-
-    if (this._config.enableDebugging) {
-      console.log(`[EventManager] Added ${eventType} listener to element:`, element);
-    }
   }
 
   /**
@@ -80,10 +76,6 @@ export class EventManager {
     if (elementListeners.size === 0) {
       this._listeners.delete(element);
     }
-
-    if (this._config.enableDebugging) {
-      console.log(`[EventManager] Removed ${eventType} listener from element:`, element);
-    }
   }
 
   /**
@@ -100,10 +92,6 @@ export class EventManager {
     });
 
     this._listeners.delete(element);
-
-    if (this._config.enableDebugging) {
-      console.log(`[EventManager] Removed all listeners from element:`, element);
-    }
   }
 
   /**
@@ -119,10 +107,6 @@ export class EventManager {
     });
 
     this._listeners.clear();
-
-    if (this._config.enableDebugging) {
-      console.log(`[EventManager] Removed all listeners from all elements`);
-    }
   }
 
   /**
@@ -140,10 +124,6 @@ export class EventManager {
     });
 
     const result = element.dispatchEvent(event);
-
-    if (this._config.enableDebugging) {
-      console.log(`[EventManager] Dispatched ${eventType} event:`, { element, detail, result });
-    }
 
     return result;
   }

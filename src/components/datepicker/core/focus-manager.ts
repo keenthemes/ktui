@@ -47,9 +47,6 @@ export class FocusManager {
    */
   public focus(element: HTMLElement): boolean {
     if (!element || !this._isElementFocusable(element)) {
-      if (this._config.enableDebugging) {
-        console.log('[FocusManager] Element not focusable:', element);
-      }
       return false;
     }
 
@@ -58,16 +55,8 @@ export class FocusManager {
 
     try {
       element.focus();
-
-      if (this._config.enableDebugging) {
-        console.log('[FocusManager] Focused element:', element);
-      }
-
       return true;
     } catch (error) {
-      if (this._config.enableDebugging) {
-        console.log('[FocusManager] Failed to focus element:', error);
-      }
       return false;
     }
   }
@@ -109,10 +98,6 @@ export class FocusManager {
         isFocusable: true
       }))
       .sort((a, b) => a.tabIndex - b.tabIndex);
-
-    if (this._config.enableDebugging) {
-      console.log('[FocusManager] Set focusable elements:', this._focusableElements.length);
-    }
   }
 
   /**

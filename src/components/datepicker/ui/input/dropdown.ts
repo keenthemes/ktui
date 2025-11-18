@@ -113,9 +113,6 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
    * Handle open state change from unified state manager
    */
   private _handleOpenFromState(): void {
-    if (this._config.debug) {
-      console.log('KTDatepickerDropdown: Handling open state change from unified manager');
-    }
     this._isOpen = true;
     this._performOpenTransition();
   }
@@ -124,9 +121,6 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
    * Handle close state change from unified state manager
    */
   private _handleCloseFromState(): void {
-    if (this._config.debug) {
-      console.log('KTDatepickerDropdown: Handling close state change from unified manager');
-    }
     this._performCloseTransition();
   }
 
@@ -193,10 +187,6 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
       if (this._unifiedStateManager) {
         this._unifiedStateManager.setDropdownTransitioning(false, 'dropdown-transition-complete');
       }
-
-      if (this._config.debug) {
-        console.log('KTDatepickerDropdown: Open transition completed');
-      }
     });
   }
 
@@ -248,10 +238,6 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
     // Notify unified state manager that transition is complete
     if (this._unifiedStateManager) {
       this._unifiedStateManager.setDropdownTransitioning(false, 'dropdown-transition-complete');
-    }
-
-    if (this._config.debug) {
-      console.log('KTDatepickerDropdown: Close transition completed');
     }
   }
 
@@ -337,10 +323,6 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
    * Open the dropdown (legacy method - now handled by observer pattern)
    */
   public open(): void {
-    if (this._config.debug) {
-      console.log('KTDatepickerDropdown.open: Legacy method called, should use unified state manager');
-    }
-
     // This method is now deprecated - use unified state manager instead
     if (this._unifiedStateManager) {
       this._unifiedStateManager.setDropdownOpen(true, 'legacy-open-method');
@@ -351,10 +333,6 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
    * Close the dropdown (legacy method - now handled by observer pattern)
    */
   public close(): void {
-    if (this._config.debug) {
-      console.log('KTDatepickerDropdown.close: Legacy method called, should use unified state manager');
-    }
-
     // This method is now deprecated - use unified state manager instead
     if (this._unifiedStateManager) {
       this._unifiedStateManager.setDropdownOpen(false, 'legacy-close-method');

@@ -81,7 +81,6 @@ export function renderCalendar(
     if (button) {
       button.addEventListener('click', (e) => {
         e.stopPropagation();
-        console.log('🗓️ [KTDatepicker] Day button clicked:', days[i]);
         const dayObj = days[i];
         if (dayObj.getMonth() === currentDate.getMonth()) {
           onDayClick(dayObj);
@@ -89,7 +88,6 @@ export function renderCalendar(
       });
     }
   });
-  console.log('🗓️ [KTDatepicker] Calendar rendered:', calendar);
   return calendar;
 }
 
