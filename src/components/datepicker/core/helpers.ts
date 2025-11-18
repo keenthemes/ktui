@@ -92,6 +92,7 @@ export function renderRangeSegmentedInputUI(
     configClasses: { ...config?.classes, segmentedDateInput: 'kt-segmented-input-start' }
   });
   startContainer.setAttribute('aria-label', 'Start date');
+  startContainer.setAttribute('data-kt-datepicker-start-container', '');
 
   const endContainer = templateRenderer.renderTemplateToElement({
     templateKey: 'segmentedDateInput',
@@ -99,6 +100,7 @@ export function renderRangeSegmentedInputUI(
     configClasses: { ...config?.classes, segmentedDateInput: 'kt-segmented-input-end' }
   });
   endContainer.setAttribute('aria-label', 'End date');
+  endContainer.setAttribute('data-kt-datepicker-end-container', '');
   // Render template with placeholders
   const separator = '–';
   let rangeHtml: string;

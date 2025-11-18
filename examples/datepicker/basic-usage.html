@@ -80,6 +80,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- Date Range Picker Example -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range Picker</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date range:</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy - dd/mm/yyyy" class="hidden">
+                </div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <strong>Selected Range:</strong> <span id="range-display">None</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -165,6 +179,35 @@
                 }
             }
         );
+
+        // Initialize date range picker
+        const rangeDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[6],
+            {
+                range: true,
+                format: 'dd/MM/yyyy',
+                onChange: (date) => {
+                    updateRangeDisplay();
+                    console.log('Range changed:', date);
+                }
+            }
+        );
+
+        // Function to update the range display
+        function updateRangeDisplay() {
+            const state = rangeDatepicker.getState();
+            const display = document.getElementById('range-display');
+            if (state.selectedRange && state.selectedRange.start && state.selectedRange.end) {
+                const start = state.selectedRange.start.toLocaleDateString();
+                const end = state.selectedRange.end.toLocaleDateString();
+                display.textContent = `${start} to ${end}`;
+            } else if (state.selectedRange && state.selectedRange.start) {
+                const start = state.selectedRange.start.toLocaleDateString();
+                display.textContent = `${start} (end date pending)`;
+            } else {
+                display.textContent = 'None';
+            }
+        }
 
         // Event logging function
         function logEvent(message, data = null) {

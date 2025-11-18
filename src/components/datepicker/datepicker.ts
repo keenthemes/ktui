@@ -2151,7 +2151,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // Update UI elements directly
     this._updateInput(newState);
-    this._updateSegmentedInput(newState);
+    if (this._config.range) {
+      this._updateRangeSegmentedInput(newState);
+    } else {
+      this._updateSegmentedInput(newState);
+    }
     this._updateCalendar(newState);
     this._updateTimePicker(newState);
 
