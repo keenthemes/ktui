@@ -2,7 +2,7 @@
  * datepicker-helpers.ts - Modular helpers for KTDatepicker input rendering and state
  */
 import { KTDatepickerConfig, KTDatepickerState } from '../config/types';
-import { renderTemplateToDOM } from '../templates/templates';
+import { renderTemplateToDOM, createTemplateRenderer, getTemplateStrings } from '../templates/templates';
 import { SegmentedInput } from '../ui/input/segmented-input';
 import { getTimeSegments } from '../utils/time-utils';
 import { getSegmentOrderFromFormat } from '../utils/date-utils';
@@ -42,13 +42,25 @@ export {};
 
 export function renderSingleSegmentedInputUI(
   inputWrapperTpl: string | ((data: any) => string),
-  calendarButtonHtml: string
+  calendarButtonHtml: string,
+  config?: KTDatepickerConfig
 ): HTMLElement {
+  // Get template renderer with proper configuration
+  const templates = getTemplateStrings(config);
+  const templateRenderer = createTemplateRenderer(templates);
+
+  // Create the segmented input container using the template system
+  const segmentedInputEl = templateRenderer.renderTemplateToElement({
+    templateKey: 'segmentedDateInput',
+    data: { segments: '' }, // Empty segments initially, will be populated by SegmentedInput
+    configClasses: config?.classes // Pass config classes for proper styling
+  });
+
   let inputWrapperHtml: string;
   if (typeof inputWrapperTpl === 'function') {
-    inputWrapperHtml = inputWrapperTpl({ input: '', icon: calendarButtonHtml });
+    inputWrapperHtml = inputWrapperTpl({ input: segmentedInputEl.outerHTML, icon: calendarButtonHtml });
   } else {
-    inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, '');
+    inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, segmentedInputEl.outerHTML);
   }
   const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
   return inputWrapperFrag.firstElementChild as HTMLElement;
@@ -57,8 +69,13 @@ export function renderSingleSegmentedInputUI(
 export function renderRangeSegmentedInputUI(
   inputWrapperTpl: string | ((data: any) => string),
   rangeTpl: string | ((data: any) => string),
-  calendarButtonHtml: string
+  calendarButtonHtml: string,
+  config?: KTDatepickerConfig
 ): { inputWrapperEl: HTMLElement; startContainer: HTMLElement; endContainer: HTMLElement } {
+  // Get template renderer with proper configuration
+  const templates = getTemplateStrings(config);
+  const templateRenderer = createTemplateRenderer(templates);
+
   let inputWrapperHtml: string;
   if (typeof inputWrapperTpl === 'function') {
     inputWrapperHtml = inputWrapperTpl({ input: '', icon: calendarButtonHtml });
@@ -67,12 +84,20 @@ export function renderRangeSegmentedInputUI(
   }
   const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
   const inputWrapperEl = inputWrapperFrag.firstElementChild as HTMLElement;
-  // Create containers for start and end segmented inputs
-  const startContainer = document.createElement('div');
-  startContainer.className = 'ktui-segmented-input-start flex items-center gap-1';
+
+  // Create containers for start and end segmented inputs using template system
+  const startContainer = templateRenderer.renderTemplateToElement({
+    templateKey: 'segmentedDateInput',
+    data: { segments: '' },
+    configClasses: { ...config?.classes, segmentedDateInput: 'kt-segmented-input-start' }
+  });
   startContainer.setAttribute('aria-label', 'Start date');
-  const endContainer = document.createElement('div');
-  endContainer.className = 'ktui-segmented-input-end flex items-center gap-1';
+
+  const endContainer = templateRenderer.renderTemplateToElement({
+    templateKey: 'segmentedDateInput',
+    data: { segments: '' },
+    configClasses: { ...config?.classes, segmentedDateInput: 'kt-segmented-input-end' }
+  });
   endContainer.setAttribute('aria-label', 'End date');
   // Render template with placeholders
   const separator = '–';
@@ -106,21 +131,8 @@ export function instantiateSingleSegmentedInput(
   config: KTDatepickerConfig,
   onChange: (date: Date) => void
 ): void {
-  console.log('[instantiateSingleSegmentedInput] Starting with container:', container);
-  console.log('[instantiateSingleSegmentedInput] Container HTML before:', container.innerHTML);
-
   // Use shared utility to determine segments
   const segments = getSegmentsForConfig(config);
-  console.log('[instantiateSingleSegmentedInput] Final segments:', segments);
-  console.log('[instantiateSingleSegmentedInput] Calling SegmentedInput with options:', {
-    value: state.selectedDate || state.currentDate || new Date(),
-    format: config.format,
-    segments,
-    disabled: !!config.disabled,
-    required: !!config.required,
-    readOnly: !!config.readOnly,
-    locale: config.locale
-  });
 
   SegmentedInput(container, {
     value: state.selectedDate || state.currentDate || new Date(),
@@ -133,8 +145,6 @@ export function instantiateSingleSegmentedInput(
     timeFormat: config.timeFormat,
     onChange,
   });
-
-  console.log('[instantiateSingleSegmentedInput] SegmentedInput called, container HTML after:', container.innerHTML);
 }
 
 export function instantiateRangeSegmentedInputs(

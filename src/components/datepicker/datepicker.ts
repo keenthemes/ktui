@@ -805,9 +805,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Add instance ID to element for debugging
     element.setAttribute('data-kt-datepicker-instance-id', this._instanceId);
 
-    console.log('🗓️ [KTDatepicker] Constructor: element:', element, 'instanceId:', this._instanceId);
     this._init(element);
-    console.log('🗓️ [KTDatepicker] After _init, this._input:', this._input);
 
     // Build config using the standard KTComponent approach
     this._buildConfig(config);
@@ -900,7 +898,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // Check if click is outside the datepicker element
     if (!this._element.contains(targetElement)) {
-      console.log('🗓️ [KTDatepicker] Outside click detected, closing dropdown');
       this.close();
     }
   };
@@ -946,7 +943,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     } else if (config?.range) {
       // Range mode: handle clicks inside dropdown
       closeOnSelect = false;
-      console.log('[KTDatepicker] Range mode detected, setting closeOnSelect to false');
     } else if (config?.multiDate) {
       // Multi-date mode: don't close on individual selections
       closeOnSelect = false;
@@ -1007,7 +1003,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     }
     if (this._config.range) {
       const rangeTpl = this._templateSet.segmentedDateRangeInput || defaultTemplates.segmentedDateRangeInput;
-      const { inputWrapperEl, startContainer, endContainer } = renderRangeSegmentedInputUI(inputWrapperTpl, rangeTpl, calendarButtonHtml);
+      const { inputWrapperEl, startContainer, endContainer } = renderRangeSegmentedInputUI(inputWrapperTpl, rangeTpl, calendarButtonHtml, this._config);
       instantiateRangeSegmentedInputs(
         startContainer,
         endContainer,
@@ -1019,7 +1015,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
             const timeState = dateToTimeState(date);
             const validation = validateTime(timeState, this._config.minTime, this._config.maxTime);
             if (!validation.isValid) {
-              console.warn('[KTDatepicker] Start date time validation failed:', validation.error);
               return;
             }
           }
@@ -1036,7 +1031,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
             const timeState = dateToTimeState(date);
             const validation = validateTime(timeState, this._config.minTime, this._config.maxTime);
             if (!validation.isValid) {
-              console.warn('[KTDatepicker] End date time validation failed:', validation.error);
               return;
             }
           }
@@ -1051,22 +1045,10 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       return inputWrapperEl;
     }
     // Single-date mode
-    const inputWrapperEl = renderSingleSegmentedInputUI(inputWrapperTpl, calendarButtonHtml);
-    console.log('[KTDatepicker] Input wrapper created:', inputWrapperEl);
+    const inputWrapperEl = renderSingleSegmentedInputUI(inputWrapperTpl, calendarButtonHtml, this._config);
 
-    let segmentedInputContainer = inputWrapperEl.querySelector('.ktui-segmented-input');
-    console.log('[KTDatepicker] Found existing segmented input container:', segmentedInputContainer);
-
-    if (!segmentedInputContainer) {
-      console.log('[KTDatepicker] Creating new segmented input container');
-      segmentedInputContainer = document.createElement('div');
-      segmentedInputContainer.className = 'ktui-segmented-input flex items-center gap-1';
-      inputWrapperEl.insertBefore(segmentedInputContainer, inputWrapperEl.firstChild);
-      console.log('[KTDatepicker] New container created and inserted:', segmentedInputContainer);
-    }
-
-    console.log('[KTDatepicker] Final segmented input container:', segmentedInputContainer);
-    console.log('[KTDatepicker] Container HTML before instantiation:', segmentedInputContainer.innerHTML);
+    // Find the segmented input container that was rendered by the template system
+    const segmentedInputContainer = inputWrapperEl.querySelector('[data-kt-datepicker-segmented-input]') as HTMLElement;
 
     instantiateSingleSegmentedInput(segmentedInputContainer as HTMLElement, this._unifiedStateManager.getState(), this._config, (date: Date) => {
       this.setDate(date);
@@ -1086,10 +1068,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         e.preventDefault();
         e.stopPropagation();
         if (this._config.disabled || buttonEl.hasAttribute('disabled')) {
-          console.log('🗓️ [KTDatepicker] Calendar button click blocked: disabled');
           return;
         }
-        console.log('🗓️ [KTDatepicker] Calendar button clicked, calling toggle()');
         this.toggle();
       });
     }
@@ -1114,17 +1094,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     if (!this._unifiedStateManager.isDropdownOpen()) {
       dropdownEl.classList.add('hidden');
     }
-    // --- Debug event listeners for close tracing ---
-    ['focusout', 'blur', 'mousedown'].forEach((evt) => {
-      dropdownEl.addEventListener(evt, (e) => {
-        console.log(`[KTDatepicker] Dropdown event: ${evt}`, {
-          event: e,
-          target: e.target,
-          currentTarget: e.currentTarget,
-          stack: new Error().stack
-        });
-      });
-    });
     return dropdownEl;
   }
 
@@ -1190,8 +1159,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         timeStep: this._config.timeStep || 1,
         disabled: !!this._config.disabled,
         onChange: (newTime: any) => {
-          console.log(`🗓️ [KTDatepicker] Time picker onChange called with:`, newTime);
-
           // Update unified state manager
           this._unifiedStateManager.updateState({
             selectedTime: newTime
@@ -1204,18 +1171,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
             this._unifiedStateManager.updateState({
               selectedDate: dateWithTime
             }, 'time-picker');
-            console.log(`🗓️ [KTDatepicker] Date with time applied:`, dateWithTime);
-          } else {
-            console.log(`🗓️ [KTDatepicker] No selectedDate to apply time to`);
           }
 
           // Update the time picker renderer with the new state
           if (this._timePickerRenderer) {
-            console.log(`🗓️ [KTDatepicker] Updating time picker renderer with new state`);
             this._timePickerRenderer.update(newTime);
           }
-
-          console.log(`🗓️ [KTDatepicker] Time picker state updated, keeping dropdown open`);
         },
         templates: this._templateSet
       });
@@ -1417,8 +1378,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._updatePlaceholder();
     this._updateDisabledState();
     this._enforceMinMaxDates();
-    console.log('🗓️ [KTDatepicker] _render: this._input:', this._input);
-    console.log('🗓️ [KTDatepicker] _render complete. isOpen:', this._unifiedStateManager.isDropdownOpen(), 'selectedDate:', this._unifiedStateManager.getState().selectedDate);
     // Attach keyboard event listeners
     if (this._input) {
       this._eventManager.removeListener(this._input, 'keydown', this._onKeyDown);
@@ -1474,7 +1433,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       if (this._dropdownModule) {
         this._dropdownModule.setUnifiedStateManager(this._unifiedStateManager);
         this._unifiedStateManager.subscribe(this._dropdownModule);
-        console.log('🗓️ [KTDatepicker] Dropdown module connected to unified state manager');
       }
     }
   }
@@ -1569,14 +1527,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       if (allDropdowns.length === 1) {
         // Only one dropdown exists globally, safe to use
         dropdownEl = allDropdowns[0] as HTMLElement;
-        console.warn('[KTDatepicker] Using global dropdown as fallback (only one instance found)');
       } else if (allDropdowns.length > 1) {
         // Multiple dropdowns exist - this could cause cross-instance issues
-        console.error(`[KTDatepicker] Found ${allDropdowns.length} dropdowns globally. Cannot safely determine correct dropdown for instance ${this._instanceId}. Falling back to full render.`);
         this._render();
         return;
       } else {
-        console.warn('[KTDatepicker] No dropdown found globally, falling back to full render');
         this._render();
         return;
       }
@@ -1686,14 +1641,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       if (allDropdowns.length === 1) {
         // Only one dropdown exists globally, safe to use
         dropdownEl = allDropdowns[0] as HTMLElement;
-        console.warn('[KTDatepicker] Using global dropdown as fallback (only one instance found)');
       } else if (allDropdowns.length > 1) {
         // Multiple dropdowns exist - this could cause cross-instance issues
-        console.error(`[KTDatepicker] Found ${allDropdowns.length} dropdowns globally. Cannot safely determine correct dropdown for instance ${this._instanceId}. Falling back to full render.`);
         this._render();
         return;
       } else {
-        console.warn('[KTDatepicker] No dropdown found globally, falling back to full render');
         this._render();
         return;
       }
