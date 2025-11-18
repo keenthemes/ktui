@@ -362,16 +362,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     }
   }
 
-    private _handleStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
+	private _handleStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
     // Update dropdown state if open/closed changed
     if (newState.isOpen !== oldState.isOpen) {
-      if (newState.isOpen) {
-        this._render();
-        // Refresh cache after rendering new elements
-        this._refreshElementCache();
-      } else {
-        // Handle close logic
-      }
+      // Dropdown open/close is handled by the dropdown module observer
+      // Don't call _render() here as it recreates the dropdown module
+      // The open() method handles initial rendering when needed
     }
 
     // Update disabled state
@@ -385,8 +381,63 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._updateCalendar(newState);
     this._updateTimePicker(newState);
 
+    // Fire events based on state changes
+    this._fireEvents(newState, oldState);
+
     // Start observing for dynamic element creation
     this._startElementObservation();
+  }
+
+  /**
+   * Fire events based on state changes using the centralized event system
+   */
+  private _fireEvents(newState: KTDatepickerState, oldState: KTDatepickerState): void {
+    // Fire onChange when selected date changes
+    if (newState.selectedDate !== oldState.selectedDate ||
+        newState.selectedRange?.start !== oldState.selectedRange?.start ||
+        newState.selectedRange?.end !== oldState.selectedRange?.end ||
+        JSON.stringify(newState.selectedDates) !== JSON.stringify(oldState.selectedDates)) {
+
+      let selectedValue: Date | null = null;
+
+      if (this._config.range && newState.selectedRange) {
+        // For range mode, pass the end date if both are selected, otherwise null
+        selectedValue = newState.selectedRange.end || newState.selectedRange.start;
+      } else if (this._config.multiDate && newState.selectedDates.length > 0) {
+        // For multi-date mode, pass the last selected date
+        selectedValue = newState.selectedDates[newState.selectedDates.length - 1];
+      } else {
+        // For single date mode
+        selectedValue = newState.selectedDate;
+      }
+
+      this._fireDatepickerEvent('onChange', selectedValue, this);
+    }
+
+    // Fire onOpen when dropdown opens
+    if (newState.isOpen && !oldState.isOpen) {
+      this._fireDatepickerEvent('onOpen', this);
+    }
+
+    // Fire onClose when dropdown closes
+    if (!newState.isOpen && oldState.isOpen) {
+      this._fireDatepickerEvent('onClose', this);
+    }
+  }
+
+  /**
+   * Centralized event firing system - safely dispatches events with error handling
+   */
+  private _fireDatepickerEvent(eventName: keyof KTDatepickerConfig, ...args: any[]): void {
+    try {
+      const eventHandler = this._config[eventName] as Function;
+      if (typeof eventHandler === 'function') {
+        eventHandler(...args);
+      }
+    } catch (error) {
+      console.warn(`[KTDatepicker] Error firing ${eventName} event:`, error);
+      // Don't let event handler errors break the datepicker
+    }
   }
 
   // --- Mode-specific helpers ---

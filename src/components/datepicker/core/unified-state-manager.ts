@@ -48,6 +48,12 @@ export interface StateChangeEvent {
  *
  * Centralized state management for datepicker with observer pattern.
  * Ensures all UI components automatically sync to state changes.
+ *
+ * Immediate vs Batched Updates:
+ * - Immediate updates: Use for user interactions requiring synchronous event firing
+ *   (date selection, dropdown open/close). These bypass batching delays.
+ * - Batched updates: Use for programmatic changes that don't require immediate
+ *   user feedback (navigation, initialization). These are batched for performance.
  */
 export class KTDatepickerUnifiedStateManager {
   private _state: KTDatepickerState;
@@ -105,29 +111,33 @@ export class KTDatepickerUnifiedStateManager {
 
   /**
    * Update state with validation and observer notification
+   * @param updates - Partial state updates to apply
+   * @param source - Source identifier for debugging
+   * @param immediate - If true, bypass batching and apply updates immediately
    */
-  public updateState(updates: Partial<KTDatepickerState>, source: string = 'unknown'): boolean {
+  public updateState(updates: Partial<KTDatepickerState>, source: string = 'unknown', immediate: boolean = false): boolean {
     if (this._isUpdating) {
       console.warn('[KTDatepicker] State update blocked - already updating');
       return false;
     }
 
-    // Merge updates with pending updates if batching is enabled
-    if (this._config.enableUpdateBatching) {
-      this._pendingUpdates = { ...this._pendingUpdates, ...updates };
-
-      if (this._batchTimeout) {
-        clearTimeout(this._batchTimeout);
-      }
-
-      this._batchTimeout = window.setTimeout(() => {
-        this._applyUpdates(source);
-      }, this._config.batchDelay);
-
-      return true;
+    // If immediate is requested, or batching is disabled, apply updates immediately
+    if (immediate || !this._config.enableUpdateBatching) {
+      return this._applyUpdates(source, updates);
     }
 
-    return this._applyUpdates(source, updates);
+    // Merge updates with pending updates for batched processing
+    this._pendingUpdates = { ...this._pendingUpdates, ...updates };
+
+    if (this._batchTimeout) {
+      clearTimeout(this._batchTimeout);
+    }
+
+    this._batchTimeout = window.setTimeout(() => {
+      this._applyUpdates(source);
+    }, this._config.batchDelay);
+
+    return true;
   }
 
   /**
@@ -258,8 +268,11 @@ export class KTDatepickerUnifiedStateManager {
    * Convenience methods for common state updates
    */
 
+  /**
+   * Set selected date - uses immediate update for synchronous event firing
+   */
   public setSelectedDate(date: Date | null, source: string = 'manual'): boolean {
-    return this.updateState({ selectedDate: date }, source);
+    return this.updateState({ selectedDate: date }, source, true); // immediate
   }
 
   public setSelectedTime(time: TimeState | null, source: string = 'manual'): boolean {
@@ -270,20 +283,29 @@ export class KTDatepickerUnifiedStateManager {
     return this.updateState({ currentDate: date }, source);
   }
 
+  /**
+   * Set selected range - uses immediate update for synchronous event firing
+   */
   public setSelectedRange(range: { start: Date | null; end: Date | null } | null, source: string = 'manual'): boolean {
-    return this.updateState({ selectedRange: range }, source);
+    return this.updateState({ selectedRange: range }, source, true); // immediate
   }
 
+  /**
+   * Set selected dates (multi-date) - uses immediate update for synchronous event firing
+   */
   public setSelectedDates(dates: Date[], source: string = 'manual'): boolean {
-    return this.updateState({ selectedDates: dates }, source);
+    return this.updateState({ selectedDates: dates }, source, true); // immediate
   }
 
   public setViewMode(mode: 'days' | 'months' | 'years', source: string = 'manual'): boolean {
     return this.updateState({ viewMode: mode }, source);
   }
 
+  /**
+   * Set overall open state - uses immediate update for synchronous event firing
+   */
   public setOpen(isOpen: boolean, source: string = 'manual'): boolean {
-    return this.updateState({ isOpen }, source);
+    return this.updateState({ isOpen }, source, true); // immediate
   }
 
   public setFocused(isFocused: boolean, source: string = 'manual'): boolean {
@@ -299,10 +321,14 @@ export class KTDatepickerUnifiedStateManager {
   }
 
   // Dropdown state methods (consolidated from legacy state manager)
+  /**
+   * Set dropdown open state - uses immediate update for synchronous event firing
+   */
   public setDropdownOpen(isOpen: boolean, source: string = 'manual'): boolean {
     return this.updateState({
-      dropdownState: { ...this._state.dropdownState, isOpen }
-    }, source);
+      dropdownState: { ...this._state.dropdownState, isOpen },
+      isOpen // Also update the legacy isOpen field for compatibility
+    }, source, true); // immediate
   }
 
   public setDropdownTransitioning(isTransitioning: boolean, source: string = 'manual'): boolean {
