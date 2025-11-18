@@ -13,6 +13,8 @@ import { defaultTemplates } from '../../templates/templates';
  * @param currentDate - The current month being viewed
  * @param selectedDate - The currently selected date
  * @param onDayClick - Callback for day cell click, receives the Date
+ * @param locale - Locale string for day name localization
+ * @param selectedRange - Optional range selection
  */
 export function renderCalendar(
   tpl: string | ((data: any) => string),
@@ -20,8 +22,18 @@ export function renderCalendar(
   currentDate: Date,
   selectedDate: Date | null,
   onDayClick: (date: Date) => void,
+  locale?: string,
   selectedRange?: { start: Date | null; end: Date | null }
 ): HTMLElement {
+  // Generate localized day names for the header
+  const dayNames = [];
+  const localeToUse = locale || 'en-US';
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(2023, 0, i + 1); // Use January 1st, 2023 as reference (Sunday = 0)
+    const dayName = date.toLocaleDateString(localeToUse, { weekday: 'short' });
+    dayNames.push(dayName);
+  }
+
   // Use template system for table, tbody, tr, td
   const tableTpl = defaultTemplates.calendarTable;
   const bodyTpl = defaultTemplates.calendarBody;
@@ -69,10 +81,27 @@ export function renderCalendar(
   const bodyHtml = isTemplateFunction(bodyTpl)
     ? bodyTpl({ rows: rows.join('') })
     : (bodyTpl as string).replace(/{{rows}}/g, rows.join(''));
-  // Use table template
+  // Use table template with localized day names
   const tableHtml = isTemplateFunction(tableTpl)
-    ? tableTpl({ body: bodyHtml })
-    : (tableTpl as string).replace(/{{body}}/g, bodyHtml);
+    ? tableTpl({
+        body: bodyHtml,
+        sunday: dayNames[0],
+        monday: dayNames[1],
+        tuesday: dayNames[2],
+        wednesday: dayNames[3],
+        thursday: dayNames[4],
+        friday: dayNames[5],
+        saturday: dayNames[6]
+      })
+    : (tableTpl as string)
+        .replace(/{{body}}/g, bodyHtml)
+        .replace(/{{sunday}}/g, dayNames[0])
+        .replace(/{{monday}}/g, dayNames[1])
+        .replace(/{{tuesday}}/g, dayNames[2])
+        .replace(/{{wednesday}}/g, dayNames[3])
+        .replace(/{{thursday}}/g, dayNames[4])
+        .replace(/{{friday}}/g, dayNames[5])
+        .replace(/{{saturday}}/g, dayNames[6]);
   const calendarFrag = renderTemplateToDOM(tableHtml);
   const calendar = calendarFrag.firstElementChild as HTMLElement;
   // Add day cell click listeners (attach to button for accessibility)

@@ -1221,6 +1221,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       currentState.currentDate,
       currentState.selectedDate,
       dayClickHandler,
+      this._config.locale,
       this._config.range ? currentState.selectedRange : undefined
     );
     dropdownEl.appendChild(calendar);
@@ -1279,6 +1280,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       monthDate,
       this._unifiedStateManager.getState().selectedDate,
       (day) => { this.setDate(day); },
+      this._config.locale,
       this._config.range ? this._unifiedStateManager.getState().selectedRange : undefined
     );
 
@@ -1593,6 +1595,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         currentState.currentDate,
         currentState.selectedDate,
         dayClickHandler,
+        this._config.locale,
         this._config.range ? currentState.selectedRange : undefined
       );
 
@@ -2154,7 +2157,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     if (this._config.range) {
       this._updateRangeSegmentedInput(newState);
     } else {
-      this._updateSegmentedInput(newState);
+    this._updateSegmentedInput(newState);
     }
     this._updateCalendar(newState);
     this._updateTimePicker(newState);

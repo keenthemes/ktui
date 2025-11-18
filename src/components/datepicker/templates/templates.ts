@@ -60,13 +60,13 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   </button>`,
   // Add role="row" to calendar table rows
   calendarTable: `<table data-kt-datepicker-calendar-table role="grid" aria-label="Calendar" aria-readonly="true" class="kt-datepicker-calendar-table {{class}}"><thead><tr role="row">
-    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Sun</th>
-    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Mon</th>
-    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Tue</th>
-    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Wed</th>
-    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Thu</th>
-    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Fri</th>
-    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">Sat</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{{sunday}}</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{{monday}}</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{{tuesday}}</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{{wednesday}}</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{{thursday}}</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{{friday}}</th>
+    <th class="py-1 px-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{{saturday}}</th>
   </tr></thead>{{body}}</table>`,
   calendarBody: `<tbody class="kt-datepicker-calendar-body {{class}}">{{rows}}</tbody>`,
   calendarRow: `<tr role="row" class="kt-datepicker-calendar-row {{class}}">{{cells}}</tr>`,

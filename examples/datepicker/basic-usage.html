@@ -94,6 +94,34 @@
                 </div>
             </div>
         </div>
+
+        <!-- German Locale Example -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">German Locale (de-DE)</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Wählen Sie ein Datum (German locale):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="tt/mm/jjjj" class="hidden">
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                    Format: dd/MM/yyyy with German locale
+                </div>
+            </div>
+        </div>
+
+        <!-- French Locale Example -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">French Locale (fr-FR)</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sélectionnez une date (French locale):</label>
+                <div class="kt-datepicker" data-kt-datepicker-segmented>
+                    <input type="text" data-kt-datepicker-input placeholder="jj/mm/aaaa" class="hidden">
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                    Format: dd/MM/yyyy with French locale
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -208,6 +236,30 @@
                 display.textContent = 'None';
             }
         }
+
+        // Initialize German locale datepicker
+        const germanDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[7],
+            {
+                format: 'dd/MM/yyyy',
+                locale: 'de-DE',
+                onChange: (date) => {
+                    console.log('German locale date selected:', date);
+                }
+            }
+        );
+
+        // Initialize French locale datepicker
+        const frenchDatepicker = new KTDatepicker(
+            document.querySelectorAll('.kt-datepicker')[8],
+            {
+                format: 'dd/MM/yyyy',
+                locale: 'fr-FR',
+                onChange: (date) => {
+                    console.log('French locale date selected:', date);
+                }
+            }
+        );
 
         // Event logging function
         function logEvent(message, data = null) {
