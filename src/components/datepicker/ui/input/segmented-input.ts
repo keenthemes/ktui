@@ -282,6 +282,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
   let focusedIdx = 0;
   // --- Track caret position (offset) ---
   let caretOffset: number | null = null;
+  // --- Track if this is the first render ---
+  let isInitialRender = true;
   // --- Track if we're in the middle of Arrow Up/Down navigation ---
   let isArrowNavigation = false;
 
@@ -608,8 +610,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         restoreFocus(focusedIdx, caretOffset);
       });
     });
-    // After rendering, restore focus to the correct segment and caret
+    // After rendering, restore focus to the correct segment and caret (skip on initial render)
+    if (!isInitialRender) {
     restoreFocus(focusedIdx, caretOffset);
+    }
+    isInitialRender = false;
   }
 
   // --- Initial render ---
