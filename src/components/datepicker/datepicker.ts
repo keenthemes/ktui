@@ -1017,15 +1017,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         this._unifiedStateManager.getState(),
         this._config,
         (date: Date) => {
-          // Validate time constraints if time is enabled
-          if (this._config.enableTime) {
-            const timeState = dateToTimeState(date);
-            const validation = validateTime(timeState, this._config.minTime, this._config.maxTime);
-            if (!validation.isValid) {
-              return;
-            }
-          }
-
           const end = this._unifiedStateManager.getState().selectedRange?.end || null;
           let newEnd = end;
           if (end && date > end) newEnd = null;
@@ -1033,15 +1024,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
           this._render();
         },
         (date: Date) => {
-          // Validate time constraints if time is enabled
-          if (this._config.enableTime) {
-            const timeState = dateToTimeState(date);
-            const validation = validateTime(timeState, this._config.minTime, this._config.maxTime);
-            if (!validation.isValid) {
-              return;
-            }
-          }
-
           const start = this._unifiedStateManager.getState().selectedRange?.start || null;
           let newStart = start;
           if (start && date < start) newStart = null;
@@ -1709,6 +1691,15 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     if (this._config.maxDate && date > new Date(this._config.maxDate)) {
       console.log('🗓️ [KTDatepicker] setDate blocked: date is after maxDate');
       return;
+    }
+    // Validate time constraints if time is enabled
+    if (this._config.enableTime) {
+      const timeState = dateToTimeState(date);
+      const validation = validateTime(timeState, this._config.minTime, this._config.maxTime);
+      if (!validation.isValid) {
+        console.log('🗓️ [KTDatepicker] setDate blocked: time validation failed:', validation.error);
+        return;
+      }
     }
     if (this._config.multiDate) {
       this._selectMultiDate(date);

@@ -83,6 +83,20 @@
             </div>
         </div>
 
+        <!-- Date Range Picker with Time Example -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Date Range Picker with Time</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select date and time range:</label>
+                <div class="kt-datepicker" data-kt-datepicker data-kt-datepicker-range="true" data-kt-datepicker-enable-time="true" data-kt-datepicker-time-granularity="minute" data-kt-datepicker-time-format="12h" data-kt-datepicker-range-time="true">
+                    <input type="text" data-kt-datepicker-input placeholder="dd/mm/yyyy hh:mm AM - dd/mm/yyyy hh:mm PM" class="hidden">
+                </div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <strong>Selected Range:</strong> <span id="range-time-display">None</span>
+                </div>
+            </div>
+        </div>
+
         <!-- German Locale Example -->
         <div class="mb-8">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">German Locale (de-DE)</h2>
@@ -167,6 +181,65 @@
 
                 // Initial display update
                 updateRangeDisplay();
+            }
+
+            // Handle the range picker with time
+            const rangeTimePicker = document.querySelector('[data-kt-datepicker-range-time="true"]');
+            const rangeTimeDisplay = document.getElementById('range-time-display');
+
+            if (rangeTimePicker && rangeTimePicker.instance) {
+                const datepickerInstance = rangeTimePicker.instance;
+
+                // Function to format and display the selected range with time
+                function updateRangeTimeDisplay() {
+                    const state = datepickerInstance.getState();
+                    const selectedRange = state.selectedRange;
+
+                    if (selectedRange && selectedRange.start && selectedRange.end) {
+                        // Format dates and times according to the datepicker's format
+                        const formatDateTime = (date) => {
+                            const day = date.getDate().toString().padStart(2, '0');
+                            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                            const year = date.getFullYear();
+                            const hours = date.getHours() % 12 || 12;
+                            const minutes = date.getMinutes().toString().padStart(2, '0');
+                            const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
+                            return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+                        };
+
+                        const startDateTime = formatDateTime(selectedRange.start);
+                        const endDateTime = formatDateTime(selectedRange.end);
+                        rangeTimeDisplay.textContent = `${startDateTime} - ${endDateTime}`;
+                    } else if (selectedRange && selectedRange.start) {
+                        // Only start date selected
+                        const formatDateTime = (date) => {
+                            const day = date.getDate().toString().padStart(2, '0');
+                            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                            const year = date.getFullYear();
+                            const hours = date.getHours() % 12 || 12;
+                            const minutes = date.getMinutes().toString().padStart(2, '0');
+                            const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
+                            return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+                        };
+
+                        const startDateTime = formatDateTime(selectedRange.start);
+                        rangeTimeDisplay.textContent = `${startDateTime} - ...`;
+                    } else {
+                        // No range selected
+                        rangeTimeDisplay.textContent = 'None';
+                    }
+                }
+
+                // Listen for state changes
+                const originalUpdateState = datepickerInstance._unifiedStateManager.updateState;
+                datepickerInstance._unifiedStateManager.updateState = function(...args) {
+                    originalUpdateState.apply(this, args);
+                    // Update display after state change
+                    setTimeout(updateRangeTimeDisplay, 0);
+                };
+
+                // Initial display update
+                updateRangeTimeDisplay();
             }
         });
     </script>
