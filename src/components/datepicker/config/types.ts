@@ -44,7 +44,9 @@ export type KTDatepickerTemplateKey =
   | 'timeValue'
   | 'timeSeparator'
   | 'ampmControl'
-  | 'ampmButton';
+  | 'ampmButton'
+  | 'panel'
+  | 'liveRegion';
 
 // Template string map
 export type KTDatepickerTemplateStrings = {

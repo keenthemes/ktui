@@ -1273,11 +1273,15 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       this._config.range ? this._unifiedStateManager.getState().selectedRange : undefined
     );
 
-    // Wrap header + calendar in a styled panel div
-    const panel = document.createElement('div');
-    panel.className = 'bg-white dark:bg-gray-900 p-4 rounded-xl shadow border border-gray-200 dark:border-gray-700 flex flex-col items-center min-w-[260px]';
-    panel.appendChild(header);
-    panel.appendChild(calendar);
+    // Wrap header + calendar in a styled panel div using template
+    const panel = this._templateRenderer.renderTemplateToElement({
+      templateKey: 'panel',
+      data: {
+        header: header.outerHTML,
+        calendar: calendar.outerHTML
+      },
+      configClasses: this._config.classes
+    });
 
     return panel;
   }
@@ -1288,17 +1292,23 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _renderMultiMonth(dropdownEl: HTMLElement, visibleMonths: number) {
     const currentState = this._unifiedStateManager.getState();
     const baseDate = new Date(currentState.currentDate);
-    const multiMonthContainer = document.createElement('div');
-    multiMonthContainer.setAttribute('data-kt-datepicker-multimonth-container', '');
-    multiMonthContainer.className = 'flex flex-row gap-4';
 
     // Get all month dates for multi-month display
     const monthDates = this._getMultiMonthDates(baseDate, visibleMonths);
 
-    // Render each month using the helper method
-    monthDates.forEach((monthDate, index) => {
+    // Render each month using the helper method and collect HTML
+    const calendarsHtml = monthDates.map((monthDate, index) => {
       const panel = this._renderMultiMonthCalendar(monthDate, index, visibleMonths);
-      multiMonthContainer.appendChild(panel);
+      return panel.outerHTML;
+    }).join('');
+
+    // Create multi-month container using template
+    const multiMonthContainer = this._templateRenderer.renderTemplateToElement({
+      templateKey: 'multiMonthContainer',
+      data: {
+        calendars: calendarsHtml
+      },
+      configClasses: this._config.classes
     });
 
     dropdownEl.appendChild(multiMonthContainer);
@@ -1381,10 +1391,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Ensure live region exists
     let liveRegion = this._element.querySelector('[data-kt-datepicker-live]');
     if (!liveRegion) {
-      liveRegion = document.createElement('div');
-      liveRegion.setAttribute('data-kt-datepicker-live', '');
-      liveRegion.setAttribute('aria-live', 'polite');
-      liveRegion.setAttribute('style', 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;');
+      liveRegion = this._templateRenderer.renderTemplateToElement({
+        templateKey: 'liveRegion',
+        data: {},
+        configClasses: this._config.classes
+      });
       this._element.appendChild(liveRegion);
     }
 

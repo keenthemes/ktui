@@ -89,6 +89,14 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   timeSeparator: `<span data-kt-datepicker-time-separator class="kt-datepicker-time-separator {{class}}">{{separator}}</span>`,
   ampmControl: `<div data-kt-datepicker-ampm-control class="kt-datepicker-ampm-control {{class}}">{{ampmButton}}</div>`,
   ampmButton: `<button type="button" data-kt-datepicker-ampm-button aria-label="Toggle AM/PM" class="kt-datepicker-ampm-button {{class}}" {{disabled}}>{{ampmValue}}</button>`,
+  /**
+   * Panel wrapper for header + calendar
+   */
+  panel: `<div data-kt-datepicker-panel class="kt-datepicker-panel {{class}}">{{header}}{{calendar}}</div>`,
+  /**
+   * Live region for accessibility announcements
+   */
+  liveRegion: `<div data-kt-datepicker-live aria-live="polite" class="kt-datepicker-live {{class}}"></div>`,
 };
 
 /**
