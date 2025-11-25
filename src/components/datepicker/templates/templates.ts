@@ -22,7 +22,7 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
   yearSelection: `<div data-kt-datepicker-year-selection class="kt-datepicker-year-selection {{class}}">{{years}}</div>`,
   inputWrapper: `<div data-kt-datepicker-input-wrapper class="kt-datepicker-input-wrapper flex items-center {{class}}">{{input}} {{icon}}</div>`,
   segmentedDateInput: `<div data-kt-datepicker-segmented-input class="kt-segmented-input flex items-center gap-1 {{class}}">{{segments}}</div>`,
-  segmentedDateRangeInput: `<div data-kt-datepicker-segmented-range-input class="kt-datepicker-segmented-range-input flex items-center gap-1 {{class}}">{{start}} {{separator}} {{end}}</div>`,
+  segmentedDateRangeInput: `<div data-kt-datepicker-segmented-range-input class="kt-datepicker-segmented-range-input flex items-center {{class}}">{{start}}{{separator}}{{end}}</div>`,
   /**
    * Template for a single date segment (e.g., day, month, year)
    * Placeholders: segmentType, segmentValue, ariaLabel, ariaValueNow, ariaValueText, ariaValueMin, ariaValueMax, tabindex, contenteditable

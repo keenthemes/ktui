@@ -190,7 +190,8 @@
 	.kt-alert-input-error {
 		@apply mt-2 text-sm text-destructive;
 		@apply flex items-center gap-2;
-		@apply animate-in fade-in-0 duration-200;
+		@apply duration-200;
+		animation: fadeIn 0.2s ease-out;
 	}
 
 	.kt-alert-input-error::before {

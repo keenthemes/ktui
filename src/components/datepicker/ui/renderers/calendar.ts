@@ -60,7 +60,7 @@ export function renderCalendar(
       }
       const dayIndex = i + j;
       const attributes = [
-        isSelected ? 'class="active" aria-selected="true"' : '',
+        isSelected ? 'data-selected="true" aria-selected="true" class="active"' : '',
         isToday ? 'data-today="true"' : '',
         isCurrentMonth ? '' : 'data-outside="true"',
         inRange ? 'data-in-range="true"' : '',
