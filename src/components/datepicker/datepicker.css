@@ -92,8 +92,9 @@
 /* Dropdown Container */
 @layer components {
 	.kt-datepicker-dropdown {
-		@apply absolute z-50 mt-1.5 rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
-		@apply p-4;
+		@apply absolute z-50 mt-1.5 rounded-md border border-border/60 bg-popover text-popover-foreground;
+		@apply p-3;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 	}
 
 	.kt-datepicker-dropdown.hidden {
@@ -106,17 +107,17 @@
 
 	/* Panel Container */
 	.kt-datepicker-panel {
-		@apply flex flex-col gap-3;
+		@apply flex flex-col gap-2.5;
 	}
 
 	/* Header */
 	.kt-datepicker-header {
-		@apply flex items-center justify-between gap-2 px-1 pb-2;
-		@apply border-b border-border;
+		@apply flex items-center justify-between gap-2 px-0.5 pb-2.5;
+		@apply border-0;
 	}
 
 	.kt-datepicker-month-year {
-		@apply text-sm font-semibold text-foreground select-none;
+		@apply text-sm font-medium text-foreground select-none;
 		@apply flex-1 text-center;
 	}
 
@@ -124,16 +125,16 @@
 	.kt-datepicker-prev-button,
 	.kt-datepicker-next-button {
 		@apply inline-flex items-center justify-center shrink-0;
-		@apply w-8 h-8 rounded-md transition-all;
-		@apply text-muted-foreground hover:text-foreground;
-		@apply hover:bg-accent hover:text-accent-foreground;
+		@apply w-7 h-7 rounded-md transition-all duration-150 cursor-pointer;
+		@apply text-muted-foreground;
+		@apply hover:bg-accent/60 hover:text-foreground;
 		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1;
-		@apply active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+		@apply active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent;
 	}
 
 	.kt-datepicker-prev-button svg,
 	.kt-datepicker-next-button svg {
-		@apply w-4 h-4;
+		@apply w-3.5 h-3.5;
 	}
 
 	/* Calendar Table */
@@ -142,40 +143,42 @@
 	}
 
 	.kt-datepicker-calendar-table thead {
-		@apply border-b border-border/50;
+		@apply border-0;
 	}
 
 	.kt-datepicker-calendar-table th {
-		@apply py-2 px-1 text-xs font-semibold text-muted-foreground text-center;
+		@apply py-2 px-0.5 text-xs font-medium text-muted-foreground text-center uppercase;
 		@apply w-[calc(100%/7)];
 	}
 
 	.kt-datepicker-calendar-body {
-		@apply border-t border-border/50;
+		@apply border-0;
 	}
 
 	.kt-datepicker-calendar-row {
-		@apply border-b border-border/30 last:border-b-0;
+		@apply border-0;
 	}
 
 	/* Day Cell */
 	.kt-datepicker-day-cell {
-		@apply p-0 text-center;
+		@apply py-1.5 px-1 text-center;
 	}
 
 	.kt-datepicker-day-cell button {
-		@apply w-full h-9 rounded-md text-sm font-medium transition-all;
-		@apply text-foreground hover:bg-accent hover:text-accent-foreground;
+		@apply w-full h-8 rounded-md text-sm font-medium transition-all duration-150;
+		@apply text-foreground cursor-pointer;
+		@apply hover:bg-accent/60 hover:text-accent-foreground;
 		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1;
-		@apply active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+		@apply active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent;
 	}
 
 	.kt-datepicker-day-cell[data-today="true"] button {
-		@apply bg-primary/10 text-primary font-semibold;
-		@apply hover:bg-primary/20;
+		@apply bg-primary/8 text-primary font-semibold;
+		@apply border border-primary/20;
+		@apply hover:bg-primary/15 hover:border-primary/30;
 	}
 
-	/* Selected state - similar to today but with solid primary background */
+	/* Selected state - circular background like Flatpickr */
 	.kt-datepicker-day-cell[data-selected="true"] button,
 	.kt-datepicker-day-cell.active button,
 	.kt-datepicker-day-cell[aria-selected="true"] button,
@@ -195,11 +198,12 @@
 	[data-kt-datepicker-day][aria-selected="true"][data-today="true"] button {
 		@apply bg-primary text-primary-foreground font-semibold;
 		@apply hover:bg-primary/90;
+		@apply border-0;
 	}
 
 	.kt-datepicker-day-cell[data-outside="true"] button {
-		@apply text-muted-foreground opacity-50;
-		@apply hover:opacity-75 hover:bg-accent/50;
+		@apply text-muted-foreground opacity-50 cursor-default;
+		@apply hover:opacity-70 hover:bg-accent/40;
 	}
 
 	.kt-datepicker-day-cell[tabindex="0"] button {
@@ -208,21 +212,21 @@
 
 	/* Footer */
 	.kt-datepicker-footer {
-		@apply flex items-center justify-end gap-2 pt-3 mt-2;
-		@apply border-t border-border;
+		@apply flex items-center justify-end gap-2 pt-2.5 mt-2;
+		@apply border-t border-border/40;
 	}
 
 	.kt-datepicker-today-button,
 	.kt-datepicker-clear-button,
 	.kt-datepicker-apply-button {
 		@apply inline-flex items-center justify-center;
-		@apply h-8 px-3 text-xs font-medium rounded-md transition-all;
+		@apply h-7 px-3 text-xs font-medium rounded-md transition-all duration-150 cursor-pointer;
 		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2;
-		@apply active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed;
+		@apply active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
 	}
 
 	.kt-datepicker-today-button {
-		@apply text-muted-foreground hover:text-foreground hover:bg-accent;
+		@apply text-muted-foreground hover:text-foreground hover:bg-accent/70;
 	}
 
 	.kt-datepicker-clear-button {
@@ -231,7 +235,8 @@
 
 	.kt-datepicker-apply-button {
 		@apply bg-primary text-primary-foreground;
-		@apply hover:bg-primary/90;
+		@apply hover:bg-primary/95;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 	}
 
 	/* Multi-Month Container */
@@ -241,7 +246,7 @@
 
 	/* Time Picker */
 	.kt-datepicker-time-picker {
-		@apply flex flex-col gap-3 p-3 border-t border-border;
+		@apply flex flex-col gap-2.5 p-2.5 border-t border-border/40;
 	}
 
 	.kt-datepicker-time-display {
@@ -319,14 +324,20 @@
 		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
 	}
 
+	.dark .kt-datepicker-dropdown {
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	}
+
 	.dark .kt-datepicker-day-cell[data-today="true"] button {
-		@apply bg-primary/20 text-primary;
-		@apply hover:bg-primary/30;
+		@apply bg-primary/15 text-primary;
+		@apply border-primary/30;
+		@apply hover:bg-primary/25 hover:border-primary/40;
 	}
 
 	.dark .kt-datepicker-day-cell[data-selected="true"] button {
 		@apply bg-primary text-primary-foreground;
-		@apply hover:bg-primary/90;
+		@apply hover:bg-primary/95;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 	}
 }
 
