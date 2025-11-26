@@ -242,18 +242,96 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
   }
 
   /**
-   * Set dropdown width to match toggle element
+   * Set dropdown width to match input wrapper element (matching ktselect behavior)
    */
   private _setDropdownWidth(): void {
-    if (this._config.dropdownWidth === 'auto') {
-      this._dropdownElement.style.width = 'auto';
-      this._dropdownElement.style.minWidth = 'auto';
-    } else if (this._config.dropdownWidth === 'toggle') {
-      const toggleRect = this._toggleElement.getBoundingClientRect();
-      this._dropdownElement.style.width = `${toggleRect.width}px`;
-    } else if (typeof this._config.dropdownWidth === 'string') {
-      this._dropdownElement.style.width = this._config.dropdownWidth;
+    if (!this._dropdownElement || !this._element) return;
+
+    // Find the input wrapper element to match its width
+    const inputWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]') as HTMLElement;
+    if (!inputWrapper) return;
+
+    // Check if width is configured
+    if (this._config.dropdownWidth) {
+      // If custom width is set, use that
+      if (this._config.dropdownWidth === 'auto') {
+        this._dropdownElement.style.width = 'auto';
+        this._dropdownElement.style.minWidth = 'auto';
+      } else if (typeof this._config.dropdownWidth === 'string') {
+        this._dropdownElement.style.width = this._config.dropdownWidth;
+        // Clear min-width when custom width is set
+        this._dropdownElement.style.minWidth = '';
+      }
+    } else {
+      // Otherwise, match input wrapper width for a cleaner appearance (like ktselect)
+      const inputWrapperWidth = inputWrapper.offsetWidth;
+      this._dropdownElement.style.width = `${inputWrapperWidth}px`;
+      // Clear min-width to ensure input wrapper width takes precedence
+      this._dropdownElement.style.minWidth = '';
     }
+  }
+
+  /**
+   * Detect if the datepicker is inside a modal container
+   * @returns The modal element if found, null otherwise
+   */
+  private _getModalContainer(): HTMLElement | null {
+    return this._element.closest(
+      '[data-kt-modal], .kt-modal, .kt-modal-center',
+    ) as HTMLElement | null;
+  }
+
+  /**
+   * Get the appropriate boundary element for Popper positioning
+   * For centered modals, use .kt-modal-content to avoid transform calculation issues
+   * @returns The boundary element, or null if no modal found
+   */
+  private _getModalBoundary(): HTMLElement | null {
+    const modalParent = this._getModalContainer();
+    if (!modalParent) {
+      return null;
+    }
+
+    // For centered modals, use .kt-modal-content as boundary to avoid transform issues
+    if (modalParent.classList.contains('kt-modal-center')) {
+      const modalContent = modalParent.querySelector(
+        '.kt-modal-content',
+      ) as HTMLElement | null;
+      return modalContent || modalParent;
+    }
+
+    // For non-centered modals, use the modal element itself
+    return modalParent;
+  }
+
+  /**
+   * Get the appropriate positioning strategy based on context
+   * @returns 'fixed' if inside non-centered modal, 'absolute' for centered modals or no modal
+   */
+  private _getPositioningStrategy(): 'fixed' | 'absolute' {
+    // Check if config explicitly sets strategy
+    if (this._config.dropdownStrategy) {
+      return this._config.dropdownStrategy as 'fixed' | 'absolute';
+    }
+
+    // For centered modals, use absolute positioning to avoid transform calculation issues
+    // For non-centered modals, use fixed positioning
+    const modalParent = this._getModalContainer();
+    if (modalParent && modalParent.classList.contains('kt-modal-center')) {
+      return 'absolute';
+    }
+
+    // Use fixed positioning for non-centered modals
+    return modalParent ? 'fixed' : 'absolute';
+  }
+
+  /**
+   * Get the reference element for Popper positioning (input wrapper instead of toggle)
+   */
+  private _getPopperReferenceElement(): HTMLElement {
+    // Use input wrapper for positioning (like ktselect uses the select element)
+    const inputWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]') as HTMLElement;
+    return inputWrapper || this._toggleElement; // Fallback to toggle if input wrapper not found
   }
 
   /**
@@ -264,33 +342,81 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
       this._popperInstance.destroy();
     }
 
-    const placement = (this._config.dropdownPlacement as Placement) || 'bottom-start';
-    const offset = this._parseOffset(this._config.dropdownOffset || '0,5');
+    // Default offset - matching ktselect
+    const offsetValue = this._config.dropdownOffset || '0, 5';
 
-    this._popperInstance = createPopper(this._toggleElement, this._dropdownElement, {
-      placement,
-      modifiers: [
-        {
-          name: 'offset',
-          options: {
-            offset,
+    // Get configuration options
+    const placement = (this._config.dropdownPlacement as Placement) || 'bottom-start';
+    const strategy = this._getPositioningStrategy();
+    const preventOverflow = this._config.dropdownPreventOverflow !== false;
+    const flip = this._config.dropdownFlip !== false;
+
+    // Get appropriate boundary element for modal context
+    const boundary = this._getModalBoundary() || this._config.dropdownBoundary || 'clippingParents';
+
+    // Get reference element for positioning (input wrapper, not the calendar button)
+    const referenceElement = this._getPopperReferenceElement();
+
+    // Create new popper instance
+    this._popperInstance = createPopper(
+      referenceElement,
+      this._dropdownElement,
+      {
+        placement: placement,
+        strategy: strategy,
+        modifiers: [
+          {
+            name: 'offset',
+            options: {
+              offset: this._parseOffset(offsetValue),
+            },
           },
-        },
-        {
-          name: 'preventOverflow',
-          options: {
-            boundary: this._config.dropdownBoundary || 'clippingParents',
-            padding: 8,
+          {
+            name: 'preventOverflow',
+            options: {
+              boundary: boundary,
+              altAxis: preventOverflow,
+            },
           },
-        },
-        {
-          name: 'flip',
-          options: {
-            fallbackPlacements: ['top-start', 'bottom-start', 'top-end', 'bottom-end'],
+          {
+            name: 'flip',
+            options: {
+              enabled: flip,
+              fallbackPlacements: ['top-start', 'bottom-end', 'top-end'],
+            },
           },
-        },
-      ],
-    });
+          {
+            name: 'sameWidth',
+            enabled: !this._config.dropdownWidth, // Enable when dropdownWidth is null/undefined (matching ktselect)
+            phase: 'beforeWrite',
+            requires: ['computeStyles'],
+            fn: ({ state }) => {
+              // Use input wrapper width instead of toggle element width
+              const inputWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]') as HTMLElement;
+              if (inputWrapper) {
+                state.styles.popper.width = `${inputWrapper.offsetWidth}px`;
+              } else {
+                // Fallback to reference width if input wrapper not found
+                state.styles.popper.width = `${state.rects.reference.width}px`;
+              }
+            },
+            effect: ({ state }) => {
+              // Use input wrapper width instead of toggle element width
+              const inputWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]') as HTMLElement;
+              if (inputWrapper && 'offsetWidth' in inputWrapper) {
+                state.elements.popper.style.width = `${inputWrapper.offsetWidth}px`;
+              } else {
+                // Fallback to reference width if input wrapper not found
+                const reference = state.elements.reference as HTMLElement;
+                if (reference && 'offsetWidth' in reference) {
+                  state.elements.popper.style.width = `${reference.offsetWidth}px`;
+                }
+              }
+            },
+          },
+        ],
+      },
+    );
   }
 
   /**

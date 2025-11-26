@@ -30,9 +30,9 @@ export const defaultDatepickerConfig: KTDatepickerConfig = {
   timeStep: 1,
   // Dropdown defaults
   dropdownPlacement: 'bottom-start',
-  dropdownOffset: '0,8',
+  dropdownOffset: '0, 5',
   dropdownBoundary: 'clippingParents',
-  dropdownWidth: 'auto',
+  dropdownWidth: undefined, // null/undefined to match toggle element width (like ktselect)
   dropdownZindex: undefined,
   dropdownContainer: undefined,
   // Custom classes for template elements

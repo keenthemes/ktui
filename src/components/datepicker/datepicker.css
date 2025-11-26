@@ -92,9 +92,8 @@
 /* Dropdown Container */
 @layer components {
 	.kt-datepicker-dropdown {
-		@apply absolute z-50 mt-1.5 rounded-md border border-border bg-popover text-popover-foreground;
-		@apply shadow-md shadow-[rgba(0,0,0,0.05)];
-		@apply min-w-[280px] p-4;
+		@apply absolute z-50 mt-1.5 rounded-md shadow-md shadow-[rgba(0,0,0,0.05)] border border-border bg-popover text-popover-foreground;
+		@apply p-4;
 	}
 
 	.kt-datepicker-dropdown.hidden {
