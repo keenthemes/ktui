@@ -364,13 +364,37 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update calendar display
    */
   private _updateCalendar(state: KTDatepickerState): void {
-    if (!this._cachedElements.calendarElement) return;
+    // Find calendar element dynamically (don't rely on stale cache)
+    let calendarElement = this._cachedElements.calendarElement;
+
+    // If cache is null or element no longer exists, try to find it
+    if (!calendarElement || !calendarElement.isConnected) {
+      // Try to find dropdown first
+      let dropdownEl: HTMLElement | null = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+
+      if (!dropdownEl && this._instanceId) {
+        dropdownEl = document.querySelector(`[data-kt-datepicker-dropdown][data-kt-datepicker-instance-id="${this._instanceId}"]`) as HTMLElement;
+      }
+
+      if (dropdownEl) {
+        calendarElement = dropdownEl.querySelector('[data-kt-datepicker-calendar-table]') as HTMLElement;
+        // Update cache if found
+        if (calendarElement) {
+          this._cachedElements.calendarElement = calendarElement;
+        }
+      }
+    }
+
+    // If still not found, return early
+    if (!calendarElement) {
+      return;
+    }
 
     // Update date selection highlighting
-    this._updateDateSelection(state, this._cachedElements.calendarElement);
+    this._updateDateSelection(state, calendarElement);
 
     // Update navigation (month/year display)
-    this._updateNavigation(state, this._cachedElements.calendarElement);
+    this._updateNavigation(state, calendarElement);
   }
 
   /**
@@ -378,15 +402,22 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    */
   private _updateDateSelection(state: KTDatepickerState, calendarElement: HTMLElement): void {
     // Clear previous selections
-    const selectedCells = calendarElement.querySelectorAll('[data-selected]');
-    selectedCells.forEach(cell => cell.removeAttribute('data-selected'));
+    const selectedCells = calendarElement.querySelectorAll('[data-kt-selected]');
+    selectedCells.forEach(cell => {
+      cell.removeAttribute('data-kt-selected');
+      cell.removeAttribute('aria-selected');
+    });
 
     // Highlight selected date(s)
     if (state.selectedDate) {
       this._highlightDate(state.selectedDate, calendarElement);
-    } else if (state.selectedRange) {
+    }
+    // Highlight range start/end dates
+    if (state.selectedRange) {
       this._highlightDateRange(state.selectedRange, calendarElement);
-    } else if (state.selectedDates.length > 0) {
+    }
+    // Highlight multi-date selections
+    if (state.selectedDates.length > 0) {
       state.selectedDates.forEach(date => this._highlightDate(date, calendarElement));
     }
   }
@@ -397,7 +428,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _highlightDate(date: Date, calendarElement: HTMLElement): void {
     const cell = this._findDayCell(date, calendarElement);
     if (cell) {
-      cell.setAttribute('data-selected', 'true');
+      cell.setAttribute('data-kt-selected', 'true');
+      cell.setAttribute('aria-selected', 'true');
     }
   }
 
@@ -417,13 +449,25 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Find day cell for a specific date
    */
   private _findDayCell(date: Date, calendarElement: HTMLElement): HTMLElement | null {
-    const day = date.getDate();
+    const dateISO = date.toISOString().split('T')[0]; // Use ISO date string for accurate matching
     const cells = calendarElement.querySelectorAll('td[data-kt-datepicker-day]');
 
     for (const cell of Array.from(cells)) {
+      const cellDate = cell.getAttribute('data-date');
+      if (cellDate === dateISO) {
+        return cell as HTMLElement;
+      }
+    }
+
+    // Fallback: try matching by day number (less accurate but works for same month)
+    const day = date.getDate();
+    for (const cell of Array.from(cells)) {
       const button = cell.querySelector('button');
       if (button && button.getAttribute('data-day') === day.toString()) {
-        return cell as HTMLElement;
+        // Only match if it's in the current month (not outside)
+        if (!cell.hasAttribute('data-outside')) {
+          return cell as HTMLElement;
+        }
       }
     }
 
@@ -1211,7 +1255,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       currentState.selectedDate,
       dayClickHandler,
       this._config.locale,
-      this._config.range ? currentState.selectedRange : undefined
+      this._config.range ? currentState.selectedRange : undefined,
+      this._config.multiDate ? currentState.selectedDates : undefined
     );
     dropdownEl.appendChild(calendar);
   }
@@ -1263,14 +1308,16 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       (e) => { e.stopPropagation(); this._changeMonth(1); }
     );
 
+    const currentState = this._unifiedStateManager.getState();
     const calendar = renderCalendar(
       this._templateSet.dayCell,
       this._getCalendarDays(monthDate),
       monthDate,
-      this._unifiedStateManager.getState().selectedDate,
+      currentState.selectedDate,
       (day) => { this.setDate(day); },
       this._config.locale,
-      this._config.range ? this._unifiedStateManager.getState().selectedRange : undefined
+      this._config.range ? currentState.selectedRange : undefined,
+      this._config.multiDate ? currentState.selectedDates : undefined
     );
 
     // Wrap header + calendar in a styled panel div using template
@@ -1596,7 +1643,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         currentState.selectedDate,
         dayClickHandler,
         this._config.locale,
-        this._config.range ? currentState.selectedRange : undefined
+        this._config.range ? currentState.selectedRange : undefined,
+        this._config.multiDate ? currentState.selectedDates : undefined
       );
 
       // Insert the new calendar after the header
@@ -1607,6 +1655,9 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         // Fallback: append to dropdown
         dropdownEl.appendChild(newCalendar);
       }
+
+      // Refresh cache with the new calendar element
+      this._cachedElements.calendarElement = newCalendar as HTMLElement;
     } else {
       // If calendar element not found, fallback to full render
       console.warn('[KTDatepicker] Calendar element not found, falling back to full render');

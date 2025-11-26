@@ -15,6 +15,7 @@ import { defaultTemplates } from '../../templates/templates';
  * @param onDayClick - Callback for day cell click, receives the Date
  * @param locale - Locale string for day name localization
  * @param selectedRange - Optional range selection
+ * @param selectedDates - Optional array of selected dates for multi-date mode
  */
 export function renderCalendar(
   tpl: string | ((data: any) => string),
@@ -23,7 +24,8 @@ export function renderCalendar(
   selectedDate: Date | null,
   onDayClick: (date: Date) => void,
   locale?: string,
-  selectedRange?: { start: Date | null; end: Date | null }
+  selectedRange?: { start: Date | null; end: Date | null },
+  selectedDates?: Date[]
 ): HTMLElement {
   // Generate localized day names for the header
   const dayNames = [];
@@ -44,26 +46,56 @@ export function renderCalendar(
   if (selectedDate) {
     tabbableIndex = days.findIndex(d => isSameDay(d, selectedDate));
   }
+  if (tabbableIndex === -1 && selectedDates && selectedDates.length > 0) {
+    tabbableIndex = days.findIndex(d => selectedDates.some(date => isSameDay(d, date)));
+  }
+  if (tabbableIndex === -1 && selectedRange && selectedRange.start) {
+    tabbableIndex = days.findIndex(d => isSameDay(d, selectedRange.start!));
+  }
   if (tabbableIndex === -1) {
     const today = new Date();
     tabbableIndex = days.findIndex(d => isSameDay(d, today));
   }
+  // Helper function to check if a date is selected
+  const checkIsSelected = (day: Date): boolean => {
+    // Check single date selection
+    if (selectedDate && isSameDay(day, selectedDate)) {
+      return true;
+    }
+    // Check multi-date selection
+    if (selectedDates && selectedDates.length > 0) {
+      return selectedDates.some(date => isSameDay(day, date));
+    }
+    // Check range selection start/end dates
+    if (selectedRange) {
+      if (selectedRange.start && isSameDay(day, selectedRange.start)) {
+        return true;
+      }
+      if (selectedRange.end && isSameDay(day, selectedRange.end)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   for (let i = 0; i < days.length; i += 7) {
     const week = days.slice(i, i + 7);
     const tds = week.map((day, j) => {
       const isCurrentMonth = day.getMonth() === currentDate.getMonth();
       const isToday = isSameDay(day, new Date());
-      const isSelected = selectedDate && isSameDay(day, selectedDate);
+      const isSelected = checkIsSelected(day);
       let inRange = false;
       if (selectedRange && selectedRange.start && selectedRange.end) {
         inRange = day >= selectedRange.start && day <= selectedRange.end;
       }
       const dayIndex = i + j;
+      const dateISO = day.toISOString().split('T')[0]; // Store full date as ISO string for accurate matching
       const attributes = [
-        isSelected ? 'data-selected="true" aria-selected="true" class="active"' : '',
+        isSelected ? 'data-kt-selected="true" aria-selected="true" class="active"' : '',
         isToday ? 'data-today="true"' : '',
         isCurrentMonth ? '' : 'data-outside="true"',
         inRange ? 'data-in-range="true"' : '',
+        `data-date="${dateISO}"`,
         `tabindex=\"${dayIndex === tabbableIndex ? '0' : '-1'}\"`
       ].filter(Boolean).join(' ');
       const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, inRange, attributes };
@@ -104,7 +136,7 @@ export function renderCalendar(
         .replace(/{{saturday}}/g, dayNames[6]);
   const calendarFrag = renderTemplateToDOM(tableHtml);
   const calendar = calendarFrag.firstElementChild as HTMLElement;
-  // Add day cell click listeners (attach to button for accessibility)
+  // Add day cell click and hover listeners (attach to button for accessibility)
   calendar.querySelectorAll('td[data-kt-datepicker-day]').forEach((td, i) => {
     const button = td.querySelector('button[data-day]');
     if (button) {
@@ -114,6 +146,15 @@ export function renderCalendar(
         if (dayObj.getMonth() === currentDate.getMonth()) {
           onDayClick(dayObj);
         }
+      });
+
+      // Add hover event listeners for data-kt-hover attribute
+      const cell = td as HTMLElement;
+      button.addEventListener('mouseenter', () => {
+        cell.setAttribute('data-kt-hover', '');
+      });
+      button.addEventListener('mouseleave', () => {
+        cell.removeAttribute('data-kt-hover');
       });
     }
   });
