@@ -56,6 +56,16 @@
 	"main": "lib/cjs/index.js",
 	"module": "lib/esm/index.js",
 	"license": "MIT",
+	"files": [
+		"dist",
+		"lib",
+		"src",
+		"styles",
+		"styles.css",
+		"package.json",
+		"README.md",
+		"LICENSE.md"
+	],
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "concurrently \"npm run build:webpack\" \"npm run build:css:once\"",
