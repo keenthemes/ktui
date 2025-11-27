@@ -21,6 +21,10 @@
 		@apply focus-within:ring-0 focus-within:border-0;
 		@apply hover:border-0;
 		@apply text-[0.8125rem] leading-(--text-sm--line-height);
+		/* Remove spacing between inline-flex children */
+		font-size: 0;
+		letter-spacing: 0;
+		word-spacing: 0;
 	}
 
 	/* Date Range Input Container - tighter spacing */
@@ -36,20 +40,95 @@
 		@apply hover:bg-accent/50;
 		@apply disabled:cursor-not-allowed disabled:opacity-50;
 		@apply aria-invalid:bg-destructive/10 aria-invalid:text-destructive;
+		/* Restore font-size from parent (font-size: 0 trick) */
+		font-size: 0.875rem; /* text-sm equivalent */
+		letter-spacing: normal;
+		word-spacing: normal;
 	}
 
 	[data-segment][contenteditable="true"] {
 		@apply cursor-text;
+		/* Reset browser defaults for contenteditable spacing */
+		padding: 0 !important;
+		margin: 0 !important;
+		line-height: 1.5;
+		white-space: nowrap !important;
+		overflow: hidden;
+		/* Prevent browser default contenteditable spacing */
+		-webkit-user-modify: read-write-plaintext-only;
+		user-modify: read-write-plaintext-only;
+		/* Remove any default outline spacing */
+		outline: none;
+		outline-offset: 0;
+		/* Prevent any text selection spacing */
+		text-indent: 0;
+		/* Ensure no extra spacing from flex alignment - use flex-start to minimize spacing */
+		align-items: center;
+		justify-content: flex-start;
+		/* Remove any default browser spacing for contenteditable */
+		-webkit-tap-highlight-color: transparent;
+		/* Ensure text node has no extra spacing */
+		word-spacing: 0;
+		letter-spacing: normal;
+		/* Prevent empty contenteditable from collapsing */
+		min-height: 1em;
+		/* Remove any default browser margins on focus */
+		-webkit-margin-before: 0;
+		-webkit-margin-after: 0;
+		-webkit-margin-start: 0;
+		-webkit-margin-end: 0;
+		/* Reduce min-width when editing to minimize spacing */
+		min-width: fit-content;
+		width: fit-content;
+	}
+
+	/* Remove spacing from text nodes inside contenteditable segments */
+	[data-segment][contenteditable="true"] * {
+		margin: 0;
+		padding: 0;
+		display: inline;
+	}
+
+	/* Handle empty contenteditable to prevent spacing issues */
+	[data-segment][contenteditable="true"]:empty::before {
+		content: "\200B"; /* Zero-width space to prevent collapsing */
+		display: inline-block;
 	}
 
 	[data-segment][contenteditable="true"]:focus {
 		@apply bg-accent text-accent-foreground ring-2 ring-ring/50;
 	}
 
+	/* Add left spacing for time segments - only on the first time segment (hour) */
+	[data-segment="hour"] {
+		@apply ml-2;
+	}
+
+	/* Add left spacing for AM/PM segment */
+	[data-segment="ampm"] {
+		@apply ml-2;
+	}
+
+	/* Ensure separator before hour has proper spacing */
+	[data-segment-separator] + [data-segment="hour"] {
+		@apply ml-2;
+	}
+
+	/* Ensure separator before ampm has proper spacing */
+	[data-segment-separator] + [data-segment="ampm"] {
+		@apply ml-2;
+	}
+
 	/* Segment Separator */
 	[data-segment-separator] {
 		@apply inline-flex items-center text-muted-foreground select-none pointer-events-none;
 		@apply text-sm font-medium;
+		/* Restore font-size from parent (font-size: 0 trick) */
+		font-size: 0.875rem; /* text-sm equivalent */
+		letter-spacing: normal;
+		word-spacing: normal;
+		/* Ensure space separators are visible */
+		white-space: pre;
 	}
 
 	/* Calendar Button */

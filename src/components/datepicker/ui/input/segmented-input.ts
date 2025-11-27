@@ -394,22 +394,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
       }
     });
 
-    // Wrap in segmentedDateInput template
-    let segmentedInputHtml = segmentsHtml;
-    const segmentedDateInputTpl = templates.segmentedDateInput as string | ((data: any) => string) | undefined;
-    if (segmentedDateInputTpl) {
-      if (typeof segmentedDateInputTpl === 'function') {
-        segmentedInputHtml = segmentedDateInputTpl({ segments: segmentsHtml, class: '' });
-      } else if (typeof segmentedDateInputTpl === 'string') {
-        segmentedInputHtml = segmentedDateInputTpl
-          .replace(/{{segments}}/g, segmentsHtml)
-          .replace(/{{class}}/g, ''); // Replace class placeholder with empty string if no class provided
-      } else {
-        segmentedInputHtml = segmentsHtml;
-      }
-    }
-
-    container.innerHTML = segmentedInputHtml;
+    // Render segments directly into container (container already has the correct structure from template)
+    container.innerHTML = segmentsHtml;
 
     // Verify template rendering was successful
     const segs = Array.from(container.querySelectorAll('[data-segment]')) as HTMLElement[];
