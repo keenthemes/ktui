@@ -1,6 +1,6 @@
 {
 	"name": "@keenthemes/ktui",
-	"version": "1.0.28",
+	"version": "1.0.29",
 	"description": "Free & Open-Source Tailwind UI Components by Keenthemes",
 	"homepage": "https://ktui.io",
 	"repository": {
@@ -56,6 +56,16 @@
 	"main": "lib/cjs/index.js",
 	"module": "lib/esm/index.js",
 	"license": "MIT",
+	"files": [
+		"dist",
+		"lib",
+		"src",
+		"styles",
+		"styles.css",
+		"package.json",
+		"README.md",
+		"LICENSE.md"
+	],
 	"scripts": {
 		"test": "vitest run",
 		"test:watch": "vitest",
