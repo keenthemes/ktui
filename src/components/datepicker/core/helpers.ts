@@ -58,9 +58,12 @@ export function renderSingleSegmentedInputUI(
 
   let inputWrapperHtml: string;
   if (typeof inputWrapperTpl === 'function') {
-    inputWrapperHtml = inputWrapperTpl({ input: segmentedInputEl.outerHTML, icon: calendarButtonHtml });
+    inputWrapperHtml = inputWrapperTpl({ input: segmentedInputEl.outerHTML, icon: calendarButtonHtml, class: '' });
   } else {
-    inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, segmentedInputEl.outerHTML);
+    inputWrapperHtml = inputWrapperTpl
+      .replace(/{{icon}}/g, calendarButtonHtml)
+      .replace(/{{input}}/g, segmentedInputEl.outerHTML)
+      .replace(/{{class}}/g, ''); // Replace class placeholder with empty string if no class provided
   }
   const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
   return inputWrapperFrag.firstElementChild as HTMLElement;
@@ -78,9 +81,12 @@ export function renderRangeSegmentedInputUI(
 
   let inputWrapperHtml: string;
   if (typeof inputWrapperTpl === 'function') {
-    inputWrapperHtml = inputWrapperTpl({ input: '', icon: calendarButtonHtml });
+    inputWrapperHtml = inputWrapperTpl({ input: '', icon: calendarButtonHtml, class: '' });
   } else {
-    inputWrapperHtml = inputWrapperTpl.replace(/{{icon}}/g, calendarButtonHtml).replace(/{{input}}/g, '');
+    inputWrapperHtml = inputWrapperTpl
+      .replace(/{{icon}}/g, calendarButtonHtml)
+      .replace(/{{input}}/g, '')
+      .replace(/{{class}}/g, ''); // Replace class placeholder with empty string if no class provided
   }
   const inputWrapperFrag = renderTemplateToDOM(inputWrapperHtml);
   const inputWrapperEl = inputWrapperFrag.firstElementChild as HTMLElement;
@@ -109,12 +115,14 @@ export function renderRangeSegmentedInputUI(
       start: '<div data-kt-datepicker-segmented-start></div>',
       separator,
       end: '<div data-kt-datepicker-segmented-end></div>',
+      class: ''
     });
   } else {
     rangeHtml = rangeTpl
       .replace(/{{start}}/g, '<div data-kt-datepicker-segmented-start></div>')
       .replace(/{{separator}}/g, separator)
-      .replace(/{{end}}/g, '<div data-kt-datepicker-segmented-end></div>');
+      .replace(/{{end}}/g, '<div data-kt-datepicker-segmented-end></div>')
+      .replace(/{{class}}/g, ''); // Replace class placeholder with empty string if no class provided
   }
   const rangeFrag = renderTemplateToDOM(rangeHtml);
   // Find mount points

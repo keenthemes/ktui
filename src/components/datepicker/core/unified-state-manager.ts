@@ -62,6 +62,7 @@ export class KTDatepickerUnifiedStateManager {
   private _batchTimeout: number | null = null;
   private _pendingUpdates: Partial<KTDatepickerState> = {};
   private _isUpdating = false;
+  private _lastUpdateSource: string = 'unknown';
 
   constructor(config?: Partial<StateManagerConfig>) {
     this._config = {
@@ -107,6 +108,14 @@ export class KTDatepickerUnifiedStateManager {
    */
   public getState(): Readonly<KTDatepickerState> {
     return { ...this._state };
+  }
+
+  /**
+   * Get the source of the last state update
+   * @returns The source identifier of the last state update
+   */
+  public getLastUpdateSource(): string {
+    return this._lastUpdateSource;
   }
 
   /**
@@ -234,6 +243,9 @@ export class KTDatepickerUnifiedStateManager {
    */
   private _notifyObservers(oldState: KTDatepickerState, newState: KTDatepickerState, source: string, changes: Partial<KTDatepickerState>): void {
     if (this._observers.size === 0) return;
+
+    // Store the last update source for external queries
+    this._lastUpdateSource = source;
 
     // Sort observers by priority
     const sortedObservers = Array.from(this._observers).sort((a, b) =>

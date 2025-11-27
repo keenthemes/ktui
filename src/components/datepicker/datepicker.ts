@@ -303,19 +303,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   }
 
   /**
-   * Update range mode segmented inputs
-   */
-  private _updateRangeSegmentedInput(state: KTDatepickerState): void {
-    if (this._cachedElements.startContainer && state.selectedRange?.start) {
-      this._updateDateSegmentsInContainer(state.selectedRange.start, this._cachedElements.startContainer);
-    }
-
-    if (this._cachedElements.endContainer && state.selectedRange?.end) {
-      this._updateDateSegmentsInContainer(state.selectedRange.end, this._cachedElements.endContainer);
-    }
-  }
-
-  /**
    * Update date segments in a specific container
    */
   private _updateDateSegmentsInContainer(date: Date, container: HTMLElement): void {
@@ -1425,7 +1412,13 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     this._updatePlaceholder();
     this._updateDisabledState();
-    this._enforceMinMaxDates();
+
+    // Enforce min/max dates after rendering
+    // Use setTimeout to ensure DOM is fully rendered
+    setTimeout(() => {
+      this._enforceMinMaxDates();
+    }, 0);
+
     // Attach keyboard event listeners
     if (this._input) {
       this._eventManager.removeListener(this._input, 'keydown', this._onKeyDown);
@@ -1658,6 +1651,9 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
       // Refresh cache with the new calendar element
       this._cachedElements.calendarElement = newCalendar as HTMLElement;
+
+      // Enforce min/max dates after calendar update
+      this._enforceMinMaxDates();
     } else {
       // If calendar element not found, fallback to full render
       console.warn('[KTDatepicker] Calendar element not found, falling back to full render');
@@ -1735,6 +1731,9 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       const panel = this._renderMultiMonthCalendar(monthDate, index, visibleMonths);
       multiMonthContainer.appendChild(panel);
     });
+
+    // Enforce min/max dates after multi-month calendar update
+    this._enforceMinMaxDates();
 
     console.log('[KTDatepicker] Multi-month calendar content updated successfully');
   }
@@ -1994,6 +1993,39 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   }
 
   /**
+   * Update the range segmented inputs UI to reflect current state
+   */
+  private _updateRangeSegmentedInput(state: KTDatepickerState): void {
+    const startContainer = this._element.querySelector('[data-kt-datepicker-start-container]') as HTMLElement;
+    const endContainer = this._element.querySelector('[data-kt-datepicker-end-container]') as HTMLElement;
+
+    if (!startContainer || !endContainer) return;
+
+    // Re-instantiate the range segmented inputs with the current state
+    // This will update the display without recreating the entire UI
+    instantiateRangeSegmentedInputs(
+      startContainer,
+      endContainer,
+      state,
+      this._config,
+      (date: Date) => {
+        const end = state.selectedRange?.end || null;
+        let newEnd = end;
+        if (end && date > end) newEnd = null;
+        this._unifiedStateManager.updateState({ selectedRange: { start: date, end: newEnd } }, 'range-selection');
+        this._updateCalendarContent();
+      },
+      (date: Date) => {
+        const start = state.selectedRange?.start || null;
+        let newStart = start;
+        if (start && date < start) newStart = null;
+        this._unifiedStateManager.updateState({ selectedRange: { start: newStart, end: date } }, 'range-selection');
+        this._updateCalendarContent();
+      }
+    );
+  }
+
+  /**
    * Handle changes from the segmented input
    */
   private _handleSegmentedInputChange(date: Date): void {
@@ -2026,24 +2058,56 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   }
 
   /**
+   * Normalize a date to midnight for date-only comparison (removes time component)
+   */
+  private _normalizeDateToMidnight(date: Date): Date {
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
+  }
+
+  /**
    * Disable day buttons outside min/max date range
    */
   private _enforceMinMaxDates() {
     if (this._config.minDate || this._config.maxDate) {
-      const minDate = this._config.minDate ? new Date(this._config.minDate) : null;
-      const maxDate = this._config.maxDate ? new Date(this._config.maxDate) : null;
-      const dayButtons = this._element.querySelectorAll('button[data-day]');
-      dayButtons.forEach((btn) => {
-        const day = parseInt(btn.getAttribute('data-day'), 10);
-        const td = btn.closest('td[data-kt-datepicker-day]');
-        if (!td) return;
-        // Get the date for this cell
-        const year = this._unifiedStateManager.getState().currentDate.getFullYear();
-        const month = this._unifiedStateManager.getState().currentDate.getMonth();
-        const date = new Date(year, month, day);
+      // Normalize min/max dates to midnight for date-only comparison
+      const minDate = this._config.minDate ? this._normalizeDateToMidnight(new Date(this._config.minDate)) : null;
+      const maxDate = this._config.maxDate ? this._normalizeDateToMidnight(new Date(this._config.maxDate)) : null;
+
+      // Find calendar element - try multiple strategies
+      let calendarElement = this._cachedElements.calendarElement;
+      if (!calendarElement || !calendarElement.isConnected) {
+        // Try to find dropdown first
+        let dropdownEl: HTMLElement | null = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
+        if (!dropdownEl && this._instanceId) {
+          dropdownEl = document.querySelector(`[data-kt-datepicker-dropdown][data-kt-datepicker-instance-id="${this._instanceId}"]`) as HTMLElement;
+        }
+        if (dropdownEl) {
+          calendarElement = dropdownEl.querySelector('[data-kt-datepicker-calendar-table]') as HTMLElement;
+        }
+      }
+
+      if (!calendarElement) return;
+
+      // Get all day cells using the calendar element scope
+      const dayCells = calendarElement.querySelectorAll('td[data-kt-datepicker-day]');
+
+      dayCells.forEach((td) => {
+        // Get the actual date from the data-date attribute (stored as ISO string)
+        const dateISO = td.getAttribute('data-date');
+        if (!dateISO) return;
+
+        // Parse the ISO date and normalize to midnight for comparison
+        const cellDate = this._normalizeDateToMidnight(new Date(dateISO));
+        const btn = td.querySelector('button[data-day]') as HTMLButtonElement;
+        if (!btn) return;
+
         let disabled = false;
-        if (minDate && date < minDate) disabled = true;
-        if (maxDate && date > maxDate) disabled = true;
+        // Compare dates (normalized to midnight) for proper date-only comparison
+        if (minDate && cellDate < minDate) disabled = true;
+        if (maxDate && cellDate > maxDate) disabled = true;
+
         if (disabled) {
           btn.setAttribute('disabled', 'true');
           td.setAttribute('data-out-of-range', 'true');
@@ -2194,6 +2258,9 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       return;
     }
 
+    // Get the source of the last state update
+    const lastUpdateSource = this._unifiedStateManager.getLastUpdateSource();
+
     // Update dropdown state if open/closed changed
     if (newState.isOpen !== oldState.isOpen) {
       if (this._dropdownModule) {
@@ -2215,9 +2282,23 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Update UI elements directly
     this._updateInput(newState);
     if (this._config.range) {
-      this._updateRangeSegmentedInput(newState);
+      // Skip updating range segmented inputs if the state change originated from range selection
+      // This prevents focus loss during typing in range mode
+      // Note: Range mode uses 'range-selection' as source, but we still want to update when
+      // the change comes from calendar selection or programmatic updates
+      if (lastUpdateSource !== 'range-selection') {
+        this._updateRangeSegmentedInput(newState);
+      } else {
+        console.log('🗓️ [KTDatepicker] Skipping _updateRangeSegmentedInput to preserve focus during typing');
+      }
     } else {
-    this._updateSegmentedInput(newState);
+      // Skip updating segmented input if the state change originated from the segmented input itself
+      // This prevents focus loss during typing
+      if (lastUpdateSource !== 'segmented-input') {
+        this._updateSegmentedInput(newState);
+      } else {
+        console.log('🗓️ [KTDatepicker] Skipping _updateSegmentedInput to preserve focus during typing');
+      }
     }
     this._updateCalendar(newState);
     this._updateTimePicker(newState);

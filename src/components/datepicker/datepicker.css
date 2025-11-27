@@ -17,7 +17,6 @@
 	/* Segmented Input Container */
 	[data-kt-datepicker-segmented-input] {
 		@apply inline-flex items-center flex-1 min-w-0;
-		@apply pl-3 pr-12 py-1.5;
 		@apply border-0 bg-transparent shadow-none;
 		@apply focus-within:ring-0 focus-within:border-0;
 		@apply hover:border-0;
@@ -31,7 +30,7 @@
 
 	/* Date Segment (Day/Month/Year) */
 	[data-segment] {
-		@apply inline-flex items-center justify-center min-w-[2rem] px-1 py-0 text-sm font-medium text-foreground;
+		@apply inline-flex items-center justify-center min-w-[2rem] px-0 py-0 text-sm font-medium text-foreground;
 		@apply rounded-sm transition-all outline-none;
 		@apply focus:bg-accent focus:text-accent-foreground focus:ring-2 focus:ring-ring/50;
 		@apply hover:bg-accent/50;

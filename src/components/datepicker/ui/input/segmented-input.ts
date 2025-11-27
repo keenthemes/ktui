@@ -399,9 +399,11 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
     const segmentedDateInputTpl = templates.segmentedDateInput as string | ((data: any) => string) | undefined;
     if (segmentedDateInputTpl) {
       if (typeof segmentedDateInputTpl === 'function') {
-        segmentedInputHtml = segmentedDateInputTpl({ segments: segmentsHtml });
+        segmentedInputHtml = segmentedDateInputTpl({ segments: segmentsHtml, class: '' });
       } else if (typeof segmentedDateInputTpl === 'string') {
-        segmentedInputHtml = segmentedDateInputTpl.replace(/{{segments}}/g, segmentsHtml);
+        segmentedInputHtml = segmentedDateInputTpl
+          .replace(/{{segments}}/g, segmentsHtml)
+          .replace(/{{class}}/g, ''); // Replace class placeholder with empty string if no class provided
       } else {
         segmentedInputHtml = segmentsHtml;
       }
@@ -533,19 +535,33 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         } else if (/^[0-9]$/.test(e.key)) {
           // Direct typing, enforce min/max - optimized to avoid focus loss
           e.preventDefault();
-          let newValue;
+          let newValue: string;
+          const currentText = span.textContent || '';
+
           if (segments[idx] === 'year') {
-            newValue = (span.textContent?.length === 4 ? e.key : (span.textContent || '') + e.key).slice(-4);
+            // For year: shift left and append new digit (e.g., "2024" + "6" = "0246", then becomes "2026" after validation)
+            // If already 4 digits, shift left by removing first digit and appending new one
+            if (currentText.length === 4) {
+              newValue = (currentText.slice(1) + e.key);
+            } else {
+              newValue = (currentText + e.key).slice(-4);
+            }
           } else {
-            newValue = (span.textContent?.length === 2 ? e.key : (span.textContent || '') + e.key).slice(-2);
+            // For day/month: shift left and append new digit (e.g., "12" + "5" = "25")
+            // If already 2 digits, shift left by removing first digit and appending new one
+            if (currentText.length === 2) {
+              newValue = (currentText.slice(1) + e.key);
+            } else {
+              newValue = (currentText + e.key).slice(-2);
+            }
           }
+
           const min = getSegmentMin(segments[idx], currentValue) ?? 0;
           const max = getSegmentMax(segments[idx], currentValue) ?? (segments[idx] === 'year' ? 9999 : 99);
           let num = Math.max(min, Math.min(max, Number(newValue)));
           if (isNaN(num)) num = min;
 
           // Update content directly without re-rendering to preserve focus
-          const oldText = span.textContent;
           const shouldPad = shouldPadSegment(segments[idx], options.format);
           if (segments[idx] === 'year') {
             span.textContent = shouldPad ? num.toString().padStart(4, '0') : num.toString();
