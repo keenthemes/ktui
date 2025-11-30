@@ -170,8 +170,12 @@
 @layer utilities {
 	[data-kt-datepicker-dropdown] {
 		@apply absolute z-50 mt-1.5 rounded-md border border-border/60 bg-popover text-popover-foreground;
-		@apply p-3;
+		@apply px-3 py-2;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		/* Fixed width for calendar dropdown - not tied to input width */
+		width: 20rem; /* 320px - standard calendar width */
+		min-width: 20rem;
+		max-width: 20rem;
 	}
 
 	[data-kt-datepicker-dropdown].hidden {
@@ -184,12 +188,12 @@
 
 	/* Panel Container */
 	[data-kt-datepicker-panel] {
-		@apply flex flex-col gap-2.5;
+		@apply flex flex-col gap-1.5;
 	}
 
 	/* Header */
 	[data-kt-datepicker-header] {
-		@apply flex items-center justify-between gap-2 px-0.5 pb-2.5;
+		@apply flex items-center justify-between gap-2 px-0.5 pb-1.5;
 		@apply border-0;
 	}
 
@@ -224,7 +228,7 @@
 	}
 
 	[data-kt-datepicker-calendar-table] th {
-		@apply py-2 px-0.5 text-xs font-medium text-muted-foreground text-center uppercase;
+		@apply py-1 px-0.5 text-xs font-medium text-muted-foreground text-center uppercase;
 		@apply w-[calc(100%/7)];
 	}
 
@@ -238,11 +242,11 @@
 
 	/* Day Cell */
 	[data-kt-datepicker-day] {
-		@apply py-1.5 px-1 text-center;
+		@apply py-0.5 px-1 text-center;
 	}
 
 	[data-kt-datepicker-day] button {
-		@apply w-full h-8 rounded-md text-sm font-medium transition-all duration-150;
+		@apply w-full h-7 rounded-md text-sm font-medium transition-all duration-150;
 		@apply text-foreground cursor-pointer;
 		@apply hover:bg-accent/60 hover:text-accent-foreground;
 		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1;
@@ -308,7 +312,7 @@
 
 	/* Footer */
 	[data-kt-datepicker-footer] {
-		@apply flex items-center justify-end gap-2 pt-2.5 mt-2;
+		@apply flex items-center justify-end gap-2 pt-1.5 mt-1.5;
 		@apply border-t border-border/40;
 	}
 
@@ -342,7 +346,7 @@
 
 	/* Time Picker */
 	[data-kt-datepicker-time-picker] {
-		@apply flex flex-col gap-2.5 p-2.5 border-t border-border/40;
+		@apply flex flex-col gap-1.5 p-2 border-t border-border/40;
 	}
 
 	[data-kt-datepicker-time-display] {

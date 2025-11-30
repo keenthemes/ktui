@@ -326,12 +326,11 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
   }
 
   /**
-   * Get the reference element for Popper positioning (input wrapper instead of toggle)
+   * Get the reference element for Popper positioning (calendar button/icon)
    */
   private _getPopperReferenceElement(): HTMLElement {
-    // Use input wrapper for positioning (like ktselect uses the select element)
-    const inputWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]') as HTMLElement;
-    return inputWrapper || this._toggleElement; // Fallback to toggle if input wrapper not found
+    // Use calendar button (toggle element) for positioning - dropdown sticks under the icon
+    return this._toggleElement;
   }
 
   /**
