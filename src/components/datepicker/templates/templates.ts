@@ -97,6 +97,14 @@ export const defaultTemplates: KTDatepickerTemplateStrings = {
    * Live region for accessibility announcements
    */
   liveRegion: `<div data-kt-datepicker-live aria-live="polite" {{class}}></div>`,
+  /**
+   * Container for range input start date segment
+   */
+  rangeStartContainer: `<div data-kt-datepicker-segmented-start {{class}}></div>`,
+  /**
+   * Container for range input end date segment
+   */
+  rangeEndContainer: `<div data-kt-datepicker-segmented-end {{class}}></div>`,
 };
 
 /**

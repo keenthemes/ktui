@@ -371,13 +371,13 @@ describe('Calendar Rendering Optimizations', () => {
 				selectedRange
 			);
 
-			// Start and end dates should be highlighted
-			const selectedCells = calendar.querySelectorAll('[data-kt-selected="true"]');
-			expect(selectedCells.length).toBeGreaterThanOrEqual(2);
+		// Start and end dates should be highlighted
+		const selectedCells = calendar.querySelectorAll('[data-kt-selected="true"]');
+		expect(selectedCells.length).toBeGreaterThanOrEqual(2);
 
-			// Range dates should have in-range attribute
-			const inRangeCells = calendar.querySelectorAll('[data-in-range="true"]');
-			expect(inRangeCells.length).toBeGreaterThan(0);
+		// Range dates should have data-kt-hover-range attribute (consolidated from data-in-range)
+		const inRangeCells = calendar.querySelectorAll('[data-kt-hover-range]');
+		expect(inRangeCells.length).toBeGreaterThan(0);
 		});
 
 		it('should optimize tabbable index calculation using date keys', () => {
@@ -519,22 +519,23 @@ describe('Calendar Rendering Optimizations', () => {
 				selectedRange
 			);
 
-			// Range dates should be marked without creating Date objects in loop
-			const inRangeCells = calendar.querySelectorAll('[data-in-range="true"]');
-			expect(inRangeCells.length).toBeGreaterThan(0);
+		// Range dates should be marked without creating Date objects in loop
+		// Note: Uses data-kt-hover-range (consolidated from data-in-range)
+		const inRangeCells = calendar.querySelectorAll('[data-kt-hover-range]');
+		expect(inRangeCells.length).toBeGreaterThan(0);
 
-			// Verify range calculation is correct using date keys
-			const startKey = getDateKey(selectedRange.start);
-			const endKey = getDateKey(selectedRange.end);
-			inRangeCells.forEach(cell => {
-				const dateAttr = cell.getAttribute('data-date');
-				if (dateAttr) {
-					const [year, month, day] = dateAttr.split('-').map(Number);
-					const cellKey = getDateKey(new Date(year, month - 1, day));
-					expect(cellKey).toBeGreaterThanOrEqual(startKey);
-					expect(cellKey).toBeLessThanOrEqual(endKey);
-				}
-			});
+		// Verify range calculation is correct using date keys
+		const startKey = getDateKey(selectedRange.start);
+		const endKey = getDateKey(selectedRange.end);
+		inRangeCells.forEach(cell => {
+			const dateAttr = cell.getAttribute('data-date');
+			if (dateAttr) {
+				const [year, month, day] = dateAttr.split('-').map(Number);
+				const cellKey = getDateKey(new Date(year, month - 1, day));
+				expect(cellKey).toBeGreaterThanOrEqual(startKey);
+				expect(cellKey).toBeLessThanOrEqual(endKey);
+			}
+		});
 		});
 	});
 

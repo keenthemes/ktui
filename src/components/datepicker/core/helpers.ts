@@ -2,7 +2,7 @@
  * datepicker-helpers.ts - Modular helpers for KTDatepicker input rendering and state
  */
 import { KTDatepickerConfig, KTDatepickerState } from '../config/types';
-import { renderTemplateToDOM, createTemplateRenderer, getTemplateStrings } from '../templates/templates';
+import { renderTemplateToDOM, createTemplateRenderer, getTemplateStrings, renderTemplateString } from '../templates/templates';
 import { SegmentedInput } from '../ui/input/segmented-input';
 import { getTimeSegments } from '../utils/time-utils';
 import { getSegmentOrderFromFormat, normalizeDateToLocalMidnight } from '../utils/date-utils';
@@ -107,21 +107,35 @@ export function renderRangeSegmentedInputUI(
   });
   endContainer.setAttribute('aria-label', 'End date');
   endContainer.setAttribute('data-kt-datepicker-end-container', '');
-  // Render template with placeholders
+  // Render template with placeholders using template system
   const separator = '–';
+
+  // Render start and end containers using templates
+  const startContainerHtml = templateRenderer.renderTemplateString({
+    templateKey: 'rangeStartContainer',
+    data: {},
+    configClasses: config?.classes
+  });
+
+  const endContainerHtml = templateRenderer.renderTemplateString({
+    templateKey: 'rangeEndContainer',
+    data: {},
+    configClasses: config?.classes
+  });
+
   let rangeHtml: string;
   if (typeof rangeTpl === 'function') {
     rangeHtml = rangeTpl({
-      start: '<div data-kt-datepicker-segmented-start></div>',
+      start: startContainerHtml,
       separator,
-      end: '<div data-kt-datepicker-segmented-end></div>',
+      end: endContainerHtml,
       class: ''
     });
   } else {
     rangeHtml = rangeTpl
-      .replace(/{{start}}/g, '<div data-kt-datepicker-segmented-start></div>')
+      .replace(/{{start}}/g, startContainerHtml)
       .replace(/{{separator}}/g, separator)
-      .replace(/{{end}}/g, '<div data-kt-datepicker-segmented-end></div>')
+      .replace(/{{end}}/g, endContainerHtml)
       .replace(/{{class}}/g, ''); // Replace class placeholder with empty string if no class provided
   }
   const rangeFrag = renderTemplateToDOM(rangeHtml);
