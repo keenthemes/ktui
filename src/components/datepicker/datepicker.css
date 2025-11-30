@@ -280,6 +280,21 @@
 		@apply bg-primary/90 text-primary-foreground;
 	}
 
+	/* Range hover preview - dates in hover range */
+	[data-kt-datepicker-day][data-kt-hover-range] button {
+		@apply bg-accent/40 text-accent-foreground;
+	}
+
+	/* Range hover preview + Selected (start date) */
+	[data-kt-datepicker-day][data-kt-selected="true"][data-kt-hover-range] button {
+		@apply bg-primary/80 text-primary-foreground;
+	}
+
+	/* Range hover preview + Hover combination */
+	[data-kt-datepicker-day][data-kt-hover-range][data-kt-hover] button {
+		@apply bg-accent/60 text-accent-foreground;
+	}
+
 	[data-kt-datepicker-day][data-outside="true"] button {
 		@apply text-muted-foreground opacity-50 cursor-default;
 		@apply hover:opacity-70 hover:bg-accent/40;

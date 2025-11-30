@@ -377,6 +377,25 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       return;
     }
 
+    // Update range state on calendar element for hover handlers to access dynamically
+    if (this._config.range && state.selectedRange) {
+      const calendar = calendarElement;
+      if (state.selectedRange.start) {
+        calendar.setAttribute('data-kt-range-start', state.selectedRange.start.toISOString().split('T')[0]);
+      } else {
+        calendar.removeAttribute('data-kt-range-start');
+      }
+      if (state.selectedRange.end) {
+        calendar.setAttribute('data-kt-range-end', state.selectedRange.end.toISOString().split('T')[0]);
+      } else {
+        calendar.removeAttribute('data-kt-range-end');
+      }
+    } else if (this._config.range) {
+      // No range selected, clear attributes
+      calendarElement.removeAttribute('data-kt-range-start');
+      calendarElement.removeAttribute('data-kt-range-end');
+    }
+
     // Update date selection highlighting
     this._updateDateSelection(state, calendarElement);
 

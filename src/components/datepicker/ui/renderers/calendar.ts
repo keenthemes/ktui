@@ -136,7 +136,120 @@ export function renderCalendar(
         .replace(/{{saturday}}/g, dayNames[6]);
   const calendarFrag = renderTemplateToDOM(tableHtml);
   const calendar = calendarFrag.firstElementChild as HTMLElement;
-  // Add day cell click and hover listeners (attach to button for accessibility)
+
+  // Store selectedRange state on the calendar element so hover handlers can access current state
+  // This allows the state to be updated without re-rendering the entire calendar
+  // The _updateCalendar() method will update these attributes when the state changes
+  if (selectedRange) {
+    if (selectedRange.start) {
+      calendar.setAttribute('data-kt-range-start', selectedRange.start.toISOString().split('T')[0]);
+    }
+    if (selectedRange.end) {
+      calendar.setAttribute('data-kt-range-end', selectedRange.end.toISOString().split('T')[0]);
+    }
+  }
+
+  // Helper function to get current selectedRange from calendar element data attributes
+  const getCurrentSelectedRange = (): { start: Date | null; end: Date | null } | null => {
+    const startAttr = calendar.getAttribute('data-kt-range-start');
+    const endAttr = calendar.getAttribute('data-kt-range-end');
+
+    if (!startAttr && !endAttr) {
+      return null;
+    }
+
+    return {
+      start: startAttr ? new Date(startAttr + 'T00:00:00') : null,
+      end: endAttr ? new Date(endAttr + 'T00:00:00') : null
+    };
+  };
+
+  // Helper function to check if we're in range preview mode (checked dynamically)
+  const isRangePreviewMode = (): boolean => {
+    const currentRange = getCurrentSelectedRange();
+    return !!(currentRange && currentRange.start && !currentRange.end);
+  };
+
+  // Helper function to clear all hover range attributes
+  const clearHoverRange = () => {
+    calendar.querySelectorAll('[data-kt-hover-range]').forEach((cell) => {
+      (cell as HTMLElement).removeAttribute('data-kt-hover-range');
+    });
+  };
+
+  // Helper function to get all dates in a range (inclusive)
+  const getDatesInRange = (startDate: Date, endDate: Date): Date[] => {
+    const dates: Date[] = [];
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Normalize dates to midnight for accurate comparison
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+
+    // Determine the actual start and end (handles reverse ranges)
+    const actualStart = start <= end ? start : end;
+    const actualEnd = start <= end ? end : start;
+
+    // Generate all dates in the range
+    const current = new Date(actualStart);
+    while (current <= actualEnd) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+
+    return dates;
+  };
+
+  // Helper function to format date to ISO string matching the format used in calendar cells (YYYY-MM-DD)
+  // This matches the format used in the calendar: day.toISOString().split('T')[0]
+  const formatDateToISO = (date: Date): string => {
+    const d = new Date(date);
+    // Use the same method as calendar cell rendering to ensure matching
+    return d.toISOString().split('T')[0];
+  };
+
+  // Helper function to find a date cell by date
+  const findDateCell = (targetDate: Date): HTMLElement | null => {
+    const targetISO = formatDateToISO(targetDate);
+    const cell = calendar.querySelector(`[data-kt-datepicker-day][data-date="${targetISO}"]`) as HTMLElement;
+    return cell;
+  };
+
+  // Helper function to update hover range preview
+  const updateHoverRange = (hoveredDate: Date) => {
+    if (!isRangePreviewMode()) {
+      return;
+    }
+
+    // Get current range state from calendar element (reads dynamically)
+    const currentRange = getCurrentSelectedRange();
+    if (!currentRange?.start) {
+      return;
+    }
+
+    // Normalize hovered date
+    const normalizedHovered = new Date(hoveredDate);
+    normalizedHovered.setHours(0, 0, 0, 0);
+
+    // Normalize start date
+    const normalizedStart = new Date(currentRange.start);
+    normalizedStart.setHours(0, 0, 0, 0);
+
+    // Clear previous hover range
+    clearHoverRange();
+
+    // Calculate range between start date and hovered date
+    const rangeDates = getDatesInRange(normalizedStart, normalizedHovered);
+
+    // Add data-kt-hover-range to all dates in the range
+    rangeDates.forEach((date) => {
+      const cell = findDateCell(date);
+      if (cell) {
+        cell.setAttribute('data-kt-hover-range', '');
+      }
+    });
+  };  // Add day cell click and hover listeners (attach to button for accessibility)
   calendar.querySelectorAll('td[data-kt-datepicker-day]').forEach((td, i) => {
     const button = td.querySelector('button[data-day]');
     if (button) {
@@ -148,16 +261,61 @@ export function renderCalendar(
         }
       });
 
-      // Add hover event listeners for data-kt-hover attribute
+      // Add hover event listeners
       const cell = td as HTMLElement;
+      const dayObj = days[i];
+
       button.addEventListener('mouseenter', () => {
+        // Always set single date hover
         cell.setAttribute('data-kt-hover', '');
+
+        // If in range preview mode, update hover range
+        if (isRangePreviewMode()) {
+          updateHoverRange(dayObj);
+        }
       });
+
       button.addEventListener('mouseleave', () => {
+        // Always remove single date hover
         cell.removeAttribute('data-kt-hover');
+
+        // Note: Hover range clearing is handled at calendar level to prevent flickering
       });
     }
   });
+
+  // Track hover state to prevent flickering when moving between dates
+  let hoverRangeClearTimeout: number | null = null;
+
+  // Handle calendar-level mouseleave to clear hover range when mouse leaves calendar entirely
+  calendar.addEventListener('mouseleave', (e) => {
+    if (!isRangePreviewMode()) return;
+
+    // Check if we're moving to another button within the calendar
+    const relatedTarget = (e as MouseEvent).relatedTarget as HTMLElement;
+    if (relatedTarget && calendar.contains(relatedTarget)) {
+      // Mouse is moving to another element within the calendar, don't clear
+      return;
+    }
+
+    // Clear hover range with a small delay to allow smooth transitions
+    if (hoverRangeClearTimeout) {
+      clearTimeout(hoverRangeClearTimeout);
+    }
+    hoverRangeClearTimeout = window.setTimeout(() => {
+      clearHoverRange();
+      hoverRangeClearTimeout = null;
+    }, 50);
+  });
+
+  // Clear timeout if mouse re-enters calendar
+  calendar.addEventListener('mouseenter', () => {
+    if (hoverRangeClearTimeout) {
+      clearTimeout(hoverRangeClearTimeout);
+      hoverRangeClearTimeout = null;
+    }
+  });
+
   return calendar;
 }
 
