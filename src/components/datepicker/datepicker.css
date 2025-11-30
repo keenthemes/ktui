@@ -99,24 +99,20 @@
 		@apply bg-accent text-accent-foreground ring-2 ring-ring/50;
 	}
 
-	/* Add left spacing for time segments - only on the first time segment (hour) */
-	[data-segment="hour"] {
-		@apply ml-2;
-	}
-
-	/* Add left spacing for AM/PM segment */
-	[data-segment="ampm"] {
-		@apply ml-2;
-	}
-
-	/* Ensure separator before hour has proper spacing */
+	/* Add left spacing for time input group - hour segment */
+	/* Target hour segment that comes after a separator (space between date and time) */
 	[data-segment-separator] + [data-segment="hour"] {
-		@apply ml-2;
+		@apply ml-3;
 	}
 
-	/* Ensure separator before ampm has proper spacing */
+	/* Remove left spacing if hour is the very first segment (time-only input) */
+	[data-kt-datepicker-segmented-input] > [data-segment="hour"]:first-child {
+		@apply ml-0;
+	}
+
+	/* Add left spacing for AM/PM segment when it follows time segments (space separator) */
 	[data-segment-separator] + [data-segment="ampm"] {
-		@apply ml-2;
+		@apply ml-3;
 	}
 
 	/* Segment Separator */
@@ -129,6 +125,8 @@
 		word-spacing: normal;
 		/* Ensure space separators are visible */
 		white-space: pre;
+		/* Ensure empty separators (whitespace) have minimum width to contribute to spacing */
+		min-width: 0.25rem;
 	}
 
 	/* Calendar Button */

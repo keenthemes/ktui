@@ -370,7 +370,8 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
           .replace(/{{ariaValueMin}}/g, segmentData.ariaValueMin)
           .replace(/{{ariaValueMax}}/g, segmentData.ariaValueMax)
           .replace(/{{tabindex}}/g, segmentData.tabindex)
-          .replace(/{{contenteditable}}/g, segmentData.contenteditable);
+          .replace(/{{contenteditable}}/g, segmentData.contenteditable)
+          .replace(/{{class}}/g, ''); // Replace class placeholder with empty string
       } else {
         segmentHtml = '';
       }
@@ -386,7 +387,9 @@ export function SegmentedInput(container: HTMLElement, options: SegmentedInputOp
         if (typeof separatorTpl === 'function') {
           sepHtml = separatorTpl({ separator });
         } else if (typeof separatorTpl === 'string') {
-          sepHtml = separatorTpl.replace(/{{separator}}/g, separator);
+          sepHtml = separatorTpl
+            .replace(/{{separator}}/g, separator)
+            .replace(/{{class}}/g, ''); // Replace class placeholder with empty string
         } else {
           sepHtml = '';
         }
