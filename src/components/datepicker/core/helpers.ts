@@ -5,7 +5,7 @@ import { KTDatepickerConfig, KTDatepickerState } from '../config/types';
 import { renderTemplateToDOM, createTemplateRenderer, getTemplateStrings } from '../templates/templates';
 import { SegmentedInput } from '../ui/input/segmented-input';
 import { getTimeSegments } from '../utils/time-utils';
-import { getSegmentOrderFromFormat } from '../utils/date-utils';
+import { getSegmentOrderFromFormat, normalizeDateToLocalMidnight } from '../utils/date-utils';
 
 /**
  * Get segments array based on configuration (date + optional time)
@@ -196,15 +196,19 @@ export function updateRangeSelection(
   selectedRange: { start: Date | null; end: Date | null } | null,
   date: Date
 ): { start: Date | null; end: Date | null } {
+  // Normalize dates to local midnight for date-only comparisons
+  const normalizedDate = normalizeDateToLocalMidnight(date);
+
   if (!selectedRange || (!selectedRange.start && !selectedRange.end)) {
-    return { start: date, end: null };
+    return { start: normalizedDate, end: null };
   } else if (selectedRange.start && !selectedRange.end) {
-    if (date >= selectedRange.start) {
-      return { start: selectedRange.start, end: date };
+    const normalizedStart = normalizeDateToLocalMidnight(selectedRange.start);
+    if (normalizedDate >= normalizedStart) {
+      return { start: selectedRange.start, end: normalizedDate };
     } else {
-      return { start: date, end: null };
+      return { start: normalizedDate, end: null };
     }
   } else {
-    return { start: date, end: null };
+    return { start: normalizedDate, end: null };
   }
 }

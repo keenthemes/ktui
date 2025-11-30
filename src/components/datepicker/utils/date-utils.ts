@@ -98,3 +98,53 @@ export function getSegmentOrderFromFormat(format: string): Array<'day' | 'month'
 
   return uniqueSegments;
 }
+
+/**
+ * Formats a date to a local timezone string in YYYY-MM-DD format.
+ * Uses local timezone components to prevent date shifts from UTC conversion.
+ * @param date Date object to format
+ * @returns Date string in YYYY-MM-DD format using local timezone
+ */
+export function formatDateToLocalString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Normalizes a date to local midnight (00:00:00) in the local timezone.
+ * Useful for date-only comparisons where time components should be ignored.
+ * @param date Date object to normalize
+ * @returns New Date object set to local midnight
+ */
+export function normalizeDateToLocalMidnight(date: Date): Date {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+}
+
+/**
+ * Checks if two dates represent the same calendar day in local timezone.
+ * Compares year, month, and day components, ignoring time.
+ * @param a First date
+ * @param b Second date
+ * @returns True if both dates represent the same day in local timezone
+ */
+export function isSameLocalDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}
+
+/**
+ * Parses a date string (YYYY-MM-DD format) into a Date object at local midnight.
+ * Creates a local timezone date to avoid timezone-related date shifts.
+ * @param dateStr Date string in YYYY-MM-DD format
+ * @returns Date object representing the date at local midnight
+ */
+export function parseLocalDate(dateStr: string): Date {
+  // Parse YYYY-MM-DD string and create local date at midnight
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}

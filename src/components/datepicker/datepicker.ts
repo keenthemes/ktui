@@ -29,7 +29,7 @@ import { KTDatepickerDropdown } from './ui/input/dropdown';
 import { KTDatepickerUnifiedStateManager, StateObserver } from './core/unified-state-manager';
 import { DropdownState } from './config/types';
 import { SegmentedInput, SegmentedInputOptions } from './ui/input/segmented-input';
-import { parseDateFromFormat } from './utils/date-utils';
+import { parseDateFromFormat, formatDateToLocalString } from './utils/date-utils';
 import { dateToTimeState, applyTimeToDate, validateTime } from './utils/time-utils';
 import { TimeState } from './config/types';
 import {
@@ -381,12 +381,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     if (this._config.range && state.selectedRange) {
       const calendar = calendarElement;
       if (state.selectedRange.start) {
-        calendar.setAttribute('data-kt-range-start', state.selectedRange.start.toISOString().split('T')[0]);
+        calendar.setAttribute('data-kt-range-start', formatDateToLocalString(state.selectedRange.start));
       } else {
         calendar.removeAttribute('data-kt-range-start');
       }
       if (state.selectedRange.end) {
-        calendar.setAttribute('data-kt-range-end', state.selectedRange.end.toISOString().split('T')[0]);
+        calendar.setAttribute('data-kt-range-end', formatDateToLocalString(state.selectedRange.end));
       } else {
         calendar.removeAttribute('data-kt-range-end');
       }
@@ -455,12 +455,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Find day cell for a specific date
    */
   private _findDayCell(date: Date, calendarElement: HTMLElement): HTMLElement | null {
-    const dateISO = date.toISOString().split('T')[0]; // Use ISO date string for accurate matching
+    const dateLocal = formatDateToLocalString(date); // Use local timezone date string for accurate matching
     const cells = calendarElement.querySelectorAll('td[data-kt-datepicker-day]');
 
     for (const cell of Array.from(cells)) {
       const cellDate = cell.getAttribute('data-date');
-      if (cellDate === dateISO) {
+      if (cellDate === dateLocal) {
         return cell as HTMLElement;
       }
     }

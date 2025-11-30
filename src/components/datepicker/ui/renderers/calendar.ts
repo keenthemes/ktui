@@ -5,6 +5,7 @@
 
 import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../../templates/templates';
 import { defaultTemplates } from '../../templates/templates';
+import { formatDateToLocalString, parseLocalDate, isSameLocalDay } from '../../utils/date-utils';
 
 /**
  * Renders the datepicker calendar and returns an HTMLElement.
@@ -86,16 +87,23 @@ export function renderCalendar(
       const isSelected = checkIsSelected(day);
       let inRange = false;
       if (selectedRange && selectedRange.start && selectedRange.end) {
-        inRange = day >= selectedRange.start && day <= selectedRange.end;
+        // Normalize dates to midnight for accurate date-only comparison
+        const normalizedDay = new Date(day);
+        normalizedDay.setHours(0, 0, 0, 0);
+        const normalizedStart = new Date(selectedRange.start);
+        normalizedStart.setHours(0, 0, 0, 0);
+        const normalizedEnd = new Date(selectedRange.end);
+        normalizedEnd.setHours(0, 0, 0, 0);
+        inRange = normalizedDay >= normalizedStart && normalizedDay <= normalizedEnd;
       }
       const dayIndex = i + j;
-      const dateISO = day.toISOString().split('T')[0]; // Store full date as ISO string for accurate matching
+      const dateLocal = formatDateToLocalString(day); // Store date as local timezone string for accurate matching
       const attributes = [
         isSelected ? 'data-kt-selected="true" aria-selected="true" class="active"' : '',
         isToday ? 'data-today="true"' : '',
         isCurrentMonth ? '' : 'data-outside="true"',
         inRange ? 'data-in-range="true"' : '',
-        `data-date="${dateISO}"`,
+        `data-date="${dateLocal}"`,
         `tabindex=\"${dayIndex === tabbableIndex ? '0' : '-1'}\"`
       ].filter(Boolean).join(' ');
       const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, inRange, attributes };
@@ -142,12 +150,18 @@ export function renderCalendar(
   // The _updateCalendar() method will update these attributes when the state changes
   if (selectedRange) {
     if (selectedRange.start) {
-      calendar.setAttribute('data-kt-range-start', selectedRange.start.toISOString().split('T')[0]);
+      calendar.setAttribute('data-kt-range-start', formatDateToLocalString(selectedRange.start));
     }
     if (selectedRange.end) {
-      calendar.setAttribute('data-kt-range-end', selectedRange.end.toISOString().split('T')[0]);
+      calendar.setAttribute('data-kt-range-end', formatDateToLocalString(selectedRange.end));
     }
   }
+
+  // Helper function to parse ISO date string (YYYY-MM-DD) as local date to avoid timezone issues
+  const parseLocalDateFromAttr = (dateStr: string): Date => {
+    // Parse YYYY-MM-DD string and create local date at midnight
+    return parseLocalDate(dateStr);
+  };
 
   // Helper function to get current selectedRange from calendar element data attributes
   const getCurrentSelectedRange = (): { start: Date | null; end: Date | null } | null => {
@@ -159,8 +173,8 @@ export function renderCalendar(
     }
 
     return {
-      start: startAttr ? new Date(startAttr + 'T00:00:00') : null,
-      end: endAttr ? new Date(endAttr + 'T00:00:00') : null
+      start: startAttr ? parseLocalDateFromAttr(startAttr) : null,
+      end: endAttr ? parseLocalDateFromAttr(endAttr) : null
     };
   };
 
@@ -201,18 +215,10 @@ export function renderCalendar(
     return dates;
   };
 
-  // Helper function to format date to ISO string matching the format used in calendar cells (YYYY-MM-DD)
-  // This matches the format used in the calendar: day.toISOString().split('T')[0]
-  const formatDateToISO = (date: Date): string => {
-    const d = new Date(date);
-    // Use the same method as calendar cell rendering to ensure matching
-    return d.toISOString().split('T')[0];
-  };
-
   // Helper function to find a date cell by date
   const findDateCell = (targetDate: Date): HTMLElement | null => {
-    const targetISO = formatDateToISO(targetDate);
-    const cell = calendar.querySelector(`[data-kt-datepicker-day][data-date="${targetISO}"]`) as HTMLElement;
+    const targetLocal = formatDateToLocalString(targetDate);
+    const cell = calendar.querySelector(`[data-kt-datepicker-day][data-date="${targetLocal}"]`) as HTMLElement;
     return cell;
   };
 
@@ -320,7 +326,6 @@ export function renderCalendar(
 }
 
 function isSameDay(a: Date, b: Date): boolean {
-  return a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
+  // Use the utility function for consistent local timezone comparison
+  return isSameLocalDay(a, b);
 }
