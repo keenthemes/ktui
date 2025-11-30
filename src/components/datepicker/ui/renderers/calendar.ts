@@ -130,7 +130,8 @@ export function renderCalendar(
         isSelected ? 'data-kt-selected="true" aria-selected="true" class="active"' : '',
         isToday ? 'data-today="true"' : '',
         isCurrentMonth ? '' : 'data-outside="true"',
-        inRange ? 'data-in-range="true"' : '',
+        // Use data-kt-hover-range for completed ranges too (consolidated with hover preview)
+        inRange ? 'data-kt-hover-range="true"' : '',
         `data-date="${dateLocal}"`,
         `data-day-index="${dayIndex}"`, // Store day index for event delegation
         `tabindex=\"${dayIndex === tabbableIndex ? '0' : '-1'}\"`
@@ -289,10 +290,12 @@ export function renderCalendar(
     // Calculate range between start date and hovered date
     const rangeDates = getDatesInRange(normalizedStart, normalizedHovered);
 
-    // Add data-kt-hover-range to all dates in the range
+    // Add data-kt-hover-range to all dates in the range that are visible in the current calendar
+    // Only apply to cells that exist in the current calendar view to prevent issues when range spans months
     rangeDates.forEach((date) => {
       const cell = findDateCell(date);
-      if (cell) {
+      if (cell && calendar.contains(cell)) {
+        // Only set attribute if cell is actually in the current calendar view
         cell.setAttribute('data-kt-hover-range', '');
       }
     });
@@ -319,6 +322,10 @@ export function renderCalendar(
     }
   });
 
+  // Track currently hovered cell to prevent race conditions during fast mouse movement
+  let currentHoveredCell: HTMLElement | null = null;
+  let hoverTimeout: number | null = null;
+
   // Delegated hover handlers for single date hover and range preview
   // Use mouseover/mouseout on calendar with relatedTarget check for proper delegation
   calendar.addEventListener('mouseover', (e) => {
@@ -333,7 +340,19 @@ export function renderCalendar(
     const dateAttr = cell.getAttribute('data-date');
     if (!dateAttr) return;
 
-    // Always set single date hover
+    // Clear any pending hover removal timeout
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = null;
+    }
+
+    // Clear previous hovered cell if different
+    if (currentHoveredCell && currentHoveredCell !== cell) {
+      currentHoveredCell.removeAttribute('data-kt-hover');
+    }
+
+    // Set new hovered cell
+    currentHoveredCell = cell;
     cell.setAttribute('data-kt-hover', '');
 
     // If in range preview mode, update hover range
@@ -354,14 +373,31 @@ export function renderCalendar(
     // If moving to another element within the same calendar, don't remove hover
     if (relatedTarget && calendar.contains(relatedTarget)) {
       const relatedButton = relatedTarget.closest('button[data-day]');
-      if (relatedButton) return; // Moving to another button, keep hover state
+      if (relatedButton) {
+        // Moving to another button - mouseover will handle the transition
+        return;
+      }
     }
 
     const cell = button.closest('td[data-kt-datepicker-day]') as HTMLElement;
     if (!cell) return;
 
-    // Always remove single date hover when leaving the button
-    cell.removeAttribute('data-kt-hover');
+    // Clear any pending hover removal timeout
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = null;
+    }
+
+    // Use a small delay to prevent flickering when moving fast between cells
+    // This allows mouseover on the next cell to fire first
+    hoverTimeout = window.setTimeout(() => {
+      // Only remove if this is still the current hovered cell
+      if (currentHoveredCell === cell) {
+        cell.removeAttribute('data-kt-hover');
+        currentHoveredCell = null;
+      }
+      hoverTimeout = null;
+    }, 50);
 
     // Note: Hover range clearing is handled at calendar level to prevent flickering
   });

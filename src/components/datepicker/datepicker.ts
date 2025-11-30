@@ -414,11 +414,21 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       cell.removeAttribute('aria-selected');
     });
 
+    // Clear previous range highlighting (only if range is complete, not during hover preview)
+    // Check if we're in hover preview mode by checking if range has start but no end
+    if (state.selectedRange?.start && state.selectedRange?.end) {
+      // Range is complete, clear all hover-range attributes to re-apply for completed range
+      const hoverRangeCells = calendarElement.querySelectorAll('[data-kt-hover-range]');
+      hoverRangeCells.forEach(cell => {
+        (cell as HTMLElement).removeAttribute('data-kt-hover-range');
+      });
+    }
+
     // Highlight selected date(s)
     if (state.selectedDate) {
       this._highlightDate(state.selectedDate, calendarElement);
     }
-    // Highlight range start/end dates
+    // Highlight range start/end dates and dates in between
     if (state.selectedRange) {
       this._highlightDateRange(state.selectedRange, calendarElement);
     }
@@ -441,23 +451,58 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
   /**
    * Highlight a date range
+   * Uses data-kt-hover-range for both hover preview and completed ranges (consolidated)
    */
   private _highlightDateRange(range: { start: Date | null; end: Date | null }, calendarElement: HTMLElement): void {
-    if (range.start) {
-      this._highlightDate(range.start, calendarElement);
+    if (!range.start || !range.end) {
+      // If only start or end is set, just highlight that date (hover preview handles the rest)
+      if (range.start) {
+        this._highlightDate(range.start, calendarElement);
+      }
+      if (range.end) {
+        this._highlightDate(range.end, calendarElement);
+      }
+      return;
     }
-    if (range.end) {
-      this._highlightDate(range.end, calendarElement);
+
+    // Normalize dates to local midnight for accurate comparison
+    const start = new Date(range.start);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(range.end);
+    end.setHours(0, 0, 0, 0);
+
+    // Determine actual start and end (handle backward selection)
+    const actualStart = start <= end ? start : end;
+    const actualEnd = start <= end ? end : start;
+
+    // Highlight start and end dates
+    this._highlightDate(actualStart, calendarElement);
+    this._highlightDate(actualEnd, calendarElement);
+
+    // Highlight all dates in between using data-kt-hover-range (same as hover preview)
+    const current = new Date(actualStart);
+    current.setDate(current.getDate() + 1); // Start from day after start
+
+    while (current < actualEnd) {
+      const dateLocal = formatDateToLocalString(current);
+      const cell = calendarElement.querySelector(`td[data-kt-datepicker-day][data-date="${dateLocal}"]`) as HTMLElement;
+      if (cell) {
+        // Use data-kt-hover-range for completed ranges (consolidated with hover preview)
+        cell.setAttribute('data-kt-hover-range', 'true');
+      }
+      current.setDate(current.getDate() + 1);
     }
   }
 
   /**
    * Find day cell for a specific date
+   * Uses data-date attribute (YYYY-MM-DD format) for accurate date matching across months
    */
   private _findDayCell(date: Date, calendarElement: HTMLElement): HTMLElement | null {
-    const dateLocal = formatDateToLocalString(date); // Use local timezone date string for accurate matching
+    const dateLocal = formatDateToLocalString(date); // Use local timezone date string for accurate matching (YYYY-MM-DD)
     const cells = calendarElement.querySelectorAll('td[data-kt-datepicker-day]');
 
+    // Primary method: match by data-date attribute (handles year, month, day correctly)
     for (const cell of Array.from(cells)) {
       const cellDate = cell.getAttribute('data-date');
       if (cellDate === dateLocal) {
@@ -465,18 +510,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       }
     }
 
-    // Fallback: try matching by day number (less accurate but works for same month)
-    const day = date.getDate();
-    for (const cell of Array.from(cells)) {
-      const button = cell.querySelector('button');
-      if (button && button.getAttribute('data-day') === day.toString()) {
-        // Only match if it's in the current month (not outside)
-        if (!cell.hasAttribute('data-outside')) {
-          return cell as HTMLElement;
-        }
-      }
-    }
-
+    // No fallback - if date not found by data-date, it's not in the current calendar view
+    // This prevents incorrect matches (e.g., matching Oct 20 when looking for Nov 20)
     return null;
   }
 

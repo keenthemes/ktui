@@ -204,9 +204,12 @@ export function updateRangeSelection(
   } else if (selectedRange.start && !selectedRange.end) {
     const normalizedStart = normalizeDateToLocalMidnight(selectedRange.start);
     if (normalizedDate >= normalizedStart) {
+      // Forward selection: new date is after start, becomes end
       return { start: selectedRange.start, end: normalizedDate };
     } else {
-      return { start: normalizedDate, end: null };
+      // Backward selection: new date is before start, swap so start is always earlier
+      // The clicked date becomes the actual start, original start becomes end
+      return { start: normalizedDate, end: selectedRange.start };
     }
   } else {
     return { start: normalizedDate, end: null };
