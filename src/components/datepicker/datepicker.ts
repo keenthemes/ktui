@@ -25,6 +25,7 @@ import { KTDatepickerDropdown } from './ui/input/dropdown';
 import { KTDatepickerUnifiedStateManager, StateObserver } from './core/unified-state-manager';
 import { DropdownState } from './config/types';
 import { formatDateToLocalString } from './utils/date-utils';
+import { formatDate, isSameDay, normalizeDateToMidnight } from './utils/date-formatters';
 import { dateToTimeState, applyTimeToDate, validateTime } from './utils/time-utils';
 import { TimeState } from './config/types';
 import {
@@ -658,22 +659,22 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         // Check if format already includes time tokens
         const hasTimeTokens = /[Hhms]/.test(this._config.format);
         if (hasTimeTokens) {
-          return this._formatDate(date, this._config.format);
+          return formatDate(date, this._config.format);
         } else {
           // Add time format based on granularity and format
           const timeFormat = this._getTimeFormat();
           const dateFormat = this._config.format;
-          return this._formatDate(date, `${dateFormat} ${timeFormat}`);
+          return formatDate(date, `${dateFormat} ${timeFormat}`);
         }
       } else {
         // Default format with time
         const timeFormat = this._getTimeFormat();
-        return `${date.toLocaleDateString(this._config.locale || 'en-US')} ${this._formatDate(date, timeFormat)}`;
+        return `${date.toLocaleDateString(this._config.locale || 'en-US')} ${formatDate(date, timeFormat)}`;
       }
     } else {
       // Time not enabled, use original logic
       if (this._config.format && typeof this._config.format === 'string') {
-        return this._formatDate(date, this._config.format);
+        return formatDate(date, this._config.format);
       } else if (this._config.locale) {
         return date.toLocaleDateString(this._config.locale);
       } else {
@@ -1622,11 +1623,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     return days;
   }
 
-  private _isSameDay(a: Date, b: Date): boolean {
-    return a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate();
-  }
 
       private _changeMonth(offset: number) {
     const currentState = this._unifiedStateManager.getState();
@@ -1898,42 +1894,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._selectSingleDate(date);
   }
 
-  private _formatDate(date: Date, format: string): string {
-    /**
-     * Formats a Date object according to the provided format string.
-     * Supported tokens:
-     *   yyyy - 4-digit year
-     *   yy   - 2-digit year
-     *   MM   - 2-digit month (01-12)
-     *   M    - 1/2-digit month (1-12)
-     *   dd   - 2-digit day (01-31)
-     *   d    - 1/2-digit day (1-31)
-     *   HH   - 2-digit hour (00-23)
-     *   H    - 1/2-digit hour (0-23)
-     *   mm   - 2-digit minute (00-59)
-     *   m    - 1/2-digit minute (0-59)
-     *   ss   - 2-digit second (00-59)
-     *   s    - 1/2-digit second (0-59)
-     * @param date Date to format
-     * @param format Format string
-     * @returns Formatted date string
-     */
-    if (!(date instanceof Date) || isNaN(date.getTime())) return '';
-    return format
-      .replace(/yyyy/g, date.getFullYear().toString())
-      .replace(/yy/g, date.getFullYear().toString().slice(-2))
-      .replace(/MM/g, String(date.getMonth() + 1).padStart(2, '0'))
-      .replace(/M(?![a-zA-Z])/g, String(date.getMonth() + 1))
-      .replace(/dd/g, String(date.getDate()).padStart(2, '0'))
-      .replace(/d(?![a-zA-Z])/g, String(date.getDate()))
-      .replace(/HH/g, String(date.getHours()).padStart(2, '0'))
-      .replace(/H(?![a-zA-Z])/g, String(date.getHours()))
-      .replace(/mm/g, String(date.getMinutes()).padStart(2, '0'))
-      .replace(/m(?![a-zA-Z])/g, String(date.getMinutes()))
-      .replace(/ss/g, String(date.getSeconds()).padStart(2, '0'))
-      .replace(/s(?![a-zA-Z])/g, String(date.getSeconds()))
-      .replace(/a/g, date.getHours() >= 12 ? 'PM' : 'AM');
-  }
 
   /**
    * Get the selected date
@@ -2185,11 +2145,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   /**
    * Normalize a date to midnight for date-only comparison (removes time component)
    */
-  private _normalizeDateToMidnight(date: Date): Date {
-    const normalized = new Date(date);
-    normalized.setHours(0, 0, 0, 0);
-    return normalized;
-  }
 
   /**
    * Disable day buttons outside min/max date range
@@ -2197,8 +2152,8 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _enforceMinMaxDates() {
     if (this._config.minDate || this._config.maxDate) {
       // Normalize min/max dates to midnight for date-only comparison
-      const minDate = this._config.minDate ? this._normalizeDateToMidnight(new Date(this._config.minDate)) : null;
-      const maxDate = this._config.maxDate ? this._normalizeDateToMidnight(new Date(this._config.maxDate)) : null;
+      const minDate = this._config.minDate ? normalizeDateToMidnight(new Date(this._config.minDate)) : null;
+      const maxDate = this._config.maxDate ? normalizeDateToMidnight(new Date(this._config.maxDate)) : null;
 
       // Find calendar element - try multiple strategies
       let calendarElement = this._cachedElements.calendarElement;
@@ -2224,7 +2179,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         if (!dateISO) return;
 
         // Parse the ISO date and normalize to midnight for comparison
-        const cellDate = this._normalizeDateToMidnight(new Date(dateISO));
+        const cellDate = normalizeDateToMidnight(new Date(dateISO));
         const btn = td.querySelector('button[data-day]') as HTMLButtonElement;
         if (!btn) return;
 

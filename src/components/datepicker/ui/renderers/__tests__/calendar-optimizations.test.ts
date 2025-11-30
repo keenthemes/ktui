@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderCalendar } from '../calendar';
 import { getDateKey } from '../../../utils/date-utils';
-import { defaultTemplates } from '../../../templates/templates';
+import { defaultTemplates } from '../../templates/templates';
 
 describe('Calendar Rendering Optimizations', () => {
 	let container: HTMLElement;

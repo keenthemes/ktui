@@ -4,4 +4,5 @@
  */
 
 export * from './date-utils';
+export * from './date-formatters';
 export * from './time-utils';
