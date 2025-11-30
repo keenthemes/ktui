@@ -148,3 +148,25 @@ export function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
   return new Date(year, month - 1, day, 0, 0, 0, 0);
 }
+
+/**
+ * Converts a date to a numeric key for O(1) date comparisons.
+ * Format: year * 10000 + month * 100 + day
+ * This enables efficient Set/Map lookups for date matching.
+ * @param date Date object to convert
+ * @returns Numeric key representing the date (e.g., 20241225 for Dec 25, 2024)
+ */
+export function getDateKey(date: Date): number {
+  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+}
+
+/**
+ * Checks if two dates have the same date key (same calendar day).
+ * Optimized version using numeric keys for O(1) comparison.
+ * @param a First date
+ * @param b Second date
+ * @returns True if both dates have the same date key
+ */
+export function isSameDayByKey(a: Date, b: Date): boolean {
+  return getDateKey(a) === getDateKey(b);
+}

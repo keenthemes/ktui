@@ -12,6 +12,8 @@
 		@apply hover:border-ring/50;
 		@apply disabled:cursor-not-allowed disabled:opacity-60;
 		@apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
+		padding-left: 10px;
+		padding-right: 10px;
 	}
 
 	/* Segmented Input Container */

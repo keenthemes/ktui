@@ -5,7 +5,31 @@
 
 import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../../templates/templates';
 import { defaultTemplates } from '../../templates/templates';
-import { formatDateToLocalString, parseLocalDate, isSameLocalDay } from '../../utils/date-utils';
+import { formatDateToLocalString, parseLocalDate, getDateKey } from '../../utils/date-utils';
+
+// Cache for localized day names to avoid regeneration on every render
+const dayNameCache = new Map<string, string[]>();
+
+/**
+ * Gets localized day names for a given locale, using cache to avoid regeneration.
+ * @param locale Locale string (e.g., 'en-US', 'de-DE')
+ * @returns Array of 7 day names starting with Sunday
+ */
+function getDayNames(locale: string): string[] {
+  if (dayNameCache.has(locale)) {
+    return dayNameCache.get(locale)!;
+  }
+
+  const dayNames: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(2023, 0, i + 1); // Use January 1st, 2023 as reference (Sunday = 0)
+    const dayName = date.toLocaleDateString(locale, { weekday: 'short' });
+    dayNames.push(dayName);
+  }
+
+  dayNameCache.set(locale, dayNames);
+  return dayNames;
+}
 
 /**
  * Renders the datepicker calendar and returns an HTMLElement.
@@ -28,53 +52,60 @@ export function renderCalendar(
   selectedRange?: { start: Date | null; end: Date | null },
   selectedDates?: Date[]
 ): HTMLElement {
-  // Generate localized day names for the header
-  const dayNames = [];
+  // Get localized day names from cache
   const localeToUse = locale || 'en-US';
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(2023, 0, i + 1); // Use January 1st, 2023 as reference (Sunday = 0)
-    const dayName = date.toLocaleDateString(localeToUse, { weekday: 'short' });
-    dayNames.push(dayName);
-  }
+  const dayNames = getDayNames(localeToUse);
+
+  // Cache "today" date object to avoid creating it multiple times
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayKey = getDateKey(today);
+
+  // Pre-compute date keys for selected dates for O(1) lookups
+  const selectedDateKey = selectedDate ? getDateKey(selectedDate) : null;
+  const selectedDatesKeys = selectedDates && selectedDates.length > 0
+    ? new Set(selectedDates.map(d => getDateKey(d)))
+    : null;
+  const selectedRangeStartKey = selectedRange?.start ? getDateKey(selectedRange.start) : null;
+  const selectedRangeEndKey = selectedRange?.end ? getDateKey(selectedRange.end) : null;
 
   // Use template system for table, tbody, tr, td
   const tableTpl = defaultTemplates.calendarTable;
   const bodyTpl = defaultTemplates.calendarBody;
   const rowTpl = defaultTemplates.calendarRow;
   const rows = [];
-  // Determine which day should be tabbable (selected, or today if none)
+  // Determine which day should be tabbable (selected, or today if none) using date keys
   let tabbableIndex = -1;
-  if (selectedDate) {
-    tabbableIndex = days.findIndex(d => isSameDay(d, selectedDate));
+  if (selectedDateKey !== null) {
+    tabbableIndex = days.findIndex(d => getDateKey(d) === selectedDateKey);
   }
-  if (tabbableIndex === -1 && selectedDates && selectedDates.length > 0) {
-    tabbableIndex = days.findIndex(d => selectedDates.some(date => isSameDay(d, date)));
+  if (tabbableIndex === -1 && selectedDatesKeys) {
+    tabbableIndex = days.findIndex(d => selectedDatesKeys.has(getDateKey(d)));
   }
-  if (tabbableIndex === -1 && selectedRange && selectedRange.start) {
-    tabbableIndex = days.findIndex(d => isSameDay(d, selectedRange.start!));
+  if (tabbableIndex === -1 && selectedRangeStartKey !== null) {
+    tabbableIndex = days.findIndex(d => getDateKey(d) === selectedRangeStartKey);
   }
   if (tabbableIndex === -1) {
-    const today = new Date();
-    tabbableIndex = days.findIndex(d => isSameDay(d, today));
+    tabbableIndex = days.findIndex(d => getDateKey(d) === todayKey);
   }
-  // Helper function to check if a date is selected
+
+  // Helper function to check if a date is selected using date keys for O(1) lookups
   const checkIsSelected = (day: Date): boolean => {
+    const dayKey = getDateKey(day);
     // Check single date selection
-    if (selectedDate && isSameDay(day, selectedDate)) {
+    if (selectedDateKey !== null && dayKey === selectedDateKey) {
       return true;
     }
     // Check multi-date selection
-    if (selectedDates && selectedDates.length > 0) {
-      return selectedDates.some(date => isSameDay(day, date));
+    if (selectedDatesKeys && selectedDatesKeys.has(dayKey)) {
+      return true;
     }
     // Check range selection start/end dates
-    if (selectedRange) {
-      if (selectedRange.start && isSameDay(day, selectedRange.start)) {
-        return true;
-      }
-      if (selectedRange.end && isSameDay(day, selectedRange.end)) {
-        return true;
-      }
+    if (selectedRangeStartKey !== null && dayKey === selectedRangeStartKey) {
+      return true;
+    }
+    if (selectedRangeEndKey !== null && dayKey === selectedRangeEndKey) {
+      return true;
     }
     return false;
   };
@@ -83,18 +114,15 @@ export function renderCalendar(
     const week = days.slice(i, i + 7);
     const tds = week.map((day, j) => {
       const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-      const isToday = isSameDay(day, new Date());
+      const isToday = getDateKey(day) === todayKey; // Use cached today key
       const isSelected = checkIsSelected(day);
       let inRange = false;
       if (selectedRange && selectedRange.start && selectedRange.end) {
-        // Normalize dates to midnight for accurate date-only comparison
-        const normalizedDay = new Date(day);
-        normalizedDay.setHours(0, 0, 0, 0);
-        const normalizedStart = new Date(selectedRange.start);
-        normalizedStart.setHours(0, 0, 0, 0);
-        const normalizedEnd = new Date(selectedRange.end);
-        normalizedEnd.setHours(0, 0, 0, 0);
-        inRange = normalizedDay >= normalizedStart && normalizedDay <= normalizedEnd;
+        // Use date keys for efficient range comparison (no Date object creation needed)
+        const dayKey = getDateKey(day);
+        const startKey = getDateKey(selectedRange.start);
+        const endKey = getDateKey(selectedRange.end);
+        inRange = dayKey >= startKey && dayKey <= endKey;
       }
       const dayIndex = i + j;
       const dateLocal = formatDateToLocalString(day); // Store date as local timezone string for accurate matching
@@ -104,6 +132,7 @@ export function renderCalendar(
         isCurrentMonth ? '' : 'data-outside="true"',
         inRange ? 'data-in-range="true"' : '',
         `data-date="${dateLocal}"`,
+        `data-day-index="${dayIndex}"`, // Store day index for event delegation
         `tabindex=\"${dayIndex === tabbableIndex ? '0' : '-1'}\"`
       ].filter(Boolean).join(' ');
       const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, inRange, attributes };
@@ -144,6 +173,19 @@ export function renderCalendar(
         .replace(/{{saturday}}/g, dayNames[6]);
   const calendarFrag = renderTemplateToDOM(tableHtml);
   const calendar = calendarFrag.firstElementChild as HTMLElement;
+
+  // Build cell reference cache for O(1) lookups during hover range updates
+  // Map<dateKey, HTMLElement> for efficient cell lookups
+  const cellCache = new Map<number, HTMLElement>();
+  const allCells = calendar.querySelectorAll('td[data-kt-datepicker-day]');
+  allCells.forEach((cell) => {
+    const dateAttr = cell.getAttribute('data-date');
+    if (dateAttr) {
+      const cellDate = parseLocalDate(dateAttr);
+      const dateKey = getDateKey(cellDate);
+      cellCache.set(dateKey, cell as HTMLElement);
+    }
+  });
 
   // Store selectedRange state on the calendar element so hover handlers can access current state
   // This allows the state to be updated without re-rendering the entire calendar
@@ -215,11 +257,10 @@ export function renderCalendar(
     return dates;
   };
 
-  // Helper function to find a date cell by date
+  // Helper function to find a date cell by date using cached cell references
   const findDateCell = (targetDate: Date): HTMLElement | null => {
-    const targetLocal = formatDateToLocalString(targetDate);
-    const cell = calendar.querySelector(`[data-kt-datepicker-day][data-date="${targetLocal}"]`) as HTMLElement;
-    return cell;
+    const targetKey = getDateKey(targetDate);
+    return cellCache.get(targetKey) || null;
   };
 
   // Helper function to update hover range preview
@@ -255,39 +296,74 @@ export function renderCalendar(
         cell.setAttribute('data-kt-hover-range', '');
       }
     });
-  };  // Add day cell click and hover listeners (attach to button for accessibility)
-  calendar.querySelectorAll('td[data-kt-datepicker-day]').forEach((td, i) => {
-    const button = td.querySelector('button[data-day]');
-    if (button) {
-      button.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const dayObj = days[i];
-        if (dayObj.getMonth() === currentDate.getMonth()) {
-          onDayClick(dayObj);
-        }
-      });
+  };
 
-      // Add hover event listeners
-      const cell = td as HTMLElement;
-      const dayObj = days[i];
+  // Event delegation: attach single listeners to calendar table instead of individual cell listeners
+  // This reduces memory footprint from 42+ listeners to 2-3 listeners
+  calendar.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    // Check if click is on a button or inside a button within a calendar cell
+    const button = target.closest('button[data-day]') as HTMLButtonElement;
+    if (!button) return;
 
-      button.addEventListener('mouseenter', () => {
-        // Always set single date hover
-        cell.setAttribute('data-kt-hover', '');
+    const cell = button.closest('td[data-kt-datepicker-day]') as HTMLElement;
+    if (!cell) return;
 
-        // If in range preview mode, update hover range
-        if (isRangePreviewMode()) {
-          updateHoverRange(dayObj);
-        }
-      });
+    const dateAttr = cell.getAttribute('data-date');
+    if (!dateAttr) return;
 
-      button.addEventListener('mouseleave', () => {
-        // Always remove single date hover
-        cell.removeAttribute('data-kt-hover');
-
-        // Note: Hover range clearing is handled at calendar level to prevent flickering
-      });
+    const dayObj = parseLocalDate(dateAttr);
+    if (dayObj.getMonth() === currentDate.getMonth()) {
+      e.stopPropagation();
+      onDayClick(dayObj);
     }
+  });
+
+  // Delegated hover handlers for single date hover and range preview
+  // Use mouseover/mouseout on calendar with relatedTarget check for proper delegation
+  calendar.addEventListener('mouseover', (e) => {
+    const target = e.target as HTMLElement;
+    // Check if mouseover is on a button or inside a button within a calendar cell
+    const button = target.closest('button[data-day]') as HTMLButtonElement;
+    if (!button) return;
+
+    const cell = button.closest('td[data-kt-datepicker-day]') as HTMLElement;
+    if (!cell) return;
+
+    const dateAttr = cell.getAttribute('data-date');
+    if (!dateAttr) return;
+
+    // Always set single date hover
+    cell.setAttribute('data-kt-hover', '');
+
+    // If in range preview mode, update hover range
+    if (isRangePreviewMode()) {
+      const dayObj = parseLocalDate(dateAttr);
+      updateHoverRange(dayObj);
+    }
+  });
+
+  calendar.addEventListener('mouseout', (e) => {
+    const target = e.target as HTMLElement;
+    const relatedTarget = (e as MouseEvent).relatedTarget as HTMLElement;
+
+    // Check if mouseout is leaving a button
+    const button = target.closest('button[data-day]') as HTMLButtonElement;
+    if (!button) return;
+
+    // If moving to another element within the same calendar, don't remove hover
+    if (relatedTarget && calendar.contains(relatedTarget)) {
+      const relatedButton = relatedTarget.closest('button[data-day]');
+      if (relatedButton) return; // Moving to another button, keep hover state
+    }
+
+    const cell = button.closest('td[data-kt-datepicker-day]') as HTMLElement;
+    if (!cell) return;
+
+    // Always remove single date hover when leaving the button
+    cell.removeAttribute('data-kt-hover');
+
+    // Note: Hover range clearing is handled at calendar level to prevent flickering
   });
 
   // Track hover state to prevent flickering when moving between dates
@@ -325,7 +401,5 @@ export function renderCalendar(
   return calendar;
 }
 
-function isSameDay(a: Date, b: Date): boolean {
-  // Use the utility function for consistent local timezone comparison
-  return isSameLocalDay(a, b);
-}
+// Note: isSameDay function removed - all date comparisons now use date keys for better performance
+// If needed elsewhere, use isSameLocalDay or isSameDayByKey from date-utils
