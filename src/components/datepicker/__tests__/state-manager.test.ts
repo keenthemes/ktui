@@ -318,4 +318,104 @@ describe('KTDatepickerUnifiedStateManager', () => {
       observer(); // unsubscribe
     });
   });
+
+  describe('Change Tracking', () => {
+    it('should provide access to changed properties after state update', () => {
+      const observer = stateManager.subscribe(mockObserver);
+
+      stateManager.updateState({ isOpen: true }, 'test', true);
+
+      const changedProperties = stateManager.getLastChangedProperties();
+      expect(changedProperties).toBeInstanceOf(Set);
+      expect(changedProperties.has('isOpen')).toBe(true);
+
+      observer(); // unsubscribe
+    });
+
+    it('should track multiple changed properties', () => {
+      const observer = stateManager.subscribe(mockObserver);
+
+      stateManager.updateState({
+        selectedDate: new Date(2024, 0, 15),
+        isOpen: true,
+        currentDate: new Date(2024, 1, 1)
+      }, 'test', true);
+
+      const changedProperties = stateManager.getLastChangedProperties();
+      expect(changedProperties.has('selectedDate')).toBe(true);
+      expect(changedProperties.has('isOpen')).toBe(true);
+      expect(changedProperties.has('currentDate')).toBe(true);
+
+      observer(); // unsubscribe
+    });
+
+    it('should return empty set when no changes occurred', () => {
+      // Initially, no changes
+      const changedProperties = stateManager.getLastChangedProperties();
+      expect(changedProperties.size).toBe(0);
+    });
+
+    it('should update changed properties for each state update', () => {
+      const observer = stateManager.subscribe(mockObserver);
+
+      // First update
+      stateManager.updateState({ isOpen: true }, 'test1', true);
+      let changedProperties = stateManager.getLastChangedProperties();
+      expect(changedProperties.has('isOpen')).toBe(true);
+      expect(changedProperties.has('selectedDate')).toBe(false);
+
+      // Second update
+      stateManager.updateState({ selectedDate: new Date(2024, 0, 15) }, 'test2', true);
+      changedProperties = stateManager.getLastChangedProperties();
+      expect(changedProperties.has('isOpen')).toBe(false); // Previous update
+      expect(changedProperties.has('selectedDate')).toBe(true); // Current update
+
+      observer(); // unsubscribe
+    });
+
+    it('should track nested properties in selectedRange', () => {
+      const observer = stateManager.subscribe(mockObserver);
+
+      // First, set an initial range
+      const initialRange = {
+        start: new Date(2024, 0, 15),
+        end: new Date(2024, 0, 20)
+      };
+      stateManager.updateState({ selectedRange: initialRange }, 'test', true);
+      mockObserver.onStateChange.mockClear();
+
+      // Then update the range (now both old and new are objects, so nested tracking applies)
+      const updatedRange = {
+        start: new Date(2024, 0, 16), // Changed
+        end: new Date(2024, 0, 20) // Same
+      };
+      stateManager.updateState({ selectedRange: updatedRange }, 'test2', true);
+
+      const changedProperties = stateManager.getLastChangedProperties();
+      expect(changedProperties.has('selectedRange')).toBe(true);
+      // Nested properties should be tracked when both old and new are objects
+      expect(changedProperties.has('selectedRange.start')).toBe(true); // Changed
+      expect(changedProperties.has('selectedRange.end')).toBe(false); // Not changed
+
+      observer(); // unsubscribe
+    });
+
+    it('should maintain backward compatibility with existing observer pattern', () => {
+      const observer = stateManager.subscribe(mockObserver);
+
+      const testDate = new Date(2024, 0, 15);
+      stateManager.updateState({ selectedDate: testDate }, 'test', true);
+
+      // Existing behavior should still work
+      expect(mockObserver.onStateChange).toHaveBeenCalledTimes(1);
+      const [newState, oldState] = mockObserver.onStateChange.mock.calls[0];
+      expect(newState.selectedDate).toEqual(testDate);
+
+      // New functionality should also work
+      const changedProperties = stateManager.getLastChangedProperties();
+      expect(changedProperties.has('selectedDate')).toBe(true);
+
+      observer(); // unsubscribe
+    });
+  });
 });

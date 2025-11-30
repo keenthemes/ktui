@@ -41,6 +41,7 @@ export interface StateChangeEvent {
   source: string;
   timestamp: number;
   changes: Partial<KTDatepickerState>;
+  changedProperties: Set<string>; // Set of property keys that actually changed
 }
 
 /**
@@ -63,6 +64,7 @@ export class KTDatepickerUnifiedStateManager {
   private _pendingUpdates: Partial<KTDatepickerState> = {};
   private _isUpdating = false;
   private _lastUpdateSource: string = 'unknown';
+  private _lastChangedProperties: Set<string> = new Set();
 
   constructor(config?: Partial<StateManagerConfig>) {
     this._config = {
@@ -116,6 +118,14 @@ export class KTDatepickerUnifiedStateManager {
    */
   public getLastUpdateSource(): string {
     return this._lastUpdateSource;
+  }
+
+  /**
+   * Get the set of properties that changed in the last state update
+   * @returns Set of property keys that changed
+   */
+  public getLastChangedProperties(): ReadonlySet<string> {
+    return new Set(this._lastChangedProperties);
   }
 
   /**
@@ -239,6 +249,53 @@ export class KTDatepickerUnifiedStateManager {
   }
 
   /**
+   * Compute which properties actually changed between old and new state
+   */
+  private _computeChangedProperties(oldState: KTDatepickerState, newState: KTDatepickerState, changes: Partial<KTDatepickerState>): Set<string> {
+    const changedProperties = new Set<string>();
+
+    // Check each property in the changes object
+    for (const key in changes) {
+      if (changes.hasOwnProperty(key)) {
+        const oldValue = (oldState as any)[key];
+        const newValue = (newState as any)[key];
+
+        // Handle Date objects - compare by time value
+        if (oldValue instanceof Date && newValue instanceof Date) {
+          if (oldValue.getTime() !== newValue.getTime()) {
+            changedProperties.add(key);
+          }
+        }
+        // Handle arrays - compare by JSON string (for selectedDates)
+        else if (Array.isArray(oldValue) && Array.isArray(newValue)) {
+          if (JSON.stringify(oldValue.map(d => d instanceof Date ? d.getTime() : d)) !==
+              JSON.stringify(newValue.map(d => d instanceof Date ? d.getTime() : d))) {
+            changedProperties.add(key);
+          }
+        }
+        // Handle objects (like selectedRange, dropdownState)
+        else if (typeof oldValue === 'object' && oldValue !== null &&
+                 typeof newValue === 'object' && newValue !== null) {
+          if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+            changedProperties.add(key);
+            // Also add nested properties if it's a complex object
+            if (key === 'selectedRange') {
+              if (oldValue.start?.getTime() !== newValue.start?.getTime()) changedProperties.add('selectedRange.start');
+              if (oldValue.end?.getTime() !== newValue.end?.getTime()) changedProperties.add('selectedRange.end');
+            }
+          }
+        }
+        // Primitive values
+        else if (oldValue !== newValue) {
+          changedProperties.add(key);
+        }
+      }
+    }
+
+    return changedProperties;
+  }
+
+  /**
    * Notify all observers of state change
    */
   private _notifyObservers(oldState: KTDatepickerState, newState: KTDatepickerState, source: string, changes: Partial<KTDatepickerState>): void {
@@ -246,6 +303,10 @@ export class KTDatepickerUnifiedStateManager {
 
     // Store the last update source for external queries
     this._lastUpdateSource = source;
+
+    // Compute which properties actually changed
+    const changedProperties = this._computeChangedProperties(oldState, newState, changes);
+    this._lastChangedProperties = changedProperties; // Store for observers to access
 
     // Sort observers by priority
     const sortedObservers = Array.from(this._observers).sort((a, b) =>
@@ -257,7 +318,8 @@ export class KTDatepickerUnifiedStateManager {
       newState,
       source,
       timestamp: Date.now(),
-      changes
+      changes,
+      changedProperties
     };
 
     // Notify observers in priority order

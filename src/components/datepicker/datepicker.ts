@@ -1505,13 +1505,16 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     const lastDay = new Date(year, month + 1, 0);
     const days: Date[] = [];
     // Start from Sunday of the first week
-    let start = new Date(firstDay);
+    const start = new Date(firstDay);
     start.setDate(firstDay.getDate() - firstDay.getDay());
     // End at Saturday of the last week
-    let end = new Date(lastDay);
+    const end = new Date(lastDay);
     end.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      days.push(new Date(d));
+    // Reuse date object by incrementing instead of creating new ones
+    const currentDate = new Date(start);
+    while (currentDate <= end) {
+      days.push(new Date(currentDate)); // Create new Date instance for each day to avoid mutation issues
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     return days;
   }
@@ -2254,15 +2257,18 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   /**
    * StateObserver implementation: Called when state changes
    */
-  onStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
-    this._handleStateChange(newState, oldState);
-  }
-
   /**
    * StateObserver implementation: Returns update priority (lower = higher priority)
    */
   getUpdatePriority(): number {
     return 10; // Medium priority
+  }
+
+  /**
+   * StateObserver implementation: Handle state changes from unified state manager
+   */
+  onStateChange(newState: KTDatepickerState, oldState: KTDatepickerState): void {
+    this._handleStateChange(newState, oldState);
   }
 
   /**
@@ -2277,11 +2283,14 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       return;
     }
 
+    // Get changed properties for selective updates
+    const changedProperties = this._unifiedStateManager.getLastChangedProperties();
+
     // Get the source of the last state update
     const lastUpdateSource = this._unifiedStateManager.getLastUpdateSource();
 
     // Update dropdown state if open/closed changed
-    if (newState.isOpen !== oldState.isOpen) {
+    if (changedProperties.has('isOpen') && newState.isOpen !== oldState.isOpen) {
       if (this._dropdownModule) {
         console.log('🗓️ [KTDatepicker] Dropdown module available, state change will trigger open');
         // The dropdown module will automatically open via observer pattern
@@ -2293,34 +2302,53 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       // The dropdown module handles its own visibility
     }
 
-    // Update disabled state
-    if (newState.isDisabled !== oldState.isDisabled) {
+    // Update disabled state only if it changed
+    if (changedProperties.has('isDisabled') && newState.isDisabled !== oldState.isDisabled) {
       this._updateDisabledState();
     }
 
-    // Update UI elements directly
-    this._updateInput(newState);
+    // Selective UI updates based on changed properties
+    // Update input field only if selection-related properties changed
+    if (changedProperties.has('selectedDate') ||
+        changedProperties.has('selectedRange') ||
+        changedProperties.has('selectedDates') ||
+        changedProperties.has('selectedRange.start') ||
+        changedProperties.has('selectedRange.end')) {
+      this._updateInput(newState);
+    }
+
+    // Update segmented input only if selectedDate changed (and not from segmented input itself)
     if (this._config.range) {
-      // Skip updating range segmented inputs if the state change originated from range selection
-      // This prevents focus loss during typing in range mode
-      // Note: Range mode uses 'range-selection' as source, but we still want to update when
-      // the change comes from calendar selection or programmatic updates
-      if (lastUpdateSource !== 'range-selection') {
+      if ((changedProperties.has('selectedRange') ||
+           changedProperties.has('selectedRange.start') ||
+           changedProperties.has('selectedRange.end')) &&
+          lastUpdateSource !== 'range-selection') {
         this._updateRangeSegmentedInput(newState);
-      } else {
+      } else if (lastUpdateSource === 'range-selection') {
         console.log('🗓️ [KTDatepicker] Skipping _updateRangeSegmentedInput to preserve focus during typing');
       }
     } else {
-      // Skip updating segmented input if the state change originated from the segmented input itself
-      // This prevents focus loss during typing
-      if (lastUpdateSource !== 'segmented-input') {
+      if (changedProperties.has('selectedDate') && lastUpdateSource !== 'segmented-input') {
         this._updateSegmentedInput(newState);
-      } else {
+      } else if (lastUpdateSource === 'segmented-input') {
         console.log('🗓️ [KTDatepicker] Skipping _updateSegmentedInput to preserve focus during typing');
       }
     }
-    this._updateCalendar(newState);
-    this._updateTimePicker(newState);
+
+    // Update calendar highlighting only if selection state changed
+    if (changedProperties.has('selectedDate') ||
+        changedProperties.has('selectedRange') ||
+        changedProperties.has('selectedRange.start') ||
+        changedProperties.has('selectedRange.end') ||
+        changedProperties.has('selectedDates') ||
+        changedProperties.has('currentDate')) {
+      this._updateCalendar(newState);
+    }
+
+    // Update time picker only if selectedTime changed
+    if (changedProperties.has('selectedTime')) {
+      this._updateTimePicker(newState);
+    }
 
     // Fire events based on state changes
     this._fireEvents(newState, oldState);

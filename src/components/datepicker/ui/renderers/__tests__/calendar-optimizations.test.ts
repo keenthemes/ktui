@@ -101,6 +101,108 @@ describe('Calendar Rendering Optimizations', () => {
 			// Note: In some test environments, locale formatting might be the same
 			// So we just verify both have day names
 		});
+
+		it('should work with multiple locales (en-US, de-DE, fr-FR)', () => {
+			const days = getCalendarDays(2024, 0);
+			const onDayClick = vi.fn();
+			const currentDate = new Date(2024, 0, 15);
+
+			// Render calendars for all three locales
+			const calendarEN = renderCalendar(
+				defaultTemplates.dayCell as string,
+				days,
+				currentDate,
+				null,
+				onDayClick,
+				'en-US'
+			);
+
+			const calendarDE = renderCalendar(
+				defaultTemplates.dayCell as string,
+				days,
+				currentDate,
+				null,
+				onDayClick,
+				'de-DE'
+			);
+
+			const calendarFR = renderCalendar(
+				defaultTemplates.dayCell as string,
+				days,
+				currentDate,
+				null,
+				onDayClick,
+				'fr-FR'
+			);
+
+			// All should have day names
+			const dayNamesEN = Array.from(calendarEN.querySelectorAll('thead th')).map(th => th.textContent?.trim()).filter(Boolean);
+			const dayNamesDE = Array.from(calendarDE.querySelectorAll('thead th')).map(th => th.textContent?.trim()).filter(Boolean);
+			const dayNamesFR = Array.from(calendarFR.querySelectorAll('thead th')).map(th => th.textContent?.trim()).filter(Boolean);
+
+			expect(dayNamesEN.length).toBe(7);
+			expect(dayNamesDE.length).toBe(7);
+			expect(dayNamesFR.length).toBe(7);
+
+			// Verify cache persists across multiple renders of same locale
+			const calendarEN2 = renderCalendar(
+				defaultTemplates.dayCell as string,
+				days,
+				currentDate,
+				null,
+				onDayClick,
+				'en-US'
+			);
+			const dayNamesEN2 = Array.from(calendarEN2.querySelectorAll('thead th')).map(th => th.textContent?.trim()).filter(Boolean);
+			expect(dayNamesEN).toEqual(dayNamesEN2); // Should be cached
+		});
+
+		it('should work correctly across multiple datepicker instances', () => {
+			const days = getCalendarDays(2024, 0);
+			const onDayClick = vi.fn();
+			const currentDate = new Date(2024, 0, 15);
+
+			// Simulate multiple instances using same locale
+			const instance1_calendar1 = renderCalendar(
+				defaultTemplates.dayCell as string,
+				days,
+				currentDate,
+				null,
+				onDayClick,
+				'en-US'
+			);
+
+			const instance2_calendar1 = renderCalendar(
+				defaultTemplates.dayCell as string,
+				days,
+				currentDate,
+				null,
+				onDayClick,
+				'en-US'
+			);
+
+			// Both instances should use the same cached day names
+			const dayNames1 = Array.from(instance1_calendar1.querySelectorAll('thead th')).map(th => th.textContent?.trim()).filter(Boolean);
+			const dayNames2 = Array.from(instance2_calendar1.querySelectorAll('thead th')).map(th => th.textContent?.trim()).filter(Boolean);
+
+			expect(dayNames1.length).toBe(7);
+			expect(dayNames2.length).toBe(7);
+			expect(dayNames1).toEqual(dayNames2); // Cache should be shared across instances
+
+			// Render again with different months - cache should still work
+			const days2 = getCalendarDays(2024, 1);
+			const instance1_calendar2 = renderCalendar(
+				defaultTemplates.dayCell as string,
+				days2,
+				new Date(2024, 1, 15),
+				null,
+				onDayClick,
+				'en-US'
+			);
+
+			const dayNames1_month2 = Array.from(instance1_calendar2.querySelectorAll('thead th')).map(th => th.textContent?.trim()).filter(Boolean);
+			expect(dayNames1_month2).toEqual(dayNames1); // Same locale = same cached day names
+		});
 	});
 
 	describe('Event Delegation', () => {
