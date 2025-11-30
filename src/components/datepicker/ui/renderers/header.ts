@@ -3,8 +3,8 @@
  * Renders the calendar header (month, year, navigation buttons) using provided template and data.
  */
 
-import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../../templates/templates';
-import { defaultTemplates } from '../../templates/templates';
+import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../templates/templates';
+import { defaultTemplates } from '../templates/templates';
 
 /**
  * Renders the datepicker header and returns an HTMLElement.

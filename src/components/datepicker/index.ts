@@ -4,5 +4,5 @@ import { KTDatepicker, initDatepickers } from './datepicker';
 (KTDatepicker as any).init = initDatepickers;
 
 export { KTDatepicker };
-export * from './templates/templates';
+export * from './ui/templates/templates';
 export * from './config/types';

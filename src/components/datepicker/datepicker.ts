@@ -5,18 +5,14 @@
  */
 
 import KTComponent from '../component';
-import KTData from '../../helpers/data';
-import { KTDatepickerConfig, KTDatepickerState, KTDatepickerTemplateStrings } from './config/types';
+import { KTDatepickerConfig, KTDatepickerState } from './config/types';
 import {
   getTemplateStrings,
   defaultTemplates,
   createTemplateRenderer,
   TemplateRenderer,
   renderTemplateString,
-  mergeClassData,
-  isTemplateFunction,
-  renderTemplateToDOM
-} from './templates/templates';
+  mergeClassData} from './ui/templates/templates';
 import { defaultDatepickerConfig } from './config/config';
 import { renderHeader } from './ui/renderers/header';
 import { renderCalendar } from './ui/renderers/calendar';
@@ -28,8 +24,7 @@ import { KTDatepickerDropdown } from './ui/input/dropdown';
 
 import { KTDatepickerUnifiedStateManager, StateObserver } from './core/unified-state-manager';
 import { DropdownState } from './config/types';
-import { SegmentedInput, SegmentedInputOptions } from './ui/input/segmented-input';
-import { parseDateFromFormat, formatDateToLocalString } from './utils/date-utils';
+import { formatDateToLocalString } from './utils/date-utils';
 import { dateToTimeState, applyTimeToDate, validateTime } from './utils/time-utils';
 import { TimeState } from './config/types';
 import {
@@ -769,10 +764,38 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     }
   };
 
-  // Stub for _onApply (to be implemented next)
+  /**
+   * Handler for Apply button - confirms selection and closes dropdown
+   * Used in range and multi-date modes
+   */
   private _onApply = (e: Event) => {
     e.preventDefault();
-    // For multi-date, update input value (already handled by selection logic)
+    e.stopPropagation();
+
+    const currentState = this._unifiedStateManager.getState();
+
+    // Ensure input value is updated with current selection
+    this._updateInput(currentState);
+
+    // Fire onChange event if there's a selection
+    if (this._config.range && currentState.selectedRange) {
+      if (currentState.selectedRange.start || currentState.selectedRange.end) {
+        this._fireDatepickerEvent('onChange', currentState.selectedRange, this);
+      }
+    } else if (this._config.multiDate && currentState.selectedDates.length > 0) {
+      this._fireDatepickerEvent('onChange', currentState.selectedDates, this);
+    } else if (currentState.selectedDate) {
+      this._fireDatepickerEvent('onChange', currentState.selectedDate, this);
+    }
+
+    // Trigger input change event
+    if (this._input) {
+      const evt = new Event('change', { bubbles: true });
+      this._input.dispatchEvent(evt);
+    }
+
+    // Close the dropdown
+    this._unifiedStateManager.setDropdownOpen(false, 'apply-button');
   };
 
   /**
@@ -1367,15 +1390,17 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       this._config.multiDate ? currentState.selectedDates : undefined
     );
 
-    // Wrap header + calendar in a styled panel div using template
-    const panel = this._templateRenderer.renderTemplateToElement({
-      templateKey: 'panel',
-      data: {
-        header: header.outerHTML,
-        calendar: calendar.outerHTML
-      },
-      configClasses: this._config.classes
-    });
+    // Create panel element and append header + calendar directly to preserve event listeners
+    // Instead of converting to HTML strings which lose event listeners
+    const panel = document.createElement('div');
+    panel.setAttribute('data-kt-datepicker-panel', '');
+
+    // Apply default panel styling (flex flex-col gap-1.5 from CSS)
+    panel.className = 'flex flex-col gap-1.5';
+
+    // Append header and calendar directly (preserves event listeners)
+    panel.appendChild(header);
+    panel.appendChild(calendar);
 
     return panel;
   }
@@ -1390,19 +1415,20 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Get all month dates for multi-month display
     const monthDates = this._getMultiMonthDates(baseDate, visibleMonths);
 
-    // Render each month using the helper method and collect HTML
-    const calendarsHtml = monthDates.map((monthDate, index) => {
-      const panel = this._renderMultiMonthCalendar(monthDate, index, visibleMonths);
-      return panel.outerHTML;
-    }).join('');
+    // Create multi-month container element
+    const multiMonthContainer = document.createElement('div');
+    multiMonthContainer.setAttribute('data-kt-datepicker-multimonth-container', '');
 
-    // Create multi-month container using template
-    const multiMonthContainer = this._templateRenderer.renderTemplateToElement({
-      templateKey: 'multiMonthContainer',
-      data: {
-        calendars: calendarsHtml
-      },
-      configClasses: this._config.classes
+    // Apply classes: flex flex-col md:flex-row gap-4
+    multiMonthContainer.className = 'flex flex-col md:flex-row gap-4';
+    if (this._config.classes?.multiMonthContainer) {
+      multiMonthContainer.className += ' ' + this._config.classes.multiMonthContainer;
+    }
+
+    // Render each month panel and append directly (preserves event listeners)
+    monthDates.forEach((monthDate, index) => {
+      const panel = this._renderMultiMonthCalendar(monthDate, index, visibleMonths);
+      multiMonthContainer.appendChild(panel);
     });
 
     dropdownEl.appendChild(multiMonthContainer);

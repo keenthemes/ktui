@@ -3,8 +3,8 @@
  * Renders the calendar grid (days) using provided template and data.
  */
 
-import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../../templates/templates';
-import { defaultTemplates } from '../../templates/templates';
+import { isTemplateFunction, renderTemplateString, renderTemplateToDOM } from '../templates/templates';
+import { defaultTemplates } from '../templates/templates';
 import { formatDateToLocalString, parseLocalDate, getDateKey } from '../../utils/date-utils';
 
 // Cache for localized day names to avoid regeneration on every render

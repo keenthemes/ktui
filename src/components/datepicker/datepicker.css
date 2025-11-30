@@ -172,10 +172,10 @@
 		@apply absolute z-50 mt-1.5 rounded-md border border-border/60 bg-popover text-popover-foreground;
 		@apply px-3 py-2;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-		/* Fixed width for calendar dropdown - not tied to input width */
+		/* Default width for single month calendar - will be adjusted dynamically for multiple months */
 		width: 20rem; /* 320px - standard calendar width */
 		min-width: 20rem;
-		max-width: 20rem;
+		/* Remove max-width to allow flexible width for multiple months */
 	}
 
 	[data-kt-datepicker-dropdown].hidden {

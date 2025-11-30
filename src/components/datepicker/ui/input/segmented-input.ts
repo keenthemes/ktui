@@ -24,8 +24,7 @@
  * - Caret position maintained during editing
  */
 
-import { parseDateFromFormat } from '../../utils/date-utils';
-import { getTemplateStrings } from '../../templates/templates';
+import { getTemplateStrings } from '../templates/templates';
 import { KTDatepickerConfig } from '../../config/types';
 
 /**

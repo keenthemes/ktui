@@ -243,6 +243,7 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
 
   /**
    * Set dropdown width to match input wrapper element (matching ktselect behavior)
+   * Dynamically calculates width based on visibleMonths for multi-month view
    */
   private _setDropdownWidth(): void {
     if (!this._dropdownElement || !this._element) return;
@@ -251,12 +252,49 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
     const inputWrapper = this._element.querySelector('[data-kt-datepicker-input-wrapper]') as HTMLElement;
     if (!inputWrapper) return;
 
+    // Get visible months count
+    const visibleMonths = this._config.visibleMonths ?? 1;
+
     // Check if width is configured
     if (this._config.dropdownWidth) {
       // If custom width is set, use that
       if (this._config.dropdownWidth === 'auto') {
-        this._dropdownElement.style.width = 'auto';
-        this._dropdownElement.style.minWidth = 'auto';
+        // Try to measure the actual content width first (if already rendered)
+        const multiMonthContainer = this._dropdownElement.querySelector('[data-kt-datepicker-multimonth-container]') as HTMLElement;
+
+        if (multiMonthContainer && visibleMonths > 1) {
+          // Content is already rendered, measure it
+          // Force a reflow to ensure accurate measurement
+          KTDom.reflow(multiMonthContainer);
+
+          // Measure content width including gaps
+          const contentWidth = multiMonthContainer.scrollWidth;
+
+          // Add dropdown padding (px-3 = 12px on each side = 24px total)
+          const padding = 24;
+          const totalWidth = contentWidth + padding;
+
+          this._dropdownElement.style.width = `${totalWidth}px`;
+          this._dropdownElement.style.minWidth = `${totalWidth}px`;
+        } else if (visibleMonths > 1) {
+          // Content not yet rendered, calculate expected width
+          // Base month width: 20rem (320px) per month
+          // Gap between months: 1rem (16px) per gap (gap-4)
+          // Padding: 0.75rem (12px) on each side = 1.5rem (24px) total
+          const monthWidth = 320; // 20rem = 320px
+          const gapWidth = 16; // 1rem = 16px (gap-4)
+          const paddingWidth = 24; // 1.5rem = 24px (px-3 on each side)
+
+          // Calculate total width: (n months * 320px) + ((n-1) gaps * 16px) + padding
+          const totalWidth = (visibleMonths * monthWidth) + ((visibleMonths - 1) * gapWidth) + paddingWidth;
+
+          this._dropdownElement.style.width = `${totalWidth}px`;
+          this._dropdownElement.style.minWidth = `${totalWidth}px`;
+        } else {
+          // Single month: use auto (CSS default applies)
+          this._dropdownElement.style.width = 'auto';
+          this._dropdownElement.style.minWidth = 'auto';
+        }
       } else if (typeof this._config.dropdownWidth === 'string') {
         this._dropdownElement.style.width = this._config.dropdownWidth;
         // Clear min-width when custom width is set
@@ -439,6 +477,17 @@ export class KTDatepickerDropdown extends KTComponent implements StateObserver {
    * Update dropdown position
    */
   public updatePosition(): void {
+    if (this._popperInstance) {
+      this._popperInstance.update();
+    }
+  }
+
+  /**
+   * Update dropdown width (useful after content is rendered)
+   */
+  public updateWidth(): void {
+    this._setDropdownWidth();
+    // Also update popper position after width change
     if (this._popperInstance) {
       this._popperInstance.update();
     }

@@ -4,7 +4,7 @@
  * rendering utilities, and template management into a single, unified system.
  */
 
-import { KTDatepickerConfig, KTDatepickerTemplateStrings } from '../config/types';
+import { KTDatepickerConfig, KTDatepickerTemplateStrings } from '../../config/types';
 
 // Default template strings for all UI fragments
 export const defaultTemplates: KTDatepickerTemplateStrings = {
