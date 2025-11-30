@@ -981,8 +981,14 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     const targetElement = e.target as HTMLElement;
 
-    // Check if click is outside the datepicker element
-    if (!this._element.contains(targetElement)) {
+    // Find the dropdown element (it's rendered in body, not inside _element)
+    const dropdownElement = document.querySelector(`[data-kt-datepicker-dropdown][data-kt-datepicker-instance-id="${this._instanceId}"]`) as HTMLElement;
+
+    // Check if click is outside both the datepicker element and the dropdown
+    const isInsideDatepicker = this._element.contains(targetElement);
+    const isInsideDropdown = dropdownElement && dropdownElement.contains(targetElement);
+
+    if (!isInsideDatepicker && !isInsideDropdown) {
       this.close();
     }
   };

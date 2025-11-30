@@ -246,7 +246,7 @@
 	}
 
 	[data-kt-datepicker-day] button {
-		@apply w-full h-7 rounded-md text-sm font-medium transition-all duration-150;
+		@apply w-full aspect-square rounded-md text-sm font-medium transition-all duration-150;
 		@apply text-foreground cursor-pointer;
 		@apply hover:bg-accent/60 hover:text-accent-foreground;
 		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1;
@@ -255,8 +255,7 @@
 
 	[data-kt-datepicker-day][data-today="true"] button {
 		@apply bg-primary/8 text-primary font-semibold;
-		@apply border border-primary/20;
-		@apply hover:bg-primary/15 hover:border-primary/30;
+		@apply hover:bg-primary/15;
 	}
 
 	/* Selected state - circular background like Flatpickr */
@@ -430,8 +429,7 @@
 
 	.dark [data-kt-datepicker-day][data-today="true"] button {
 		@apply bg-primary/15 text-primary;
-		@apply border-primary/30;
-		@apply hover:bg-primary/25 hover:border-primary/40;
+		@apply hover:bg-primary/25;
 	}
 
 	.dark [data-kt-datepicker-day][data-kt-selected="true"] button {
