@@ -141,6 +141,7 @@
 		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset;
 		@apply active:bg-accent/70;
 		@apply border-0 bg-transparent;
+		cursor: pointer;
 	}
 
 	[data-kt-datepicker-calendar-btn] svg {
@@ -250,7 +251,7 @@
 		@apply w-full aspect-square rounded-md text-sm font-medium transition-all duration-150;
 		@apply text-foreground cursor-pointer;
 		@apply hover:bg-accent/60 hover:text-accent-foreground;
-		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1;
+		@apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-0;
 		@apply active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent;
 	}
 
@@ -307,7 +308,7 @@
 	}
 
 	[data-kt-datepicker-day][tabindex="0"] button {
-		@apply ring-2 ring-ring/50 ring-offset-1;
+		@apply ring-1 ring-ring/50 ring-offset-0;
 	}
 
 	/* Footer */
