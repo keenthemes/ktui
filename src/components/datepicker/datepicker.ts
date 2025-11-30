@@ -346,56 +346,61 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Update calendar display
    */
   private _updateCalendar(state: KTDatepickerState): void {
-    // Find calendar element dynamically (don't rely on stale cache)
-    let calendarElement = this._cachedElements.calendarElement;
+    // Try to find dropdown first
+    let dropdownEl: HTMLElement | null = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
 
-    // If cache is null or element no longer exists, try to find it
-    if (!calendarElement || !calendarElement.isConnected) {
-      // Try to find dropdown first
-      let dropdownEl: HTMLElement | null = this._element.querySelector('[data-kt-datepicker-dropdown]') as HTMLElement;
-
-      if (!dropdownEl && this._instanceId) {
-        dropdownEl = document.querySelector(`[data-kt-datepicker-dropdown][data-kt-datepicker-instance-id="${this._instanceId}"]`) as HTMLElement;
-      }
-
-      if (dropdownEl) {
-        calendarElement = dropdownEl.querySelector('[data-kt-datepicker-calendar-table]') as HTMLElement;
-        // Update cache if found
-        if (calendarElement) {
-          this._cachedElements.calendarElement = calendarElement;
-        }
-      }
+    if (!dropdownEl && this._instanceId) {
+      dropdownEl = document.querySelector(`[data-kt-datepicker-dropdown][data-kt-datepicker-instance-id="${this._instanceId}"]`) as HTMLElement;
     }
 
-    // If still not found, return early
-    if (!calendarElement) {
+    if (!dropdownEl) {
       return;
     }
 
-    // Update range state on calendar element for hover handlers to access dynamically
-    if (this._config.range && state.selectedRange) {
-      const calendar = calendarElement;
-      if (state.selectedRange.start) {
-        calendar.setAttribute('data-kt-range-start', formatDateToLocalString(state.selectedRange.start));
-      } else {
-        calendar.removeAttribute('data-kt-range-start');
-      }
-      if (state.selectedRange.end) {
-        calendar.setAttribute('data-kt-range-end', formatDateToLocalString(state.selectedRange.end));
-      } else {
-        calendar.removeAttribute('data-kt-range-end');
-      }
-    } else if (this._config.range) {
-      // No range selected, clear attributes
-      calendarElement.removeAttribute('data-kt-range-start');
-      calendarElement.removeAttribute('data-kt-range-end');
+    // Find ALL calendar tables (for multi-month view support)
+    const calendarElements = dropdownEl.querySelectorAll('[data-kt-datepicker-calendar-table]') as NodeListOf<HTMLElement>;
+
+    // If no calendars found, return early
+    if (calendarElements.length === 0) {
+      return;
     }
 
-    // Update date selection highlighting
-    this._updateDateSelection(state, calendarElement);
+    // Update cache with first calendar (for backward compatibility)
+    if (calendarElements.length > 0) {
+      this._cachedElements.calendarElement = calendarElements[0];
+    }
 
-    // Update navigation (month/year display)
-    this._updateNavigation(state, calendarElement);
+    // Update range state on ALL calendar elements for hover handlers to access dynamically
+    if (this._config.range && state.selectedRange) {
+      calendarElements.forEach((calendar) => {
+        if (state.selectedRange.start) {
+          calendar.setAttribute('data-kt-range-start', formatDateToLocalString(state.selectedRange.start));
+        } else {
+          calendar.removeAttribute('data-kt-range-start');
+        }
+        if (state.selectedRange.end) {
+          calendar.setAttribute('data-kt-range-end', formatDateToLocalString(state.selectedRange.end));
+        } else {
+          calendar.removeAttribute('data-kt-range-end');
+        }
+      });
+    } else if (this._config.range) {
+      // No range selected, clear attributes from all calendars
+      calendarElements.forEach((calendar) => {
+        calendar.removeAttribute('data-kt-range-start');
+        calendar.removeAttribute('data-kt-range-end');
+      });
+    }
+
+    // Update date selection highlighting for ALL calendars
+    calendarElements.forEach((calendarElement) => {
+      this._updateDateSelection(state, calendarElement);
+    });
+
+    // Update navigation (month/year display) - only update first calendar for navigation
+    if (calendarElements.length > 0) {
+      this._updateNavigation(state, calendarElements[0]);
+    }
   }
 
   /**
@@ -407,6 +412,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     selectedCells.forEach(cell => {
       cell.removeAttribute('data-kt-selected');
       cell.removeAttribute('aria-selected');
+      cell.classList.remove('active'); // Remove active class if present (legacy support)
     });
 
     // Clear previous range highlighting (only if range is complete, not during hover preview)
@@ -435,12 +441,14 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
   /**
    * Highlight a specific date
+   * Uses data-kt-selected attribute (class="active" removed for consistency)
    */
   private _highlightDate(date: Date, calendarElement: HTMLElement): void {
     const cell = this._findDayCell(date, calendarElement);
     if (cell) {
       cell.setAttribute('data-kt-selected', 'true');
       cell.setAttribute('aria-selected', 'true');
+      // Note: class="active" is redundant - CSS already targets data-kt-selected
     }
   }
 
@@ -474,16 +482,27 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._highlightDate(actualStart, calendarElement);
     this._highlightDate(actualEnd, calendarElement);
 
+    // Find all calendars in multi-month view to highlight range across all visible months
+    const dropdownEl = calendarElement.closest('[data-kt-datepicker-dropdown]') as HTMLElement;
+    const allCalendars = dropdownEl
+      ? Array.from(dropdownEl.querySelectorAll('[data-kt-datepicker-calendar-table]')) as HTMLElement[]
+      : [calendarElement];
+
     // Highlight all dates in between using data-kt-hover-range (same as hover preview)
     const current = new Date(actualStart);
     current.setDate(current.getDate() + 1); // Start from day after start
 
     while (current < actualEnd) {
       const dateLocal = formatDateToLocalString(current);
-      const cell = calendarElement.querySelector(`td[data-kt-datepicker-day][data-date="${dateLocal}"]`) as HTMLElement;
-      if (cell) {
-        // Use data-kt-hover-range for completed ranges (consolidated with hover preview)
-        cell.setAttribute('data-kt-hover-range', 'true');
+
+      // Search across all calendars to find the cell
+      for (const calendar of allCalendars) {
+        const cell = calendar.querySelector(`td[data-kt-datepicker-day][data-date="${dateLocal}"]`) as HTMLElement;
+        if (cell) {
+          // Use data-kt-hover-range for completed ranges (consolidated with hover preview)
+          cell.setAttribute('data-kt-hover-range', 'true');
+          break; // Found in this calendar, no need to search others
+        }
       }
       current.setDate(current.getDate() + 1);
     }
@@ -492,12 +511,13 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   /**
    * Find day cell for a specific date
    * Uses data-date attribute (YYYY-MM-DD format) for accurate date matching across months
+   * Searches within the provided calendar element, or across all calendars in multi-month view
    */
   private _findDayCell(date: Date, calendarElement: HTMLElement): HTMLElement | null {
     const dateLocal = formatDateToLocalString(date); // Use local timezone date string for accurate matching (YYYY-MM-DD)
-    const cells = calendarElement.querySelectorAll('td[data-kt-datepicker-day]');
 
-    // Primary method: match by data-date attribute (handles year, month, day correctly)
+    // First, try to find in the provided calendar element
+    const cells = calendarElement.querySelectorAll('td[data-kt-datepicker-day]');
     for (const cell of Array.from(cells)) {
       const cellDate = cell.getAttribute('data-date');
       if (cellDate === dateLocal) {
@@ -505,7 +525,23 @@ export class KTDatepicker extends KTComponent implements StateObserver {
       }
     }
 
-    // No fallback - if date not found by data-date, it's not in the current calendar view
+    // If not found in provided calendar, search across all calendars in multi-month view
+    // This handles cases where the date might be in a different visible month
+    const dropdownEl = calendarElement.closest('[data-kt-datepicker-dropdown]') as HTMLElement;
+    if (dropdownEl) {
+      const allCalendars = dropdownEl.querySelectorAll('[data-kt-datepicker-calendar-table]');
+      for (const calendar of Array.from(allCalendars)) {
+        const allCells = calendar.querySelectorAll('td[data-kt-datepicker-day]');
+        for (const cell of Array.from(allCells)) {
+          const cellDate = cell.getAttribute('data-date');
+          if (cellDate === dateLocal) {
+            return cell as HTMLElement;
+          }
+        }
+      }
+    }
+
+    // No fallback - if date not found by data-date, it's not in any visible calendar view
     // This prevents incorrect matches (e.g., matching Oct 20 when looking for Nov 20)
     return null;
   }

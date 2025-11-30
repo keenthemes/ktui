@@ -32,7 +32,86 @@ function getDayNames(locale: string): string[] {
 }
 
 /**
+ * Day cell computation data interface for centralized day cell rendering logic.
+ * Used by both single-month and multi-month views to ensure consistent rendering.
+ */
+interface DayCellData {
+  day: number;
+  date: Date;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
+  inRange: boolean;
+  attributes: string;
+}
+
+/**
+ * Computes day cell data (attributes, states) for a given day.
+ * This centralized helper function ensures consistent day cell rendering
+ * across single-month and multi-month views.
+ *
+ * @param day - The date for this day cell
+ * @param currentDate - The current month being viewed (for isCurrentMonth calculation)
+ * @param todayKey - Pre-computed date key for today (for performance)
+ * @param checkIsSelected - Function to check if a date is selected
+ * @param selectedRange - Optional range selection
+ * @param dayIndex - Index of this day in the calendar grid (0-based)
+ * @param tabbableIndex - Index of the tabbable day (for keyboard navigation)
+ * @returns Day cell data object with computed states and attributes
+ */
+function computeDayCellData(
+  day: Date,
+  currentDate: Date,
+  todayKey: number,
+  checkIsSelected: (day: Date) => boolean,
+  selectedRange: { start: Date | null; end: Date | null } | undefined,
+  dayIndex: number,
+  tabbableIndex: number
+): DayCellData {
+  const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+  const isToday = getDateKey(day) === todayKey;
+  const isSelected = checkIsSelected(day);
+
+  let inRange = false;
+  if (selectedRange && selectedRange.start && selectedRange.end) {
+    // Use date keys for efficient range comparison (no Date object creation needed)
+    const dayKey = getDateKey(day);
+    const startKey = getDateKey(selectedRange.start);
+    const endKey = getDateKey(selectedRange.end);
+    inRange = dayKey >= startKey && dayKey <= endKey;
+  }
+
+  const dateLocal = formatDateToLocalString(day);
+  const attributes = [
+    isSelected ? 'data-kt-selected="true" aria-selected="true"' : '',
+    isToday ? 'data-today="true"' : '',
+    isCurrentMonth ? '' : 'data-outside="true"',
+    // Use data-kt-hover-range for completed ranges too (consolidated with hover preview)
+    inRange ? 'data-kt-hover-range="true"' : '',
+    `data-date="${dateLocal}"`,
+    `data-day-index="${dayIndex}"`,
+    `tabindex=\"${dayIndex === tabbableIndex ? '0' : '-1'}\"`
+  ].filter(Boolean).join(' ');
+
+  return {
+    day: day.getDate(),
+    date: day,
+    isCurrentMonth,
+    isToday,
+    isSelected,
+    inRange,
+    attributes
+  };
+}
+
+/**
  * Renders the datepicker calendar and returns an HTMLElement.
+ *
+ * This function uses centralized day cell computation logic (computeDayCellData)
+ * to ensure consistent rendering across single-month and multi-month views.
+ * Both views call this function with identical state parameters, guaranteeing
+ * that the same date appears identically regardless of which view is displayed.
+ *
  * @param tpl - The template string or function for the day cell
  * @param days - Array of Date objects for the calendar grid
  * @param currentDate - The current month being viewed
@@ -110,33 +189,23 @@ export function renderCalendar(
     return false;
   };
 
+  // Render calendar weeks using centralized day cell computation
+  // This ensures consistent rendering across single-month and multi-month views
   for (let i = 0; i < days.length; i += 7) {
     const week = days.slice(i, i + 7);
     const tds = week.map((day, j) => {
-      const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-      const isToday = getDateKey(day) === todayKey; // Use cached today key
-      const isSelected = checkIsSelected(day);
-      let inRange = false;
-      if (selectedRange && selectedRange.start && selectedRange.end) {
-        // Use date keys for efficient range comparison (no Date object creation needed)
-        const dayKey = getDateKey(day);
-        const startKey = getDateKey(selectedRange.start);
-        const endKey = getDateKey(selectedRange.end);
-        inRange = dayKey >= startKey && dayKey <= endKey;
-      }
       const dayIndex = i + j;
-      const dateLocal = formatDateToLocalString(day); // Store date as local timezone string for accurate matching
-      const attributes = [
-        isSelected ? 'data-kt-selected="true" aria-selected="true" class="active"' : '',
-        isToday ? 'data-today="true"' : '',
-        isCurrentMonth ? '' : 'data-outside="true"',
-        // Use data-kt-hover-range for completed ranges too (consolidated with hover preview)
-        inRange ? 'data-kt-hover-range="true"' : '',
-        `data-date="${dateLocal}"`,
-        `data-day-index="${dayIndex}"`, // Store day index for event delegation
-        `tabindex=\"${dayIndex === tabbableIndex ? '0' : '-1'}\"`
-      ].filter(Boolean).join(' ');
-      const data = { day: day.getDate(), date: day, isCurrentMonth, isToday, isSelected, inRange, attributes };
+      // Use centralized helper function to compute day cell data
+      // This guarantees identical logic for single-month and multi-month views
+      const data = computeDayCellData(
+        day,
+        currentDate,
+        todayKey,
+        checkIsSelected,
+        selectedRange,
+        dayIndex,
+        tabbableIndex
+      );
       return isTemplateFunction(tpl)
         ? tpl(data)
         : renderTemplateString(typeof tpl === 'string' ? tpl : (typeof defaultTemplates.dayCell === 'string' ? defaultTemplates.dayCell : ''), data);
@@ -284,19 +353,39 @@ export function renderCalendar(
     const normalizedStart = new Date(currentRange.start);
     normalizedStart.setHours(0, 0, 0, 0);
 
-    // Clear previous hover range
-    clearHoverRange();
+    // Clear previous hover range from ALL calendars in multi-month view
+    const dropdownEl = calendar.closest('[data-kt-datepicker-dropdown]') as HTMLElement;
+    if (dropdownEl) {
+      const allCalendars = dropdownEl.querySelectorAll('[data-kt-datepicker-calendar-table]');
+      allCalendars.forEach((cal) => {
+        const hoverCells = cal.querySelectorAll('[data-kt-hover-range]');
+        hoverCells.forEach((cell) => {
+          cell.removeAttribute('data-kt-hover-range');
+        });
+      });
+    } else {
+      clearHoverRange();
+    }
 
     // Calculate range between start date and hovered date
     const rangeDates = getDatesInRange(normalizedStart, normalizedHovered);
 
-    // Add data-kt-hover-range to all dates in the range that are visible in the current calendar
-    // Only apply to cells that exist in the current calendar view to prevent issues when range spans months
+    // Add data-kt-hover-range to all dates in the range across ALL visible calendars
+    // This enables hover preview to work across multiple months
+    const allCalendars = dropdownEl
+      ? Array.from(dropdownEl.querySelectorAll('[data-kt-datepicker-calendar-table]')) as HTMLElement[]
+      : [calendar];
+
     rangeDates.forEach((date) => {
-      const cell = findDateCell(date);
-      if (cell && calendar.contains(cell)) {
-        // Only set attribute if cell is actually in the current calendar view
-        cell.setAttribute('data-kt-hover-range', '');
+      const dateLocal = formatDateToLocalString(date);
+      // Search across all calendars to find the cell by data-date attribute
+      for (const cal of allCalendars) {
+        const cell = cal.querySelector(`td[data-kt-datepicker-day][data-date="${dateLocal}"]`) as HTMLElement;
+        if (cell) {
+          // Set attribute if cell is found in this calendar
+          cell.setAttribute('data-kt-hover-range', '');
+          break; // Found in this calendar, no need to search others
+        }
       }
     });
   };

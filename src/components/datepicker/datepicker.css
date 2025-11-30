@@ -195,6 +195,7 @@
 	[data-kt-datepicker-header] {
 		@apply flex items-center justify-between gap-2 px-0.5 pb-1.5;
 		@apply border-0;
+		height: 34px;
 	}
 
 	[data-kt-datepicker-month-year] {
