@@ -429,16 +429,7 @@
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 	}
 
-	.dark [data-kt-datepicker-day][data-today="true"] button {
-		@apply bg-primary/15 text-primary;
-		@apply hover:bg-primary/25;
-	}
-
-	.dark [data-kt-datepicker-day][data-kt-selected="true"] button {
-		@apply bg-primary text-primary-foreground;
-		@apply hover:bg-primary/95;
-		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-	}
+	/* Primary colors use system CSS variables - no dark mode overrides needed */
 }
 
 
