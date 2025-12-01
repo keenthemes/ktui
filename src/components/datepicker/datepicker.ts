@@ -1156,8 +1156,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    */
   private _renderInputWrapper(calendarButtonHtml: string): HTMLElement {
     const inputWrapperTpl = this._templateSet.inputWrapper || defaultTemplates.inputWrapper;
-    if (this._input && this._input.parentNode) {
-      this._input.parentNode.removeChild(this._input);
+    // Set input to hidden instead of removing it, so it remains in DOM for form submission
+    if (this._input) {
+      this._input.type = 'hidden';
+      // Remove any visible styling classes that might interfere
+      this._input.classList.remove('hidden');
     }
     if (this._config.range) {
       const rangeTpl = this._templateSet.segmentedDateRangeInput || defaultTemplates.segmentedDateRangeInput;
