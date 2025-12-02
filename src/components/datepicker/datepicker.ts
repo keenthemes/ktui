@@ -1200,7 +1200,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   }
 
   /**
-   * Bind event listener to the calendar button in the input wrapper
+   * Bind event listener to the calendar button and input wrapper
    */
   private _bindCalendarButtonEvent(inputWrapperEl: HTMLElement) {
     const buttonEl = inputWrapperEl.querySelector('button[data-kt-datepicker-calendar-btn]');
@@ -1216,6 +1216,28 @@ export class KTDatepicker extends KTComponent implements StateObserver {
         this.toggle();
       });
     }
+
+    // Add click handler to entire input wrapper for better UX
+    inputWrapperEl.addEventListener('click', (e) => {
+      // Don't handle if disabled
+      if (this._config.disabled) {
+        return;
+      }
+
+      // Don't handle if target is a focusable input element (segmented input)
+      const target = e.target as HTMLElement;
+      if (target.hasAttribute('contenteditable') || target.hasAttribute('data-segment')) {
+        return;
+      }
+
+      // Don't handle if already handled by button click
+      if (target === buttonEl || buttonEl?.contains(target)) {
+        return;
+      }
+
+      // Open the datepicker
+      this.open();
+    });
   }
 
   /**

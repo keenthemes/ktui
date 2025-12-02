@@ -6,7 +6,7 @@
 /* Input Wrapper */
 @layer utilities {
 	[data-kt-datepicker-input-wrapper] {
-		@apply relative inline-flex items-center w-full;
+		@apply relative inline-flex items-center w-full cursor-pointer;
 		@apply h-8.5 rounded-md border border-input bg-background shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow];
 		@apply focus-within:ring-ring/30 focus-within:border-ring focus-within:outline-none focus-within:ring-[3px];
 		@apply hover:border-ring/50;
