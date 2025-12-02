@@ -1,10 +1,8 @@
-/**
- * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
- * Copyright 2025 by Keenthemes Inc
- */
+import { KTDatepicker, initDatepickers } from './datepicker';
 
-import { KTDatepicker } from './datepicker';
-import * as DatepickerTypes from './types';
+// Attach static init method to KTDatepicker
+(KTDatepicker as any).init = initDatepickers;
 
-export { KTDatepicker, DatepickerTypes };
-export default KTDatepicker;
+export { KTDatepicker };
+export * from './ui/templates/templates';
+export * from './config/types';

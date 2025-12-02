@@ -3,5 +3,433 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-@layer components {
+/* Input Wrapper */
+@layer utilities {
+	[data-kt-datepicker-input-wrapper] {
+		@apply relative inline-flex items-center w-full cursor-pointer;
+		@apply h-8.5 rounded-md border border-input bg-background shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow];
+		@apply focus-within:ring-ring/30 focus-within:border-ring focus-within:outline-none focus-within:ring-[3px];
+		@apply hover:border-ring/50;
+		@apply disabled:cursor-not-allowed disabled:opacity-60;
+		@apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+
+	/* Segmented Input Container */
+	[data-kt-datepicker-segmented-input] {
+		@apply inline-flex items-center flex-1 min-w-0;
+		@apply border-0 bg-transparent shadow-none;
+		@apply focus-within:ring-0 focus-within:border-0;
+		@apply hover:border-0;
+		@apply text-[0.8125rem] leading-(--text-sm--line-height);
+		/* Remove spacing between inline-flex children */
+		font-size: 0;
+		letter-spacing: 0;
+		word-spacing: 0;
+	}
+
+	/* Date Range Input Container - tighter spacing */
+	[data-kt-datepicker-segmented-range-input] {
+		@apply gap-0.5;
+	}
+
+	/* Date Segment (Day/Month/Year) */
+	[data-segment] {
+		@apply inline-flex items-center justify-center min-w-[2rem] px-0 py-0 text-sm font-medium text-foreground;
+		@apply rounded-sm transition-all outline-none;
+		@apply focus:bg-accent focus:text-accent-foreground focus:ring-2 focus:ring-ring/50;
+		@apply hover:bg-accent/50;
+		@apply disabled:cursor-not-allowed disabled:opacity-50;
+		@apply aria-invalid:bg-destructive/10 aria-invalid:text-destructive;
+		/* Restore font-size from parent (font-size: 0 trick) */
+		font-size: 0.875rem; /* text-sm equivalent */
+		letter-spacing: normal;
+		word-spacing: normal;
+	}
+
+	[data-segment][contenteditable="true"] {
+		@apply cursor-text;
+		/* Reset browser defaults for contenteditable spacing */
+		padding: 0 !important;
+		margin: 0 !important;
+		line-height: 1.5;
+		white-space: nowrap !important;
+		overflow: hidden;
+		/* Prevent browser default contenteditable spacing */
+		-webkit-user-modify: read-write-plaintext-only;
+		user-modify: read-write-plaintext-only;
+		/* Remove any default outline spacing */
+		outline: none;
+		outline-offset: 0;
+		/* Prevent any text selection spacing */
+		text-indent: 0;
+		/* Ensure no extra spacing from flex alignment - use flex-start to minimize spacing */
+		align-items: center;
+		justify-content: flex-start;
+		/* Remove any default browser spacing for contenteditable */
+		-webkit-tap-highlight-color: transparent;
+		/* Ensure text node has no extra spacing */
+		word-spacing: 0;
+		letter-spacing: normal;
+		/* Prevent empty contenteditable from collapsing */
+		min-height: 1em;
+		/* Remove any default browser margins on focus */
+		-webkit-margin-before: 0;
+		-webkit-margin-after: 0;
+		-webkit-margin-start: 0;
+		-webkit-margin-end: 0;
+		/* Reduce min-width when editing to minimize spacing */
+		min-width: fit-content;
+		width: fit-content;
+	}
+
+	/* Remove spacing from text nodes inside contenteditable segments */
+	[data-segment][contenteditable="true"] * {
+		margin: 0;
+		padding: 0;
+		display: inline;
+	}
+
+	/* Handle empty contenteditable to prevent spacing issues */
+	[data-segment][contenteditable="true"]:empty::before {
+		content: "\200B"; /* Zero-width space to prevent collapsing */
+		display: inline-block;
+	}
+
+	[data-segment][contenteditable="true"]:focus {
+		@apply bg-accent text-accent-foreground ring-2 ring-ring/50;
+	}
+
+	/* Add left spacing for time input group - hour segment */
+	/* Target hour segment that comes after a separator (space between date and time) */
+	[data-segment-separator] + [data-segment="hour"] {
+		@apply ml-3;
+	}
+
+	/* Remove left spacing if hour is the very first segment (time-only input) */
+	[data-kt-datepicker-segmented-input] > [data-segment="hour"]:first-child {
+		@apply ml-0;
+	}
+
+	/* Add left spacing for AM/PM segment when it follows time segments (space separator) */
+	[data-segment-separator] + [data-segment="ampm"] {
+		@apply ml-3;
+	}
+
+	/* Segment Separator */
+	[data-segment-separator] {
+		@apply inline-flex items-center text-muted-foreground select-none pointer-events-none;
+		@apply text-sm font-medium;
+		/* Restore font-size from parent (font-size: 0 trick) */
+		font-size: 0.875rem; /* text-sm equivalent */
+		letter-spacing: normal;
+		word-spacing: normal;
+		/* Ensure space separators are visible */
+		white-space: pre;
+		/* Ensure empty separators (whitespace) have minimum width to contribute to spacing */
+		min-width: 0.25rem;
+	}
+
+	/* Calendar Button */
+	[data-kt-datepicker-calendar-btn] {
+		@apply absolute right-0 top-0 bottom-0;
+		@apply inline-flex items-center justify-center shrink-0;
+		@apply w-10 h-full rounded-r-md;
+		@apply text-muted-foreground transition-all;
+		@apply hover:bg-accent/50 hover:text-accent-foreground;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset;
+		@apply active:bg-accent/70;
+		@apply border-0 bg-transparent;
+		cursor: pointer;
+	}
+
+	[data-kt-datepicker-calendar-btn] svg {
+		@apply w-4 h-4;
+	}
+
+	[data-kt-datepicker-calendar-btn][aria-expanded="true"] {
+		@apply bg-accent/50 text-accent-foreground;
+	}
+
+	/* Placeholder */
+	[data-kt-datepicker-placeholder] {
+		@apply text-muted-foreground pointer-events-none select-none;
+	}
+
+	/* Display Wrapper */
+	[data-kt-datepicker-display-wrapper] {
+		@apply inline-flex items-center min-h-[2rem] px-3 py-1.5 text-sm text-foreground;
+	}
+
+	[data-kt-datepicker-display-element] {
+		@apply text-foreground;
+	}
 }
+
+/* Dropdown Container */
+@layer utilities {
+	[data-kt-datepicker-dropdown] {
+		@apply absolute z-50 mt-1.5 rounded-md border border-border/60 bg-popover text-popover-foreground;
+		@apply px-3 py-2;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		/* Default width for single month calendar - will be adjusted dynamically for multiple months */
+		width: 20rem; /* 320px - standard calendar width */
+		min-width: 20rem;
+		/* Remove max-width to allow flexible width for multiple months */
+	}
+
+	[data-kt-datepicker-dropdown].hidden {
+		@apply hidden;
+	}
+
+	[data-kt-datepicker-dropdown].open {
+		@apply block;
+	}
+
+	/* Panel Container */
+	[data-kt-datepicker-panel] {
+		@apply flex flex-col gap-1.5;
+	}
+
+	/* Header */
+	[data-kt-datepicker-header] {
+		@apply flex items-center justify-between gap-2 px-0.5 pb-1.5;
+		@apply border-0;
+		height: 34px;
+	}
+
+	[data-kt-datepicker-month-year] {
+		@apply text-sm font-medium text-foreground select-none;
+		@apply flex-1 text-center;
+	}
+
+	/* Navigation Buttons */
+	[data-kt-datepicker-prev],
+	[data-kt-datepicker-next] {
+		@apply inline-flex items-center justify-center shrink-0;
+		@apply w-7 h-7 rounded-md transition-all duration-150 cursor-pointer;
+		@apply text-muted-foreground;
+		@apply hover:bg-accent/60 hover:text-foreground;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1;
+		@apply active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+	}
+
+	[data-kt-datepicker-prev] svg,
+	[data-kt-datepicker-next] svg {
+		@apply w-3.5 h-3.5;
+	}
+
+	/* Calendar Table */
+	[data-kt-datepicker-calendar-table] {
+		@apply w-full border-collapse;
+	}
+
+	[data-kt-datepicker-calendar-table] thead {
+		@apply border-0;
+	}
+
+	[data-kt-datepicker-calendar-table] th {
+		@apply py-1 px-0.5 text-xs font-medium text-muted-foreground text-center uppercase;
+		@apply w-[calc(100%/7)];
+	}
+
+	[data-kt-datepicker-calendar-body] {
+		@apply border-0;
+	}
+
+	[data-kt-datepicker-calendar-row] {
+		@apply border-0;
+	}
+
+	/* Day Cell */
+	[data-kt-datepicker-day] {
+		@apply py-0.5 px-1 text-center;
+	}
+
+	[data-kt-datepicker-day] button {
+		@apply w-full aspect-square rounded-md text-sm font-medium transition-all duration-150;
+		@apply text-foreground cursor-pointer;
+		@apply hover:bg-accent/60 hover:text-accent-foreground;
+		@apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50 focus-visible:ring-offset-0;
+		@apply active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+	}
+
+	[data-kt-datepicker-day][data-today="true"] button {
+		@apply bg-primary/8 text-primary font-semibold;
+		@apply hover:bg-primary/15;
+	}
+
+	/* Selected state - circular background like Flatpickr */
+	[data-kt-datepicker-day][data-kt-selected="true"] button,
+	[data-kt-datepicker-day].active button,
+	[data-kt-datepicker-day][aria-selected="true"] button {
+		@apply bg-primary text-primary-foreground font-semibold;
+		@apply hover:bg-primary/90;
+	}
+
+	/* Selected + Today combination - selected takes precedence */
+	[data-kt-datepicker-day][data-kt-selected="true"][data-today="true"] button,
+	[data-kt-datepicker-day].active[data-today="true"] button,
+	[data-kt-datepicker-day][aria-selected="true"][data-today="true"] button {
+		@apply bg-primary text-primary-foreground font-semibold;
+		@apply hover:bg-primary/90;
+		@apply border-0;
+	}
+
+	/* Hover state */
+	[data-kt-datepicker-day][data-kt-hover] button {
+		@apply bg-accent text-accent-foreground;
+	}
+
+	/* Hover + Selected combination */
+	[data-kt-datepicker-day][data-kt-selected="true"][data-kt-hover] button {
+		@apply bg-primary/90 text-primary-foreground;
+	}
+
+	/* Range hover preview - dates in hover range */
+	[data-kt-datepicker-day][data-kt-hover-range] button {
+		@apply bg-accent/40 text-accent-foreground;
+	}
+
+	/* Range hover preview + Selected (start date) */
+	[data-kt-datepicker-day][data-kt-selected="true"][data-kt-hover-range] button {
+		@apply bg-primary/80 text-primary-foreground;
+	}
+
+	/* Range hover preview + Hover combination */
+	[data-kt-datepicker-day][data-kt-hover-range][data-kt-hover] button {
+		@apply bg-accent/60 text-accent-foreground;
+	}
+
+	[data-kt-datepicker-day][data-outside="true"] button {
+		@apply text-muted-foreground opacity-50 cursor-default;
+		@apply hover:opacity-70 hover:bg-accent/40;
+	}
+
+	[data-kt-datepicker-day][tabindex="0"] button {
+		@apply ring-1 ring-ring/50 ring-offset-0;
+	}
+
+	/* Footer */
+	[data-kt-datepicker-footer] {
+		@apply flex items-center justify-end gap-2 pt-1.5 mt-1.5;
+		@apply border-t border-border/40;
+	}
+
+	[data-kt-datepicker-today],
+	[data-kt-datepicker-clear],
+	[data-kt-datepicker-apply] {
+		@apply inline-flex items-center justify-center;
+		@apply h-7 px-3 text-xs font-medium rounded-md transition-all duration-150 cursor-pointer;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2;
+		@apply active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
+	}
+
+	[data-kt-datepicker-today] {
+		@apply text-muted-foreground hover:text-foreground hover:bg-accent/70;
+	}
+
+	[data-kt-datepicker-clear] {
+		@apply text-muted-foreground hover:text-destructive hover:bg-destructive/10;
+	}
+
+	[data-kt-datepicker-apply] {
+		@apply bg-primary text-primary-foreground;
+		@apply hover:bg-primary/95;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	/* Multi-Month Container */
+	[data-kt-datepicker-multimonth-container] {
+		@apply flex flex-col md:flex-row gap-4;
+	}
+
+	/* Time Picker */
+	[data-kt-datepicker-time-picker] {
+		@apply flex flex-col gap-1.5 p-2 border-t border-border/40;
+	}
+
+	[data-kt-datepicker-time-display] {
+		@apply text-center text-lg font-semibold text-foreground;
+	}
+
+	[data-kt-datepicker-time-controls] {
+		@apply flex items-center justify-center gap-2;
+	}
+
+	[data-kt-datepicker-time-unit] {
+		@apply flex flex-col items-center gap-1;
+	}
+
+	[data-kt-datepicker-time-up],
+	[data-kt-datepicker-time-down] {
+		@apply inline-flex items-center justify-center;
+		@apply w-8 h-6 rounded-md transition-all;
+		@apply text-muted-foreground hover:text-foreground;
+		@apply hover:bg-accent hover:text-accent-foreground;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50;
+		@apply active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+	}
+
+	[data-kt-datepicker-time-value] {
+		@apply text-sm font-semibold text-foreground;
+	}
+
+	[data-kt-datepicker-time-separator] {
+		@apply text-muted-foreground text-sm font-medium;
+	}
+
+	[data-kt-datepicker-ampm-control] {
+		@apply flex flex-col gap-1 ml-2;
+	}
+
+	[data-kt-datepicker-ampm-button] {
+		@apply inline-flex items-center justify-center;
+		@apply w-10 h-6 rounded-md text-xs font-medium transition-all;
+		@apply text-muted-foreground hover:text-foreground;
+		@apply hover:bg-accent hover:text-accent-foreground;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50;
+		@apply active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+	}
+
+	/* Multi-Date Tag */
+	[data-kt-datepicker-multidate-tag] {
+		@apply inline-flex items-center gap-1.5 px-2 py-1 rounded-md;
+		@apply bg-accent text-accent-foreground text-xs font-medium;
+	}
+
+	[data-kt-datepicker-multidate-tag] button {
+		@apply inline-flex items-center justify-center;
+		@apply w-4 h-4 rounded-sm transition-all;
+		@apply text-muted-foreground hover:text-destructive;
+		@apply hover:bg-destructive/10;
+		@apply focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring;
+	}
+
+	/* Empty State */
+	[data-kt-datepicker-empty] {
+		@apply text-center py-8 text-sm text-muted-foreground;
+	}
+
+	/* Live Region (Accessibility) */
+	[data-kt-datepicker-live] {
+		@apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+		clip: rect(0, 0, 0, 0);
+	}
+}
+
+/* Dark Mode Styles */
+@layer utilities {
+	.dark [data-kt-datepicker-input-wrapper] {
+		@apply aria-invalid:border-destructive aria-invalid:ring-destructive/20;
+	}
+
+	.dark [data-kt-datepicker-dropdown] {
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	}
+
+	/* Primary colors use system CSS variables - no dark mode overrides needed */
+}
+
+

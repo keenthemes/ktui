@@ -1,0 +1,296 @@
+<!--
+  KTUI Alert Examples (JS API Only)
+  - All alerts are triggered via KTAlert.show({...})
+  - No data-kt-alert attributes or auto-init
+  - Pattern matches Toast examples for consistency
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KTUI Alert Examples</title>
+  <link rel="stylesheet" href="../../dist/styles.css">
+  <style>
+    /* Custom CSS classes for class override examples */
+    .custom-overlay { background-color: rgba(0, 0, 0, 0.8) !important; }
+    .custom-modal { border-radius: 20px !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important; }
+    .custom-title { color: #e74c3c !important; font-size: 24px !important; }
+    .custom-message { color: #2c3e50 !important; font-size: 16px !important; }
+    .custom-confirm { background-color: #e74c3c !important; border-color: #e74c3c !important; }
+    .custom-cancel { background-color: #95a5a6 !important; border-color: #95a5a6 !important; }
+    .custom-input { border: 2px solid #3498db !important; }
+    .custom-input-label { color: #2980b9 !important; font-weight: bold !important; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="bg-white rounded-lg shadow p-8 w-full max-w-md mt-10 mx-auto">
+    <h2 class="text-xl font-bold mb-4">KTUI Alert Examples</h2>
+
+    <!-- Alert Types -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Alert Types</h3>
+      <div class="flex flex-col gap-4">
+        <button id="alert-info" class="kt-btn w-full">Show Info Alert</button>
+        <button id="alert-success" class="kt-btn w-full">Show Success Alert</button>
+        <button id="alert-error" class="kt-btn w-full">Show Error Alert</button>
+        <button id="alert-warning" class="kt-btn w-full">Show Warning Alert</button>
+        <button id="alert-question" class="kt-btn w-full">Show Question Alert</button>
+      </div>
+    </div>
+
+    <!-- Modal & Non-Modal -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Modal & Non-Modal</h3>
+      <div class="flex flex-col gap-4">
+        <button id="alert-modal" class="kt-btn w-full">Show Modal Alert</button>
+        <button id="alert-nonmodal" class="kt-btn w-full">Show Non-Modal Alert</button>
+      </div>
+    </div>
+
+    <!-- Confirmation & Input -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Confirmation & Input</h3>
+      <div class="flex flex-col gap-4">
+        <button id="alert-confirm" class="kt-btn w-full">Show Confirmation Dialog</button>
+        <button id="alert-input" class="kt-btn w-full">Show Prompt/Input Alert</button>
+      </div>
+    </div>
+
+    <!-- Custom Content & Dismissible -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Custom & Dismissible</h3>
+      <div class="flex flex-col gap-4">
+        <button id="alert-custom" class="kt-btn w-full">Show Custom Content Alert</button>
+        <button id="alert-dismissible" class="kt-btn w-full">Show Dismissible Alert</button>
+      </div>
+    </div>
+
+    <!-- Input Validation -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Input Validation</h3>
+      <div class="flex flex-col gap-4">
+        <button id="alert-validation-email" class="kt-btn w-full">Email Validation</button>
+        <button id="alert-validation-required" class="kt-btn w-full">Required Field Validation</button>
+        <button id="alert-validation-async" class="kt-btn w-full">Async Validation</button>
+        <button id="alert-validation-preconfirm" class="kt-btn w-full">Pre-Confirm Processing</button>
+      </div>
+    </div>
+
+    <!-- Class Override Examples -->
+    <div class="mb-6">
+      <h3 class="font-semibold mb-2">Class Override Examples</h3>
+      <div class="flex flex-col gap-4">
+        <button id="basic-override" class="kt-btn w-full">Basic Alert with Class Overrides</button>
+        <button id="input-override" class="kt-btn w-full">Input Alert with Class Overrides</button>
+        <button id="select-override" class="kt-btn w-full">Select Alert with Class Overrides</button>
+      </div>
+    </div>
+
+  </div>
+  <script src="../../dist/ktui.js"></script>
+  <script>
+    // Alert Types
+    document.getElementById('alert-info').onclick = () => KTAlert.fire({ type: 'info', title: 'Info', message: 'This is an info alert.' });
+    document.getElementById('alert-success').onclick = () => KTAlert.fire({ type: 'success', title: 'Success', message: 'Action completed successfully!' });
+    document.getElementById('alert-error').onclick = () => KTAlert.fire({ type: 'error', title: 'Error', message: 'Something went wrong.' });
+    document.getElementById('alert-warning').onclick = () => KTAlert.fire({ type: 'warning', title: 'Warning', message: 'Please check your input.' });
+    document.getElementById('alert-question').onclick = () => KTAlert.fire({ type: 'question', title: 'Are you sure?', message: 'Do you want to proceed?' });
+
+    // Modal & Non-Modal
+    document.getElementById('alert-modal').onclick = () => KTAlert.fire({ type: 'info', title: 'Modal Alert', message: 'This is a modal alert.', modal: true });
+    document.getElementById('alert-nonmodal').onclick = () => KTAlert.fire({ type: 'info', title: 'Non-Modal Alert', message: 'This is a non-modal alert.', modal: false });
+
+    // Confirmation & Input
+    document.getElementById('alert-confirm').onclick = () => KTAlert.fire({ type: 'question', title: 'Confirm Action', message: 'Are you sure you want to continue?', confirmText: 'Yes', cancelText: 'No', modal: true, dismissible: true });
+    document.getElementById('alert-input').onclick = () => KTAlert.fire({ type: 'info', title: 'Enter Your Name', message: 'Please provide your name below:', input: true, confirmText: 'Submit', cancelText: 'Cancel', modal: true, dismissible: true });
+
+    // Custom Content & Dismissible
+    document.getElementById('alert-custom').onclick = () => KTAlert.fire({ type: 'success', title: 'Custom Content', customContent: '<img src="https://placekitten.com/80/80" alt="Kitten" class="rounded-full mx-auto mb-2" /> <div class="text-center">Here is a custom image!</div>', modal: true, dismissible: true });
+    document.getElementById('alert-dismissible').onclick = () => KTAlert.fire({ type: 'info', title: 'Dismissible', message: 'You can close this alert.', dismissible: true });
+
+    // Input Validation Examples
+    document.getElementById('alert-validation-email').onclick = () => {
+      KTAlert.fire({
+        title: 'Enter Email',
+        message: 'Please provide a valid email address:',
+        input: true,
+        inputType: 'email',
+        inputPlaceholder: 'user@example.com',
+        inputAutoFocus: true,
+        inputValidator: (value) => {
+          if (!value) {
+            return 'You need to enter an email!';
+          }
+          if (!value.includes('@')) {
+            return 'Please enter a valid email address!';
+          }
+          return null; // null = valid
+        },
+        showConfirmButton: true,
+        showCancelButton: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log('Validated email:', result.value);
+        }
+      });
+    };
+
+    document.getElementById('alert-validation-required').onclick = () => {
+      KTAlert.fire({
+        title: 'Enter Your Name',
+        message: 'Please provide your full name:',
+        input: true,
+        inputType: 'text',
+        inputPlaceholder: 'John Doe',
+        inputAutoFocus: true,
+        inputValidator: (value) => {
+          if (!value || value.trim().length === 0) {
+            return 'Name is required!';
+          }
+          if (value.trim().length < 2) {
+            return 'Name must be at least 2 characters!';
+          }
+          return null;
+        },
+        showConfirmButton: true,
+        showCancelButton: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log('Validated name:', result.value);
+        }
+      });
+    };
+
+    document.getElementById('alert-validation-async').onclick = () => {
+      KTAlert.fire({
+        title: 'Check Username',
+        message: 'Enter a username to check availability:',
+        input: true,
+        inputType: 'text',
+        inputPlaceholder: 'username',
+        inputAutoFocus: true,
+        inputValidator: async (value) => {
+          if (!value || value.trim().length === 0) {
+            return 'Username is required!';
+          }
+          if (value.trim().length < 3) {
+            return 'Username must be at least 3 characters!';
+          }
+
+          // Simulate async validation
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // Simulate username check
+          if (['admin', 'root', 'test'].includes(value.toLowerCase())) {
+            return 'Username is already taken!';
+          }
+
+          return null;
+        },
+        showConfirmButton: true,
+        showCancelButton: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log('Async validated username:', result.value);
+        }
+      });
+    };
+
+    document.getElementById('alert-validation-preconfirm').onclick = () => {
+      KTAlert.fire({
+        title: 'Enter URL',
+        message: 'Please provide a website URL:',
+        input: true,
+        inputType: 'url',
+        inputPlaceholder: 'https://example.com',
+        inputAutoFocus: true,
+        inputValidator: (value) => {
+          if (!value) {
+            return 'URL is required!';
+          }
+          if (!value.startsWith('http://') && !value.startsWith('https://')) {
+            return 'URL must start with http:// or https://';
+          }
+          return null;
+        },
+        preConfirm: (value) => {
+          // Normalize URL (add protocol if missing)
+          if (!value.startsWith('http://') && !value.startsWith('https://')) {
+            return `https://${value}`;
+          }
+          return value;
+        },
+        showConfirmButton: true,
+        showCancelButton: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log('Processed URL:', result.value);
+        }
+      });
+    };
+
+    // Class Override Examples
+    document.getElementById('basic-override').onclick = () => {
+      KTAlert.fire({
+        title: 'Custom Styled Alert',
+        message: 'This alert uses custom CSS classes for styling.',
+        type: 'info',
+        modal: true,
+        // Granular class overrides
+        overlayClass: 'custom-overlay',
+        modalClass: 'custom-modal',
+        titleClass: 'custom-title',
+        messageClass: 'custom-message',
+        confirmButtonClass: 'custom-confirm',
+        cancelButtonClass: 'custom-cancel'
+      });
+    };
+
+    document.getElementById('input-override').onclick = () => {
+      KTAlert.fire({
+        title: 'Custom Input Alert',
+        message: 'Enter your name with custom styling:',
+        type: 'question',
+        input: true,
+        inputType: 'text',
+        inputPlaceholder: 'Enter your name',
+        inputLabel: 'Name:',
+        modal: true,
+        // Input-specific class overrides
+        inputClass: 'custom-input',
+        inputLabelClass: 'custom-input-label',
+        titleClass: 'custom-title',
+        messageClass: 'custom-message',
+        confirmButtonClass: 'custom-confirm',
+        cancelButtonClass: 'custom-cancel'
+      });
+    };
+
+    document.getElementById('select-override').onclick = () => {
+      KTAlert.fire({
+        title: 'Custom Select Alert',
+        message: 'Choose your favorite color:',
+        type: 'question',
+        input: true,
+        inputType: 'select',
+        inputLabel: 'Color:',
+        inputOptions: [
+          { value: 'red', label: 'Red' },
+          { value: 'blue', label: 'Blue' },
+          { value: 'green', label: 'Green' },
+          { value: 'yellow', label: 'Yellow' }
+        ],
+        modal: true,
+        // Select-specific class overrides
+        inputClass: 'custom-input',
+        inputLabelClass: 'custom-input-label',
+        titleClass: 'custom-title',
+        messageClass: 'custom-message',
+        confirmButtonClass: 'custom-confirm',
+        cancelButtonClass: 'custom-cancel'
+      });
+    };
+  </script>
+</body>
+</html>
