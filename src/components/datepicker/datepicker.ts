@@ -722,9 +722,24 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
   /** Select a single date */
   private _selectSingleDate(date: Date) {
-    // Preserve time if time is enabled and we have a selected time
-    if (this._config.enableTime && this._unifiedStateManager.getState().selectedTime) {
-      const dateWithTime = applyTimeToDate(date, this._unifiedStateManager.getState().selectedTime);
+    // Preserve time if time is enabled
+    if (this._config.enableTime) {
+      let timeToUse = this._unifiedStateManager.getState().selectedTime;
+
+      // If no selectedTime, try to extract from current selectedDate
+      if (!timeToUse) {
+        const currentSelectedDate = this._unifiedStateManager.getState().selectedDate;
+        if (currentSelectedDate) {
+          timeToUse = dateToTimeState(currentSelectedDate);
+        }
+      }
+
+      // If still no time, default to current time
+      if (!timeToUse) {
+        timeToUse = dateToTimeState(new Date());
+      }
+
+      const dateWithTime = applyTimeToDate(date, timeToUse);
       this._unifiedStateManager.setSelectedDate(dateWithTime, 'calendar');
     } else {
       this._unifiedStateManager.setSelectedDate(date, 'calendar');
@@ -743,8 +758,39 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    */
   private _selectRangeDate(date: Date) {
     const currentState = this._unifiedStateManager.getState();
+
+    // First, let updateRangeSelection handle the date logic (it normalizes to midnight for comparison)
     const newRange = updateRangeSelection(currentState.selectedRange, date);
-    this._unifiedStateManager.setSelectedRange(newRange, 'calendar');
+
+    // Then, if time is enabled, apply time to both start and end dates
+    if (this._config.enableTime) {
+      let timeToUse = currentState.selectedTime;
+
+      // If no selectedTime, try to extract from current selectedDate or range dates
+      if (!timeToUse) {
+        // Check if we have a start date with time
+        if (currentState.selectedRange?.start) {
+          timeToUse = dateToTimeState(currentState.selectedRange.start);
+        } else if (currentState.selectedDate) {
+          timeToUse = dateToTimeState(currentState.selectedDate);
+        }
+      }
+
+      // If still no time, default to current time
+      if (!timeToUse) {
+        timeToUse = dateToTimeState(new Date());
+      }
+
+      // Apply time to both start and end dates
+      const rangeWithTime = {
+        start: newRange.start ? applyTimeToDate(newRange.start, timeToUse) : null,
+        end: newRange.end ? applyTimeToDate(newRange.end, timeToUse) : null
+      };
+
+      this._unifiedStateManager.setSelectedRange(rangeWithTime, 'calendar');
+    } else {
+      this._unifiedStateManager.setSelectedRange(newRange, 'calendar');
+    }
 
     if (this._input) {
       const evt = new Event('change', { bubbles: true });
@@ -756,13 +802,34 @@ export class KTDatepicker extends KTComponent implements StateObserver {
   private _selectMultiDate(date: Date) {
     const currentState = this._unifiedStateManager.getState();
     const currentDates = currentState.selectedDates || [];
-    const exists = currentDates.some((d) => d.getTime() === date.getTime());
+
+    // Preserve time if time is enabled
+    let dateToSelect = date;
+    if (this._config.enableTime) {
+      let timeToUse = currentState.selectedTime;
+
+      // If no selectedTime, try to extract from existing selected dates
+      if (!timeToUse && currentDates.length > 0) {
+        timeToUse = dateToTimeState(currentDates[0]);
+      } else if (!timeToUse && currentState.selectedDate) {
+        timeToUse = dateToTimeState(currentState.selectedDate);
+      }
+
+      // If still no time, default to current time
+      if (!timeToUse) {
+        timeToUse = dateToTimeState(new Date());
+      }
+
+      dateToSelect = applyTimeToDate(date, timeToUse);
+    }
+
+    const exists = currentDates.some((d) => d.getTime() === dateToSelect.getTime());
     let newDates: Date[];
 
     if (exists) {
-      newDates = currentDates.filter((d) => d.getTime() !== date.getTime());
+      newDates = currentDates.filter((d) => d.getTime() !== dateToSelect.getTime());
     } else {
-      newDates = [...currentDates, date];
+      newDates = [...currentDates, dateToSelect];
     }
 
     this._unifiedStateManager.setSelectedDates(newDates, 'calendar');
@@ -1500,6 +1567,11 @@ export class KTDatepicker extends KTComponent implements StateObserver {
    * Render the datepicker UI using templates
    */
   private _render() {
+    // Performance marker: Start render
+    if (typeof performance !== 'undefined' && this._config.debug) {
+      performance.mark('datepicker-render-start');
+    }
+
             // Store current state before rendering
     const wasOpen = this._unifiedStateManager.isDropdownOpen();
     const selectedDate = this._unifiedStateManager.getState().selectedDate;
@@ -1562,10 +1634,10 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     this._updateDisabledState();
 
     // Enforce min/max dates after rendering
-    // Use setTimeout to ensure DOM is fully rendered
-    setTimeout(() => {
+    // Use requestAnimationFrame to align with browser render cycle
+    requestAnimationFrame(() => {
       this._enforceMinMaxDates();
-    }, 0);
+    });
 
     // Attach keyboard event listeners
     if (this._input) {
@@ -1589,6 +1661,12 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     // Initialize DOM element cache after rendering
     this._initializeElementCache();
+
+    // Performance marker: End render
+    if (typeof performance !== 'undefined' && this._config.debug) {
+      performance.mark('datepicker-render-end');
+      performance.measure('datepicker-render', 'datepicker-render-start', 'datepicker-render-end');
+    }
   }
 
   /**
@@ -1685,11 +1763,16 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     }, 10);
   }
 
-      /**
+	/**
    * Update only the calendar content without recreating the dropdown
    * This preserves the dropdown state while updating the month view
    */
   private _updateCalendarContent() {
+    // Performance marker: Start incremental update
+    if (typeof performance !== 'undefined' && this._config.debug) {
+      performance.mark('datepicker-incremental-update-start');
+    }
+
     // Instance-scoped dropdown element selection strategy
     let dropdownEl: HTMLElement | null = null;
 
@@ -1727,7 +1810,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     if (!dropdownEl) {
       // Fallback to full render if dropdown doesn't exist (should be rare)
-      console.warn('[KTDatepicker] Dropdown element not found, falling back to full render');
       this._render();
       return;
     }
@@ -1800,9 +1882,14 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
       // Enforce min/max dates after calendar update
       this._enforceMinMaxDates();
+
+      // Performance marker: End incremental update
+      if (typeof performance !== 'undefined' && this._config.debug) {
+        performance.mark('datepicker-incremental-update-end');
+        performance.measure('datepicker-incremental-update', 'datepicker-incremental-update-start', 'datepicker-incremental-update-end');
+      }
     } else {
       // If calendar element not found, fallback to full render
-      console.warn('[KTDatepicker] Calendar element not found, falling back to full render');
       this._render();
     }
   }
@@ -1849,7 +1936,6 @@ export class KTDatepicker extends KTComponent implements StateObserver {
 
     if (!dropdownEl) {
       // Fallback to full render if dropdown doesn't exist (should be rare)
-      console.warn('[KTDatepicker] Dropdown element not found, falling back to full render');
       this._render();
       return;
     }
@@ -1861,7 +1947,7 @@ export class KTDatepicker extends KTComponent implements StateObserver {
     // Find the multi-month container
     const multiMonthContainer = dropdownEl.querySelector('[data-kt-datepicker-multimonth-container]');
     if (!multiMonthContainer) {
-      console.warn('[KTDatepicker] Multi-month container not found, falling back to full render');
+      // Multi-month container not found, fallback to full render
       this._render();
       return;
     }
