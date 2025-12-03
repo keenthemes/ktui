@@ -10,7 +10,6 @@
 		@apply outline-0 block w-full bg-background border border-input shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground;
 		@apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
 		@apply disabled:cursor-not-allowed disabled:opacity-60;
-		@apply [&[readonly]]:bg-muted/80 [&[readonly]]:cursor-not-allowed [&[readonly]]:text-secondary-foreground/80;
 		@apply file:h-full [&[type=file]]:py-0;
 		@apply file:border-solid file:border-input file:bg-transparent file:font-medium file:not-italic file:text-foreground file:p-0 file:border-0 file:border-e;
 		@apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;

@@ -9,7 +9,6 @@
 		@apply cursor-pointer py-0 appearance-none flex items-center gap-2 w-full bg-background border border-input shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground/80;
 		@apply focus-visible:ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px];
 		@apply disabled:cursor-not-allowed disabled:opacity-60;
-		@apply [&[readonly]]:opacity-70;
 		@apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
 
 		background-repeat: no-repeat;

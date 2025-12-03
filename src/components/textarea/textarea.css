@@ -10,7 +10,6 @@
 		@apply w-full bg-background border border-input text-foreground shadow-xs shadow-[rgba(0,0,0,0.05)] transition-[color,box-shadow] placeholder:text-muted-foreground/80;
 		@apply focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/30;
 		@apply disabled:cursor-not-allowed disabled:opacity-60;
-		@apply [&[readonly]]:bg-muted/80 [&[readonly]]:cursor-not-allowed;
 		@apply aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10;
 	}
 
