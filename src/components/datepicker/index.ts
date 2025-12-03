@@ -1,8 +1,10 @@
-import { KTDatepicker, initDatepickers } from './datepicker';
+/**
+ * KTUI - Free & Open-Source Tailwind UI Components by Keenthemes
+ * Copyright 2025 by Keenthemes Inc
+ */
 
-// Attach static init method to KTDatepicker
-(KTDatepicker as any).init = initDatepickers;
+import { KTDatepicker } from './datepicker';
+import * as DatepickerTypes from './types';
 
-export { KTDatepicker };
-export * from './ui/templates/templates';
-export * from './config/types';
+export { KTDatepicker, DatepickerTypes };
+export default KTDatepicker;

@@ -223,33 +223,6 @@ For specific cases, you can use the `rtl:*` Tailwind modifier to easily control 
 
 ---
 
-## Integration Testing (Playwright)
-
-Integration tests for KTUI components use [Playwright](https://playwright.dev/). Example HTML files in `examples/datepicker` are used as test harnesses, and tests are located in `src/components/datepicker/tests/`.
-
-### Running Integration Tests
-
-1. **Install dependencies:**
-   ```sh
-   npm install
-   ```
-2. **Run integration tests (headless):**
-   ```sh
-   npm run test:integration
-   ```
-3. **Run integration tests (headed, for debugging):**
-   ```sh
-   npm run test:integration:headed
-   ```
-
-Playwright will automatically start a static server to serve the example HTML files during test runs.
-
-### Test File Locations
-- Example HTML: `examples/datepicker/*.html`
-- Integration tests: `src/components/datepicker/tests/*.integration.spec.ts`
-
----
-
 ## License
 
 KTUI is distributed under the MIT license. See [LICENSE.md](https://github.com/keenthemes/ktui/blob/main/LICENSE.md) for full details.
