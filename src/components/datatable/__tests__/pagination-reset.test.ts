@@ -429,7 +429,7 @@ describe('KTDataTable - Pagination Reset', () => {
 	});
 
 	describe('Scenario: State persistence respects pagination reset', () => {
-		it('should save page 1 to state when search resets pagination', () => {
+		it('should save page 1 to state when search resets pagination', async () => {
 			const { container } = createMockDataTable(25);
 
 			// Enable state saving with unique namespace
@@ -439,8 +439,18 @@ describe('KTDataTable - Pagination Reset', () => {
 				stateNamespace: 'test-datatable-search-reset',
 			});
 
+			// Wait for initial _updateData() to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
 			datatable.goPage(2);
+
+			// Wait for goPage to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
 			datatable.search('test query');
+
+			// Wait for async state save operations to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
 
 			// Check saved state
 			const savedState = localStorage.getItem('test-datatable-search-reset');
@@ -483,7 +493,7 @@ describe('KTDataTable - Pagination Reset', () => {
 			localStorage.removeItem('test-datatable-filter-reset');
 		});
 
-		it('should restore to page 1 with active search on reload', () => {
+		it('should restore to page 1 with active search on reload', async () => {
 			const { container } = createMockDataTable(25);
 			const namespace = 'test-datatable-restore';
 
@@ -494,11 +504,25 @@ describe('KTDataTable - Pagination Reset', () => {
 				stateNamespace: namespace,
 			});
 
+			// Wait for initial load
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
 			table1.goPage(2);
+
+			// Wait for goPage to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
 			table1.search('User 5');
+
+			// Wait for search and state save to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
 
 			// Destroy first instance
 			table1.dispose();
+
+			// Wait for cleanup to complete
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
 			document.body.innerHTML = '';
 
 			// Create new instance (simulating page reload)

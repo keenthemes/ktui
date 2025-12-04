@@ -58,6 +58,18 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _data: T[] = [];
 	private _isFetching: boolean = false;
 
+	/**
+	 * AbortController for cancelling previous fetch requests
+	 * Used to prevent race conditions when multiple requests are triggered rapidly
+	 */
+	private _abortController: AbortController | null = null;
+
+	/**
+	 * Request ID counter for tracking request sequence
+	 * Used to detect and ignore stale responses from older requests
+	 */
+	private _requestId: number = 0;
+
 	constructor(element: HTMLElement, config?: KTDataTableConfigInterface) {
 		super();
 
@@ -448,15 +460,16 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		try {
 			this._showSpinner(); // Show spinner before fetching data
 
-			// Fetch data from the DOM and initialize the checkbox plugin
-			return typeof this._config.apiEndpoint === 'undefined'
-				? this._fetchDataFromLocal().then(
-						this._finalize.bind(this) as () => Promise<void>,
-					)
-				: this._fetchDataFromServer().then(
-						this._finalize.bind(this) as () => Promise<void>,
-					);
+			// Fetch data and finalize - properly await to ensure finally block runs after completion
+			if (typeof this._config.apiEndpoint === 'undefined') {
+				await this._fetchDataFromLocal();
+				await this._finalize();
+			} else {
+				await this._fetchDataFromServer();
+				await this._finalize();
+			}
 		} finally {
+			// Finally block now correctly executes after promises resolve, not immediately
 			this._isFetching = false;
 		}
 	}
@@ -703,11 +716,30 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * Fetch data from the server
 	 */
 	private async _fetchDataFromServer(): Promise<void> {
+		// Increment request ID to track this specific request
+		const currentRequestId = ++this._requestId;
+
 		this._fireEvent('fetch');
 		this._dispatchEvent('fetch');
 
 		const queryParams = this._getQueryParamsForFetchRequest();
-		const response = await this._performFetchRequest(queryParams);
+
+		let response: Response;
+		try {
+			response = await this._performFetchRequest(queryParams);
+		} catch (error) {
+			// Silently ignore AbortError - request was cancelled
+			if ((error as Error).name === 'AbortError') {
+				return;
+			}
+			throw error;
+		}
+
+		// Check if this response is stale (a newer request has been initiated)
+		if (currentRequestId !== this._requestId) {
+			// Ignore stale response - a more recent request is in progress or has completed
+			return;
+		}
 
 		let responseData = null;
 
@@ -727,6 +759,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				status: response.status,
 				statusText: response.statusText
 			});
+			return;
+		}
+
+		// Double-check request ID after JSON parsing (additional safety)
+		if (currentRequestId !== this._requestId) {
 			return;
 		}
 
@@ -809,6 +846,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		let requestMethod: RequestInit['method'] = this._config.requestMethod;
 		let requestBody: RequestInit['body'] | undefined = undefined;
 
+		// Cancel previous request to prevent race conditions
+		if (this._abortController) {
+			this._abortController.abort();
+		}
+
+		// Create new AbortController for this request
+		this._abortController = new AbortController();
+
 		// If the request method is POST, send the query params as the request body
 		if (requestMethod === 'POST') {
 			requestBody = queryParams;
@@ -828,8 +873,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			...(this._config.requestCredentials && {
 				credentials: this._config.requestCredentials,
 			}),
+			// Add abort signal if available
+			...(this._abortController && { signal: this._abortController.signal }),
 		}).catch((error) => {
-			// Trigger an error event
+			// Silently ignore AbortError - this is expected when requests are cancelled
+			if (error.name === 'AbortError') {
+				return Promise.reject(error);
+			}
+
+			// Trigger an error event for non-abort errors
 			this._fireEvent('error', { error });
 			this._dispatchEvent('error', { error });
 
@@ -897,7 +949,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._fireEvent('drew');
 		this._dispatchEvent('drew');
 
-		this._hideSpinner(); // Hide spinner after data is fetched
+		// Spinner is hidden in _finalize() to ensure it stays visible until the entire request completes
+		// Removed duplicate _hideSpinner() call here to prevent premature hiding
 
 		if (this._config.stateSave) {
 			this._saveState();

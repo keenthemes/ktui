@@ -35,8 +35,8 @@ afterEach(() => {
 	// Reset document body
 	document.body.innerHTML = '';
 
-	// Clear any intervals/timeouts
-	// This helps prevent test interference
+	// Clear all pending timers to prevent "document is not defined" errors
+	vi.clearAllTimers();
 });
 
 // Mock window.matchMedia if needed
@@ -45,7 +45,7 @@ Object.defineProperty(window, 'matchMedia', {
 	value: (query: string) => ({
 		matches: false,
 		media: query,
-		onchange: null,
+		onchange: null as ((this: MediaQueryList, ev: MediaQueryListEvent) => any) | null,
 		addListener: () => {}, // deprecated
 		removeListener: () => {}, // deprecated
 		addEventListener: () => {},
