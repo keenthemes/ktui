@@ -10,7 +10,8 @@
 		"target": "es5",
 		"allowJs": true,
 		"resolveJsonModule": true,
-		"moduleResolution": "node"
+		"moduleResolution": "node",
+		"skipLibCheck": true
 	},
 	"include": ["src/components"],
 	"exclude": ["node_modules", "dist"]
