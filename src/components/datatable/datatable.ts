@@ -1668,6 +1668,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			),
 			filter,
 		];
+		this._config._state.page = 1;
 		return this;
 	}
 
@@ -1677,6 +1678,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	public search(query: string | object): void {
 		this._config._state.search = query;
+		this._config._state.page = 1;
 		this.reload();
 	}
 
