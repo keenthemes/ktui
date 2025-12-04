@@ -25,7 +25,6 @@ import { KTThemeSwitch } from './components/theme-switch';
 import { KTImageInput } from './components/image-input';
 import { KTTogglePassword } from './components/toggle-password';
 import { KTDataTable } from './components/datatable';
-import { KTDatepicker } from './components/datepicker';
 import { KTSelect } from './components/select';
 import { KTToast } from './components/toast';
 
@@ -48,7 +47,6 @@ export { KTThemeSwitch } from './components/theme-switch';
 export { KTImageInput } from './components/image-input';
 export { KTTogglePassword } from './components/toggle-password';
 export { KTDataTable } from './components/datatable';
-export { KTDatepicker } from './components/datepicker';
 export { KTSelect } from './components/select';
 export { KTToast } from './components/toast';
 
@@ -73,7 +71,6 @@ const KTComponents = {
 		KTImageInput.init();
 		KTTogglePassword.init();
 		KTDataTable.init();
-		KTDatepicker.init();
 		KTSelect.init();
 		KTToast.init();
 	},
@@ -103,7 +100,6 @@ declare global {
 		KTImageInput: typeof KTImageInput;
 		KTTogglePassword: typeof KTTogglePassword;
 		KTDataTable: typeof KTDataTable;
-		KTDatepicker: typeof KTDatepicker;
 		KTSelect: typeof KTSelect;
 		KTToast: typeof KTToast;
 		KTComponents: typeof KTComponents;
