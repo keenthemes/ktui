@@ -1129,10 +1129,16 @@ export class KTSelect extends KTComponent {
 			this._config.closeOnOtherOpen !== false; // Default to true
 		if (closeOnOtherOpen) {
 			// Close all other open dropdowns
+			const otherSelectsToClose: KTSelect[] = [];
 			KTSelect.openDropdowns.forEach((otherSelect) => {
-				if (otherSelect !== this && otherSelect._dropdownIsOpen) {
-					otherSelect.closeDropdown();
+				const isOther = otherSelect !== this;
+				const isOpen = otherSelect._dropdownIsOpen;
+				if (isOther && isOpen) {
+					otherSelectsToClose.push(otherSelect);
 				}
+			});
+			otherSelectsToClose.forEach((otherSelect) => {
+				otherSelect.closeDropdown();
 			});
 		}
 
