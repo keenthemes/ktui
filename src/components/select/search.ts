@@ -91,15 +91,29 @@ export class KTSelectSearch {
 					.getWrapperElement()
 					.addEventListener('dropdown.close', () => {
 						this._focusManager.resetFocus();
-						// If clearSearchOnClose is false and there's a value, the search term and filtered state should persist.
-						// KTSelect's closeDropdown method already calls this._searchModule.clearSearch() (which clears highlights)
-						// and conditionally clears the input value based on KTSelect's config.clearSearchOnClose.
-						// This listener in search.ts seems to unconditionally clear everything.
-						// For now, keeping its original behavior:
-						this.clearSearch(); // Clears highlights from current options
-						this._searchInput.value = ''; // Clears the search input field
-						this._resetAllOptions(); // Shows all options, restores original text, removes highlights
-						this._clearNoResultsMessage(); // Clears any "no results" message
+						const config = this._select.getConfig();
+
+						// Clear highlights from current options (always do this)
+						this.clearSearch();
+
+						// Respect clearSearchOnClose config option
+						if (config.clearSearchOnClose) {
+							// Clear the search input field
+							this._searchInput.value = '';
+							// Reset all options to their original state
+							this._resetAllOptions();
+							// Clear any "no results" message
+							this._clearNoResultsMessage();
+						} else {
+							// When clearSearchOnClose is false, preserve search text
+							// The search input value is already preserved by KTSelect's closeDropdown method
+							// Reset options visibility to show all (they will be re-filtered when dropdown reopens)
+							this._resetAllOptions();
+							// Clear any "no results" message
+							this._clearNoResultsMessage();
+							// Note: The search input value is preserved, so when dropdown reopens,
+							// the dropdown.show listener will detect it and re-filter options accordingly
+						}
 					});
 
 				// Clear highlights when an option is selected - ATTACH TO ORIGINAL SELECT (standard 'change' event)

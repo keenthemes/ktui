@@ -3,13 +3,13 @@
  * Tests the fixes for concurrent request handling, request cancellation, and stale response detection
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
 import { KTDataTable } from '../datatable';
 import { waitFor } from './setup';
 
 describe('KTDataTable Race Condition Fixes', () => {
 	let container: HTMLElement;
-	let mockFetch: typeof fetch;
+	let mockFetch: MockedFunction<typeof fetch>;
 	let abortSignals: AbortSignal[] = [];
 
 	beforeEach(() => {
@@ -158,7 +158,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			let callCount = 0;
 
 			// Mock to capture request sequence
-			mockFetch.mockImplementation((url, options) => {
+			mockFetch.mockImplementation((url: RequestInfo | URL, options?: RequestInit) => {
 				callCount++;
 				const id = callCount;
 				requestIds.push(id);
@@ -251,7 +251,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 		it('should reset _isFetching flag even after fetch error', async () => {
 			let callCount = 0;
-			mockFetch.mockImplementation(() => {
+			mockFetch.mockImplementation((url: RequestInfo | URL, options?: RequestInit) => {
 				callCount++;
 				if (callCount === 1) {
 					// Return invalid JSON to trigger parse error
