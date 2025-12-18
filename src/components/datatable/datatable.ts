@@ -73,7 +73,17 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	constructor(element: HTMLElement, config?: KTDataTableConfigInterface) {
 		super();
 
-		if (KTData.has(element as HTMLElement, this._name)) return;
+		// Check for existing instance
+		const existingInstance = KTData.get(element, this._name) as
+			| KTDataTable<T>
+			| undefined;
+		if (existingInstance) {
+			// If instance exists and is not disposed, return early (idempotent initialization)
+			if (!existingInstance._disposed) {
+				return;
+			}
+			// If instance exists but is disposed, it will be cleaned up in _init()
+		}
 
 		this._defaultConfig = this._initDefaultConfig(config);
 
@@ -82,6 +92,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		// Store the instance directly on the element
 		(element as any).instance = this;
+
+		// Store in static instances map for getInstance() lookup
+		KTDataTable._instances.set(element, this as any);
 
 		this._initElements();
 
@@ -370,12 +383,30 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {void}
 	 */
 	private _initElements(): void {
+		// Guard: check if element is null or disposed
+		if (!this._element || this._disposed) {
+			return;
+		}
 		/**
 		 * Data table element
+		 * First check if the element itself is a table matching the selector
+		 * Otherwise, query for a table inside the container
 		 */
-		this._tableElement = this._element.querySelector<HTMLTableElement>(
-			this._config.attributes.table,
-		)!;
+		if (
+			this._element instanceof HTMLTableElement &&
+			this._element.matches(this._config.attributes.table)
+		) {
+			// Element is the table itself
+			this._tableElement = this._element;
+		} else {
+			// Element is a container, query for table inside
+			this._tableElement = this._element.querySelector<HTMLTableElement>(
+				this._config.attributes.table,
+			)!;
+		}
+		if (!this._tableElement) {
+			return;
+		}
 		/**
 		 * Table body element
 		 */
@@ -455,6 +486,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {Promise<void>} Promise which is resolved after data has been fetched and checkbox plugin initialized.
 	 */
 	private async _updateData(): Promise<void> {
+		// Guard: check if table element is initialized or disposed
+		if (!this._tableElement || this._disposed) {
+			return;
+		}
 		if (this._isFetching) return; // Prevent duplicate fetches
 		this._isFetching = true;
 		try {
@@ -463,10 +498,16 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			// Fetch data and finalize - properly await to ensure finally block runs after completion
 			if (typeof this._config.apiEndpoint === 'undefined') {
 				await this._fetchDataFromLocal();
-				await this._finalize();
+				// Guard again before finalize (might have been disposed during fetch)
+				if (!this._disposed && this._element) {
+					await this._finalize();
+				}
 			} else {
 				await this._fetchDataFromServer();
-				await this._finalize();
+				// Guard again before finalize (might have been disposed during fetch)
+				if (!this._disposed && this._element) {
+					await this._finalize();
+				}
 			}
 		} finally {
 			// Finally block now correctly executes after promises resolve, not immediately
@@ -479,6 +520,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {void}
 	 */
 	private _finalize(): void {
+		// Guard: check if disposed or element is null
+		if (this._disposed || !this._element) {
+			return;
+		}
 		this._element.classList.add('datatable-initialized');
 
 		// Initialize checkbox logic
@@ -1385,6 +1430,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	// Method to show the loading spinner
 	private _showSpinner(): void {
+		// Guard: check if element or table element is null
+		if (!this._element || !this._tableElement) {
+			return;
+		}
 		const spinner =
 			this._element.querySelector<HTMLElement>(
 				this._config.attributes.spinner,
@@ -1408,7 +1457,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	// Method to create a spinner element if it doesn't exist
 	private _createSpinner(): HTMLElement {
-		if (typeof this._config.loading === 'undefined') {
+		// Guard: check if table element is null
+		if (!this._tableElement || typeof this._config.loading === 'undefined') {
 			return null;
 		}
 
@@ -1726,7 +1776,39 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	public override dispose(): void {
+		// Idempotent: can be called multiple times safely
+		if (this._disposed) return;
+
+		// Cancel any pending async operations
+		if (this._abortController) {
+			this._abortController.abort();
+			this._abortController = null;
+		}
+
+		// Reset fetching flag
+		this._isFetching = false;
+
+		// Call private dispose to clean up event listeners and DOM
 		this._dispose();
+
+		// Clear references
+		this._checkbox = null;
+		this._sortHandler = null;
+		this._tableElement = null;
+		this._tbodyElement = null;
+		this._theadElement = null;
+		this._infoElement = null;
+		this._sizeElement = null;
+		this._paginationElement = null;
+		this._data = [];
+
+		// Remove from static instances map
+		if (KTDataTable._instances) {
+			KTDataTable._instances.delete(this._element);
+		}
+
+		// Call parent dispose to clean up base class resources
+		super.dispose();
 	}
 
 	public search(query: string | object): void {
@@ -1778,6 +1860,37 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		element: HTMLElement,
 	): KTDataTable<KTDataTableDataInterface> | undefined {
 		return this._instances.get(element);
+	}
+
+	/**
+	 * Re-initialize a KTDataTable component on an element.
+	 * If an active instance exists, it is returned. If a disposed instance exists, it is cleaned up and a new instance is created.
+	 * @param element The HTML element to initialize the component on
+	 * @param config Optional configuration to use for the new instance
+	 * @returns The KTDataTable instance
+	 * @example
+	 * const table = KTDataTable.reinit(element);
+	 * const tableWithConfig = KTDataTable.reinit(element, { apiEndpoint: '/api/data' });
+	 */
+	public static reinit<T extends KTDataTableDataInterface>(
+		element: HTMLElement,
+		config?: KTDataTableConfigInterface,
+	): KTDataTable<T> {
+		const existing = KTData.get(element, 'datatable') as
+			| KTDataTable<T>
+			| undefined;
+		if (existing && !existing._disposed) {
+			// Return existing active instance (idempotent)
+			return existing;
+		}
+		if (existing && existing._disposed) {
+			// Clean up disposed instance
+			existing.dispose();
+		}
+		// Create new instance
+		const instance = new KTDataTable<T>(element, config);
+		this._instances.set(element, instance as any);
+		return instance;
 	}
 
 	/**
