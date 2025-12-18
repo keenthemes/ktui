@@ -9,7 +9,7 @@ import { waitFor } from './setup';
 
 describe('KTDataTable Race Condition Fixes', () => {
 	let container: HTMLElement;
-	let mockFetch: typeof fetch;
+	let mockFetch: ReturnType<typeof vi.fn<typeof fetch>>;
 	let abortSignals: AbortSignal[] = [];
 
 	beforeEach(() => {
@@ -158,7 +158,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			let callCount = 0;
 
 			// Mock to capture request sequence
-			mockFetch.mockImplementation((url, options) => {
+			(mockFetch as any).mockImplementation((url: any, options: any) => {
 				callCount++;
 				const id = callCount;
 				requestIds.push(id);
@@ -251,7 +251,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 		it('should reset _isFetching flag even after fetch error', async () => {
 			let callCount = 0;
-			mockFetch.mockImplementation(() => {
+			(mockFetch as any).mockImplementation(() => {
 				callCount++;
 				if (callCount === 1) {
 					// Return invalid JSON to trigger parse error

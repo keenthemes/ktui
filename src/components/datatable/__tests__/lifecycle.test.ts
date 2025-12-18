@@ -79,7 +79,7 @@ describe('KTDataTable Lifecycle Management', () => {
 			table1.dispose();
 
 			// Verify disposed
-			expect(table1._disposed).toBe(true);
+			expect((table1 as any)._disposed).toBe(true);
 			expect(tableEl.hasAttribute('data-kt-datatable-initialized')).toBe(false);
 
 			// Re-initialize
@@ -89,7 +89,7 @@ describe('KTDataTable Lifecycle Management', () => {
 
 			// Verify new instance works
 			expect(table2.getElement()).toBe(tableEl);
-			expect(table2._disposed).toBe(false);
+			expect((table2 as any)._disposed).toBe(false);
 			expect(tableEl.hasAttribute('data-kt-datatable-initialized')).toBe(true);
 			expect(table2).not.toBe(table1);
 		});
@@ -113,7 +113,7 @@ describe('KTDataTable Lifecycle Management', () => {
 
 			// Verify new instance
 			expect(table2.getElement()).toBe(tableEl);
-			expect(table2._disposed).toBe(false);
+			expect((table2 as any)._disposed).toBe(false);
 			expect(table2).not.toBe(table1);
 		});
 
@@ -133,7 +133,7 @@ describe('KTDataTable Lifecycle Management', () => {
 
 			// Should return same instance
 			expect(table2).toBe(table1);
-			expect(table2._disposed).toBe(false);
+			expect((table2 as any)._disposed).toBe(false);
 		});
 
 		it('should allow reinit with updated configuration', async () => {
@@ -156,7 +156,7 @@ describe('KTDataTable Lifecycle Management', () => {
 			});
 
 			// Verify new config is applied
-			expect(table2._config.pageSize).toBe(20);
+			expect((table2 as any)._config.pageSize).toBe(20);
 		});
 	});
 
@@ -284,7 +284,7 @@ describe('KTDataTable Lifecycle Management', () => {
 			table.dispose();
 
 			// Should not throw and should be disposed
-			expect(table._disposed).toBe(true);
+			expect((table as any)._disposed).toBe(true);
 		});
 	});
 
@@ -300,19 +300,19 @@ describe('KTDataTable Lifecycle Management', () => {
 			tableInstance = new KTDataTable(tableEl, {
 				apiEndpoint: '/api/data',
 			});
-			expect(tableInstance._disposed).toBe(false);
+			expect((tableInstance as any)._disposed).toBe(false);
 
 			// Unmount (cleanup)
 			if (tableInstance) {
 				tableInstance.dispose();
 			}
-			expect(tableInstance._disposed).toBe(true);
+			expect((tableInstance as any)._disposed).toBe(true);
 
 			// Re-mount
 			tableInstance = new KTDataTable(tableEl, {
 				apiEndpoint: '/api/data',
 			});
-			expect(tableInstance._disposed).toBe(false);
+			expect((tableInstance as any)._disposed).toBe(false);
 		});
 
 		it('should work with Vue-like onMounted/onUnmounted pattern', async () => {
@@ -326,19 +326,19 @@ describe('KTDataTable Lifecycle Management', () => {
 			tableInstance = new KTDataTable(tableEl, {
 				apiEndpoint: '/api/data',
 			});
-			expect(tableInstance._disposed).toBe(false);
+			expect((tableInstance as any)._disposed).toBe(false);
 
 			// onUnmounted
 			if (tableInstance) {
 				tableInstance.dispose();
 			}
-			expect(tableInstance._disposed).toBe(true);
+			expect((tableInstance as any)._disposed).toBe(true);
 
 			// Re-mount
 			tableInstance = KTDataTable.reinit(tableEl, {
 				apiEndpoint: '/api/data',
 			});
-			expect(tableInstance._disposed).toBe(false);
+			expect((tableInstance as any)._disposed).toBe(false);
 		});
 
 		it('should handle rapid destroy/re-init cycles without memory leaks', async () => {
@@ -357,7 +357,7 @@ describe('KTDataTable Lifecycle Management', () => {
 			const finalTable = new KTDataTable(tableEl, {
 				apiEndpoint: '/api/data',
 			});
-			expect(finalTable._disposed).toBe(false);
+			expect((finalTable as any)._disposed).toBe(false);
 			expect(finalTable.getElement()).toBe(tableEl);
 		});
 	});

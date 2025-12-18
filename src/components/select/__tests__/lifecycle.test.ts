@@ -79,7 +79,7 @@ describe('KTSelect Lifecycle Management', () => {
 			select1.dispose();
 
 			// Verify disposed
-			expect(select1._disposed).toBe(true);
+			expect((select1 as any)._disposed).toBe(true);
 			expect(selectEl.hasAttribute('data-kt-select-initialized')).toBe(false);
 
 			// Re-initialize
@@ -88,7 +88,7 @@ describe('KTSelect Lifecycle Management', () => {
 
 			// Verify new instance works
 			expect(select2.getElement()).toBe(selectEl);
-			expect(select2._disposed).toBe(false);
+			expect((select2 as any)._disposed).toBe(false);
 			expect(selectEl.hasAttribute('data-kt-select-initialized')).toBe(true);
 			expect(select2).not.toBe(select1);
 		});
@@ -110,7 +110,7 @@ describe('KTSelect Lifecycle Management', () => {
 
 			// Verify new instance
 			expect(select2.getElement()).toBe(selectEl);
-			expect(select2._disposed).toBe(false);
+			expect((select2 as any)._disposed).toBe(false);
 			expect(select2).not.toBe(select1);
 		});
 
@@ -127,7 +127,7 @@ describe('KTSelect Lifecycle Management', () => {
 
 			// Should return same instance
 			expect(select2).toBe(select1);
-			expect(select2._disposed).toBe(false);
+			expect((select2 as any)._disposed).toBe(false);
 		});
 
 		it('should allow reinit with updated configuration', async () => {
@@ -168,7 +168,7 @@ describe('KTSelect Lifecycle Management', () => {
 			select.dispose();
 
 			// Should not throw and should be disposed
-			expect(select._disposed).toBe(true);
+			expect((select as any)._disposed).toBe(true);
 		});
 	});
 
@@ -305,14 +305,15 @@ describe('KTSelect Lifecycle Management', () => {
 			]);
 			container.appendChild(selectEl);
 
-			const select = new KTSelect(selectEl, { height: 250 });
-			await waitForInit(select);
+		const select = new KTSelect(selectEl, { height: 250 });
+		await waitForInit(select);
 
-			// Select option 2
-			select.setSelectedOptions(['2']);
-			await waitFor(50);
+		// Select option 2
+		const option2 = selectEl.querySelector('option[value="2"]') as HTMLOptionElement;
+		select.setSelectedOptions([option2]);
+		await waitFor(50);
 
-			// Change value programmatically to same value
+		// Change value programmatically to same value
 			selectEl.value = '2';
 			selectEl.dispatchEvent(new Event('change'));
 			await waitFor(50);
@@ -332,11 +333,12 @@ describe('KTSelect Lifecycle Management', () => {
 			const select = new KTSelect(selectEl, { height: 250 });
 			await waitForInit(select);
 
-			// Select option 2
-			select.setSelectedOptions(['2']);
-			await waitFor(50);
+		// Select option 2
+		const option2ToRemove = selectEl.querySelector('option[value="2"]') as HTMLOptionElement;
+		select.setSelectedOptions([option2ToRemove]);
+		await waitFor(50);
 
-			// Remove option 2
+		// Remove option 2
 			const option2 = selectEl.querySelector('option[value="2"]');
 			if (option2) {
 				option2.remove();
@@ -468,18 +470,18 @@ describe('KTSelect Lifecycle Management', () => {
 			// Mount
 			selectInstance = new KTSelect(selectEl, { height: 250 });
 			await waitForInit(selectInstance);
-			expect(selectInstance._disposed).toBe(false);
+			expect((selectInstance as any)._disposed).toBe(false);
 
 			// Unmount (cleanup)
 			if (selectInstance) {
 				selectInstance.dispose();
 			}
-			expect(selectInstance._disposed).toBe(true);
+			expect((selectInstance as any)._disposed).toBe(true);
 
 			// Re-mount
 			selectInstance = new KTSelect(selectEl, { height: 250 });
 			await waitForInit(selectInstance);
-			expect(selectInstance._disposed).toBe(false);
+			expect((selectInstance as any)._disposed).toBe(false);
 		});
 
 		it('should work with Vue-like onMounted/onUnmounted pattern', async () => {
@@ -492,18 +494,18 @@ describe('KTSelect Lifecycle Management', () => {
 			// onMounted
 			selectInstance = new KTSelect(selectEl, { height: 250 });
 			await waitForInit(selectInstance);
-			expect(selectInstance._disposed).toBe(false);
+			expect((selectInstance as any)._disposed).toBe(false);
 
 			// onUnmounted
 			if (selectInstance) {
 				selectInstance.dispose();
 			}
-			expect(selectInstance._disposed).toBe(true);
+			expect((selectInstance as any)._disposed).toBe(true);
 
 			// Re-mount
 			selectInstance = KTSelect.reinit(selectEl, { height: 250 });
 			await waitForInit(selectInstance);
-			expect(selectInstance._disposed).toBe(false);
+			expect((selectInstance as any)._disposed).toBe(false);
 		});
 
 		it('should handle rapid destroy/re-init cycles without memory leaks', async () => {
@@ -520,7 +522,7 @@ describe('KTSelect Lifecycle Management', () => {
 			// Final instance should work
 			const finalSelect = new KTSelect(selectEl, { height: 250 });
 			await waitForInit(finalSelect);
-			expect(finalSelect._disposed).toBe(false);
+			expect((finalSelect as any)._disposed).toBe(false);
 			expect(finalSelect.getElement()).toBe(selectEl);
 		});
 	});
