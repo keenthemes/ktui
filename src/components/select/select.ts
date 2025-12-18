@@ -35,6 +35,9 @@ export class KTSelect extends KTComponent {
 	// Static global configuration
 	private static globalConfig: Partial<KTSelectConfigInterface> = {};
 
+	// Static registry for tracking open dropdowns (global dropdown management)
+	private static openDropdowns: Set<KTSelect> = new Set();
+
 	// DOM elements
 	private _wrapperElement: HTMLElement;
 	private _displayElement: HTMLElement;
@@ -135,6 +138,37 @@ export class KTSelect extends KTComponent {
 			),
 			...config,
 		} as KTSelectConfigInterface;
+	}
+
+	/**
+	 * Override _dispatchEvent to also dispatch on document for global listeners (jQuery compatibility)
+	 */
+	protected override _dispatchEvent(eventType: string, payload: object = null): void {
+		// Call parent method to dispatch on element (existing behavior)
+		super._dispatchEvent(eventType, payload);
+
+		// Also dispatch on document if configured
+		const dispatchGlobalEvents =
+			this._config.dispatchGlobalEvents !== false; // Default to true
+		if (dispatchGlobalEvents) {
+			// Create namespaced event name for document dispatch
+			const namespacedEventType = `kt-select:${eventType}`;
+
+			// Create event with same detail structure
+			const globalEvent = new CustomEvent(namespacedEventType, {
+				detail: {
+					payload,
+					instance: this, // Include component instance reference
+					element: this._element, // Include element reference
+				},
+				bubbles: true,
+				cancelable: true,
+				composed: true, // Allow event to cross shadow DOM boundaries
+			});
+
+			// Dispatch on document
+			document.dispatchEvent(globalEvent);
+		}
 	}
 
 	/**
@@ -831,13 +865,28 @@ export class KTSelect extends KTComponent {
 		}
 
 		// Get search input element - this is used for the search functionality
+		// First try to find the actual input element (not the wrapper div)
 		this._searchInputElement = this._dropdownContentElement.querySelector(
-			`[data-kt-select-search]`,
+			`input[data-kt-select-search]`,
 		) as HTMLInputElement;
 
-		// If not found in dropdown, check if it's the display element itself
+		// If not found, try the wrapper selector (for backward compatibility)
 		if (!this._searchInputElement) {
-			this._searchInputElement = this._displayElement as HTMLInputElement;
+			const searchWrapper = this._dropdownContentElement.querySelector(
+				`[data-kt-select-search]`,
+			) as HTMLElement;
+			if (searchWrapper) {
+				this._searchInputElement = searchWrapper.querySelector(
+					'input',
+				) as HTMLInputElement;
+			}
+		}
+
+		// If still not found in dropdown, check if it's the display element itself (combobox mode)
+		if (!this._searchInputElement) {
+			this._searchInputElement = this._displayElement.querySelector(
+				'input[data-kt-select-search]',
+			) as HTMLInputElement;
 		}
 
 		this._selectAllButton = this._wrapperElement.querySelector(
@@ -1075,18 +1124,40 @@ export class KTSelect extends KTComponent {
 			return;
 		}
 
+		// Global dropdown management: close other open dropdowns if configured
+		const closeOnOtherOpen =
+			this._config.closeOnOtherOpen !== false; // Default to true
+		if (closeOnOtherOpen) {
+			// Close all other open dropdowns
+			KTSelect.openDropdowns.forEach((otherSelect) => {
+				if (otherSelect !== this && otherSelect._dropdownIsOpen) {
+					otherSelect.closeDropdown();
+				}
+			});
+		}
+
 		if (this._config.debug)
 			console.log('Opening dropdown via dropdownModule...');
 
 		// Set our internal flag to match what we're doing
 		this._dropdownIsOpen = true;
 
+		// Add to registry
+		KTSelect.openDropdowns.add(this);
+
 		// Open the dropdown via the module
 		this._dropdownModule.open();
 
-		// Dispatch custom event
+		// Dispatch custom events
 		this._dispatchEvent('show');
 		this._fireEvent('show');
+
+		// Dispatch dropdown.show event on wrapper for search module
+		const dropdownShowEvent = new CustomEvent('dropdown.show', {
+			bubbles: true,
+			cancelable: true,
+		});
+		this._wrapperElement.dispatchEvent(dropdownShowEvent);
 
 		// Update ARIA states
 		this._setAriaAttributes();
@@ -1133,6 +1204,9 @@ export class KTSelect extends KTComponent {
 		// Set our internal flag to match what we're doing
 		this._dropdownIsOpen = false;
 
+		// Remove from registry
+		KTSelect.openDropdowns.delete(this);
+
 		// Call the dropdown module's close method
 		this._dropdownModule.close();
 
@@ -1144,6 +1218,13 @@ export class KTSelect extends KTComponent {
 		// Dispatch custom events
 		this._dispatchEvent('close');
 		this._fireEvent('close');
+
+		// Dispatch dropdown.close event on wrapper for search module
+		const dropdownCloseEvent = new CustomEvent('dropdown.close', {
+			bubbles: true,
+			cancelable: true,
+		});
+		this._wrapperElement.dispatchEvent(dropdownCloseEvent);
 
 		// Update ARIA states
 		this._setAriaAttributes();
@@ -1711,14 +1792,27 @@ export class KTSelect extends KTComponent {
 		// Update option classes without re-rendering the dropdown content
 		this._updateSelectedOptionClass();
 
-		// For single select mode, always close the dropdown after selection
+		// For single select mode, close the dropdown after selection unless closeOnEnter is false
 		// For multiple select mode, keep the dropdown open to allow multiple selections
 		if (!this._config.multiple) {
-			if (this._config.debug)
-				console.log(
-					'About to call closeDropdown() for single select mode - always close after selection',
-				);
-			this.closeDropdown();
+			// Check if we should close based on closeOnEnter config
+			// closeOnEnter only applies to Enter key selections, but for backward compatibility,
+			// we'll respect it for all selections when explicitly set to false
+			const shouldClose =
+				this._config.closeOnEnter !== false; // Default to true
+			if (shouldClose) {
+				if (this._config.debug)
+					console.log(
+						'About to call closeDropdown() for single select mode - closeOnEnter is true',
+					);
+				this.closeDropdown();
+			} else {
+				if (this._config.debug)
+					console.log(
+						'Single select mode but closeOnEnter is false - keeping dropdown open',
+					);
+				this.updateSelectAllButtonState();
+			}
 		} else {
 			if (this._config.debug)
 				console.log(
@@ -2727,5 +2821,21 @@ export class KTSelect extends KTComponent {
 		this._selectAllButtonToggle.textContent = isAllSelected
 			? this._config.clearAllText
 			: this._config.selectAllText;
+	}
+
+	/**
+	 * Destroy the component and clean up resources
+	 */
+	public destroy(): void {
+		// Remove from global dropdown registry
+		KTSelect.openDropdowns.delete(this);
+
+		// Close dropdown if open
+		if (this._dropdownIsOpen) {
+			this.closeDropdown();
+		}
+
+		// Call parent dispose method
+		super.dispose();
 	}
 }
