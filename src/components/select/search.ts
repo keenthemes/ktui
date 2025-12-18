@@ -139,9 +139,67 @@ export class KTSelectSearch {
 
 						// Handle autofocus for the search input (this was one of the original separate listeners)
 						if (this._select.getConfig().searchAutofocus) {
-							setTimeout(() => {
-								this._searchInput?.focus(); // Focus search input
-							}, 50); // Delay to ensure dropdown is visible
+							// Ensure search input is available and focusable
+							const focusSearchInput = () => {
+								// Refresh search input reference in case it was recreated
+								const searchInput =
+									this._searchInput || this._select.getSearchInput();
+
+								if (!searchInput) {
+									// Retry if input not available yet
+									setTimeout(focusSearchInput, 50);
+									return;
+								}
+
+								// Check if input is visible and focusable
+								const isVisible =
+									searchInput.offsetParent !== null &&
+									!searchInput.hasAttribute('disabled') &&
+									!searchInput.hasAttribute('readonly');
+
+								if (!isVisible) {
+									// Retry if not visible yet
+									setTimeout(focusSearchInput, 50);
+									return;
+								}
+
+								try {
+									// Use requestAnimationFrame to ensure DOM is ready
+									requestAnimationFrame(() => {
+										requestAnimationFrame(() => {
+											const input =
+												this._searchInput || this._select.getSearchInput();
+											if (input) {
+												// CRITICAL FIX: Elements with tabIndex: -1 cannot receive programmatic focus
+												// Set tabIndex to 0 (or remove it) to allow focus
+												if (input.tabIndex === -1) {
+													input.tabIndex = 0;
+												}
+
+												input.focus();
+
+												// Ensure cursor is at the end if there's existing text
+												if (input.value) {
+													input.setSelectionRange(
+														input.value.length,
+														input.value.length,
+													);
+												}
+											}
+										});
+									});
+								} catch (error) {
+									// Fallback: try again after a short delay
+									setTimeout(() => {
+										const input =
+											this._searchInput || this._select.getSearchInput();
+										input?.focus();
+									}, 100);
+								}
+							};
+
+							// Start focusing after a small delay to ensure dropdown is ready
+							setTimeout(focusSearchInput, 100);
 						}
 						this._select.updateSelectAllButtonState();
 					});
