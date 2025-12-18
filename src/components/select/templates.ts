@@ -38,7 +38,7 @@ export const coreTemplateStrings = {
 			<div class="kt-select-option-text" data-kt-text-container="true">{{text}}</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-3.5 ms-auto hidden text-primary kt-select-option-selected:block"><path d="M20 6 9 17l-5-5"/></svg>
 		</li>
 	`,
-	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-input-ghost" role="searchbox" aria-label="{{searchPlaceholder}}"/></div>`,
+	search: `<div data-kt-select-search class="kt-select-search {{class}}"><input type="text" data-kt-select-search="true" placeholder="{{searchPlaceholder}}" class="kt-input kt-input-ghost" role="searchbox" aria-label="{{searchPlaceholder}}"/><button type="button" data-kt-select-search-clear class="kt-select-search-clear hidden" aria-label="Clear search" tabindex="0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg></button></div>`,
 	searchEmpty: `<div data-kt-select-search-empty class="kt-select-search-empty {{class}}"></div>`,
 	loading: `<li class="kt-select-loading {{class}}" role="status" aria-live="polite"></li>`,
 	tag: `<div data-kt-select-tag="true" class="kt-select-tag {{class}}"></div>`,

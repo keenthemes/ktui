@@ -11,6 +11,7 @@ import { filterOptions, FocusManager, EventManager } from './utils';
 export class KTSelectSearch {
 	private _select: KTSelect;
 	private _searchInput: HTMLInputElement;
+	private _clearButton: HTMLButtonElement | null = null;
 	private _noResultsElement: HTMLElement | null = null;
 	private _originalOptionContents = new Map<string, string>();
 	private _eventManager: EventManager;
@@ -39,6 +40,13 @@ export class KTSelectSearch {
 			this._searchInput = this._select.getSearchInput();
 
 			if (this._searchInput) {
+				// Get clear button reference
+				const searchContainer = this._searchInput.closest('[data-kt-select-search]');
+				if (searchContainer) {
+					this._clearButton = searchContainer.querySelector(
+						'[data-kt-select-search-clear]',
+					) as HTMLButtonElement;
+				}
 
 				// First remove any existing listeners to prevent duplicates
 				this._removeEventListeners();
@@ -49,6 +57,26 @@ export class KTSelectSearch {
 					'input',
 					this.handleSearchInput,
 				);
+
+				// Update clear button visibility on input
+				this._eventManager.addListener(
+					this._searchInput,
+					'input',
+					() => this._updateClearButtonVisibility(),
+				);
+
+				// Add clear button click handler
+				if (this._clearButton) {
+					this._eventManager.addListener(
+						this._clearButton,
+						'click',
+						(e: Event) => {
+							e.preventDefault();
+							e.stopPropagation();
+							this._clearSearchInput();
+						},
+					);
+				}
 
 				// Add keydown event listener for navigation, selection, and escape
 				this._eventManager.addListener(
@@ -95,15 +123,22 @@ export class KTSelectSearch {
 					.getWrapperElement()
 					.addEventListener('dropdown.close', () => {
 						this._focusManager.resetFocus();
-						// If clearSearchOnClose is false and there's a value, the search term and filtered state should persist.
-						// KTSelect's closeDropdown method already calls this._searchModule.clearSearch() (which clears highlights)
-						// and conditionally clears the input value based on KTSelect's config.clearSearchOnClose.
-						// This listener in search.ts seems to unconditionally clear everything.
-						// For now, keeping its original behavior:
-						this.clearSearch(); // Clears highlights from current options
-						this._searchInput.value = ''; // Clears the search input field
-						this._resetAllOptions(); // Shows all options, restores original text, removes highlights
-						this._clearNoResultsMessage(); // Clears any "no results" message
+						const config = this._select.getConfig();
+
+						// Respect clearSearchOnClose config
+						if (config.clearSearchOnClose) {
+							// Clear search input and reset everything
+							this.clearSearch(); // Clears highlights from current options
+							this._searchInput.value = ''; // Clears the search input field
+							this._resetAllOptions(); // Shows all options, restores original text, removes highlights
+							this._clearNoResultsMessage(); // Clears any "no results" message
+							this._updateClearButtonVisibility();
+						} else {
+							// Only clear highlights, preserve search text
+							this.clearSearch(); // Clears highlights from current options
+							// Don't clear input value or reset options - preserve search state
+							this._updateClearButtonVisibility();
+						}
 					});
 
 				// Clear highlights when an option is selected - ATTACH TO ORIGINAL SELECT (standard 'change' event)
@@ -143,6 +178,9 @@ export class KTSelectSearch {
 							// 2. Clear any "no results" message.
 							this._clearNoResultsMessage();
 						}
+
+						// Update clear button visibility when dropdown opens
+						this._updateClearButtonVisibility();
 
 						// Handle autofocus for the search input with retry mechanism
 						if (this._select.getConfig().searchAutofocus) {
@@ -464,6 +502,30 @@ export class KTSelectSearch {
 		if (this._noResultsElement && this._noResultsElement.parentNode) {
 			this._noResultsElement.parentNode.removeChild(this._noResultsElement);
 			this._noResultsElement = null;
+		}
+	}
+
+	/**
+	 * Clear the search input and reset search state
+	 */
+	private _clearSearchInput() {
+		if (this._searchInput) {
+			this._searchInput.value = '';
+			this._searchInput.focus(); // Keep focus on input after clearing
+			this.handleSearchInput(new Event('input')); // Trigger search update
+		}
+	}
+
+	/**
+	 * Update clear button visibility based on input value
+	 */
+	private _updateClearButtonVisibility() {
+		if (this._clearButton && this._searchInput) {
+			if (this._searchInput.value.trim() !== '') {
+				this._clearButton.classList.remove('hidden');
+			} else {
+				this._clearButton.classList.add('hidden');
+			}
 		}
 	}
 

@@ -52,10 +52,33 @@
 	}
 
 	.kt-select-search {
-		@apply px-4 py-1 border-b border-border;
+		@apply px-4 py-1 border-b border-border relative;
 
 		.kt-input {
 			@apply text-sm;
+		}
+	}
+
+	.kt-select-search-clear {
+		@apply absolute right-6 top-1/2 -translate-y-1/2;
+		@apply flex items-center justify-center;
+		@apply w-5 h-5 rounded-full;
+		@apply text-muted-foreground hover:text-foreground;
+		@apply hover:bg-accent/50;
+		@apply transition-all duration-200;
+		@apply cursor-pointer;
+		@apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30;
+
+		svg {
+			@apply w-3.5 h-3.5;
+		}
+
+		&:hover {
+			@apply scale-110;
+		}
+
+		&.hidden {
+			@apply hidden;
 		}
 	}
 
