@@ -55,6 +55,12 @@ module.exports = (env) => {
 				},
 				{
 					test: /\.ts$/,
+					exclude: [
+						/node_modules/,
+						/__tests__/,
+						/\.test\.ts$/,
+						/\.spec\.ts$/,
+					],
 					use: [{ loader: 'ts-loader' }],
 				},
 			],
