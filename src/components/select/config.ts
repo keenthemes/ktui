@@ -53,6 +53,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	searchMaxItems: 50, // Maximum number of search results to display
 	searchEmpty: 'No results', // Text to display when no search results are found
 	clearSearchOnClose: true, // Clear search input when dropdown closes
+	closeOnEnter: true, // Close dropdown when Enter is pressed in search input
 
 	// Multi-Select Display
 	selectAllText: 'Select all', // Text for the "Select All" option (if implemented)
@@ -73,6 +74,8 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	dropdownPreventOverflow: false,
 	dropdownStrategy: null,
 	dropdownWidth: null, // Custom width for dropdown (e.g., '300px'), null to match toggle element width
+	closeOnOtherOpen: true, // Close other open dropdowns when this one opens
+	dispatchGlobalEvents: true, // Dispatch events on document for global listeners (jQuery compatibility)
 
 	// New Config
 	dropdownTemplate: '',
@@ -102,6 +105,7 @@ export interface KTSelectConfigInterface {
 	searchDebounce?: number;
 	searchParam?: string;
 	clearSearchOnClose?: boolean;
+	closeOnEnter?: boolean;
 
 	// Multi-Select Display
 	selectAllText?: string;
@@ -144,6 +148,8 @@ export interface KTSelectConfigInterface {
 	dropdownPreventOverflow?: boolean;
 	dropdownStrategy?: 'fixed' | 'absolute';
 	dropdownWidth?: string | null; // Custom width for dropdown, null to match toggle element width
+	closeOnOtherOpen?: boolean;
+	dispatchGlobalEvents?: boolean;
 
 	// Styling
 	dropdownClass?: string;

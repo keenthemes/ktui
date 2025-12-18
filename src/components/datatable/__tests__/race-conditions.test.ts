@@ -9,7 +9,7 @@ import { waitFor } from './setup';
 
 describe('KTDataTable Race Condition Fixes', () => {
 	let container: HTMLElement;
-	let mockFetch: ReturnType<typeof vi.fn>;
+	let mockFetch: typeof fetch;
 	let abortSignals: AbortSignal[] = [];
 
 	beforeEach(() => {
@@ -35,7 +35,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 		// Mock fetch to track requests and signals
 		abortSignals = [];
-		mockFetch = vi.fn((url, options) => {
+		mockFetch = vi.fn<typeof fetch>((url, options) => {
 			// Store abort signal for verification
 			if (options?.signal) {
 				abortSignals.push(options.signal);
