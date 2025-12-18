@@ -149,7 +149,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _initDefaultConfig(
 		config?: KTDataTableConfigInterface,
 	): KTDataTableConfigInterface {
-		return {
+		const defaultConfig = {
 			/**
 			 * HTTP method for server-side API call
 			 */
@@ -374,8 +374,16 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			 */
 			_state: {} as KTDataTableStateInterface,
 			loadingClass: 'loading',
-			...config,
 		} as KTDataTableConfigInterface;
+
+		// Deep merge global config with defaults, then merge instance config (instance takes precedence)
+		const mergedWithGlobal = KTDataTable._deepMerge(
+			defaultConfig,
+			KTDataTable._globalConfig,
+		);
+		const finalConfig = KTDataTable._deepMerge(mergedWithGlobal, config || {});
+
+		return finalConfig as KTDataTableConfigInterface;
 	}
 
 	/**
@@ -1642,7 +1650,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {KTDataTableStateInterface} The current state of the table.
 	 */
 	public getState(): KTDataTableStateInterface {
-		return {
+		// Spread state first, then override with config values to ensure config.pageSize takes precedence
+		const state = this._config._state || ({} as KTDataTableStateInterface);
+		const result: KTDataTableStateInterface = {
 			/**
 			 * The current page number.
 			 */
@@ -1654,19 +1664,17 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			/**
 			 * The sort order (ascending or descending).
 			 */
-			sortOrder: '',
-			/**
-			 * The number of rows to display per page.
-			 */
-			pageSize: this._config.pageSize,
-
+			sortOrder: '' as KTDataTableSortOrderInterface,
 			filters: [],
 
 			/**
 			 * Any additional state that may have been stored in the config.
 			 */
-			...this._config._state,
+			...state,
+			// Ensure config.pageSize overrides any pageSize from _state (must come after spread)
+			pageSize: this._config.pageSize,
 		};
+		return result;
 	}
 
 	/**
@@ -1814,6 +1822,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	public search(query: string | object): void {
 		this._config._state.search = query;
 		this._config._state.page = 1;
+		// Save state immediately after resetting page to prevent state restore from overriding the reset
+		if (this._config.stateSave) {
+			this._saveState();
+		}
 		this.reload();
 	}
 
@@ -1824,6 +1836,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		HTMLElement,
 		KTDataTable<KTDataTableDataInterface>
 	>();
+
+	/**
+	 * Global default configuration that applies to all new DataTable instances
+	 */
+	private static _globalConfig: Partial<KTDataTableConfigInterface> = {};
 
 	/**
 	 * Create KTDataTable instances for all elements with a data-kt-datatable="true" attribute.
@@ -1891,6 +1908,77 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const instance = new KTDataTable<T>(element, config);
 		this._instances.set(element, instance as any);
 		return instance;
+	}
+
+	/**
+	 * Set global default configuration that applies to all new DataTable instances.
+	 * Global config merges with instance-specific config, with instance config taking precedence.
+	 * Subsequent calls to setGlobalConfig merge with existing global config.
+	 *
+	 * @param config Partial configuration object to set as global defaults
+	 * @example
+	 * KTDataTable.setGlobalConfig({ pageSize: 20, pageSizes: [10, 20, 50] });
+	 * const table = new KTDataTable(element); // Uses pageSize: 20
+	 * const table2 = new KTDataTable(element2, { pageSize: 10 }); // Uses pageSize: 10 (overrides global)
+	 */
+	public static setGlobalConfig(
+		config: Partial<KTDataTableConfigInterface>,
+	): void {
+		// Deep merge global config with new config
+		KTDataTable._globalConfig = this._deepMerge(
+			KTDataTable._globalConfig,
+			config,
+		);
+	}
+
+	/**
+	 * Deep merge utility for configuration objects
+	 * @param target Target object to merge into
+	 * @param source Source object to merge from
+	 * @returns Merged object
+	 */
+	private static _deepMerge(
+		target: Partial<KTDataTableConfigInterface>,
+		source: Partial<KTDataTableConfigInterface>,
+	): Partial<KTDataTableConfigInterface> {
+		const result: any = { ...target };
+
+		for (const key in source) {
+			if (source.hasOwnProperty(key)) {
+				const sourceValue = (source as any)[key];
+				const targetValue = result[key];
+
+				if (
+					this._isPlainObject(sourceValue) &&
+					this._isPlainObject(targetValue)
+				) {
+					// Recursively merge nested objects
+					result[key] = this._deepMerge(
+						targetValue as Partial<KTDataTableConfigInterface>,
+						sourceValue as Partial<KTDataTableConfigInterface>,
+					);
+				} else {
+					// Overwrite with source value
+					result[key] = sourceValue;
+				}
+			}
+		}
+
+		return result as Partial<KTDataTableConfigInterface>;
+	}
+
+	/**
+	 * Check if value is a plain object (not array, null, etc.)
+	 * @param value Value to check
+	 * @returns True if value is a plain object
+	 */
+	private static _isPlainObject(value: any): boolean {
+		return (
+			value !== null &&
+			typeof value === 'object' &&
+			!Array.isArray(value) &&
+			Object.prototype.toString.call(value) === '[object Object]'
+		);
 	}
 
 	/**

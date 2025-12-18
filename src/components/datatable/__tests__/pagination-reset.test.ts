@@ -429,6 +429,55 @@ describe('KTDataTable - Pagination Reset', () => {
 	});
 
 	describe('Scenario: State persistence respects pagination reset', () => {
+		it('should save page 1 to state immediately when search resets pagination', async () => {
+			const { container } = createMockDataTable(25);
+
+			// Enable state saving with unique namespace
+			datatable = new KTDataTable(container, {
+				pageSize: 10,
+				stateSave: true,
+				stateNamespace: 'test-datatable-search-reset-immediate',
+			});
+
+			// Wait for initial _updateData() to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			datatable.goPage(2);
+
+			// Wait for goPage to complete
+			await new Promise((resolve) => setTimeout(resolve, 100));
+
+			// Verify we're on page 2
+			expect(datatable.getState().page).toBe(2);
+
+			// Spy on localStorage.setItem to verify immediate save
+			const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+
+			// Perform search - state should be saved immediately (synchronously) before reload
+			datatable.search('test query');
+
+			// Verify state was saved immediately (check localStorage was called)
+			expect(setItemSpy).toHaveBeenCalled();
+
+			// Check that the saved state reflects page 1 immediately
+			const savedState = localStorage.getItem('test-datatable-search-reset-immediate');
+			expect(savedState).toBeTruthy();
+
+			if (savedState) {
+				const state = JSON.parse(savedState);
+				expect(state.page).toBe(1);
+				expect(state.search).toBe('test query');
+			}
+
+			// Verify current state is also page 1
+			expect(datatable.getState().page).toBe(1);
+
+			setItemSpy.mockRestore();
+
+			// Cleanup
+			localStorage.removeItem('test-datatable-search-reset-immediate');
+		});
+
 		it('should save page 1 to state when search resets pagination', async () => {
 			const { container } = createMockDataTable(25);
 
