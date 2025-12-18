@@ -4,7 +4,7 @@
  */
 
 import { KTSelectConfigInterface, KTSelectOption } from './config';
-import { renderTemplateString } from './utils';
+import { renderTemplateString, renderTemplateStringSafe } from './utils';
 
 /**
  * Default HTML string templates for KTSelect. All UI structure is defined here.
@@ -286,14 +286,22 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			optionData = (
 				option as import('./option').KTSelectOption
 			).getOptionDataForTemplate();
+			// Merge optionsConfig for this option value if available
+			if (config.optionsConfig && optionData.value) {
+				optionData = {
+					...optionData,
+					...(config.optionsConfig[optionData.value] || {}),
+				};
+			}
 		}
 
 		let content = optionData?.text?.trim(); // Default content to option's text
 
 		if (config.optionTemplate) {
 			// Use the user-provided template string, rendering with the full optionData.
-			// renderTemplateString will replace {{key}} with values from optionData.
-			content = renderTemplateString(config.optionTemplate, optionData);
+			// renderTemplateStringSafe escapes variable values to prevent XSS while preserving
+			// the template's HTML structure (allowing users to include HTML in their templates).
+			content = renderTemplateStringSafe(config.optionTemplate, optionData);
 		} else {
 			content = optionData.text || optionData.content; // Prefer explicit text, fallback to content
 		}
@@ -321,7 +329,10 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		const element = stringToElement(html);
 
 		// If a custom option template is provided, replace the element's innerHTML with the content.
+		// The content is already safe because renderTemplateStringSafe escaped all variable values.
+		// This allows users to provide full HTML templates that replace the default structure.
 		if (config.optionTemplate) {
+			// Replace the entire innerHTML to allow custom templates with images, icons, etc.
 			element.innerHTML = content;
 		}
 

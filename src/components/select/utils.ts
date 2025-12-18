@@ -512,6 +512,34 @@ export function debounce(
  * Replaces all {{key}} in the template with the corresponding value from the data object.
  * If a key is missing in data, replaces with an empty string.
  */
+/**
+ * Escapes HTML special characters to prevent XSS attacks.
+ * Converts HTML special characters to their entity equivalents.
+ *
+ * @param text - The text to escape. Can be a string, null, or undefined.
+ * @returns The escaped string, or empty string if input is null/undefined.
+ *
+ * @example
+ * escapeHtml('<script>alert("XSS")</script>')
+ * // Returns: '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
+ */
+export function escapeHtml(text: string | null | undefined): string {
+	if (text === null || text === undefined) {
+		return '';
+	}
+
+	const str = String(text);
+	const escapeMap: Record<string, string> = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#39;',
+	};
+
+	return str.replace(/[&<>"']/g, (char) => escapeMap[char]);
+}
+
 export function renderTemplateString(
 	template: string,
 	data: Record<string, any>,
@@ -519,6 +547,85 @@ export function renderTemplateString(
 	return template.replace(/{{(\w+)}}/g, (_, key) =>
 		data[key] !== undefined && data[key] !== null ? String(data[key]) : '',
 	);
+}
+
+/**
+ * Escapes HTML attribute values (quotes and ampersands) while preserving URLs and other safe content.
+ * This is used for values in HTML attributes like src, href, etc.
+ *
+ * @param text - The text to escape for use in HTML attributes
+ * @returns The escaped string safe for HTML attributes
+ */
+function escapeHtmlAttribute(text: string | null | undefined): string {
+	if (text === null || text === undefined) {
+		return '';
+	}
+
+	const str = String(text);
+	// For attributes, we need to escape quotes and ampersands, but preserve URLs
+	// Escape quotes to prevent attribute injection, and & to prevent entity confusion
+	return str.replace(/["'&]/g, (char) => {
+		if (char === '"') return '&quot;';
+		if (char === "'") return '&#39;';
+		if (char === '&') {
+			// Only escape & if it's not already part of an entity
+			// Simple check: if followed by alphanumeric and #, it might be an entity
+			return '&amp;';
+		}
+		return char;
+	});
+}
+
+/**
+ * Renders a template string with HTML-escaped variable values to prevent XSS.
+ * The template structure itself (HTML tags) is preserved, but all variable values are escaped.
+ * Values in attribute contexts (inside quotes) are escaped for attributes, while values in
+ * text content are escaped for HTML entities.
+ *
+ * @param template - The template string with {{key}} placeholders
+ * @param data - The data object containing values to insert
+ * @returns The rendered template with escaped values
+ *
+ * @example
+ * renderTemplateStringSafe('<div>{{text}}</div>', { text: '<script>alert("XSS")</script>' })
+ * // Returns: '<div>&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;</div>'
+ *
+ * @example
+ * renderTemplateStringSafe('<img src="{{url}}" />', { url: 'https://example.com?q=1&p=2' })
+ * // Returns: '<img src="https://example.com?q=1&amp;p=2" />'
+ */
+export function renderTemplateStringSafe(
+	template: string,
+	data: Record<string, any>,
+): string {
+	return template.replace(/{{(\w+)}}/g, (match, key, offset) => {
+		if (data[key] === undefined || data[key] === null) {
+			return '';
+		}
+
+		const value = String(data[key]);
+
+		// Check if this placeholder is inside an HTML attribute (between quotes)
+		// Look backwards to find the opening quote and check for = before it
+		const beforeMatch = template.substring(Math.max(0, offset - 200), offset);
+		const afterMatch = template.substring(offset + match.length, offset + match.length + 50);
+
+		// More robust detection: look for attribute pattern like: attr="...{{key}}..."
+		// Pattern: = followed by optional whitespace, then quote, then content up to our match
+		const attributePattern = /=\s*["'][^"']*$/;
+		const isInAttribute =
+			attributePattern.test(beforeMatch) &&
+			(/^[^"']*["']/.test(afterMatch) || /^[^"']*[\s>]/.test(afterMatch));
+
+		if (isInAttribute) {
+			// For attribute values, escape quotes and ampersands but preserve URLs
+			// URLs with & will become &amp; which browsers correctly decode
+			return escapeHtmlAttribute(value);
+		} else {
+			// For text content, escape all HTML special characters
+			return escapeHtml(value);
+		}
+	});
 }
 
 // Type-to-search buffer utility for keyboard navigation

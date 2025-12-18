@@ -90,6 +90,7 @@ describe('KTSelect Remote Search', () => {
 				enableSearch: true,
 				searchMinLength: 0,
 				searchDebounce: 100, // Lower debounce for tests
+				height: 250,
 			});
 
 			// Wait for initial remote data to load
@@ -191,6 +192,7 @@ describe('KTSelect Remote Search', () => {
 				enableSearch: true,
 				searchMinLength: 0,
 				searchDebounce: 100, // Lower debounce for tests
+				height: 250,
 			});
 
 			// Wait for initial remote data to load
@@ -305,6 +307,7 @@ describe('KTSelect Remote Search', () => {
 				enableSearch: true,
 				searchMinLength: 0,
 				searchDebounce: 100, // Lower debounce for tests
+				height: 250,
 			});
 
 			// Wait for initial remote data to load
@@ -411,6 +414,7 @@ describe('KTSelect Remote Search', () => {
 				searchDebounce: 100, // Lower debounce for tests
 				dataValueField: 'userId',
 				dataFieldText: 'name',
+				height: 250,
 			});
 
 			// Wait for initial remote data to load
