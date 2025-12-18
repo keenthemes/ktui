@@ -325,6 +325,9 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			element.innerHTML = content;
 		}
 
+		// Ensure data-value attribute is set explicitly
+		element.setAttribute('data-value', optionData?.value !== undefined && optionData?.value !== null ? String(optionData.value) : '');
+
 		// Ensure data-text attribute is set to the original, clean text for searching/filtering
 		element.setAttribute('data-text', optionData?.text?.trim() || '');
 

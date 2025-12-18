@@ -347,6 +347,8 @@ export class KTSelect extends KTComponent {
 			'[data-kt-select-option]',
 		) as NodeListOf<HTMLElement>;
 
+
+
 	}
 
 	/**
@@ -356,8 +358,10 @@ export class KTSelect extends KTComponent {
 		// Get all options from the original select element
 		const options = Array.from(this._element.querySelectorAll('option'));
 
+
 		// Use unified renderer
 		this._renderOptionsInDropdown(options, true);
+
 	}
 
 	/**
@@ -2266,10 +2270,19 @@ export class KTSelect extends KTComponent {
 							// Update options in the dropdown
 							this._updateSearchResults(items);
 
-							// Refresh the search module to update focus and cache
-							if (this._searchModule) {
-								this._searchModule.refreshAfterSearch();
-							}
+							// Use requestAnimationFrame to ensure DOM updates are complete before refreshing search module
+							// This prevents race conditions where refreshAfterSearch runs before options are fully rendered
+							requestAnimationFrame(() => {
+								// Use another requestAnimationFrame to ensure all DOM updates are flushed
+								requestAnimationFrame(() => {
+									// Refresh the search module to update focus and cache
+									if (this._searchModule) {
+										this._searchModule.refreshAfterSearch();
+									}
+
+								});
+							});
+
 							this.updateSelectAllButtonState();
 						})
 						.catch((error) => {
@@ -2375,13 +2388,16 @@ export class KTSelect extends KTComponent {
 		// First update the original select element with search results
 		this._updateOriginalSelectWithSearchResults(items);
 
-		// Then update dropdown using the standard flow
-		this._updateDropdownWithNewOptions();
+		// Then update dropdown by rendering items directly (more reliable than querying)
+		// This ensures data-value and data-text are set correctly
+		this._renderOptionsInDropdown(items, true);
+
 
 		// Add pagination "Load More" button if needed
 		if (this._config.pagination && this._remoteModule.hasMorePages()) {
 			this._addLoadMoreButton();
 		}
+
 	}
 
 	/**
@@ -2389,14 +2405,81 @@ export class KTSelect extends KTComponent {
 	 * @param items Search result items
 	 */
 	private _updateOriginalSelectWithSearchResults(items: KTSelectOptionData[]) {
-		// Clear existing options except placeholder
-		this._clearExistingOptions();
+		// For remote search, clear ALL options (including empty placeholder)
+		// because we're replacing them with search results
+		const allOptions = Array.from(this._element.querySelectorAll('option'));
+		allOptions.forEach((option) => option.remove());
 
 		// Add search result items to original select element
-		items.forEach((item) => {
+		items.forEach((item, index) => {
+			// Skip invalid items
+			if (!item || (typeof item !== 'object')) {
+				return;
+			}
 			const optionElement = document.createElement('option');
-			optionElement.value = item.id || '';
-			optionElement.textContent = item.title || '';
+
+			// Get value - use item.id directly if available, otherwise try dataValueField
+			let value = '';
+			// Check if item.id exists and is not empty
+			if (item.id !== undefined && item.id !== null && item.id !== '') {
+				value = String(item.id);
+			} else if (this._config.dataValueField) {
+				const extractedValue = this._getValueByKey(item, this._config.dataValueField);
+				value = extractedValue !== null && extractedValue !== '' ? String(extractedValue) : '';
+			}
+
+			// Fallback: try to get value from common fields if still empty
+			if (!value && item) {
+				const fallbackFields = ['id', 'value', 'key', 'pk'];
+				for (const field of fallbackFields) {
+					const fieldValue = (item as any)[field];
+					if (fieldValue !== null && fieldValue !== undefined) {
+						value = String(fieldValue);
+						break;
+					}
+				}
+			}
+
+			// Get label - use item.title directly if available, otherwise try dataFieldText
+			let label = '';
+			// Check if item.title exists and is not empty
+			if (item.title !== undefined && item.title !== null && item.title !== '') {
+				label = String(item.title);
+			} else if (this._config.dataFieldText) {
+				const extractedLabel = this._getValueByKey(item, this._config.dataFieldText);
+				label = extractedLabel !== null && extractedLabel !== '' ? String(extractedLabel) : 'Unnamed option';
+			}
+
+			// Fallback: try to get label from common fields if still empty
+			if (!label && item) {
+				const fallbackFields = ['title', 'name', 'label', 'text', 'displayName'];
+				for (const field of fallbackFields) {
+					const fieldValue = (item as any)[field];
+					if (fieldValue !== null && fieldValue !== undefined) {
+						label = String(fieldValue);
+						break;
+					}
+				}
+			}
+
+			// If still no label, use value or a fallback
+			if (!label) {
+				label = value || 'Unnamed option';
+			}
+
+			// Ensure value is not empty (use index as fallback)
+			if (!value) {
+				value = String(index);
+			}
+
+			// Set value and textContent - ensure they're set before appending
+			optionElement.value = value;
+			optionElement.textContent = label;
+
+			// Also set value attribute explicitly as a fallback
+			if (value) {
+				optionElement.setAttribute('value', value);
+			}
 
 			if (item.selected) {
 				optionElement.setAttribute('selected', 'selected');
@@ -2407,6 +2490,7 @@ export class KTSelect extends KTComponent {
 
 			this._element.appendChild(optionElement);
 		});
+
 
 	}
 

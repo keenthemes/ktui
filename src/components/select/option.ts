@@ -67,12 +67,33 @@ export class KTSelectOption extends KTComponent {
 			// Element was removed from DOM, return empty data
 			return { value: '', text: '' };
 		}
-		const text = el.textContent || '';
+		// Get text - try multiple sources
+		const text = el.textContent?.trim() || el.innerText?.trim() || el.text?.trim() || '';
+
+		// Get value - try multiple sources in order of preference
+		let value = '';
+		// 1. Try el.value property (standard HTMLOptionElement property)
+		if (el.value) {
+			value = el.value;
+		}
+		// 2. Try getAttribute('value') as fallback
+		else if (el.getAttribute('value')) {
+			value = el.getAttribute('value') || '';
+		}
+		// 3. Try data-value attribute
+		else if (el.getAttribute('data-value')) {
+			value = el.getAttribute('data-value') || '';
+		}
+		// 4. If still empty and we have text, use text as fallback (for cases where value wasn't set)
+		else if (text) {
+			value = text;
+		}
+
 		return {
 			// Custom data from data-kt-select-option attributes (parsed into this._config)
 			...this._config,
 			// Standard HTMLOptionElement properties
-			value: el.value,
+			value: value,
 			text: text, // Original text
 			selected: el.selected,
 			disabled: el.disabled,

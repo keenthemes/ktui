@@ -82,7 +82,11 @@ export class KTSelectSearch {
 
 					this._select.getElement().addEventListener('remoteSearchEnd', () => {
 						// After remote search completes, refresh our option cache
-						this.refreshOptionCache();
+						// But only if refreshAfterSearch hasn't already been called
+						// (refreshAfterSearch already calls refreshOptionCache)
+						// This prevents double-caching and stale cache issues
+						// Note: refreshAfterSearch is called by KTSelect after _updateSearchResults
+						// So we don't need to call refreshOptionCache here
 					});
 				}
 
@@ -121,11 +125,17 @@ export class KTSelectSearch {
 					.addEventListener('dropdown.show', () => {
 						this._focusManager.resetFocus(); // Always clear previous focus state
 
+						const config = this._select.getConfig();
+						const isRemoteSearch = config.remote && config.searchParam;
+
 						if (this._searchInput?.value) {
 							// If there's an existing search term:
-							// 1. Re-filter options. This ensures the display (hidden/visible) is correct
-							//    and "no results" message is handled if query yields nothing.
-							this._filterOptions(this._searchInput.value);
+							// For remote search, don't filter locally as remote module handles it
+							if (!isRemoteSearch) {
+								// 1. Re-filter options. This ensures the display (hidden/visible) is correct
+								//    and "no results" message is handled if query yields nothing.
+								this._filterOptions(this._searchInput.value);
+							}
 						} else {
 							// If search input is empty:
 							// 1. Reset all options to their full, unfiltered, original state.
@@ -292,10 +302,26 @@ export class KTSelectSearch {
 			return;
 		}
 		const options = Array.from(optionsElement) as HTMLElement[];
+
+		const config = this._select.getConfig();
+		const isRemoteSearch = config.remote && config.searchParam;
+
+		// For remote search, don't restore from cache as the options are dynamically generated
+		// The cache will be updated by refreshOptionCache after new options are rendered
+		if (isRemoteSearch) {
+			return;
+		}
+
 		options.forEach((option) => {
 			const value = option.getAttribute('data-value');
+			// Only restore if the value exists in cache AND the cache entry is not empty
+			// This prevents restoring empty content from stale cache
 			if (value && this._originalOptionContents.has(value)) {
 				const originalContent = this._originalOptionContents.get(value)!;
+				// Skip if cached content is empty (stale cache)
+				if (!originalContent || originalContent.trim() === '') {
+					return;
+				}
 				// Only restore if current content is different, to avoid unnecessary DOM manipulation
 				if (option.innerHTML !== originalContent) {
 					option.innerHTML = originalContent;
@@ -311,8 +337,12 @@ export class KTSelectSearch {
 		// Reset focused option when search changes
 		this._focusManager.resetFocus();
 
-		// Restore original content for all options before filtering/highlighting again
-		this._restoreOptionContentsBeforeFilter();
+		// For remote search, don't restore from cache as options are dynamically generated
+		// For local search, restore original content before filtering/highlighting
+		if (!(config.remote && config.searchParam)) {
+			// Restore original content for all options before filtering/highlighting again
+			this._restoreOptionContentsBeforeFilter();
+		}
 
 		if (query.trim() === '') {
 			this._resetAllOptions();
@@ -475,15 +505,24 @@ export class KTSelectSearch {
 		if (!optionsElement) {
 			return;
 		}
+
+
+		// Clear the cache first to prevent stale entries
 		this._originalOptionContents.clear();
 		const currentOptions = Array.from(optionsElement) as HTMLElement[];
 
+
 		currentOptions.forEach((option) => {
 			const value = option.getAttribute('data-value');
-			if (value) {
-				this._originalOptionContents.set(value, option.innerHTML);
+			const html = option.innerHTML;
+			// Only cache if value exists and HTML content is not empty
+			// This prevents caching empty content that would later be restored
+			if (value && html && html.trim() !== '') {
+				this._originalOptionContents.set(value, html);
+			} else {
 			}
 		});
+
 	}
 
 	/**
