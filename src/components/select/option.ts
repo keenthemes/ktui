@@ -22,7 +22,7 @@ export class KTSelectOption extends KTComponent {
 		this._buildConfig();
 
 		// Clean the config
-		this._config = (this._config as any)[''] || {};
+		this._config = (this._config as any)?.[''] || {};
 
 		// Add the option config to the global config
 		// Ensure optionsConfig is initialized
@@ -63,6 +63,10 @@ export class KTSelectOption extends KTComponent {
 	 */
 	public getOptionDataForTemplate(): Record<string, any> {
 		const el = this.getHTMLOptionElement();
+		if (!el) {
+			// Element was removed from DOM, return empty data
+			return { value: '', text: '' };
+		}
 		const text = el.textContent || '';
 		return {
 			// Custom data from data-kt-select-option attributes (parsed into this._config)

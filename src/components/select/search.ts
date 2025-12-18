@@ -262,8 +262,16 @@ export class KTSelectSearch {
 	private _cacheOriginalOptionContents() {
 		// Wait for options to be initialized
 		setTimeout(() => {
+			// Guard: check if select is disposed or options element is null
+			if (!this._select || (this._select as any)._disposed) {
+				return;
+			}
+			const optionsElement = this._select.getOptionsElement();
+			if (!optionsElement) {
+				return;
+			}
 			this._originalOptionContents.clear(); // Clear before re-caching
-			const options = Array.from(this._select.getOptionsElement());
+			const options = Array.from(optionsElement);
 			options.forEach((option) => {
 				const value = option.getAttribute('data-value');
 				if (value) {
@@ -279,9 +287,11 @@ export class KTSelectSearch {
 	 * This is typically called before applying new filters/highlights.
 	 */
 	private _restoreOptionContentsBeforeFilter(): void {
-		const options = Array.from(
-			this._select.getOptionsElement(),
-		) as HTMLElement[];
+		const optionsElement = this._select.getOptionsElement();
+		if (!optionsElement) {
+			return;
+		}
+		const options = Array.from(optionsElement) as HTMLElement[];
 		options.forEach((option) => {
 			const value = option.getAttribute('data-value');
 			if (value && this._originalOptionContents.has(value)) {
@@ -333,9 +343,11 @@ export class KTSelectSearch {
 	}
 
 	private _filterOptions(query: string) {
-		const options = Array.from(
-			this._select.getOptionsElement(),
-		) as HTMLElement[];
+		const optionsElement = this._select.getOptionsElement();
+		if (!optionsElement) {
+			return;
+		}
+		const options = Array.from(optionsElement) as HTMLElement[];
 		const config = this._select.getConfig();
 		const dropdownElement = this._select.getDropdownElement();
 
@@ -363,9 +375,11 @@ export class KTSelectSearch {
 	 */
 	private _resetAllOptions() {
 		// Show all options
-		const options = Array.from(
-			this._select.getOptionsElement(),
-		) as HTMLElement[];
+		const optionsElement = this._select.getOptionsElement();
+		if (!optionsElement) {
+			return;
+		}
+		const options = Array.from(optionsElement) as HTMLElement[];
 
 		// Ensure the cache is populated if it's somehow empty here
 		if (this._originalOptionContents.size === 0) {
@@ -429,9 +443,11 @@ export class KTSelectSearch {
 	 */
 	public clearSearch() {
 		// Restore original option content (removes highlighting)
-		const optionsToClear = Array.from(
-			this._select.getOptionsElement(),
-		) as HTMLElement[];
+		const optionsElement = this._select.getOptionsElement();
+		if (!optionsElement) {
+			return;
+		}
+		const optionsToClear = Array.from(optionsElement) as HTMLElement[];
 
 		// Ensure cache is available
 		if (this._originalOptionContents.size === 0 && optionsToClear.length > 0) {
@@ -455,10 +471,12 @@ export class KTSelectSearch {
 	 */
 	public refreshOptionCache(): void {
 		// Re-cache all option contents
+		const optionsElement = this._select.getOptionsElement();
+		if (!optionsElement) {
+			return;
+		}
 		this._originalOptionContents.clear();
-		const currentOptions = Array.from(
-			this._select.getOptionsElement(),
-		) as HTMLElement[];
+		const currentOptions = Array.from(optionsElement) as HTMLElement[];
 
 		currentOptions.forEach((option) => {
 			const value = option.getAttribute('data-value');
