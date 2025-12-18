@@ -39,11 +39,6 @@ export class KTSelectSearch {
 			this._searchInput = this._select.getSearchInput();
 
 			if (this._searchInput) {
-				if (this._config.debug)
-					console.log(
-						'Initializing search module with input:',
-						this._searchInput,
-					);
 
 				// First remove any existing listeners to prevent duplicates
 				this._removeEventListeners();
