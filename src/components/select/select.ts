@@ -64,6 +64,9 @@ export class KTSelect extends KTComponent {
 	private _typeToSearchBuffer: TypeToSearchBuffer = new TypeToSearchBuffer();
 	private _mutationObserver: MutationObserver | null = null;
 	private _preSelectedValues: string[] = [];
+	private _nativeChangeHandler: ((e: Event) => void) | null = null;
+	private _nativeChangeTimeout: ReturnType<typeof setTimeout> | null = null;
+	private _isSyncing: boolean = false; // Flag to prevent recursive sync calls
 
 	/**
 	 * Constructor: Initializes the select component
@@ -71,8 +74,16 @@ export class KTSelect extends KTComponent {
 	constructor(element: HTMLElement, config?: KTSelectConfigInterface) {
 		super();
 
-		if (KTData.has(element, this._name)) {
-			return;
+		// Check for existing instance
+		const existingInstance = KTData.get(element, this._name) as
+			| KTSelect
+			| undefined;
+		if (existingInstance) {
+			// If instance exists and is not disposed, return early (idempotent initialization)
+			if (!existingInstance._disposed) {
+				return;
+			}
+			// If instance exists but is disposed, it will be cleaned up in _init()
 		}
 
 		this._init(element);
@@ -117,6 +128,33 @@ export class KTSelect extends KTComponent {
 	 */
 	static config(options: Partial<KTSelectConfigInterface>): void {
 		this.globalConfig = { ...this.globalConfig, ...options };
+	}
+
+	/**
+	 * Re-initialize a KTSelect component on an element.
+	 * If an active instance exists, it is returned. If a disposed instance exists, it is cleaned up and a new instance is created.
+	 * @param element The HTML element to initialize the component on
+	 * @param config Optional configuration to use for the new instance
+	 * @returns The KTSelect instance
+	 * @example
+	 * const select = KTSelect.reinit(element);
+	 * const selectWithConfig = KTSelect.reinit(element, { enableSearch: true });
+	 */
+	static reinit(
+		element: HTMLElement,
+		config?: KTSelectConfigInterface,
+	): KTSelect {
+		const existing = KTData.get(element, 'select') as KTSelect | undefined;
+		if (existing && !existing._disposed) {
+			// Return existing active instance (idempotent)
+			return existing;
+		}
+		if (existing && existing._disposed) {
+			// Clean up disposed instance
+			existing.dispose();
+		}
+		// Create new instance
+		return new KTSelect(element, config);
 	}
 
 	/**
@@ -704,7 +742,11 @@ export class KTSelect extends KTComponent {
 		// Attach event listeners after all modules are initialized
 		this._attachEventListeners();
 
+		// Initialize MutationObserver for DOM change detection
 		this._observeNativeSelect();
+
+		// Add native event listeners for state synchronization
+		this._initializeNativeEventListeners();
 	}
 
 	/**
@@ -1729,36 +1771,82 @@ export class KTSelect extends KTComponent {
 	 * This overrides the parent dispose method
 	 */
 	public override dispose(): void {
+		// Idempotent: can be called multiple times safely
+		if (this._disposed) return;
+
+		// Clean up MutationObserver
+		if (this._mutationObserver) {
+			this._mutationObserver.disconnect();
+			this._mutationObserver = null;
+		}
+
+		// Clean up native event listeners (if any were added)
+		if (this._element && this._nativeChangeHandler) {
+			this._element.removeEventListener('change', this._nativeChangeHandler);
+			this._element.removeEventListener('input', this._nativeChangeHandler);
+			this._nativeChangeHandler = null;
+		}
+
+		// Clear pending timeout
+		if (this._nativeChangeTimeout) {
+			clearTimeout(this._nativeChangeTimeout);
+			this._nativeChangeTimeout = null;
+		}
+
 		// Clean up event listeners
-		this._eventManager.removeAllListeners(null);
+		if (this._eventManager) {
+			this._eventManager.removeAllListeners(null);
+		}
 
 		// Dispose modules
 		if (this._dropdownModule) {
 			this._dropdownModule.dispose();
+			this._dropdownModule = null;
 		}
 
 		if (this._comboboxModule) {
 			if (typeof this._comboboxModule.destroy === 'function') {
 				this._comboboxModule.destroy();
 			}
+			this._comboboxModule = null;
 		}
 
 		if (this._tagsModule) {
 			if (typeof this._tagsModule.destroy === 'function') {
 				this._tagsModule.destroy();
 			}
+			this._tagsModule = null;
 		}
 
 		if (this._searchModule) {
 			if (typeof this._searchModule.destroy === 'function') {
 				this._searchModule.destroy();
 			}
+			this._searchModule = null;
+		}
+
+		// Remove from static registry
+		if (KTSelect.openDropdowns) {
+			KTSelect.openDropdowns.delete(this);
 		}
 
 		// Remove DOM elements
 		if (this._wrapperElement && this._wrapperElement.parentNode) {
 			this._wrapperElement.parentNode.removeChild(this._wrapperElement);
+			this._wrapperElement = null;
 		}
+
+		// Clear other references
+		this._displayElement = null;
+		this._dropdownContentElement = null;
+		this._searchInputElement = null;
+		this._options = null;
+		this._optionsContainer = null;
+		this._loadMoreIndicator = null;
+		this._selectAllButton = null;
+		this._selectAllButtonToggle = null;
+		this._remoteModule = null;
+		this._state = null;
 
 		// Call parent dispose to clean up data
 		super.dispose();
@@ -2539,6 +2627,10 @@ export class KTSelect extends KTComponent {
 	private _observeNativeSelect() {
 		if (this._mutationObserver) return; // Prevent double observers
 		this._mutationObserver = new MutationObserver((mutations) => {
+			// Guard against calls after disposal
+			if (this._disposed || !this._element) {
+				return;
+			}
 			let needsRebuild = false;
 			let needsSelectionSync = false;
 
@@ -2561,7 +2653,8 @@ export class KTSelect extends KTComponent {
 				this._rebuildOptionsFromNative();
 			}
 			if (needsSelectionSync) {
-				this._syncSelectionFromNative();
+				// Sync without dispatching events to prevent loops
+				this._syncSelectionFromNative(true);
 			}
 		});
 
@@ -2574,6 +2667,10 @@ export class KTSelect extends KTComponent {
 	}
 
 	private _rebuildOptionsFromNative() {
+		// Guard against calls after disposal
+		if (this._disposed || !this._element || !this._dropdownContentElement) {
+			return;
+		}
 		// Remove and rebuild the custom dropdown options from the native select
 		if (this._dropdownContentElement) {
 			const optionsContainer = this._dropdownContentElement.querySelector(
@@ -2589,6 +2686,10 @@ export class KTSelect extends KTComponent {
 					) {
 						return;
 					}
+					// Guard: ensure config exists before creating option
+					if (!this._config) {
+						return;
+					}
 					const selectOption = new KTSelectOption(optionElement, this._config);
 					const renderedOption = selectOption.render();
 					optionsContainer.appendChild(renderedOption);
@@ -2599,23 +2700,66 @@ export class KTSelect extends KTComponent {
 				) as NodeListOf<HTMLElement>;
 			}
 		}
-		// Sync selection after rebuilding
-		this._syncSelectionFromNative();
+		// Sync selection after rebuilding (skip event to prevent loops)
+		this._syncSelectionFromNative(true);
 		this.updateSelectedOptionDisplay();
 		this._updateSelectedOptionClass();
 	}
 
-	private _syncSelectionFromNative() {
-		// Sync internal state from the native select's selected options
-		const selected = Array.from(
-			this._element.querySelectorAll('option:checked'),
-		).map((opt) => (opt as HTMLOptionElement).value);
-		this._state.setSelectedOptions(
-			this._config.multiple ? selected : selected[0] || '',
-		);
-		this.updateSelectedOptionDisplay();
-		this._updateSelectedOptionClass();
-		this.updateSelectAllButtonState();
+	private _syncSelectionFromNative(skipEvent: boolean = false) {
+		// Guard against calls after disposal or recursive calls
+		if (this._disposed || !this._element || !this._state || this._isSyncing) {
+			return;
+		}
+		this._isSyncing = true;
+		try {
+			// Sync internal state from the native select's selected options
+			const selected = Array.from(
+				this._element.querySelectorAll('option:checked'),
+			).map((opt) => (opt as HTMLOptionElement).value);
+			this._state.setSelectedOptions(
+				this._config.multiple ? selected : selected[0] || '',
+			);
+			this.updateSelectedOptionDisplay();
+			this._updateSelectedOptionClass();
+			this.updateSelectAllButtonState();
+		} finally {
+			this._isSyncing = false;
+		}
+	}
+
+	/**
+	 * Initialize native event listeners for state synchronization
+	 * Listens to 'change' and 'input' events to detect programmatic value changes
+	 */
+	private _initializeNativeEventListeners(): void {
+		if (!this._element || this._nativeChangeHandler) return;
+
+		// Create handler with debouncing to prevent rapid updates
+		this._nativeChangeHandler = (e: Event) => {
+			// Guard against calls after disposal
+			if (this._disposed || !this._element) {
+				return;
+			}
+			// Debounce rapid changes
+			if (this._nativeChangeTimeout) {
+				clearTimeout(this._nativeChangeTimeout);
+			}
+			this._nativeChangeTimeout = setTimeout(() => {
+				// Guard again in case disposed during timeout
+				if (this._disposed || !this._element) {
+					return;
+				}
+				// Sync state from native select (skip event to prevent loop)
+				this._syncSelectionFromNative(true);
+				// Don't dispatch change event here - it would trigger the handler again
+				// The native change event already fired, so we just sync state
+			}, 10); // 10ms debounce
+		};
+
+		// Add event listeners
+		this._element.addEventListener('change', this._nativeChangeHandler);
+		this._element.addEventListener('input', this._nativeChangeHandler);
 	}
 
 	private _handleSelectAllClick(event: Event): void {

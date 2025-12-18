@@ -26,6 +26,7 @@ export default class KTComponent {
 	protected _events: Map<string, Map<string, CallableFunction>>;
 	protected _uid: string | null = null;
 	protected _element: HTMLElement | null = null;
+	protected _disposed: boolean = false;
 
 	protected _init(element: HTMLElement | null) {
 		element = KTDom.getElement(element);
@@ -34,9 +35,25 @@ export default class KTComponent {
 			return;
 		}
 
+		// Check for existing instance
+		const existingInstance = KTData.get(element, this._name) as
+			| KTComponent
+			| undefined;
+		if (existingInstance) {
+			// If instance exists and is not disposed, return early (idempotent initialization)
+			if (!existingInstance._disposed) {
+				return;
+			}
+			// If instance exists but is disposed, clean it up before re-initializing
+			if (existingInstance._disposed && typeof existingInstance.dispose === 'function') {
+				existingInstance.dispose();
+			}
+		}
+
 		this._element = element;
 		this._events = new Map();
 		this._uid = KTUtils.geUID(this._name);
+		this._disposed = false;
 
 		this._element.setAttribute(`data-kt-${this._name}-initialized`, 'true');
 
@@ -114,10 +131,26 @@ export default class KTComponent {
 	}
 
 	public dispose(): void {
-		if (!this._element) return;
+		// Idempotent: can be called multiple times safely
+		if (this._disposed || !this._element) return;
 
+		// Mark as disposed first to prevent re-entry
+		this._disposed = true;
+
+		// Clean up event listeners
+		if (this._events) {
+			this._events.clear();
+		}
+
+		// Remove data attribute
 		this._element.removeAttribute(`data-kt-${this._name}-initialized`);
+
+		// Remove from data store
 		KTData.remove(this._element, this._name);
+
+		// Clear references
+		this._element = null;
+		this._uid = null;
 	}
 
 	public on(eventType: string, callback: CallableFunction): string {
