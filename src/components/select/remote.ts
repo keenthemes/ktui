@@ -50,8 +50,6 @@ export class KTSelectRemote {
 
 		let url = this._buildUrl(query, page);
 
-		if (this._config.debug) console.log('Fetching remote data from:', url);
-
 		// Dispatch search start event
 		this._dispatchEvent('remoteSearchStart');
 
@@ -148,32 +146,21 @@ export class KTSelectRemote {
 	 */
 	private _processData(data: any): KTSelectOptionData[] {
 		try {
-			if (this._config.debug) console.log('Processing API response:', data);
 
 			let processedData = data;
 
 			// Extract data from the API property if specified
 			if (this._config.apiDataProperty && data[this._config.apiDataProperty]) {
-				if (this._config.debug)
-					console.log(
-						`Extracting data from property: ${this._config.apiDataProperty}`,
-					);
 
 				// If pagination metadata is available, extract it
 				if (this._config.pagination) {
 					if (data.total_pages) {
 						this._totalPages = data.total_pages;
-						if (this._config.debug)
-							console.log(`Total pages found: ${this._totalPages}`);
 					}
 					if (data.total) {
 						this._totalPages = Math.ceil(
 							data.total / (this._config.paginationLimit || 10),
 						);
-						if (this._config.debug)
-							console.log(
-								`Calculated total pages: ${this._totalPages} from total: ${data.total}`,
-							);
 					}
 				}
 
@@ -186,10 +173,6 @@ export class KTSelectRemote {
 				return [];
 			}
 
-			if (this._config.debug)
-				console.log(
-					`Mapping ${processedData.length} items to KTSelectOptionData format`,
-				);
 
 			// Map data to KTSelectOptionData format
 			const mappedData = processedData.map((item: any): KTSelectOptionData => {
@@ -221,10 +204,6 @@ export class KTSelectRemote {
 					// If we found a value, verify it matches what was extracted
 					if (nestedValue !== null && nestedValue !== undefined) {
 						const expectedValue = String(nestedValue);
-						if (this._config.debug)
-							console.log(
-								`Data path verification for [${this._config.dataValueField}]: Expected: ${expectedValue}, Got: ${mappedItem.id}`,
-							);
 
 						if (mappedItem.id !== expectedValue && expectedValue) {
 							console.warn(
@@ -234,13 +213,9 @@ export class KTSelectRemote {
 					}
 				}
 
-				if (this._config.debug)
-					console.log(`Mapped item: ${JSON.stringify(mappedItem)}`);
 				return mappedItem;
 			});
 
-			if (this._config.debug)
-				console.log(`Returned ${mappedData.length} mapped items`);
 			return mappedData;
 		} catch (error) {
 			console.error('Error processing remote data:', error);
@@ -260,10 +235,6 @@ export class KTSelectRemote {
 		const valueField = this._config.dataValueField || 'id';
 		const labelField = this._config.dataFieldText || 'title';
 
-		if (this._config.debug)
-			console.log(`Mapping fields: value=${valueField}, label=${labelField}`);
-		if (this._config.debug)
-			console.log('Item data:', JSON.stringify(item).substring(0, 200) + '...'); // Trimmed for readability
 
 		// Extract values using improved getValue function
 		const getValue = (obj: any, path: string): any => {
@@ -285,17 +256,6 @@ export class KTSelectRemote {
 					result = result[part];
 				}
 
-				// Log the extraction result
-				if (this._config.debug)
-					console.log(
-						`Extracted [${path}] => ${
-							result !== null && result !== undefined
-								? typeof result === 'object'
-									? JSON.stringify(result).substring(0, 50)
-									: String(result).substring(0, 50)
-								: 'null'
-						}`,
-					);
 
 				return result;
 			} catch (error) {
@@ -312,8 +272,6 @@ export class KTSelectRemote {
 			for (const field of fallbackFields) {
 				if (item[field] !== null && item[field] !== undefined) {
 					id = String(item[field]);
-					if (this._config.debug)
-						console.log(`Using fallback field '${field}' for ID: ${id}`);
 					break;
 				}
 			}
@@ -324,7 +282,6 @@ export class KTSelectRemote {
 		// If still no ID, generate one
 		if (!id) {
 			id = `option-${Math.random().toString(36).substr(2, 9)}`;
-			if (this._config.debug) console.log(`Generated fallback ID: ${id}`);
 		}
 
 		// Get label with proper fallbacks
@@ -342,8 +299,6 @@ export class KTSelectRemote {
 			for (const field of fallbackFields) {
 				if (item[field] !== null && item[field] !== undefined) {
 					title = String(item[field]);
-					if (this._config.debug)
-						console.log(`Using fallback field '${field}' for title: ${title}`);
 					break;
 				}
 			}
@@ -354,8 +309,6 @@ export class KTSelectRemote {
 		// If still no title, use ID as fallback
 		if (!title) {
 			title = `Option ${id}`;
-			if (this._config.debug)
-				console.log(`Using ID as fallback title: ${title}`);
 		}
 
 		// Create the option object with consistent structure
@@ -366,8 +319,6 @@ export class KTSelectRemote {
 			disabled: Boolean(item.disabled),
 		};
 
-		if (this._config.debug)
-			console.log('Final mapped item:', JSON.stringify(result));
 		return result;
 	}
 
