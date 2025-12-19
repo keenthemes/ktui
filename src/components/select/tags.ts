@@ -26,7 +26,6 @@ export class KTSelectTags {
 		this._valueDisplayElement = select.getValueDisplayElement();
 		this._eventManager = new EventManager();
 
-		if (this._config.debug) console.log('KTSelectTags initialized');
 	}
 
 	/**
