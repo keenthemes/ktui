@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DataTable - Merged Columns Test</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+	<style>
+		.test-container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+
+		.test-header {
+			background: #f8f9fa;
+			padding: 20px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="test-container">
+		<div class="test-header">
+			<h1 class="text-2xl font-bold mb-2">DataTable - Merged Columns/Rows Test</h1>
+			<p class="text-gray-600">This test demonstrates a datatable with merged header cells using colspan and
+				rowspan.</p>
+			<p class="text-gray-600">The fix ensures that only th elements with <code
+					class="bg-gray-200 px-1">data-kt-datatable-column</code> attribute generate td elements in tbody.
+			</p>
+		</div>
+
+		<!-- DataTable Container with Merged Columns -->
+		<div class="kt-card">
+			<div class="kt-card-header min-h-16">
+				<div class="kt-input sm:w-48">
+					<i class="icon-search"></i>
+					<input type="text" class="kt-input" placeholder="Search..."
+						data-kt-datatable-search="#kt_datatable_basic" />
+				</div>
+			</div>
+			<div id="kt_datatable_basic" class="kt-card-table" data-kt-datatable="true" data-kt-datatable-page-size="10"
+				data-kt-datatable-state-save="false">
+				<div class="kt-table-wrapper kt-scrollable overflow-auto" data-kt-datatable="true"
+					data-kt-datatable-page-size="10">
+					<table class="kt-table kt-table-border" data-kt-datatable-table="true">
+						<thead>
+							<tr>
+								<th class="text-secondary-foreground font-semibold min-w-[130px]" rowspan="2"
+									data-kt-datatable-column="person">
+									<span class="kt-table-col">
+										<span class="kt-table-col-label">Person</span>
+										<span class="kt-table-col-sort"></span>
+									</span>
+								</th>
+								<th class="text-secondary-foreground font-semibold text-center" colspan="3">Backlog</th>
+								<th class="text-secondary-foreground font-semibold text-center" colspan="3">Floater (2)
+									2025</th>
+								<th class="text-secondary-foreground font-semibold text-center" colspan="3">Floater (1)
+									2025</th>
+								<th class="text-secondary-foreground font-semibold text-center" colspan="3">CL2025</th>
+								<th class="text-secondary-foreground font-semibold text-center" colspan="3">LWP - (Leave
+									without Pay)</th>
+								<th class="text-secondary-foreground font-semibold min-w-[60px]" rowspan="2">Action</th>
+							</tr>
+							<tr>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">
+									Assigned</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">Used
+								</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center">Balance</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">
+									Assigned</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">Used
+								</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center">Balance</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">
+									Assigned</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">Used
+								</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center">Balance</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">
+									Assigned</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">Used
+								</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center">Balance</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">
+									Assigned</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r-0">Used
+								</th>
+								<th class="text-secondary-foreground font-medium text-xs text-center border-r">Balance
+								</th>
+							</tr>
+							<tr style="display: none;">
+								<!-- Hidden row - used for data-kt-datatable-column mapping to ensure correct order -->
+								<th>
+									<span class="kt-table-col">
+										<span class="kt-table-col-label">Person</span>
+										<span class="kt-table-col-sort"></span>
+									</span>
+								</th>
+
+								<th data-kt-datatable-column="backlog_assigned">Assigned</th>
+								<th data-kt-datatable-column="backlog_used">Used</th>
+								<th data-kt-datatable-column="backlog_balance">Balance</th>
+
+								<th data-kt-datatable-column="floater2_assigned">Assigned</th>
+								<th data-kt-datatable-column="floater2_used">Used</th>
+								<th data-kt-datatable-column="floater2_balance">Balance</th>
+
+								<th data-kt-datatable-column="floater1_assigned">Assigned</th>
+								<th data-kt-datatable-column="floater1_used">Used</th>
+								<th data-kt-datatable-column="floater1_balance">Balance</th>
+
+								<th data-kt-datatable-column="cl2025_assigned">Assigned</th>
+								<th data-kt-datatable-column="cl2025_used">Used</th>
+								<th data-kt-datatable-column="cl2025_balance">Balance</th>
+
+								<th data-kt-datatable-column="lwp_assigned">Assigned</th>
+								<th data-kt-datatable-column="lwp_used">Used</th>
+								<th data-kt-datatable-column="lwp_balance">Balance</th>
+
+								<th data-kt-datatable-column="action">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Esther Howard </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Guy Hawkins </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">3</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Cody Fisher </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Robert Fox </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">7</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Cameron Williamson </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">7</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Jenny Wilson </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">8</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Kristin Watson </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Annette Black </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">5</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">8</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Ralph Edwards </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">6</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">9</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Darlene Robertson </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="text-center">9</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">5</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Jerome Bell </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">5</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">8</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Courtney Henry </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">5</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">6</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="text-center">10</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">4</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Bessie Cooper </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Arlene McCoy </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">8</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">4</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Eleanor Pena </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">8</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">5</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Floyd Miles </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">7</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Marvin McKinney </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">5</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">8</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Kathryn Murphy </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Darrell Steward </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="text-center">9</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Jane Cooper </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">7</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Ronald Richards </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">6</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">4</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">2</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<div class="flex items-center gap-2.5">
+										<div class="flex flex-col gap-0.5">
+											<a class="leading-none font-semibold whitespace-nowrap text-sm text-mono"
+												href="#"> Theresa Webb </a>
+										</div>
+									</div>
+								</td>
+								<td class="border-r-0 text-center">4</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="text-center">7</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="text-center">3</td>
+								<td class="border-r-0 text-center">5</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">7</td>
+								<td class="border-r-0 text-center">1</td>
+								<td class="border-r-0 text-center">0</td>
+								<td class="text-center">1</td>
+								<td class="border-r-0 text-center">3</td>
+								<td class="border-r-0 text-center">2</td>
+								<td class="text-center">5</td>
+								<td class="text-center">
+									<button type="button" class="kt-btn">Edit</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<!--begin:pagination-->
+				<div class="kt-datatable-toolbar">
+					<div class="kt-datatable-length">
+						Show<select class="kt-select kt-select-sm w-16" name="perpage"
+							data-kt-datatable-size="true"></select>per page
+					</div>
+					<div class="kt-datatable-info">
+						<span data-kt-datatable-info="true"></span>
+						<div class="kt-datatable-pagination" data-kt-datatable-pagination="true"></div>
+					</div>
+				</div>
+				<!--end:pagination-->
+			</div>
+		</div>
+
+		<!-- Test Results -->
+		<div class="mt-8 p-4 bg-gray-50 rounded-lg">
+			<h2 class="text-lg font-semibold mb-2">Test Instructions:</h2>
+			<ol class="list-decimal list-inside space-y-2 text-gray-700">
+				<li>The table header has merged cells using colspan and rowspan</li>
+				<li>Only th elements with <code class="bg-gray-200 px-1">data-kt-datatable-column</code> should generate
+					td elements</li>
+				<li>Check that pagination works correctly without creating blank td elements</li>
+				<li>Verify that sorting and searching work properly</li>
+				<li>Inspect the DOM to confirm no extra blank td elements are created</li>
+			</ol>
+		</div>
+	</div>
+
+	<!-- Load KTUI -->
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>
