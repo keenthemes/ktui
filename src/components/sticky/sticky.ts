@@ -44,6 +44,8 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected _releaseElement: HTMLElement;
 	protected _activateElement: HTMLElement;
 	protected _wrapperElement: HTMLElement;
+	private _resizeHandler: (() => void) | null = null;
+	private _scrollHandler: (() => void) | null = null;
 
 	constructor(
 		element: HTMLElement,
@@ -51,7 +53,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	) {
 		super();
 
-		if (KTData.has(element as HTMLElement, this._name)) return;
+		// Check if element already has an instance and is still connected
+		if (this._shouldSkipInit(element)) {
+			return;
+		}
 
 		this._init(element);
 		this._buildConfig(config);
@@ -88,7 +93,8 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	}
 
 	protected _handlers(): void {
-		window.addEventListener('resize', () => {
+		// Store resize handler reference for cleanup
+		this._resizeHandler = () => {
 			let timer;
 
 			KTUtils.throttle(
@@ -98,11 +104,25 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				},
 				200,
 			);
-		});
+		};
 
-		this._targetElement.addEventListener('scroll', () => {
+		window.addEventListener('resize', this._resizeHandler);
+
+		// Store scroll handler reference for cleanup
+		this._scrollHandler = () => {
 			this._process();
-		});
+		};
+
+		if (this._targetElement) {
+			if (this._targetElement === document) {
+				window.addEventListener('scroll', this._scrollHandler);
+			} else {
+				(this._targetElement as HTMLElement).addEventListener(
+					'scroll',
+					this._scrollHandler,
+				);
+			}
+		}
 	}
 
 	protected _process(): void {
@@ -371,6 +391,36 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 	public isActive(): boolean {
 		return this._isActive();
+	}
+
+	public override dispose(): void {
+		// Remove resize event listener
+		if (this._resizeHandler) {
+			window.removeEventListener('resize', this._resizeHandler);
+			this._resizeHandler = null;
+		}
+
+		// Remove scroll event listener
+		if (this._scrollHandler) {
+			if (this._targetElement === document) {
+				window.removeEventListener('scroll', this._scrollHandler);
+			} else if (this._targetElement) {
+				(this._targetElement as HTMLElement).removeEventListener(
+					'scroll',
+					this._scrollHandler,
+				);
+			}
+			this._scrollHandler = null;
+		}
+
+		// Clean up state
+		this._disable();
+		if (this._attributeRoot && document.body.hasAttribute(this._attributeRoot)) {
+			document.body.removeAttribute(this._attributeRoot);
+		}
+
+		// Call parent dispose to clean up data attributes and KTData
+		super.dispose();
 	}
 
 	public static getInstance(element: HTMLElement): KTSticky {
