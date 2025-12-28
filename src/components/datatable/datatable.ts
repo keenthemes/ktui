@@ -1777,7 +1777,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	public static getInstance(
 		element: HTMLElement,
 	): KTDataTable<KTDataTableDataInterface> | undefined {
-		return this._instances.get(element);
+		// First check the static Map (for instances created via createInstances)
+		const instanceFromMap = this._instances.get(element);
+		if (instanceFromMap) {
+			return instanceFromMap;
+		}
+
+		// Fallback to element's instance property (for manually created instances)
+		return (element as any).instance;
 	}
 
 	/**
