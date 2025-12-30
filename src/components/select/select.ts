@@ -1410,6 +1410,65 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
+	 * Deselect a specific option by value
+	 * @param value The value of the option to deselect
+	 * @public
+	 */
+	public deselectOption(value: string): void {
+		// Check if the option is currently selected
+		if (!this._state.isSelected(value)) {
+			return; // Already deselected
+		}
+
+		// For single-select mode, check if clearing is allowed
+		if (!this._config.multiple && !this._config.allowClear) {
+			return; // Cannot deselect in single-select mode unless allowClear is true
+		}
+
+		// Remove from selected options
+		if (this._config.multiple) {
+			// For multiple select, just toggle it off
+			this._state.toggleSelectedOptions(value);
+		} else {
+			// For single select, clear all selections
+			this._state.setSelectedOptions([]);
+		}
+
+		// Update the native select element
+		const optionEl = Array.from(this._element.querySelectorAll('option')).find(
+			(opt) => opt.value === value,
+		) as HTMLOptionElement;
+
+		if (optionEl) {
+			optionEl.selected = false;
+		}
+
+		// For single select, clear the native select value
+		if (!this._config.multiple) {
+			(this._element as HTMLSelectElement).value = '';
+		}
+
+		// Update the display
+		this.updateSelectedOptionDisplay();
+		this._updateSelectedOptionClass();
+
+		// Update select all button state
+		this.updateSelectAllButtonState();
+
+		// Dispatch change event
+		this._dispatchEvent('change', {
+			value: value,
+			selected: false,
+			selectedOptions: this.getSelectedOptions(),
+		});
+		this._fireEvent('change', {
+			value: value,
+			selected: false,
+			selectedOptions: this.getSelectedOptions(),
+		});
+	}
+
+	/**
 	 * Set selected options programmatically
 	 */
 	public setSelectedOptions(options: HTMLOptionElement[]) {
@@ -1657,9 +1716,14 @@ export class KTSelect extends KTComponent {
 		// Get current selection state
 		const isSelected = this._state.isSelected(value);
 
-		// If already selected in single select mode, do nothing (can't deselect in single select)
+		// If already selected in single select mode, allow deselecting only if allowClear is true
 		if (isSelected && !this._config.multiple) {
-			return;
+			if (this._config.allowClear) {
+				// Use the deselectOption method to handle clearing
+				this.deselectOption(value);
+				return;
+			}
+			return; // Can't deselect in single select mode when allowClear is false
 		}
 
 		// Ensure any search input is cleared when selection changes
