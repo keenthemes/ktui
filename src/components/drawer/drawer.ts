@@ -272,7 +272,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 			return KTData.get(element, 'drawer') as KTDrawer;
 		}
 
-		if (element.getAttribute('data-kt-drawer-initialized') === 'true') {
+		if (element.getAttribute('data-kt-drawer')) {
 			return new KTDrawer(element);
 		}
 

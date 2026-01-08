@@ -170,4 +170,16 @@ export default class KTComponent {
 		if (!this._element) return null;
 		return this._element;
 	}
+
+	public static cleanup(): void {
+		const map = KTData.getElementMap();
+
+		map.forEach((components) => {
+			Array.from(components.values()).forEach((component) => {
+				if (component && typeof (component as any).dispose === 'function') {
+					(component as any).dispose();
+				}
+			});
+		});
+	}
 }

@@ -3,7 +3,7 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-const KTElementMap = new Map();
+const KTElementMap: Map<HTMLElement, Map<string, unknown>> = new Map();
 
 const KTData = {
 	set(element: HTMLElement, key: string, value: unknown): void {
@@ -40,6 +40,10 @@ const KTData = {
 		if (valueMap.size === 0) {
 			KTElementMap.delete(element);
 		}
+	},
+
+	getElementMap(): Map<HTMLElement, Map<string, unknown>> {
+		return KTElementMap;
 	},
 };
 
