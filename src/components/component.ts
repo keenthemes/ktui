@@ -27,6 +27,32 @@ export default class KTComponent {
 	protected _uid: string | null = null;
 	protected _element: HTMLElement | null = null;
 
+	/**
+	 * Check if component should skip initialization
+	 * Returns true if element already has an instance and is still connected to DOM
+	 * Returns false if element should be initialized (no instance or disconnected)
+	 * @param element The element to check
+	 * @returns true if initialization should be skipped, false otherwise
+	 */
+	protected _shouldSkipInit(element: HTMLElement): boolean {
+		if (!KTData.has(element, this._name)) {
+			return false;
+		}
+
+		const existingInstance = KTData.get(element, this._name) as KTComponent;
+
+		// If element is not connected to DOM, dispose old instance and allow reinitialization
+		if (element.isConnected === false) {
+			if (existingInstance && typeof existingInstance.dispose === 'function') {
+				existingInstance.dispose();
+			}
+			return false;
+		}
+
+		// Element is connected and has instance, skip initialization
+		return true;
+	}
+
 	protected _init(element: HTMLElement | null) {
 		element = KTDom.getElement(element);
 
