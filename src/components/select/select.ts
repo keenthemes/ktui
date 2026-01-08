@@ -149,23 +149,31 @@ export class KTSelect extends KTComponent {
 		const dispatchGlobalEvents =
 			this._config.dispatchGlobalEvents !== false; // Default to true
 		if (dispatchGlobalEvents) {
-			// Create namespaced event name for document dispatch
-			const namespacedEventType = `kt-select:${eventType}`;
+			// Create event detail structure
+			const eventDetail = {
+				payload,
+				instance: this, // Include component instance reference
+				element: this._element, // Include element reference
+			};
 
-			// Create event with same detail structure
-			const globalEvent = new CustomEvent(namespacedEventType, {
-				detail: {
-					payload,
-					instance: this, // Include component instance reference
-					element: this._element, // Include element reference
-				},
+			// Dispatch non-namespaced event on document (for jQuery compatibility: $(document).on('show', ...))
+			const nonNamespacedEvent = new CustomEvent(eventType, {
+				detail: eventDetail,
 				bubbles: true,
 				cancelable: true,
 				composed: true, // Allow event to cross shadow DOM boundaries
 			});
+			document.dispatchEvent(nonNamespacedEvent);
 
-			// Dispatch on document
-			document.dispatchEvent(globalEvent);
+			// Also dispatch namespaced event on document (for namespaced listeners: $(document).on('kt-select:show', ...))
+			const namespacedEventType = `kt-select:${eventType}`;
+			const namespacedEvent = new CustomEvent(namespacedEventType, {
+				detail: eventDetail,
+				bubbles: true,
+				cancelable: true,
+				composed: true, // Allow event to cross shadow DOM boundaries
+			});
+			document.dispatchEvent(namespacedEvent);
 		}
 	}
 
