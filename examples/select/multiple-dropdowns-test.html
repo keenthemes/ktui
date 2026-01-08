@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Multiple Dropdowns Test</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-2xl mt-10 mx-auto">
+		<h1 class="text-2xl font-bold mb-6">Multiple KTSelect Dropdowns Test</h1>
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-1">Select 1</label>
+				<select
+					id="select-1"
+					class="kt-select"
+					data-kt-select="true"
+					data-kt-select-placeholder="Select an option...">
+					<option value="option1">Option 1</option>
+					<option value="option2">Option 2</option>
+					<option value="option3">Option 3</option>
+					<option value="option4">Option 4</option>
+				</select>
+			</div>
+
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-2">Select 2</label>
+				<select
+					id="select-2"
+					class="kt-select"
+					data-kt-select="true"
+					data-kt-select-placeholder="Select an option...">
+					<option value="optionA">Option A</option>
+					<option value="optionB">Option B</option>
+					<option value="optionC">Option C</option>
+					<option value="optionD">Option D</option>
+				</select>
+			</div>
+
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-3">Select 3</label>
+				<select
+					id="select-3"
+					class="kt-select"
+					data-kt-select="true"
+					data-kt-select-placeholder="Select an option...">
+					<option value="item1">Item 1</option>
+					<option value="item2">Item 2</option>
+					<option value="item3">Item 3</option>
+					<option value="item4">Item 4</option>
+				</select>
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>
