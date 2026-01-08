@@ -39,11 +39,6 @@ export class KTSelectSearch {
 			this._searchInput = this._select.getSearchInput();
 
 			if (this._searchInput) {
-				if (this._config.debug)
-					console.log(
-						'Initializing search module with input:',
-						this._searchInput,
-					);
 
 				// First remove any existing listeners to prevent duplicates
 				this._removeEventListeners();
@@ -96,24 +91,40 @@ export class KTSelectSearch {
 					.getWrapperElement()
 					.addEventListener('dropdown.close', () => {
 						this._focusManager.resetFocus();
-						// If clearSearchOnClose is false and there's a value, the search term and filtered state should persist.
-						// KTSelect's closeDropdown method already calls this._searchModule.clearSearch() (which clears highlights)
-						// and conditionally clears the input value based on KTSelect's config.clearSearchOnClose.
-						// This listener in search.ts seems to unconditionally clear everything.
-						// For now, keeping its original behavior:
-						this.clearSearch(); // Clears highlights from current options
-						this._searchInput.value = ''; // Clears the search input field
-						this._resetAllOptions(); // Shows all options, restores original text, removes highlights
-						this._clearNoResultsMessage(); // Clears any "no results" message
+						const config = this._select.getConfig();
+
+						// Clear highlights from current options (always do this)
+						this.clearSearch();
+
+						// Respect clearSearchOnClose config option
+						if (config.clearSearchOnClose) {
+							// Clear the search input field
+							this._searchInput.value = '';
+							// Reset all options to their original state
+							this._resetAllOptions();
+							// Clear any "no results" message
+							this._clearNoResultsMessage();
+						} else {
+							// When clearSearchOnClose is false, preserve search text
+							// The search input value is already preserved by KTSelect's closeDropdown method
+							// Reset options visibility to show all (they will be re-filtered when dropdown reopens)
+							this._resetAllOptions();
+							// Clear any "no results" message
+							this._clearNoResultsMessage();
+							// Note: The search input value is preserved, so when dropdown reopens,
+							// the dropdown.show listener will detect it and re-filter options accordingly
+						}
 					});
 
 				// Clear highlights when an option is selected - ATTACH TO ORIGINAL SELECT (standard 'change' event)
 				this._select.getElement().addEventListener('change', () => {
 					this.clearSearch();
 
-					// Close dropdown only for single select mode
+					// Close dropdown only for single select mode, and only if closeOnEnter is not false
 					// Keep dropdown open for multiple select mode to allow additional selections
-					if (!this._select.getConfig().multiple) {
+					// Also respect closeOnEnter config when it's explicitly set to false
+					const config = this._select.getConfig();
+					if (!config.multiple && config.closeOnEnter !== false) {
 						this._select.closeDropdown();
 					}
 				});
@@ -137,69 +148,9 @@ export class KTSelectSearch {
 							this._clearNoResultsMessage();
 						}
 
-						// Handle autofocus for the search input (this was one of the original separate listeners)
+						// Handle autofocus for the search input with retry mechanism
 						if (this._select.getConfig().searchAutofocus) {
-							// Ensure search input is available and focusable
-							const focusSearchInput = () => {
-								// Refresh search input reference in case it was recreated
-								const searchInput =
-									this._searchInput || this._select.getSearchInput();
-
-								if (!searchInput) {
-									// Retry if input not available yet
-									setTimeout(focusSearchInput, 50);
-									return;
-								}
-
-								// Check if input is visible and focusable
-								const isVisible =
-									searchInput.offsetParent !== null &&
-									!searchInput.hasAttribute('disabled') &&
-									!searchInput.hasAttribute('readonly');
-
-								if (!isVisible) {
-									// Retry if not visible yet
-									setTimeout(focusSearchInput, 50);
-									return;
-								}
-
-								try {
-									// Use requestAnimationFrame to ensure DOM is ready
-									requestAnimationFrame(() => {
-										requestAnimationFrame(() => {
-											const input =
-												this._searchInput || this._select.getSearchInput();
-											if (input) {
-												// CRITICAL FIX: Elements with tabIndex: -1 cannot receive programmatic focus
-												// Set tabIndex to 0 (or remove it) to allow focus
-												if (input.tabIndex === -1) {
-													input.tabIndex = 0;
-												}
-
-												input.focus();
-
-												// Ensure cursor is at the end if there's existing text
-												if (input.value) {
-													input.setSelectionRange(
-														input.value.length,
-														input.value.length,
-													);
-												}
-											}
-										});
-									});
-								} catch (error) {
-									// Fallback: try again after a short delay
-									setTimeout(() => {
-										const input =
-											this._searchInput || this._select.getSearchInput();
-										input?.focus();
-									}, 100);
-								}
-							};
-
-							// Start focusing after a small delay to ensure dropdown is ready
-							setTimeout(focusSearchInput, 100);
+							this._focusSearchInputWithRetry();
 						}
 						this._select.updateSelectAllButtonState();
 					});
@@ -213,6 +164,58 @@ export class KTSelectSearch {
 	private _removeEventListeners(): void {
 		if (this._searchInput) {
 			this._eventManager.removeAllListeners(this._searchInput);
+		}
+	}
+
+	/**
+	 * Focus the search input with retry mechanism for reliability
+	 * Retries up to 3 times with exponential backoff (50ms, 100ms, 200ms)
+	 */
+	private _focusSearchInputWithRetry(attempt: number = 0): void {
+		if (!this._searchInput) {
+			return;
+		}
+
+		const maxAttempts = 3;
+		const delays = [0, 50, 100, 200]; // Initial attempt + 3 retries
+
+		if (attempt > maxAttempts) {
+			if (this._config.debug) {
+				console.warn(
+					'KTSelect: Failed to focus search input after',
+					maxAttempts,
+					'attempts',
+				);
+			}
+			return;
+		}
+
+		const delay = delays[attempt] || 200;
+		const focusAttempt = () => {
+			try {
+				this._searchInput?.focus();
+				// Check if focus was successful
+				const isFocused = document.activeElement === this._searchInput || this._searchInput === document.activeElement;
+				if (isFocused) {
+					// Focus successful
+					return;
+				}
+				// Focus failed, retry if we haven't exceeded max attempts
+				if (attempt < maxAttempts) {
+					this._focusSearchInputWithRetry(attempt + 1);
+				}
+			} catch (error) {
+				// Focus failed with error, retry if we haven't exceeded max attempts
+				if (attempt < maxAttempts) {
+					this._focusSearchInputWithRetry(attempt + 1);
+				}
+			}
+		};
+
+		if (delay === 0) {
+			focusAttempt();
+		} else {
+			setTimeout(focusAttempt, delay);
 		}
 	}
 
@@ -245,10 +248,13 @@ export class KTSelectSearch {
 				if (firstAvailableOption) {
 					const optionValue = firstAvailableOption.getAttribute('data-value');
 					if (optionValue) {
+						// toggleSelection() already handles closing the dropdown based on closeOnEnter config
+						// for single-select mode, so we don't need to call closeDropdown() here
 						this._select.toggleSelection(optionValue);
-						// KTSelect.toggleSelection handles closing the dropdown based on config.closeOnSelect and config.multiple
+						// If closeOnEnter is false, dropdown remains open for additional selections
 					}
 				}
+				// If no available option, do nothing (dropdown remains open)
 				break;
 			case 'Escape':
 				event.preventDefault();

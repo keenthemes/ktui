@@ -54,7 +54,6 @@ export class KTSelectCombobox {
 			// this._select.showAllOptions(); // showAllOptions might be too broad, filtering is managed by typing.
 		});
 
-		if (this._config.debug) console.log('KTSelectCombobox initialized');
 	}
 
 	/**

@@ -113,8 +113,6 @@ export class KTSelectDropdown extends KTComponent {
 		event.stopPropagation();
 
 		if (this._config.disabled) {
-			if (this._config.debug)
-				console.log('KTSelectDropdown._handleToggleClick: select is disabled');
 			return;
 		}
 
@@ -313,8 +311,6 @@ export class KTSelectDropdown extends KTComponent {
 	 */
 	public open(): void {
 		if (this._config.disabled) {
-			if (this._config.debug)
-				console.log('KTSelectDropdown.open: select is disabled, not opening');
 			return;
 		}
 		if (this._isOpen || this._isTransitioning) return;
@@ -390,26 +386,12 @@ export class KTSelectDropdown extends KTComponent {
 	 * Close the dropdown
 	 */
 	public close(): void {
-		if (this._config.debug)
-			console.log(
-				'KTSelectDropdown.close called - isOpen:',
-				this._isOpen,
-				'isTransitioning:',
-				this._isTransitioning,
-			);
-
 		if (!this._isOpen || this._isTransitioning) {
-			if (this._config.debug)
-				console.log(
-					'KTSelectDropdown.close - early return: dropdown not open or is transitioning',
-				);
 			return;
 		}
 
 		// Events and ARIA will be handled by KTSelect
 
-		if (this._config.debug)
-			console.log('KTSelectDropdown.close - starting transition');
 		this._isTransitioning = true;
 
 		this._dropdownElement.style.opacity = '0';
@@ -417,8 +399,6 @@ export class KTSelectDropdown extends KTComponent {
 		let transitionComplete = false;
 		const fallbackTimer = setTimeout(() => {
 			if (!transitionComplete) {
-				if (this._config.debug)
-					console.log('KTSelectDropdown.close - fallback timer triggered');
 				completeTransition();
 			}
 		}, 300);
@@ -428,8 +408,6 @@ export class KTSelectDropdown extends KTComponent {
 			transitionComplete = true;
 			clearTimeout(fallbackTimer);
 
-			if (this._config.debug)
-				console.log('KTSelectDropdown.close - transition ended');
 
 			this._dropdownElement.classList.add('hidden');
 			this._dropdownElement.classList.remove('open');
@@ -443,8 +421,6 @@ export class KTSelectDropdown extends KTComponent {
 
 			// Events will be handled by KTSelect
 
-			if (this._config.debug)
-				console.log('KTSelectDropdown.close - visual part complete');
 		};
 
 		KTDom.transitionEnd(this._dropdownElement, completeTransition);

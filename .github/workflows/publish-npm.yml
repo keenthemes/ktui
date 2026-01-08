@@ -1,8 +1,9 @@
-name: Publish to npm
+name: Publish to npm registries
 
 on:
   release:
     types: [created]
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -15,7 +16,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://registry.npmjs.org/'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@keenthemes'
 
       - name: Install dependencies
         run: npm install
@@ -29,7 +31,52 @@ jobs:
       - name: Build package
         run: npm run build:prod
 
-      - name: Publish to npm
-        run: npm publish --access public
+      - name: Get package version
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Check if version exists in GitHub Packages
+        id: check-github
+        run: |
+          if npm view @keenthemes/ktui@${{ steps.package-version.outputs.version }} version --registry=https://npm.pkg.github.com 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} already exists in GitHub Packages"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} not found in GitHub Packages"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Publish to GitHub Packages
+        if: steps.check-github.outputs.exists != 'true'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js for npmjs.org
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Check if version exists in npmjs.org
+        id: check-npm
+        run: |
+          if npm view @keenthemes/ktui@${{ steps.package-version.outputs.version }} version --registry=https://registry.npmjs.org/ 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} already exists in npmjs.org"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} not found in npmjs.org"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
+      - name: Publish to npmjs.org
+        if: steps.check-npm.outputs.exists != 'true'
+        run: npm publish --registry https://registry.npmjs.org/ --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

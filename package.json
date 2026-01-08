@@ -1,11 +1,14 @@
 {
 	"name": "@keenthemes/ktui",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "Free & Open-Source Tailwind UI Components by Keenthemes",
 	"homepage": "https://ktui.io",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/keenthemes/ktui.git"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
 	},
 	"keywords": [
 		"reui",
