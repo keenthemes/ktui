@@ -241,20 +241,29 @@ export class KTSelectSearch {
 				break;
 			case 'Enter':
 				event.preventDefault();
-				// Always attempt to select the first available option in the list.
-				// focusFirst() finds, focuses, and returns the first visible, non-disabled option.
 				const firstAvailableOption = this._focusManager.focusFirst();
 
 				if (firstAvailableOption) {
 					const optionValue = firstAvailableOption.getAttribute('data-value');
 					if (optionValue) {
-						// toggleSelection() already handles closing the dropdown based on closeOnEnter config
-						// for single-select mode, so we don't need to call closeDropdown() here
-						this._select.toggleSelection(optionValue);
-						// If closeOnEnter is false, dropdown remains open for additional selections
+						const config = this._select.getConfig();
+						const isAlreadySelected = !config.multiple && this._select.getSelectedOptions().includes(optionValue);
+						const shouldClose = !config.multiple && config.closeOnEnter !== false;
+
+						if (isAlreadySelected && shouldClose) {
+							this._select.closeDropdown();
+						} else {
+							this._select.toggleSelection(optionValue);
+						}
+
+						// Focus display element after closing so user can press Enter again
+						if (shouldClose) {
+							setTimeout(() => {
+								this._select.getDisplayElement()?.focus();
+							}, 0);
+						}
 					}
 				}
-				// If no available option, do nothing (dropdown remains open)
 				break;
 			case 'Escape':
 				event.preventDefault();
