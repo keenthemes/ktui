@@ -43,13 +43,16 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	constructor(element: HTMLElement, config?: KTDrawerConfigInterface) {
 		super();
 
-		if (KTData.has(element as HTMLElement, this._name)) return;
+		if (KTData.has(element as HTMLElement, this._name)) {
+			return;
+		}
 
 		this._init(element);
 		this._buildConfig(config);
 		this._handleClose();
 		this._update();
 		this._handleContainer();
+
 	}
 
 	protected _handleClose(): void {
@@ -87,6 +90,28 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		}
 
 		KTDrawer.hide();
+
+		// If drawer needs to be in front of backdrop, ensure it's in body (for proper z-index stacking)
+		// This ensures the drawer and backdrop are in the same stacking context
+		if (this._getOption('container') === 'body' && this._element.parentElement !== document.body) {
+			// Store original parent for restoration when hiding
+			if (!this._element.hasAttribute('data-kt-drawer-original-parent-id')) {
+				const originalParent = this._element.parentElement;
+				if (originalParent && originalParent !== document.body) {
+					this._element.setAttribute('data-kt-drawer-original-parent-id', originalParent.id || '');
+					// Store a reference to find the parent later (using closest to find Livewire component or header)
+					const livewireComponent = originalParent.closest('[wire\\:id]');
+					const header = originalParent.closest('header#header');
+					if (livewireComponent) {
+						this._element.setAttribute('data-kt-drawer-original-wire-id', (livewireComponent as HTMLElement).getAttribute('wire:id') || '');
+					}
+					if (header) {
+						this._element.setAttribute('data-kt-drawer-original-in-header', 'true');
+					}
+				}
+			}
+			document.body.appendChild(this._element);
+		}
 
 		if (this._getOption('backdrop') === true) this._createBackdrop();
 
@@ -162,6 +187,10 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 			this._element.classList.remove(this._getOption('shownClass') as string);
 			this._element.style.zIndex = '';
 
+			// Note: We don't move drawer back to original location here
+			// Livewire will handle DOM structure on next navigation, and drawer will be reinitialized
+			// in its original location from the persisted component HTML
+
 			this._fireEvent('hidden');
 			this._dispatchEvent('hidden');
 		});
@@ -180,7 +209,25 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	protected _handleContainer(): void {
 		if (this._getOption('container')) {
 			if (this._getOption('container') === 'body') {
-				document.body.appendChild(this._element);
+				// Check if drawer is in a persisted Livewire component (like header with @persist)
+				// If so, don't move it to body - keep it in place so Livewire can preserve it
+				// This follows the same pattern as dropdowns/menus which work with wire:navigate
+				const originalParent = this._element.parentNode;
+				const isInPersistedComponent = originalParent &&
+					((originalParent as HTMLElement).closest('[wire\\:id]') !== null ||
+					 (originalParent as HTMLElement).closest('header#header') !== null);
+
+				if (isInPersistedComponent) {
+					// Don't move to body - keep in original location for Livewire persistence
+					// Use fixed positioning to achieve the same visual effect
+					// Ensure drawer has fixed positioning to work from its current location
+					if (!this._element.style.position || this._element.style.position === 'static') {
+						this._element.style.position = 'fixed';
+					}
+				} else {
+					// Not in persisted component - safe to move to body (follows original behavior)
+					document.body.appendChild(this._element);
+				}
 			} else {
 				document
 					.querySelector(this._getOption('container') as string)
@@ -265,15 +312,128 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		return this._isEnabled();
 	}
 
+	public static getElement(reference: HTMLElement): HTMLElement {
+		if (reference && reference.hasAttribute('data-kt-drawer-initialized'))
+			return reference;
+
+		const findElement =
+			reference &&
+			(reference.closest('[data-kt-drawer-initialized]') as HTMLElement);
+		if (findElement) return findElement;
+
+		// Fallback: look for parent with data-kt-drawer attribute
+		if (reference) {
+			const drawerContainer = reference.closest('[data-kt-drawer]') as HTMLElement;
+			if (drawerContainer) return drawerContainer;
+		}
+
+		// If reference is a toggle button with a selector, find the drawer by selector
+		// This handles cases where the toggle button is not a child of the drawer
+		if (reference && reference.hasAttribute('data-kt-drawer-toggle')) {
+			const selector = reference.getAttribute('data-kt-drawer-toggle');
+			if (selector) {
+				// Check both document and body (drawers with container="body" are moved to body)
+				const drawerElInDoc = document.querySelector(selector);
+				const drawerElInBody = document.body.querySelector(selector);
+				const drawerEl = drawerElInDoc || drawerElInBody;
+				if (drawerEl) return drawerEl as HTMLElement;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Wait for an element to appear in the DOM using polling with MutationObserver fallback
+	 * Useful for persisted Livewire components that may not be in DOM immediately
+	 */
+	public static waitForElement(selector: string, timeout: number = 2000): Promise<HTMLElement | null> {
+		return new Promise((resolve) => {
+			let resolved = false;
+
+			const doResolve = (element: HTMLElement | null) => {
+				if (!resolved) {
+					resolved = true;
+					resolve(element);
+				}
+			};
+
+			// Check if element already exists
+			const existing = document.querySelector(selector) || document.body.querySelector(selector);
+			if (existing) {
+				doResolve(existing as HTMLElement);
+				return;
+			}
+
+			// Use polling for faster detection (check every 50ms)
+			let attempts = 0;
+			const maxAttempts = timeout / 50;
+			const pollInterval = setInterval(() => {
+				if (resolved) {
+					clearInterval(pollInterval);
+					return;
+				}
+				attempts++;
+				const element = document.querySelector(selector) || document.body.querySelector(selector);
+				if (element) {
+					clearInterval(pollInterval);
+					doResolve(element as HTMLElement);
+					return;
+				}
+				if (attempts >= maxAttempts) {
+					clearInterval(pollInterval);
+					doResolve(null);
+				}
+			}, 50);
+
+			// Also use MutationObserver as backup for immediate detection
+			const observer = new MutationObserver(() => {
+				if (resolved) {
+					observer.disconnect();
+					return;
+				}
+				const element = document.querySelector(selector) || document.body.querySelector(selector);
+				if (element) {
+					clearInterval(pollInterval);
+					observer.disconnect();
+					doResolve(element as HTMLElement);
+				}
+			});
+
+			observer.observe(document.body, {
+				childList: true,
+				subtree: true,
+			});
+
+			// Cleanup on timeout
+			setTimeout(() => {
+				if (!resolved) {
+					clearInterval(pollInterval);
+					observer.disconnect();
+					doResolve(null);
+				}
+			}, timeout);
+		});
+	}
+
 	public static getInstance(element: HTMLElement): KTDrawer {
 		if (!element) return null;
 
-		if (KTData.has(element, 'drawer')) {
-			return KTData.get(element, 'drawer') as KTDrawer;
+		const drawerElement = KTDrawer.getElement(element);
+		if (!drawerElement) {
+			// If element is a toggle button and drawer element wasn't found, return null
+			// The handleToggle() will handle waiting for the element to appear
+			if (element.hasAttribute('data-kt-drawer-toggle')) {
+			}
+			return null;
 		}
 
-		if (element.getAttribute('data-kt-drawer-initialized') === 'true') {
-			return new KTDrawer(element);
+		if (KTData.has(drawerElement, 'drawer')) {
+			return KTData.get(drawerElement, 'drawer') as KTDrawer;
+		}
+
+		if (drawerElement.getAttribute('data-kt-drawer-initialized') === 'true') {
+			return new KTDrawer(drawerElement);
 		}
 
 		return null;
@@ -322,6 +482,14 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	}
 
 	public static handleToggle(): void {
+
+		// Add raw click listener to document.body to track all clicks
+		document.body.addEventListener('click', (rawEvent: MouseEvent) => {
+			const target = rawEvent.target as HTMLElement;
+			if (target && target.hasAttribute('data-kt-drawer-toggle')) {
+			}
+		}, true); // Use capture phase to catch before any stopPropagation
+
 		KTEventHandler.on(
 			document.body,
 			'[data-kt-drawer-toggle]',
@@ -332,10 +500,49 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 				const selector = target.getAttribute('data-kt-drawer-toggle');
 				if (!selector) return;
 
-				const drawerEl = document.querySelector(selector);
-				const drawer = KTDrawer.getInstance(drawerEl as HTMLElement);
+				// Try to get instance immediately
+				const drawer = KTDrawer.getInstance(target);
+
 				if (drawer) {
 					drawer.toggle();
+				} else {
+					// Drawer element not found - wait for it to appear (handles persisted Livewire components)
+					// Check if drawer exists in persisted components (might be in header that's persisted)
+					const persistedHeader = document.querySelector('[wire\\:id]')?.closest('[wire\\:id]') || document.querySelector('header#header');
+					const drawerInPersisted = persistedHeader ? persistedHeader.querySelector(selector) : null;
+
+					// Wait longer for persisted components that may take time to render
+					// Also check if drawer exists in persisted header component
+					KTDrawer.waitForElement(selector, 5000).then((drawerElement) => {
+						if (drawerElement) {
+							// Initialize the drawer if not already initialized
+							if (!KTData.has(drawerElement, 'drawer')) {
+								new KTDrawer(drawerElement);
+							}
+							// Get instance and toggle
+							const drawerInstance = KTDrawer.getInstance(drawerElement);
+							if (drawerInstance) {
+								drawerInstance.toggle();
+							}
+						} else {
+							// Drawer never appeared - trigger a reinit to see if it helps
+							// This handles cases where drawers are in persisted components that haven't rendered yet
+							setTimeout(() => {
+								KTDrawer.reinit();
+								// Try one more time after reinit
+								const drawerAfterReinit = document.querySelector(selector) || document.body.querySelector(selector);
+								if (drawerAfterReinit) {
+									if (!KTData.has(drawerAfterReinit as HTMLElement, 'drawer')) {
+										new KTDrawer(drawerAfterReinit as HTMLElement);
+									}
+									const drawerInstance = KTDrawer.getInstance(drawerAfterReinit as HTMLElement);
+									if (drawerInstance) {
+										drawerInstance.toggle();
+									}
+								}
+							}, 500);
+						}
+					});
 				}
 			},
 		);
@@ -411,8 +618,12 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	}
 
 	public static createInstances(): void {
-		const elements = document.querySelectorAll('[data-kt-drawer]');
-
+		// Find all drawer elements - check both document and body (drawers with container="body" are moved there)
+		const elementsInDoc = document.querySelectorAll('[data-kt-drawer]');
+		const elementsInBody = document.body.querySelectorAll('[data-kt-drawer]');
+		// Combine and deduplicate
+		const allElements = new Set([...Array.from(elementsInDoc), ...Array.from(elementsInBody)]);
+		const elements = Array.from(allElements);
 		elements.forEach((element) => {
 			new KTDrawer(element as HTMLElement);
 		});
@@ -429,6 +640,51 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 			KTDrawer.handleKeyword();
 			window.KT_DRAWER_INITIALIZED = true;
 		}
+	}
+
+	/**
+	 * Force reinitialization of drawers by clearing KTData entries.
+	 * Useful for Livewire wire:navigate where persisted elements need reinitialization.
+	 */
+	public static reinit(): void {
+		// Follow the same simple pattern as KTDropdown.reinit()
+		// Find all drawer elements - check both document and body (some may be moved to body)
+		const elementsInDoc = document.querySelectorAll('[data-kt-drawer]');
+		const elementsInBody = document.body.querySelectorAll('[data-kt-drawer]');
+		// Combine and deduplicate
+		const allElements = new Set([...Array.from(elementsInDoc), ...Array.from(elementsInBody)]);
+		const elements = Array.from(allElements);
+
+
+		// Clean up existing instances
+		elements.forEach((element) => {
+			try {
+				// Get existing instance to clean up
+				const instance = KTDrawer.getInstance(element as HTMLElement);
+				if (instance && typeof instance.hide === 'function') {
+					instance.hide(); // This will clean up backdrop and state
+				}
+				// Clear KTData entries
+				const hadDrawer = KTData.has(element as HTMLElement, 'drawer');
+				KTData.remove(element as HTMLElement, 'drawer');
+				// Remove initialization attribute to allow fresh initialization
+				element.removeAttribute('data-kt-drawer-initialized');
+			} catch (e) {
+				// Ignore errors for individual elements
+			}
+		});
+
+		// Now create fresh instances
+		KTDrawer.createInstances();
+
+		// Always ensure handlers are set up (similar to KTMenu.init() behavior)
+		// Event handlers use delegation so they persist, but we ensure they're attached
+		KTDrawer.handleToggle();
+		KTDrawer.handleDismiss();
+		KTDrawer.handleResize();
+		KTDrawer.handleClickAway();
+		KTDrawer.handleKeyword();
+
 	}
 }
 

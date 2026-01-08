@@ -6,6 +6,7 @@
 import KTDom from './helpers/dom';
 import KTUtils from './helpers/utils';
 import KTEventHandler from './helpers/event-handler';
+import KTData from './helpers/data';
 import { KTDropdown } from './components/dropdown';
 import { KTModal } from './components/modal';
 import { KTDrawer } from './components/drawer';
@@ -81,6 +82,7 @@ declare global {
 		KTUtils: typeof KTUtils;
 		KTDom: typeof KTDom;
 		KTEventHandler: typeof KTEventHandler;
+		KTData: typeof KTData;
 		KTDropdown: typeof KTDropdown;
 		KTModal: typeof KTModal;
 		KTDrawer: typeof KTDrawer;
