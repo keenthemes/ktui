@@ -189,7 +189,7 @@ export class KTAccordion extends KTComponent implements KTAccordionInterface {
 			return KTData.get(element, 'accordion') as KTAccordion;
 		}
 
-		if (element.getAttribute('data-kt-accordion-initialized') === 'true') {
+		if (element.getAttribute('data-kt-accordion')) {
 			return new KTAccordion(element);
 		}
 

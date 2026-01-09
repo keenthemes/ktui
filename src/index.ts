@@ -6,6 +6,7 @@
 import KTDom from './helpers/dom';
 import KTUtils from './helpers/utils';
 import KTEventHandler from './helpers/event-handler';
+import KTComponent from './components/component';
 import { KTDropdown } from './components/dropdown';
 import { KTModal } from './components/modal';
 import { KTDrawer } from './components/drawer';
@@ -74,6 +75,35 @@ const KTComponents = {
 		KTSelect.init();
 		KTToast.init();
 	},
+	cleanup(): void {
+		KTComponent.cleanup();
+
+		const flags = [
+			'KT_DROPDOWN_INITIALIZED',
+			'KT_MODAL_INITIALIZED',
+			'KT_DRAWER_INITIALIZED',
+			'KT_DISMISS_INITIALIZED',
+			'KT_TABS_INITIALIZED',
+			'KT_ACCORDION_INITIALIZED',
+			'KT_SCROLLSPY_INITIALIZED',
+			'KT_SCROLLABLE_INITIALIZED',
+			'KT_SCROLLTO_INITIALIZED',
+			'KT_STICKY_INITIALIZED',
+			'KT_REPARENT_INITIALIZED',
+			'KT_TOGGLE_INITIALIZED',
+			'KT_TOOLTIP_INITIALIZED',
+			'KT_STEPPER_INITIALIZED',
+			'KT_THEME_SWITCH_INITIALIZED',
+			'KT_IMAGE_INPUT_INITIALIZED',
+			'KT_TOGGLE_PASSWORD_INITIALIZED',
+		];
+
+		flags.forEach((flag) => {
+			if ((window as any)[flag]) {
+				(window as any)[flag] = false;
+			}
+		});
+	},
 };
 
 declare global {
@@ -104,6 +134,13 @@ declare global {
 		KTToast: typeof KTToast;
 		KTComponents: typeof KTComponents;
 	}
+}
+
+if (typeof window !== 'undefined') {
+	window.KTComponents = KTComponents;
+	window.KTUtils = KTUtils;
+	window.KTDom = KTDom;
+	window.KTEventHandler = KTEventHandler;
 }
 
 export default KTComponents;

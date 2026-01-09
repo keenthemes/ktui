@@ -237,6 +237,13 @@ export class KTTooltip extends KTComponent implements KTTooltipInterface {
 		});
 	}
 
+	public dispose(): void {
+		if (this._popper) {
+			this._popper.destroy();
+		}
+		super.dispose();
+	}
+
 	protected _handleContainer(): void {
 		if (this._getOption('container')) {
 			if (this._getOption('container') === 'body') {

@@ -226,6 +226,11 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		});
 	}
 
+	public dispose(): void {
+		this._destroyPopper();
+		super.dispose();
+	}
+
 	protected _initPopper(): void {
 		const isRtl = KTDom.isRTL();
 		let reference: HTMLElement;
@@ -364,12 +369,11 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 
 	// Static Methods
 	public static getElement(reference: HTMLElement): HTMLElement {
-		if (reference && reference.hasAttribute('data-kt-dropdown-initialized'))
+		if (reference && reference.hasAttribute('data-kt-dropdown'))
 			return reference;
 
 		const findElement =
-			reference &&
-			(reference.closest('[data-kt-dropdown-initialized]') as HTMLElement);
+			reference && (reference.closest('[data-kt-dropdown]') as HTMLElement);
 		if (findElement) return findElement;
 
 		if (
@@ -392,7 +396,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 			return KTData.get(element, 'dropdown') as KTDropdown;
 		}
 
-		if (element.getAttribute('data-kt-dropdown-initialized') === 'true') {
+		if (element.getAttribute('data-kt-dropdown')) {
 			return new KTDropdown(element);
 		}
 
