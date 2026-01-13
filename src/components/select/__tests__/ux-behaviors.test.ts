@@ -796,7 +796,7 @@ describe('KTSelect UX Behaviors', () => {
 			selectEl.removeEventListener('show', showHandler);
 		});
 
-		it('should use namespaced event names for document events', async () => {
+		it('should dispatch both namespaced and non-namespaced events on document', async () => {
 			const selectEl = createSelectElement();
 			container.appendChild(selectEl);
 
@@ -819,17 +819,59 @@ describe('KTSelect UX Behaviors', () => {
 			select.openDropdown();
 			await waitFor(200);
 
-			// Only namespaced event should fire on document
+			// Both events should fire on document
 			expect(namespacedHandler).toHaveBeenCalledTimes(1);
-			// Non-namespaced might be called from element bubbling, but we check the event type
+			// Non-namespaced event should also be dispatched on document (for jQuery compatibility)
 			const nonNamespacedCalls = nonNamespacedHandler.mock.calls.filter(
 				(call) => call[0].type === 'show' && call[0].target === document,
 			);
-			expect(nonNamespacedCalls.length).toBe(0);
+			expect(nonNamespacedCalls.length).toBe(1);
+
+			// Verify event detail structure is consistent
+			const namespacedEvent = namespacedHandler.mock.calls[0][0] as CustomEvent;
+			const nonNamespacedEvent = nonNamespacedCalls[0][0] as CustomEvent;
+			expect(nonNamespacedEvent.detail.instance).toBe(select);
+			expect(nonNamespacedEvent.detail.element).toBe(selectEl);
+			expect(nonNamespacedEvent.detail).toEqual(namespacedEvent.detail);
 
 			// Cleanup
 			document.removeEventListener('kt-select:show', namespacedHandler, true);
 			document.removeEventListener('show', nonNamespacedHandler, true);
+		});
+
+		it('should support jQuery-style non-namespaced event listeners on document', async () => {
+			const selectEl = createSelectElement();
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				dispatchGlobalEvents: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Simulate jQuery-style listener: $(document).on('show', ...)
+			const showHandler = vi.fn();
+			document.addEventListener('show', showHandler);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			// Event should be dispatched on document and handler should be called
+			// Filter to only count events dispatched directly on document (not bubbled from element)
+			const documentEvents = showHandler.mock.calls.filter(
+				(call) => call[0].target === document,
+			);
+			expect(documentEvents.length).toBe(1);
+			const event = documentEvents[0][0] as CustomEvent;
+			expect(event.type).toBe('show');
+			expect(event.target).toBe(document);
+			expect(event.detail.instance).toBe(select);
+			expect(event.detail.element).toBe(selectEl);
+
+			// Cleanup
+			document.removeEventListener('show', showHandler);
 		});
 
 		it('should include component instance and element in event detail', async () => {
