@@ -1121,7 +1121,24 @@ export class KTSelect extends KTComponent {
 		this.updateSelectAllButtonState();
 
 		// Focus the first selected option or first option if nothing selected
-		this._focusSelectedOption();
+		// BUT: Skip this if search autofocus is enabled, as we want search input to get focus
+		if (!(this._config.enableSearch && this._config.searchAutofocus)) {
+			this._focusSelectedOption();
+		}
+
+		// Dispatch dropdown.show event on the wrapper element for search module
+		// Use requestAnimationFrame to ensure dropdown is visible and transition has started
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				if (this._wrapperElement) {
+					const dropdownShowEvent = new CustomEvent('dropdown.show', {
+						bubbles: true,
+						cancelable: true,
+					});
+					this._wrapperElement.dispatchEvent(dropdownShowEvent);
+				}
+			});
+		});
 	}
 
 	/**
@@ -1158,7 +1175,7 @@ export class KTSelect extends KTComponent {
 			this._focusManager.resetFocus();
 		}
 
-		// Dispatch custom events
+		// Dispatch custom events on the select element
 		this._dispatchEvent('close');
 		this._fireEvent('close');
 
