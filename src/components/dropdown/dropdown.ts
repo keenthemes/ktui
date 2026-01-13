@@ -49,7 +49,9 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 	constructor(element: HTMLElement, config?: KTDropdownConfigInterface) {
 		super();
 
-		if (KTData.has(element as HTMLElement, this._name)) return;
+		if (KTData.has(element as HTMLElement, this._name)) {
+			return;
+		}
 
 		this._init(element);
 		this._buildConfig(config);
@@ -57,11 +59,15 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		this._toggleElement = this._element.querySelector(
 			'[data-kt-dropdown-toggle]',
 		) as HTMLElement;
-		if (!this._toggleElement) return;
+		if (!this._toggleElement) {
+			return;
+		}
 		this._menuElement = this._element.querySelector(
 			'[data-kt-dropdown-menu]',
 		) as HTMLElement;
-		if (!this._menuElement) return;
+		if (!this._menuElement) {
+			return;
+		}
 
 		KTData.set(this._menuElement, 'dropdownElement', this._element);
 		this._setupNestedDropdowns();
@@ -101,9 +107,13 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		event.preventDefault();
 		event.stopPropagation();
 
-		if (this._disabled) return;
+		if (this._disabled) {
+			return;
+		}
 
-		if (this._getOption('trigger') !== 'click') return;
+		if (this._getOption('trigger') !== 'click') {
+			return;
+		}
 
 		this._toggle();
 	}
@@ -154,7 +164,9 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 	}
 
 	protected _show(): void {
-		if (this._isOpen || this._isTransitioning) return;
+		if (this._isOpen || this._isTransitioning) {
+			return;
+		}
 
 		const payload = { cancel: false };
 		this._fireEvent('show', payload);
@@ -372,6 +384,12 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 			(reference.closest('[data-kt-dropdown-initialized]') as HTMLElement);
 		if (findElement) return findElement;
 
+		// Fallback: look for parent with data-kt-dropdown attribute
+		if (reference) {
+			const dropdownContainer = reference.closest('[data-kt-dropdown]') as HTMLElement;
+			if (dropdownContainer) return dropdownContainer;
+		}
+
 		if (
 			reference &&
 			reference.hasAttribute('data-kt-dropdown-menu') &&
@@ -386,10 +404,13 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 	public static getInstance(element: HTMLElement): KTDropdown {
 		element = this.getElement(element);
 
-		if (!element) return null;
+		if (!element) {
+			return null;
+		}
 
 		if (KTData.has(element, 'dropdown')) {
-			return KTData.get(element, 'dropdown') as KTDropdown;
+			const instance = KTData.get(element, 'dropdown') as KTDropdown;
+			return instance;
 		}
 
 		if (element.getAttribute('data-kt-dropdown-initialized') === 'true') {
@@ -555,6 +576,40 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 			KTDropdown.initHandlers();
 			window.KT_DROPDOWN_INITIALIZED = true;
 		}
+	}
+
+	/**
+	 * Force reinitialization of dropdowns by clearing KTData entries.
+	 * Useful for Livewire wire:navigate where persisted elements need reinitialization.
+	 */
+	public static reinit(): void {
+		const elements = document.querySelectorAll('[data-kt-dropdown]');
+		elements.forEach((element) => {
+			try {
+				// Get existing instance to clean up Popper
+				const instance = KTDropdown.getInstance(element as HTMLElement);
+				if (instance && typeof instance.hide === 'function') {
+					instance.hide(); // This will destroy Popper
+				}
+				// Clear KTData entries
+				KTData.remove(element as HTMLElement, 'dropdown');
+				KTData.remove(element as HTMLElement, 'popper');
+				// Remove initialization attribute to allow fresh initialization
+				element.removeAttribute('data-kt-dropdown-initialized');
+				const menu = element.querySelector('[data-kt-dropdown-menu]');
+				if (menu) {
+					KTData.remove(menu as HTMLElement, 'dropdownElement');
+				}
+			} catch (e) {
+				// Ignore errors for individual elements
+			}
+		});
+		// Now create fresh instances
+		KTDropdown.createInstances();
+
+		// Always ensure handlers are set up (similar to KTMenu.init() behavior)
+		// Event handlers use delegation so they persist, but we ensure they're attached
+		KTDropdown.initHandlers();
 	}
 }
 
