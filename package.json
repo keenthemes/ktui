@@ -7,9 +7,6 @@
 		"type": "git",
 		"url": "https://github.com/keenthemes/ktui.git"
 	},
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com"
-	},
 	"keywords": [
 		"reui",
 		"keenthemes",
@@ -88,7 +85,9 @@
 		"format:check": "npx prettier --check 'src/**/*.ts'",
 		"type-check": "npx tsc --noEmit --project tsconfig.lib.json",
 		"validate": "npm run lint && npm run format:check && npm run type-check",
-		"validate:fix": "npm run lint:fix && npm run format"
+		"validate:fix": "npm run lint:fix && npm run format",
+		"publish:npm": "node scripts/publish-npm.js",
+		"publish:github": "npm publish"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.27.3",
@@ -118,5 +117,8 @@
 	},
 	"dependencies": {
 		"@popperjs/core": "^2.11.8"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
 	}
 }
