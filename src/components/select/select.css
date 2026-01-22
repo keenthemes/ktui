@@ -127,7 +127,11 @@
 	}
 
 	.kt-select-display:not([data-multiple='true']) {
-		@apply w-full overflow-ellipsis truncate;
+		@apply w-full flex items-center min-w-0;
+	}
+
+	.kt-select-display:not([data-multiple='true']) .kt-select-option-text {
+		@apply min-w-0 overflow-ellipsis truncate;
 	}
 
 	/* Enhanced Tag Styles */

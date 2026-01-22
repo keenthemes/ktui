@@ -41,6 +41,16 @@ const KTData = {
 			KTElementMap.delete(element);
 		}
 	},
+
+	// Clear all data for a specific element (useful for reinitialization)
+	clear(element: HTMLElement): void {
+		KTElementMap.delete(element);
+	},
 };
+
+// Expose KTData on window for external access (useful for Livewire wire:navigate)
+if (typeof window !== 'undefined') {
+	window.KTData = KTData;
+}
 
 export default KTData;

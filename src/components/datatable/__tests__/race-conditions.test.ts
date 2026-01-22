@@ -42,7 +42,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			}
 
 			// Simulate network delay
-			return new Promise((resolve, reject) => {
+			return new Promise<Response>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					if (options?.signal?.aborted) {
 						reject(new DOMException('The operation was aborted.', 'AbortError'));
@@ -72,7 +72,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			});
 		});
 
-		global.fetch = mockFetch;
+		global.fetch = mockFetch as typeof fetch;
 	});
 
 	afterEach(() => {
