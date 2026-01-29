@@ -84,7 +84,7 @@
 	}
 
 	.kt-select-wrapper {
-		@apply w-full;
+		@apply w-full min-w-0;
 
 		&.disabled {
 			@apply opacity-60 pointer-events-none;
@@ -126,8 +126,9 @@
 		@apply text-muted-foreground overflow-ellipsis truncate;
 	}
 
+	/* Single select: constrain width so long selected text truncates (Asana #1212821478465094) */
 	.kt-select-display:not([data-multiple='true']) {
-		@apply w-full flex items-center min-w-0;
+		@apply w-full flex items-center min-w-0 overflow-hidden;
 	}
 
 	.kt-select-display:not([data-multiple='true']) .kt-select-option-text {

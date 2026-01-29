@@ -1340,15 +1340,18 @@ export class KTSelect extends KTComponent {
 					return; // Exit early to prevent any text generation
 				} else {
 					// Tags are not enabled AND options are selected: render normal text display.
-					let content = '';
+					// Wrap content in .kt-select-option-text so long text truncates in single-select (see Asana #1212821478465094).
+					const wrapper = document.createElement('div');
+					wrapper.className = 'kt-select-option-text';
+					wrapper.setAttribute('data-kt-text-container', 'true');
 					if (this._config.displayTemplate) {
-						content = this.renderDisplayTemplateForSelected(
+						wrapper.innerHTML = this.renderDisplayTemplateForSelected(
 							this.getSelectedOptions(),
 						);
 					} else {
-						content = this.getSelectedOptionsText();
+						wrapper.textContent = this.getSelectedOptionsText();
 					}
-					valueDisplayEl.innerHTML = content;
+					valueDisplayEl.replaceChildren(wrapper);
 				}
 			}
 		}
