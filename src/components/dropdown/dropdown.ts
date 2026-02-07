@@ -45,6 +45,8 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 	protected _menuElement: HTMLElement;
 	protected _isTransitioning: boolean = false;
 	protected _isOpen: boolean = false;
+	/** Timestamp when _show() was last called; used to ignore duplicate _hide() from double handlers */
+	protected _shownAt: number = 0;
 
 	constructor(element: HTMLElement, config?: KTDropdownConfigInterface) {
 		super();
@@ -206,10 +208,13 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 			this._fireEvent('shown');
 			this._dispatchEvent('shown');
 		});
+		this._shownAt = Date.now();
 	}
 
 	protected _hide(): void {
 		if (!this._isOpen || this._isTransitioning) return;
+		// If another handler fired _hide() right after _show() (e.g. double initHandlers), ignore
+		if (this._shownAt && Date.now() - this._shownAt < 150) return;
 
 		const payload = { cancel: false };
 		this._fireEvent('hide', payload);
