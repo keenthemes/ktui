@@ -17,6 +17,8 @@ export interface KTDrawerConfigInterface {
 	persistent: boolean;
 	focus: boolean;
 	container: string;
+	/** When set, drawer is not moved to body when inside an element matching this selector (e.g. for SPA/persisted layouts). Comma-separated for multiple selectors. */
+	keepInPlaceWithin?: string;
 }
 export interface KTDrawerInterface {
 	show(): void;

@@ -33,6 +33,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		persistent: false,
 		container: '',
 		focus: true,
+		keepInPlaceWithin: '',
 	};
 	protected override _config: KTDrawerConfigInterface = this._defaultConfig;
 	protected _isOpen: boolean = false;
@@ -91,26 +92,19 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 
 		KTDrawer.hide();
 
-		// If drawer needs to be in front of backdrop, ensure it's in body (for proper z-index stacking)
-		// This ensures the drawer and backdrop are in the same stacking context
+		// When container="body", move drawer to body only if NOT inside an element matching keepInPlaceWithin.
+		// When keepInPlaceWithin is set (e.g. for SPA/persisted layouts), keeping the drawer in place lets the host preserve it across navigations.
 		if (this._getOption('container') === 'body' && this._element.parentElement !== document.body) {
-			// Store original parent for restoration when hiding
-			if (!this._element.hasAttribute('data-kt-drawer-original-parent-id')) {
-				const originalParent = this._element.parentElement;
-				if (originalParent && originalParent !== document.body) {
-					this._element.setAttribute('data-kt-drawer-original-parent-id', originalParent.id || '');
-					// Store a reference to find the parent later (using closest to find Livewire component or header)
-					const livewireComponent = originalParent.closest('[wire\\:id]');
-					const header = originalParent.closest('header#header');
-					if (livewireComponent) {
-						this._element.setAttribute('data-kt-drawer-original-wire-id', (livewireComponent as HTMLElement).getAttribute('wire:id') || '');
-					}
-					if (header) {
-						this._element.setAttribute('data-kt-drawer-original-in-header', 'true');
+			const keepInPlace = this._isKeepInPlace();
+			if (!keepInPlace) {
+				if (!this._element.hasAttribute('data-kt-drawer-original-parent-id')) {
+					const originalParent = this._element.parentElement;
+					if (originalParent && originalParent !== document.body) {
+						this._element.setAttribute('data-kt-drawer-original-parent-id', originalParent.id || '');
 					}
 				}
+				document.body.appendChild(this._element);
 			}
-			document.body.appendChild(this._element);
 		}
 
 		if (this._getOption('backdrop') === true) this._createBackdrop();
@@ -209,23 +203,11 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	protected _handleContainer(): void {
 		if (this._getOption('container')) {
 			if (this._getOption('container') === 'body') {
-				// Check if drawer is in a persisted Livewire component (like header with @persist)
-				// If so, don't move it to body - keep it in place so Livewire can preserve it
-				// This follows the same pattern as dropdowns/menus which work with wire:navigate
-				const originalParent = this._element.parentNode;
-				const isInPersistedComponent = originalParent &&
-					((originalParent as HTMLElement).closest('[wire\\:id]') !== null ||
-					 (originalParent as HTMLElement).closest('header#header') !== null);
-
-				if (isInPersistedComponent) {
-					// Don't move to body - keep in original location for Livewire persistence
-					// Use fixed positioning to achieve the same visual effect
-					// Ensure drawer has fixed positioning to work from its current location
+				if (this._isKeepInPlace()) {
 					if (!this._element.style.position || this._element.style.position === 'static') {
 						this._element.style.position = 'fixed';
 					}
 				} else {
-					// Not in persisted component - safe to move to body (follows original behavior)
 					document.body.appendChild(this._element);
 				}
 			} else {
@@ -234,6 +216,22 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 					?.appendChild(this._element);
 			}
 		}
+	}
+
+	/** True when drawer is inside an element matching keepInPlaceWithin (so we keep it in place instead of moving to body). */
+	protected _isKeepInPlace(): boolean {
+		const selector = (this._getOption('keepInPlaceWithin') as string)?.trim();
+		if (!selector || !this._element?.parentElement) return false;
+		const parent = this._element.parentElement;
+		const selectors = selector.split(',').map((s) => s.trim()).filter(Boolean);
+		for (const sel of selectors) {
+			try {
+				if (parent.closest(sel) !== null) return true;
+			} catch {
+				// invalid selector, skip
+			}
+		}
+		return false;
 	}
 
 	protected _autoFocus(): void {
@@ -253,7 +251,12 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		this._backdropElement = document.createElement('DIV');
 		this._backdropElement.style.zIndex = (zindex - 1).toString();
 		this._backdropElement.setAttribute('data-kt-drawer-backdrop', 'true');
-		document.body.append(this._backdropElement);
+		const parent = this._element.parentElement;
+		if (parent) {
+			parent.insertBefore(this._backdropElement, this._element);
+		} else {
+			document.body.append(this._backdropElement);
+		}
 		KTDom.reflow(this._backdropElement);
 		KTDom.addClass(
 			this._backdropElement,
