@@ -1813,8 +1813,30 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	public static init(): void {
 		if (typeof document === 'undefined') return;
-		// Create instances of KTDataTable for all elements with a
-		// data-kt-datatable="true" attribute
+		KTDataTable.createInstances();
+	}
+
+	/**
+	 * Force reinitialization of datatables by clearing existing instances.
+	 * Useful for Livewire wire:navigate where the DOM is replaced and new tables need to be initialized.
+	 */
+	public static reinit(): void {
+		if (typeof document === 'undefined') return;
+		const elements = document.querySelectorAll<HTMLElement>('[data-kt-datatable="true"]');
+		elements.forEach((element) => {
+			try {
+				const instance = KTDataTable.getInstance(element);
+				if (instance && typeof instance.dispose === 'function') {
+					instance.dispose();
+				}
+				KTData.remove(element, 'datatable');
+				element.removeAttribute('data-kt-datatable-initialized');
+				element.classList.remove('datatable-initialized');
+			} catch {
+				// ignore per-element errors
+			}
+		});
+		KTDataTable._instances.clear();
 		KTDataTable.createInstances();
 	}
 
