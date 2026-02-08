@@ -668,12 +668,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._storeOriginalClasses();
 
 		const rows = this._tbodyElement.querySelectorAll<HTMLTableRowElement>('tr');
-		
+
 		// Filter th elements to only include those with data-kt-datatable-column attribute
 		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
 			? this._theadElement.querySelectorAll('th')
 			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-		
+
 		const ths: HTMLTableCellElement[] = Array.from(allThs).filter(th => 
 			th.hasAttribute('data-kt-datatable-column')
 		);
@@ -708,15 +708,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	private _localTableHeaderInvalidate(): boolean {
 		const { originalData } = this.getState();
-		
+
 		// Count only th elements with data-kt-datatable-column attribute
 		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
 			? this._theadElement.querySelectorAll('th')
 			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-		const currentTableHeaders = Array.from(allThs).filter(th => 
+		const currentTableHeaders = Array.from(allThs).filter(th =>
 			th.hasAttribute('data-kt-datatable-column')
 		).length;
-		
+
 		const totalColumns = originalData.length
 			? Object.keys(originalData[0]).length
 			: 0;
@@ -1015,10 +1015,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
 			? this._theadElement.querySelectorAll('th')
 			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-		
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter(th => 
+
+		const ths: HTMLTableCellElement[] = Array.from(allThs).filter(th =>
 			th.hasAttribute('data-kt-datatable-column')
 		);
+		// When no th has data-kt-datatable-column, use all ths so we still render by column index (data extracted with numeric keys)
+		const columnsToRender: HTMLTableCellElement[] = ths.length > 0 ? ths : Array.from(allThs);
 
 		this._data.forEach((item: T, rowIndex: number) => {
 			const row = document.createElement('tr');
@@ -1033,8 +1035,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					? this.getState().originalDataAttributes[rowIndex]
 					: null;
 
-				// Use the order of <th> elements with data-kt-datatable-column to render <td>s in the correct order
-				ths.forEach((th, colIndex) => {
+				// Use columnsToRender so tables without data-kt-datatable-column still get cells (by index)
+				columnsToRender.forEach((th, colIndex) => {
 					const colName = th.getAttribute('data-kt-datatable-column');
 					const td = document.createElement('td');
 					let value: any;
