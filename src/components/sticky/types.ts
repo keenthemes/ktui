@@ -19,6 +19,7 @@ export interface KTStickyConfigInterface {
 	reverse: boolean;
 	release: string;
 	activate: string;
+	releaseDelay: number,
 }
 
 export interface KTStickyInterface {
