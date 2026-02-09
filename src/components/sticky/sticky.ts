@@ -330,19 +330,21 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		
 		const releaseDelay = this._getOption('releaseDelay') as number;
 
-		setTimeout(() => {
-			this._element.style.top = '';
-			this._element.style.bottom = '';
-			this._element.style.insetInlineStart = '';
-			this._element.style.insetInlineEnd = '';
-			this._element.style.insetBlockStart = '';
-			this._element.style.insetBlockEnd = '';
-			this._element.style.width = '';
-			this._element.style.left = '';
-			this._element.style.right = '';
-			this._element.style.zIndex = '';
-			this._element.style.position = '';
-		}, releaseDelay);
+		if (this._isActive() == false) {
+         setTimeout(() => {
+				this._element.style.top = '';
+				this._element.style.bottom = '';
+				this._element.style.insetInlineStart = '';
+				this._element.style.insetInlineEnd = '';
+				this._element.style.insetBlockStart = '';
+				this._element.style.insetBlockEnd = '';
+				this._element.style.width = '';
+				this._element.style.left = '';
+				this._element.style.right = '';
+				this._element.style.zIndex = '';
+				this._element.style.position = '';
+			}, releaseDelay);
+		}
 
 		const classList = this._getOption('class') as string;
 
