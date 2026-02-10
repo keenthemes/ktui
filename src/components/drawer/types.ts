@@ -21,7 +21,7 @@ export interface KTDrawerConfigInterface {
 	keepInPlaceWithin?: string;
 }
 export interface KTDrawerInterface {
-	show(): void;
+	show(relatedTarget?: HTMLElement): void;
 	hide(): void;
-	toggle(): void;
+	toggle(relatedTarget?: HTMLElement): void;
 }

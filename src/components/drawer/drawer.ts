@@ -287,8 +287,8 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		return KTUtils.stringToBoolean(this._getOption('enable'));
 	}
 
-	public toggle(): void {
-		return this._toggle();
+	public toggle(relatedTarget?: HTMLElement): void {
+		return this._toggle(relatedTarget);
 	}
 
 	public show(relatedTarget?: HTMLElement): void {
@@ -507,7 +507,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 				const drawer = KTDrawer.getInstance(target);
 
 				if (drawer) {
-					drawer.toggle();
+					drawer.toggle(target);
 				} else {
 					// Drawer element not found - wait for it to appear (handles persisted Livewire components)
 					// Check if drawer exists in persisted components (might be in header that's persisted)
@@ -525,7 +525,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 							// Get instance and toggle
 							const drawerInstance = KTDrawer.getInstance(drawerElement);
 							if (drawerInstance) {
-								drawerInstance.toggle();
+								drawerInstance.toggle(target);
 							}
 						} else {
 							// Drawer never appeared - trigger a reinit to see if it helps
@@ -540,7 +540,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 									}
 									const drawerInstance = KTDrawer.getInstance(drawerAfterReinit as HTMLElement);
 									if (drawerInstance) {
-										drawerInstance.toggle();
+										drawerInstance.toggle(target);
 									}
 								}
 							}, 500);
