@@ -325,13 +325,13 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		return true;
 	}
 
-	protected _disable(): void {
-		if (!this._element) return;
+	protected _disable(): Promise<void> {
+		if (!this._element) return Promise.resolve();
 		
 		const releaseDelay = this._getOption('releaseDelay') as number;
 
-		if (this._isActive() == false) {
-         setTimeout(() => {
+		var promise = new Promise((resolve) => {
+			setTimeout(() => {
 				this._element.style.top = '';
 				this._element.style.bottom = '';
 				this._element.style.insetInlineStart = '';
@@ -343,8 +343,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				this._element.style.right = '';
 				this._element.style.zIndex = '';
 				this._element.style.position = '';
+
+				resolve();
 			}, releaseDelay);
-		}
+		});
 
 		const classList = this._getOption('class') as string;
 
@@ -357,12 +359,15 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		}
 
 		this._element.classList.remove('active');
+
+		return promise;
 	}
 
 	protected _update(): void {
 		if (this._isActive()) {
-			this._disable();
-			this._enable();
+			this._disable().finally(() => {
+				this._enable();
+			});
 		} else {
 			this._disable();
 		}
