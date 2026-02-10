@@ -34,6 +34,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		reverse: false,
 		release: '',
 		activate: '',
+		releaseDelay: 0,
 	};
 	protected override _config: KTStickyConfigInterface = this._defaultConfig;
 	protected _targetElement: HTMLElement | Document | null = null;
@@ -327,18 +328,6 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected _disable(): void {
 		if (!this._element) return;
 
-		this._element.style.top = '';
-		this._element.style.bottom = '';
-		this._element.style.insetInlineStart = '';
-		this._element.style.insetInlineEnd = '';
-		this._element.style.insetBlockStart = '';
-		this._element.style.insetBlockEnd = '';
-		this._element.style.width = '';
-		this._element.style.left = '';
-		this._element.style.right = '';
-		this._element.style.zIndex = '';
-		this._element.style.position = '';
-
 		const classList = this._getOption('class') as string;
 
 		if (this._wrapperElement) {
@@ -349,10 +338,29 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 			KTDom.removeClass(this._element, classList);
 		}
 
+		const releaseDelay = this._getOption('releaseDelay') as number;
+
+		if(this._eventTriggerState === false){
+			setTimeout(() => {
+				this._element.style.top = '';
+				this._element.style.bottom = '';
+				this._element.style.insetInlineStart = '';
+				this._element.style.insetInlineEnd = '';
+				this._element.style.insetBlockStart = '';
+				this._element.style.insetBlockEnd = '';
+				this._element.style.width = '';
+				this._element.style.left = '';
+				this._element.style.right = '';
+				this._element.style.zIndex = '';
+				this._element.style.position = '';
+			}, releaseDelay);
+		}
+
 		this._element.classList.remove('active');
 	}
 
 	protected _update(): void {
+		this._eventTriggerState = true;
 		if (this._isActive()) {
 			this._disable();
 			this._enable();
