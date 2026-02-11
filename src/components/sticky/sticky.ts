@@ -40,7 +40,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected _targetElement: HTMLElement | Document | null = null;
 
 	protected _attributeRoot: string;
-	protected _timeoutState: boolean | number;
+	protected _timeoutState: ReturnType<typeof setTimeout> | null = null;
 	protected _eventTriggerState: boolean;
 	protected _lastScrollTop: number;
 	protected _releaseElement: HTMLElement;
@@ -71,7 +71,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		);
 		this._wrapperElement = this._element.closest('[data-kt-sticky-wrapper]');
 		this._attributeRoot = `data-kt-sticky-${this._getOption('name')}`;
-		this._timeoutState = false;
+		this._timeoutState = null;
 		this._eventTriggerState = true;
 		this._lastScrollTop = 0;
 
@@ -164,7 +164,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				}
 				// Back scroll mode
 			} else {
-				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === false) {
+				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === null) {
 					this._disable();
 					if (release) {
 						this._element.classList.add('release');
@@ -202,7 +202,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				// Back scroll mode
 			} else {
 				// back scroll mode
-				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === false) {
+				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === null) {
 					this._disable();
 					if (release) {
 						this._element.classList.add('release');
@@ -340,11 +340,11 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 			KTDom.removeClass(this._element, classList);
 		}
 
-		if(this._eventTriggerState === false && this._timeoutState !== false){
+		if(this._eventTriggerState === false && this._timeoutState !== null){
 
 			const releaseDelay = this._getOption('releaseDelay') as number;
 
-			setTimeout(() => {
+			this._timeoutState = setTimeout(() => {
 				this._element.style.top = '';
 				this._element.style.bottom = '';
 				this._element.style.insetInlineStart = '';
@@ -357,7 +357,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				this._element.style.zIndex = '';
 				this._element.style.position = '';
 
-				this._timeoutState = false;
+				this._timeoutState = null;
 			}, releaseDelay);
 
 		}
@@ -366,7 +366,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	}
 
 	protected _update(): void {
-		this._timeoutState = false;
+		this._timeoutState = null;
 		this._eventTriggerState = true;
 		if (this._isActive()) {
 			this._disable();
