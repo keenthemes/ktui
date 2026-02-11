@@ -40,6 +40,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected _targetElement: HTMLElement | Document | null = null;
 
 	protected _attributeRoot: string;
+	protected _timeoutState: boolean | number;
 	protected _eventTriggerState: boolean;
 	protected _lastScrollTop: number;
 	protected _releaseElement: HTMLElement;
@@ -70,6 +71,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		);
 		this._wrapperElement = this._element.closest('[data-kt-sticky-wrapper]');
 		this._attributeRoot = `data-kt-sticky-${this._getOption('name')}`;
+		this._timeoutState = false;
 		this._eventTriggerState = true;
 		this._lastScrollTop = 0;
 
@@ -162,7 +164,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				}
 				// Back scroll mode
 			} else {
-				if (document.body.hasAttribute(this._attributeRoot) === true) {
+				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === false) {
 					this._disable();
 					if (release) {
 						this._element.classList.add('release');
@@ -200,7 +202,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				// Back scroll mode
 			} else {
 				// back scroll mode
-				if (document.body.hasAttribute(this._attributeRoot) === true) {
+				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === false) {
 					this._disable();
 					if (release) {
 						this._element.classList.add('release');
@@ -338,9 +340,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 			KTDom.removeClass(this._element, classList);
 		}
 
-		const releaseDelay = this._getOption('releaseDelay') as number;
+		if(this._eventTriggerState === false && this._timeoutState !== false){
 
-		if(this._eventTriggerState === false){
+			const releaseDelay = this._getOption('releaseDelay') as number;
+
 			setTimeout(() => {
 				this._element.style.top = '';
 				this._element.style.bottom = '';
@@ -353,13 +356,17 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				this._element.style.right = '';
 				this._element.style.zIndex = '';
 				this._element.style.position = '';
+
+				this._timeoutState = false;
 			}, releaseDelay);
+
 		}
 
 		this._element.classList.remove('active');
 	}
 
 	protected _update(): void {
+		this._timeoutState = false;
 		this._eventTriggerState = true;
 		if (this._isActive()) {
 			this._disable();
