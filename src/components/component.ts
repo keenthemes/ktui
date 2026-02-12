@@ -139,6 +139,16 @@ export default class KTComponent {
 		};
 	}
 
+	/**
+	 * Merge config into the existing _config in place. Use when re-applying config to an
+	 * already-initialized instance so handlers that hold a reference to _config see updates.
+	 */
+	protected _mergeConfig(config: object): void {
+		if (config && typeof config === 'object' && Object.keys(config).length > 0) {
+			Object.assign(this._config, config);
+		}
+	}
+
 	public dispose(): void {
 		if (!this._element) return;
 

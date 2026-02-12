@@ -101,6 +101,20 @@ export interface KTDataTableConfigInterface {
 				rowData: KTDataTableDataInterface,
 				row: HTMLTableRowElement,
 			) => void;
+			/**
+			 * Sort comparison type for this column. When 'numeric', values are parsed
+			 * (e.g. strip currency/commas) and compared as numbers.
+			 */
+			sortType?: 'string' | 'numeric';
+			/**
+			 * Custom value used for sorting. When set, this is used instead of the raw
+			 * cell value (and instead of sortType). Return a number or string to sort by.
+			 * Use for custom formats (e.g. dates, combined fields, custom parsing).
+			 */
+			sortValue?: (
+				cellValue: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string,
+				rowData: KTDataTableDataInterface,
+			) => number | string;
 		};
 	};
 

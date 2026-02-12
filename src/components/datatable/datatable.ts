@@ -73,7 +73,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	constructor(element: HTMLElement, config?: KTDataTableConfigInterface) {
 		super();
 
-		if (KTData.has(element as HTMLElement, this._name)) return;
+		if (KTData.has(element as HTMLElement, this._name)) {
+			// Already initialized (e.g. by createInstances). Merge user config so columns/sortType etc. apply.
+			const existing = KTDataTable.getInstance(element as HTMLElement);
+			if (existing && config) {
+				existing._mergeConfig(config);
+			}
+			return;
+		}
 
 		this._defaultConfig = this._initDefaultConfig(config);
 
@@ -674,7 +681,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			? this._theadElement.querySelectorAll('th')
 			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
 
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter(th => 
+		const ths: HTMLTableCellElement[] = Array.from(allThs).filter(th =>
 			th.hasAttribute('data-kt-datatable-column')
 		);
 
