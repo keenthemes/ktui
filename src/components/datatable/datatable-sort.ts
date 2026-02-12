@@ -162,24 +162,41 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		sortField: keyof T,
 		sortOrder: KTDataTableSortOrderInterface,
 	): void {
+		const baseClass = config.sort?.classes?.base || '';
 		const sortClass = sortOrder
 			? sortOrder === 'asc'
 				? config.sort?.classes?.asc || ''
 				: config.sort?.classes?.desc || ''
 			: '';
+		// Clear all headers: remove sort state so only the active column shows highlighted arrow
+		const allTh = theadElement.querySelectorAll('th');
+		allTh.forEach((header) => {
+			const el = header as HTMLElement;
+			el.setAttribute('aria-sort', 'none');
+			const sortElement = header.querySelector(`.${baseClass}`) as HTMLElement;
+			if (sortElement) {
+				sortElement.className = baseClass;
+			}
+		});
+		// Apply sort state to the active column so table.css [aria-sort='asc'] / [aria-sort='desc'] can highlight the arrow
 		const th =
 			typeof sortField === 'number'
-				? theadElement.querySelectorAll('th')[sortField]
+				? allTh[sortField]
 				: (theadElement.querySelector(
 						`th[data-kt-datatable-column="${String(sortField)}"], th[data-kt-datatable-column-sort="${String(sortField)}"]`,
 					) as HTMLElement);
 		if (th) {
 			const sortElement = th.querySelector(
-				`.${config.sort?.classes?.base}`,
+				`.${baseClass}`,
 			) as HTMLElement;
 			if (sortElement) {
 				sortElement.className =
-					`${config.sort?.classes?.base} ${sortClass}`.trim();
+					`${baseClass} ${sortClass}`.trim();
+			}
+			if (sortOrder) {
+				th.setAttribute('aria-sort', sortOrder);
+			} else {
+				th.setAttribute('aria-sort', 'none');
 			}
 		}
 	}
