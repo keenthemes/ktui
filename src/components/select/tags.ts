@@ -25,7 +25,6 @@ export class KTSelectTags {
 		this._config = select.getConfig();
 		this._valueDisplayElement = select.getValueDisplayElement();
 		this._eventManager = new EventManager();
-
 	}
 
 	/**

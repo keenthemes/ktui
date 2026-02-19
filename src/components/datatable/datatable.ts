@@ -681,8 +681,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			? this._theadElement.querySelectorAll('th')
 			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
 
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter(th =>
-			th.hasAttribute('data-kt-datatable-column')
+		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
+			th.hasAttribute('data-kt-datatable-column'),
 		);
 
 		rows.forEach((row: HTMLTableRowElement) => {
@@ -720,8 +720,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
 			? this._theadElement.querySelectorAll('th')
 			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-		const currentTableHeaders = Array.from(allThs).filter(th =>
-			th.hasAttribute('data-kt-datatable-column')
+		const currentTableHeaders = Array.from(allThs).filter((th) =>
+			th.hasAttribute('data-kt-datatable-column'),
 		).length;
 
 		const totalColumns = originalData.length
@@ -770,13 +770,13 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				response,
 				error: String(error),
 				status: response.status,
-				statusText: response.statusText
+				statusText: response.statusText,
 			});
 			this._dispatchEvent('parseError', {
 				response,
 				error: String(error),
 				status: response.status,
-				statusText: response.statusText
+				statusText: response.statusText,
 			});
 			return;
 		}
@@ -862,7 +862,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private async _performFetchRequest(
 		queryParams: URLSearchParams,
 	): Promise<Response> {
-		let requestMethod: RequestInit['method'] = this._config.requestMethod;
+		const requestMethod: RequestInit['method'] = this._config.requestMethod;
 		let requestBody: RequestInit['body'] | undefined = undefined;
 
 		// Cancel previous request to prevent race conditions
@@ -1023,11 +1023,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			? this._theadElement.querySelectorAll('th')
 			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
 
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter(th =>
-			th.hasAttribute('data-kt-datatable-column')
+		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
+			th.hasAttribute('data-kt-datatable-column'),
 		);
 		// When no th has data-kt-datatable-column, use all ths so we still render by column index (data extracted with numeric keys)
-		const columnsToRender: HTMLTableCellElement[] = ths.length > 0 ? ths : Array.from(allThs);
+		const columnsToRender: HTMLTableCellElement[] =
+			ths.length > 0 ? ths : Array.from(allThs);
 
 		this._data.forEach((item: T, rowIndex: number) => {
 			const row = document.createElement('tr');
@@ -1481,7 +1482,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			const state = JSON.parse(stateString) as KTDataTableStateInterface;
 			if (state) this._config._state = state;
 			return state;
-		} catch {} // eslint-disable-line no-empty
+		} catch {}
 
 		return null;
 	}
@@ -1829,7 +1830,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	public static reinit(): void {
 		if (typeof document === 'undefined') return;
-		const elements = document.querySelectorAll<HTMLElement>('[data-kt-datatable="true"]');
+		const elements = document.querySelectorAll<HTMLElement>(
+			'[data-kt-datatable="true"]',
+		);
 		elements.forEach((element) => {
 			try {
 				const instance = KTDataTable.getInstance(element);

@@ -184,7 +184,9 @@ describe('KTDataTable - Pagination Reset', () => {
 						// String search
 						return data.filter((item: any) =>
 							Object.values(item).some((value: any) =>
-								String(value).toLowerCase().includes((search as string).toLowerCase()),
+								String(value)
+									.toLowerCase()
+									.includes((search as string).toLowerCase()),
 							),
 						);
 					},
@@ -326,7 +328,11 @@ describe('KTDataTable - Pagination Reset', () => {
 			expect(datatable.getState().page).toBe(1);
 
 			// Replace filter on same column
-			datatable.setFilter({ column: 'status', type: 'text', value: 'inactive' });
+			datatable.setFilter({
+				column: 'status',
+				type: 'text',
+				value: 'inactive',
+			});
 			expect(datatable.getState().page).toBe(1);
 
 			// Should only have one filter for 'status' column
@@ -498,7 +504,7 @@ describe('KTDataTable - Pagination Reset', () => {
 			const namespace = 'test-datatable-restore';
 
 			// First instance
-			let table1 = new KTDataTable(container, {
+			const table1 = new KTDataTable(container, {
 				pageSize: 10,
 				stateSave: true,
 				stateNamespace: namespace,
@@ -637,7 +643,10 @@ describe('KTDataTable - Pagination Reset', () => {
 
 		it('should not break existing event handlers', async () => {
 			const { container } = createMockDataTable(25);
-			datatable = new KTDataTable(container, { pageSize: 10, stateSave: false });
+			datatable = new KTDataTable(container, {
+				pageSize: 10,
+				stateSave: false,
+			});
 
 			const reloadSpy = vi.fn();
 			// Listen for 'reload' event directly (CustomEvent)
@@ -654,4 +663,3 @@ describe('KTDataTable - Pagination Reset', () => {
 		});
 	});
 });
-

@@ -45,7 +45,9 @@ Object.defineProperty(window, 'matchMedia', {
 	value: (query: string) => ({
 		matches: false,
 		media: query,
-		onchange: null as ((this: MediaQueryList, ev: MediaQueryListEvent) => any) | null,
+		onchange: null as
+			| ((this: MediaQueryList, ev: MediaQueryListEvent) => any)
+			| null,
 		addListener: () => {}, // deprecated
 		removeListener: () => {}, // deprecated
 		addEventListener: () => {},
@@ -55,13 +57,16 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Export utilities that tests can use
-export const waitFor = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+export const waitFor = (ms: number) =>
+	new Promise((resolve) => setTimeout(resolve, ms));
 
-export const createMockElement = (tag: string, attributes: Record<string, string> = {}) => {
+export const createMockElement = (
+	tag: string,
+	attributes: Record<string, string> = {},
+) => {
 	const el = document.createElement(tag);
 	Object.entries(attributes).forEach(([key, value]) => {
 		el.setAttribute(key, value);
 	});
 	return el;
 };
-

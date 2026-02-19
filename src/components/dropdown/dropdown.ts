@@ -391,7 +391,9 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 
 		// Fallback: look for parent with data-kt-dropdown attribute
 		if (reference) {
-			const dropdownContainer = reference.closest('[data-kt-dropdown]') as HTMLElement;
+			const dropdownContainer = reference.closest(
+				'[data-kt-dropdown]',
+			) as HTMLElement;
 			if (dropdownContainer) return dropdownContainer;
 		}
 

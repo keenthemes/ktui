@@ -3,9 +3,6 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-/* eslint-disable max-len */
-/* eslint-disable require-jsdoc */
-
 import KTData from '../../helpers/data';
 import KTDom from '../../helpers/dom';
 import KTComponent from '../component';

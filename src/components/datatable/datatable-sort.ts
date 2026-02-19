@@ -89,15 +89,15 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		return 0;
 	}
 
-	function getColumnDef(
-		sortField: keyof T | number,
-	): {
-		sortType?: 'string' | 'numeric';
-		sortValue?: (
-			cellValue: unknown,
-			rowData: KTDataTableDataInterface,
-		) => number | string;
-	} | undefined {
+	function getColumnDef(sortField: keyof T | number):
+		| {
+				sortType?: 'string' | 'numeric';
+				sortValue?: (
+					cellValue: unknown,
+					rowData: KTDataTableDataInterface,
+				) => number | string;
+		  }
+		| undefined {
 		const columns = config.columns;
 		if (!columns) return undefined;
 		const key =
@@ -114,8 +114,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 	): T[] {
 		const columnDef = getColumnDef(sortField);
 		const sortValueFn = columnDef?.sortValue;
-		const useNumeric =
-			!sortValueFn && columnDef?.sortType === 'numeric';
+		const useNumeric = !sortValueFn && columnDef?.sortType === 'numeric';
 
 		return data.sort((a, b) => {
 			const aRaw = a[sortField as keyof T] as unknown;
@@ -186,12 +185,9 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 						`th[data-kt-datatable-column="${String(sortField)}"], th[data-kt-datatable-column-sort="${String(sortField)}"]`,
 					) as HTMLElement);
 		if (th) {
-			const sortElement = th.querySelector(
-				`.${baseClass}`,
-			) as HTMLElement;
+			const sortElement = th.querySelector(`.${baseClass}`) as HTMLElement;
 			if (sortElement) {
-				sortElement.className =
-					`${baseClass} ${sortClass}`.trim();
+				sortElement.className = `${baseClass} ${sortClass}`.trim();
 			}
 			if (sortOrder) {
 				th.setAttribute('aria-sort', sortOrder);

@@ -227,7 +227,7 @@ export class FocusManager {
 			this._focusedOptionIndex === null
 				? 0
 				: (this._focusedOptionIndex + 1) % options.length;
-		let startIdx = idx;
+		const startIdx = idx;
 		do {
 			const option = options[idx];
 			if (
@@ -255,7 +255,7 @@ export class FocusManager {
 			this._focusedOptionIndex === null
 				? options.length - 1
 				: (this._focusedOptionIndex - 1 + options.length) % options.length;
-		let startIdx = idx;
+		const startIdx = idx;
 		do {
 			const option = options[idx];
 			if (

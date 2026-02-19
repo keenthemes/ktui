@@ -112,7 +112,9 @@ export interface KTDataTableConfigInterface {
 			 * Use for custom formats (e.g. dates, combined fields, custom parsing).
 			 */
 			sortValue?: (
-				cellValue: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string,
+				cellValue:
+					| KTDataTableDataInterface[keyof KTDataTableDataInterface]
+					| string,
 				rowData: KTDataTableDataInterface,
 			) => number | string;
 		};

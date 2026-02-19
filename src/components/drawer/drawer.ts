@@ -53,7 +53,6 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		this._handleClose();
 		this._update();
 		this._handleContainer();
-
 	}
 
 	protected _handleClose(): void {
@@ -94,13 +93,19 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 
 		// When container="body", move drawer to body only if NOT inside an element matching keepInPlaceWithin.
 		// When keepInPlaceWithin is set (e.g. for SPA/persisted layouts), keeping the drawer in place lets the host preserve it across navigations.
-		if (this._getOption('container') === 'body' && this._element.parentElement !== document.body) {
+		if (
+			this._getOption('container') === 'body' &&
+			this._element.parentElement !== document.body
+		) {
 			const keepInPlace = this._isKeepInPlace();
 			if (!keepInPlace) {
 				if (!this._element.hasAttribute('data-kt-drawer-original-parent-id')) {
 					const originalParent = this._element.parentElement;
 					if (originalParent && originalParent !== document.body) {
-						this._element.setAttribute('data-kt-drawer-original-parent-id', originalParent.id || '');
+						this._element.setAttribute(
+							'data-kt-drawer-original-parent-id',
+							originalParent.id || '',
+						);
 					}
 				}
 				document.body.appendChild(this._element);
@@ -204,7 +209,10 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		if (this._getOption('container')) {
 			if (this._getOption('container') === 'body') {
 				if (this._isKeepInPlace()) {
-					if (!this._element.style.position || this._element.style.position === 'static') {
+					if (
+						!this._element.style.position ||
+						this._element.style.position === 'static'
+					) {
 						this._element.style.position = 'fixed';
 					}
 				} else {
@@ -223,7 +231,10 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		const selector = (this._getOption('keepInPlaceWithin') as string)?.trim();
 		if (!selector || !this._element?.parentElement) return false;
 		const parent = this._element.parentElement;
-		const selectors = selector.split(',').map((s) => s.trim()).filter(Boolean);
+		const selectors = selector
+			.split(',')
+			.map((s) => s.trim())
+			.filter(Boolean);
 		for (const sel of selectors) {
 			try {
 				if (parent.closest(sel) !== null) return true;
@@ -326,7 +337,9 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 
 		// Fallback: look for parent with data-kt-drawer attribute
 		if (reference) {
-			const drawerContainer = reference.closest('[data-kt-drawer]') as HTMLElement;
+			const drawerContainer = reference.closest(
+				'[data-kt-drawer]',
+			) as HTMLElement;
 			if (drawerContainer) return drawerContainer;
 		}
 
@@ -350,7 +363,10 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	 * Wait for an element to appear in the DOM using polling with MutationObserver fallback
 	 * Useful for persisted Livewire components that may not be in DOM immediately
 	 */
-	public static waitForElement(selector: string, timeout: number = 2000): Promise<HTMLElement | null> {
+	public static waitForElement(
+		selector: string,
+		timeout: number = 2000,
+	): Promise<HTMLElement | null> {
 		return new Promise((resolve) => {
 			let resolved = false;
 
@@ -362,7 +378,9 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 			};
 
 			// Check if element already exists
-			const existing = document.querySelector(selector) || document.body.querySelector(selector);
+			const existing =
+				document.querySelector(selector) ||
+				document.body.querySelector(selector);
 			if (existing) {
 				doResolve(existing as HTMLElement);
 				return;
@@ -377,7 +395,9 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 					return;
 				}
 				attempts++;
-				const element = document.querySelector(selector) || document.body.querySelector(selector);
+				const element =
+					document.querySelector(selector) ||
+					document.body.querySelector(selector);
 				if (element) {
 					clearInterval(pollInterval);
 					doResolve(element as HTMLElement);
@@ -395,7 +415,9 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 					observer.disconnect();
 					return;
 				}
-				const element = document.querySelector(selector) || document.body.querySelector(selector);
+				const element =
+					document.querySelector(selector) ||
+					document.body.querySelector(selector);
 				if (element) {
 					clearInterval(pollInterval);
 					observer.disconnect();
@@ -485,13 +507,16 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 	}
 
 	public static handleToggle(): void {
-
 		// Add raw click listener to document.body to track all clicks
-		document.body.addEventListener('click', (rawEvent: MouseEvent) => {
-			const target = rawEvent.target as HTMLElement;
-			if (target && target.hasAttribute('data-kt-drawer-toggle')) {
-			}
-		}, true); // Use capture phase to catch before any stopPropagation
+		document.body.addEventListener(
+			'click',
+			(rawEvent: MouseEvent) => {
+				const target = rawEvent.target as HTMLElement;
+				if (target && target.hasAttribute('data-kt-drawer-toggle')) {
+				}
+			},
+			true,
+		); // Use capture phase to catch before any stopPropagation
 
 		KTEventHandler.on(
 			document.body,
@@ -511,8 +536,12 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 				} else {
 					// Drawer element not found - wait for it to appear (handles persisted Livewire components)
 					// Check if drawer exists in persisted components (might be in header that's persisted)
-					const persistedHeader = document.querySelector('[wire\\:id]')?.closest('[wire\\:id]') || document.querySelector('header#header');
-					const drawerInPersisted = persistedHeader ? persistedHeader.querySelector(selector) : null;
+					const persistedHeader =
+						document.querySelector('[wire\\:id]')?.closest('[wire\\:id]') ||
+						document.querySelector('header#header');
+					const drawerInPersisted = persistedHeader
+						? persistedHeader.querySelector(selector)
+						: null;
 
 					// Wait longer for persisted components that may take time to render
 					// Also check if drawer exists in persisted header component
@@ -533,12 +562,16 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 							setTimeout(() => {
 								KTDrawer.reinit();
 								// Try one more time after reinit
-								const drawerAfterReinit = document.querySelector(selector) || document.body.querySelector(selector);
+								const drawerAfterReinit =
+									document.querySelector(selector) ||
+									document.body.querySelector(selector);
 								if (drawerAfterReinit) {
 									if (!KTData.has(drawerAfterReinit as HTMLElement, 'drawer')) {
 										new KTDrawer(drawerAfterReinit as HTMLElement);
 									}
-									const drawerInstance = KTDrawer.getInstance(drawerAfterReinit as HTMLElement);
+									const drawerInstance = KTDrawer.getInstance(
+										drawerAfterReinit as HTMLElement,
+									);
 									if (drawerInstance) {
 										drawerInstance.toggle(target);
 									}
@@ -625,7 +658,10 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		const elementsInDoc = document.querySelectorAll('[data-kt-drawer]');
 		const elementsInBody = document.body.querySelectorAll('[data-kt-drawer]');
 		// Combine and deduplicate
-		const allElements = new Set([...Array.from(elementsInDoc), ...Array.from(elementsInBody)]);
+		const allElements = new Set([
+			...Array.from(elementsInDoc),
+			...Array.from(elementsInBody),
+		]);
 		const elements = Array.from(allElements);
 		elements.forEach((element) => {
 			new KTDrawer(element as HTMLElement);
@@ -655,9 +691,11 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		const elementsInDoc = document.querySelectorAll('[data-kt-drawer]');
 		const elementsInBody = document.body.querySelectorAll('[data-kt-drawer]');
 		// Combine and deduplicate
-		const allElements = new Set([...Array.from(elementsInDoc), ...Array.from(elementsInBody)]);
+		const allElements = new Set([
+			...Array.from(elementsInDoc),
+			...Array.from(elementsInBody),
+		]);
 		const elements = Array.from(allElements);
-
 
 		// Clean up existing instances
 		elements.forEach((element) => {
@@ -687,7 +725,6 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		KTDrawer.handleResize();
 		KTDrawer.handleClickAway();
 		KTDrawer.handleKeyword();
-
 	}
 }
 

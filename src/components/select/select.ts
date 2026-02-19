@@ -141,13 +141,15 @@ export class KTSelect extends KTComponent {
 	/**
 	 * Override _dispatchEvent to also dispatch on document for global listeners (jQuery compatibility)
 	 */
-	protected override _dispatchEvent(eventType: string, payload: object = null): void {
+	protected override _dispatchEvent(
+		eventType: string,
+		payload: object = null,
+	): void {
 		// Call parent method to dispatch on element (existing behavior)
 		super._dispatchEvent(eventType, payload);
 
 		// Also dispatch on document if configured
-		const dispatchGlobalEvents =
-			this._config.dispatchGlobalEvents !== false; // Default to true
+		const dispatchGlobalEvents = this._config.dispatchGlobalEvents !== false; // Default to true
 		if (dispatchGlobalEvents) {
 			// Create event detail structure
 			const eventDetail = {
@@ -183,7 +185,6 @@ export class KTSelect extends KTComponent {
 	private _initializeRemoteData() {
 		if (!this._remoteModule || !this._config.remote) return;
 
-
 		// For remote data, we need to create the HTML structure first
 		// so that the component can be properly initialized
 		this._createHtmlStructure();
@@ -196,7 +197,6 @@ export class KTSelect extends KTComponent {
 		this._remoteModule
 			.fetchData()
 			.then((items) => {
-
 				// Remove placeholder/loading options before setting new items
 				this._clearExistingOptions();
 
@@ -206,7 +206,6 @@ export class KTSelect extends KTComponent {
 					.then(() => {
 						// Generate options from the fetched data
 						this._generateOptionsHtml(this._element);
-
 
 						// Update the dropdown to show the new options
 						this._updateDropdownWithNewOptions();
@@ -316,7 +315,6 @@ export class KTSelect extends KTComponent {
 		this._options = this._dropdownContentElement.querySelectorAll(
 			'[data-kt-select-option]',
 		) as NodeListOf<HTMLElement>;
-
 	}
 
 	/**
@@ -348,7 +346,6 @@ export class KTSelect extends KTComponent {
 
 		// Apply pre-selected values captured before remote data was loaded
 		if (this._preSelectedValues.length > 0) {
-
 			// Get all available option values from the loaded remote data
 			const availableValues = Array.from(
 				this._element.querySelectorAll('option'),
@@ -364,7 +361,6 @@ export class KTSelect extends KTComponent {
 				const valuesToSelect = this._config.multiple
 					? validPreSelectedValues
 					: [validPreSelectedValues[0]];
-
 
 				// Get any existing selections from _preSelectOptions (e.g., data-kt-select-pre-selected)
 				const existingSelections = this._state.getSelectedOptions();
@@ -636,7 +632,6 @@ export class KTSelect extends KTComponent {
 		this._options = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		) as NodeListOf<HTMLElement>;
-
 	}
 
 	/**
@@ -961,7 +956,6 @@ export class KTSelect extends KTComponent {
 	private _generateOptionsHtml(element: HTMLElement) {
 		const items = this._state.getItems() || [];
 
-
 		// Only modify options if we have items to replace them with
 		if (items && items.length > 0) {
 			// Clear existing options except the first empty one
@@ -997,7 +991,6 @@ export class KTSelect extends KTComponent {
 						extractedLabel !== null ? String(extractedLabel) : 'Unnamed option';
 				}
 
-
 				// Set option attributes
 				optionElement.value = value;
 				optionElement.textContent = label || 'Unnamed option';
@@ -1008,7 +1001,6 @@ export class KTSelect extends KTComponent {
 
 				element.appendChild(optionElement);
 			});
-
 		}
 	}
 
@@ -1076,8 +1068,7 @@ export class KTSelect extends KTComponent {
 		}
 
 		// Global dropdown management: close other open dropdowns if configured
-		const closeOnOtherOpen =
-			this._config.closeOnOtherOpen !== false; // Default to true
+		const closeOnOtherOpen = this._config.closeOnOtherOpen !== false; // Default to true
 		if (closeOnOtherOpen) {
 			// Close all other open dropdowns
 			const otherSelectsToClose: KTSelect[] = [];
@@ -1092,7 +1083,6 @@ export class KTSelect extends KTComponent {
 				otherSelect.closeDropdown();
 			});
 		}
-
 
 		// Set our internal flag to match what we're doing
 		this._dropdownIsOpen = true;
@@ -1378,7 +1368,6 @@ export class KTSelect extends KTComponent {
 		const maxReached =
 			typeof this._config.maxSelections === 'number' &&
 			selectedValues.length >= this._config.maxSelections;
-
 
 		allOptions.forEach((option) => {
 			const optionValue = option.getAttribute('data-value');
@@ -1791,8 +1780,7 @@ export class KTSelect extends KTComponent {
 			// Check if we should close based on closeOnEnter config
 			// closeOnEnter only applies to Enter key selections, but for backward compatibility,
 			// we'll respect it for all selections when explicitly set to false
-			const shouldClose =
-				this._config.closeOnEnter !== false; // Default to true
+			const shouldClose = this._config.closeOnEnter !== false; // Default to true
 			if (shouldClose) {
 				this.closeDropdown();
 			} else {
@@ -1954,7 +1942,6 @@ export class KTSelect extends KTComponent {
 						availableValues.includes(value),
 					);
 
-
 					// Add new options from remote data and restore selection state
 					items.forEach((item) => {
 						const option = document.createElement('option');
@@ -2049,7 +2036,6 @@ export class KTSelect extends KTComponent {
 						availableValues.includes(value),
 					);
 
-
 					// Mark preserved selections on new options
 					validSelections.forEach((value) => {
 						const option = Array.from(
@@ -2125,7 +2111,6 @@ export class KTSelect extends KTComponent {
 					const validSelections = currentlySelected.filter((value) =>
 						availableValues.includes(value),
 					);
-
 
 					// Add new options and restore selection state
 					items.forEach((item) => {
@@ -2352,7 +2337,6 @@ export class KTSelect extends KTComponent {
 			this._searchModule.refreshAfterSearch();
 		}
 		this.updateSelectAllButtonState();
-
 	}
 
 	/**
@@ -2411,7 +2395,6 @@ export class KTSelect extends KTComponent {
 
 			this._element.appendChild(optionElement);
 		});
-
 	}
 
 	/**
