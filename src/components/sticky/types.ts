@@ -20,6 +20,8 @@ export interface KTStickyConfigInterface {
 	release: string;
 	activate: string;
 	releaseDelay: number,
+	activeClass: string,
+	releaseClass: string,
 }
 
 export interface KTStickyInterface {

@@ -35,12 +35,16 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		release: '',
 		activate: '',
 		releaseDelay: 0,
+		activeClass: '',
+		releaseClass: '',
 	};
 	protected override _config: KTStickyConfigInterface = this._defaultConfig;
 	protected _targetElement: HTMLElement | Document | null = null;
 
 	protected _attributeRoot: string;
+	protected _isScrolling: boolean;
 	protected _timeoutState: ReturnType<typeof setTimeout> | null = null;
+	protected _scrollTimeout: ReturnType<typeof setTimeout> | null = null;
 	protected _eventTriggerState: boolean;
 	protected _lastScrollTop: number;
 	protected _releaseElement: HTMLElement;
@@ -71,7 +75,9 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		);
 		this._wrapperElement = this._element.closest('[data-kt-sticky-wrapper]');
 		this._attributeRoot = `data-kt-sticky-${this._getOption('name')}`;
+		this._isScrolling = false;
 		this._timeoutState = null;
+		this._scrollTimeout = null;
 		this._eventTriggerState = true;
 		this._lastScrollTop = 0;
 
@@ -113,26 +119,57 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 		// Store scroll handler reference for cleanup
 		this._scrollHandler = () => {
-			this._process();
+
+			this._isScrolling = true;
+
+			if(this._isActive() === true){
+
+				this._debounceScroll(() => {
+
+					this._isScrolling = false;
+					this._process();
+
+				}, 200);
+
+			}else{
+
+				this._isScrolling = false;
+				this._process();
+
+			}
+
 		};
 
 		if (this._targetElement) {
 			if (this._targetElement === document) {
-				window.addEventListener('scroll', this._scrollHandler);
+				window.addEventListener('scroll', this._scrollHandler, { passive: true });
 			} else {
 				(this._targetElement as HTMLElement).addEventListener(
 					'scroll',
 					this._scrollHandler,
+					{ passive: true }
 				);
 			}
 		}
+	}
+
+	protected _debounceScroll = function (callback: () => void, delay: number = 200): void {
+
+		if (this._scrollTimeout) {
+			clearTimeout(this._scrollTimeout);
+		}
+
+		this._scrollTimeout = setTimeout(() => {
+			callback();
+		}, delay);
+
 	}
 
 	protected _process(): void {
 		const reverse = this._getOption('reverse');
 		const offset = this._getOffset();
 
-		if (offset < 0) {
+		if (offset <= 0) {
 			this._disable();
 			return;
 		}
@@ -164,7 +201,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				}
 				// Back scroll mode
 			} else {
-				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === null) {
+				if (document.body.hasAttribute(this._attributeRoot) === true) {
 					this._disable();
 					if (release) {
 						this._element.classList.add('release');
@@ -202,7 +239,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 				// Back scroll mode
 			} else {
 				// back scroll mode
-				if (document.body.hasAttribute(this._attributeRoot) === true && this._timeoutState === null) {
+				if (document.body.hasAttribute(this._attributeRoot) === true) {
 					this._disable();
 					if (release) {
 						this._element.classList.add('release');
@@ -245,7 +282,6 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		const end = this._getOption('end') as string;
 		const height = this._calculateHeight();
 		const zindex = this._getOption('zindex') as string;
-		const classList = this._getOption('class') as string;
 
 		if (height + parseInt(top) > KTDom.getViewPort().height) {
 			return false;
@@ -313,16 +349,27 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 			this._element.style.position = 'fixed';
 		}
 
-		if (classList) {
-			KTDom.addClass(this._element, classList);
+		const activeClassList = this._getOption('activeClass') as string;
+		if (activeClassList) {
+			KTDom.addClass(this._element, activeClassList);
+		}else{
+			const classList = this._getOption('class') as string;
+			if (classList) {
+				KTDom.addClass(this._element, classList);
+			}
+		}
+
+		const releaseClassList = this._getOption('releaseClass') as string;
+		if (releaseClassList) {
+			KTDom.removeClass(this._element, releaseClassList);
 		}
 
 		if (this._wrapperElement) {
 			this._wrapperElement.style.height = `${height}px`;
 		}
 
-		this._element.classList.add('active');
 		this._element.classList.remove('release');
+		this._element.classList.add('active');
 
 		return true;
 	}
@@ -330,40 +377,65 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 	protected _disable(): void {
 		if (!this._element) return;
 
-		const classList = this._getOption('class') as string;
-
 		if (this._wrapperElement) {
 			this._wrapperElement.style.height = '';
 		}
 
-		if (classList) {
-			KTDom.removeClass(this._element, classList);
-		}
-
-		if(this._eventTriggerState === false && this._timeoutState !== null){
-
-			const releaseDelay = this._getOption('releaseDelay') as number;
-
-			this._timeoutState = setTimeout(() => {
-				this._element.style.top = '';
-				this._element.style.bottom = '';
-				this._element.style.insetInlineStart = '';
-				this._element.style.insetInlineEnd = '';
-				this._element.style.insetBlockStart = '';
-				this._element.style.insetBlockEnd = '';
-				this._element.style.width = '';
-				this._element.style.left = '';
-				this._element.style.right = '';
-				this._element.style.zIndex = '';
-				this._element.style.position = '';
-
-				this._timeoutState = null;
-			}, releaseDelay);
-
-		}
-
 		this._element.classList.remove('active');
+		this._element.classList.add('release');
+
+		const activeClassList = this._getOption('activeClass') as string;
+		if (activeClassList) {
+			KTDom.removeClass(this._element, activeClassList);
+		}else{
+			const classList = this._getOption('class') as string;
+			if (classList) {
+					KTDom.removeClass(this._element, classList);
+			}
+		}
+
+		const releaseClassList = this._getOption('releaseClass') as string;
+		if (releaseClassList) {
+			KTDom.addClass(this._element, releaseClassList);
+		}
+
+		if(this._eventTriggerState === false){
+			const releaseDelay = this._getOption('releaseDelay') as number;
+			if(releaseDelay && this._timeoutState === null){
+				this._timeoutState = setTimeout(() => {
+
+					if (!this._element){
+						return;
+					}
+
+					if (this._isRelease() === true) {
+						this._resetStyles();
+					}
+
+					this._timeoutState = null;
+
+				}, releaseDelay);
+			}else{
+				this._resetStyles();
+			}
+		}else{
+			this._timeoutState = null;
+		}
 	}
+
+	protected _resetStyles = function () {
+		this._element.style.top = '';
+		this._element.style.bottom = '';
+		this._element.style.insetInlineStart = '';
+		this._element.style.insetInlineEnd = '';
+		this._element.style.insetBlockStart = '';
+		this._element.style.insetBlockEnd = '';
+		this._element.style.width = '';
+		this._element.style.left = '';
+		this._element.style.right = '';
+		this._element.style.zIndex = '';
+		this._element.style.position = '';
+	};
 
 	protected _update(): void {
 		this._timeoutState = null;
@@ -400,12 +472,20 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		return this._element.classList.contains('active');
 	}
 
+	protected _isRelease(): boolean {
+		return this._element.classList.contains('release');
+	}
+
 	public update(): void {
 		this._update();
 	}
 
 	public isActive(): boolean {
 		return this._isActive();
+	}
+
+	public isRelease(): boolean {
+		return this._isRelease();
 	}
 
 	public override dispose(): void {
