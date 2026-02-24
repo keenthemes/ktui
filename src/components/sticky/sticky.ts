@@ -153,7 +153,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		}
 	}
 
-	protected _debounceScroll = function (callback: () => void, delay: number = 200): void {
+	protected _debounceScroll(callback: () => void, delay: number = 200): void {
 
 		if (this._scrollTimeout) {
 			clearTimeout(this._scrollTimeout);
