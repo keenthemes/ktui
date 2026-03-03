@@ -993,5 +993,164 @@ describe('KTSelect UX Behaviors', () => {
 			document.removeEventListener('kt-select:show', showHandler);
 		});
 	});
+
+	describe('setSelectedOptions sync', () => {
+		it('should sync native select, trigger display, and dropdown option when setSelectedOptions([option]) is called (single-select)', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+				{ value: '3', text: 'Option 3' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, { height: 250 });
+			await waitForInit(select);
+
+			const option2 = selectEl.querySelector(
+				'option[value="2"]',
+			) as HTMLOptionElement;
+			expect(option2).toBeTruthy();
+
+			select.setSelectedOptions([option2]);
+			await waitFor(50);
+
+			expect(select.getSelectedOptions()).toEqual(['2']);
+			expect((selectEl as HTMLSelectElement).value).toBe('2');
+			const displayEl = select.getValueDisplayElement();
+			expect(displayEl?.textContent?.trim()).toBe('Option 2');
+
+			select.openDropdown();
+			await waitFor(100);
+			const dropdownOption = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="2"]');
+			expect(dropdownOption?.classList.contains('selected')).toBe(true);
+			expect(dropdownOption?.getAttribute('aria-selected')).toBe('true');
+		});
+
+		it('should sync native options, trigger/tags, and dropdown when setSelectedOptions([optionA, optionB]) is called (multi-select)', async () => {
+			const selectEl = createSelectElement([
+				{ value: 'a', text: 'A' },
+				{ value: 'b', text: 'B' },
+				{ value: 'c', text: 'C' },
+			]);
+			selectEl.setAttribute('multiple', 'multiple');
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				multiple: true,
+				height: 250,
+			});
+			await waitForInit(select);
+
+			const optionA = selectEl.querySelector(
+				'option[value="a"]',
+			) as HTMLOptionElement;
+			const optionB = selectEl.querySelector(
+				'option[value="b"]',
+			) as HTMLOptionElement;
+			expect(optionA).toBeTruthy();
+			expect(optionB).toBeTruthy();
+
+			select.setSelectedOptions([optionA, optionB]);
+			await waitFor(50);
+
+			expect(select.getSelectedOptions()).toContain('a');
+			expect(select.getSelectedOptions()).toContain('b');
+			expect(select.getSelectedOptions().length).toBe(2);
+			expect(optionA.selected).toBe(true);
+			expect(optionB.selected).toBe(true);
+			const optionC = selectEl.querySelector(
+				'option[value="c"]',
+			) as HTMLOptionElement;
+			expect(optionC.selected).toBe(false);
+
+			select.openDropdown();
+			await waitFor(100);
+			const dropdownA = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="a"]');
+			const dropdownB = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="b"]');
+			expect(dropdownA?.classList.contains('selected')).toBe(true);
+			expect(dropdownB?.classList.contains('selected')).toBe(true);
+		});
+
+		it('should clear selection, native select, show placeholder, and remove selected state when setSelectedOptions([]) is called', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				placeholder: 'Choose...',
+				height: 250,
+			});
+			await waitForInit(select);
+
+			const option1 = selectEl.querySelector(
+				'option[value="1"]',
+			) as HTMLOptionElement;
+			select.setSelectedOptions([option1]);
+			await waitFor(50);
+			expect(select.getSelectedOptions()).toEqual(['1']);
+
+			select.setSelectedOptions([]);
+			await waitFor(50);
+
+			expect(select.getSelectedOptions()).toEqual([]);
+			expect((selectEl as HTMLSelectElement).value).toBe('');
+			Array.from(selectEl.options).forEach((opt) => {
+				expect(opt.selected).toBe(false);
+			});
+			const displayEl = select.getValueDisplayElement();
+			const placeholderEl = displayEl?.querySelector(
+				'[data-kt-select-placeholder]',
+			);
+			expect(placeholderEl).toBeTruthy();
+
+			select.openDropdown();
+			await waitFor(100);
+			const options = select
+				.getDropdownElement()
+				?.querySelectorAll('[data-kt-select-option]');
+			options?.forEach((opt) => {
+				expect(opt.classList.contains('selected')).toBe(false);
+				expect(opt.getAttribute('aria-selected')).toBe('false');
+			});
+		});
+
+		it('should update trigger text immediately when setSelectedOptions([option]) is called with dropdown closed, and show option selected on next open', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'First' },
+				{ value: '2', text: 'Second' },
+				{ value: '3', text: 'Third' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, { height: 250 });
+			await waitForInit(select);
+			expect(select.isDropdownOpen()).toBe(false);
+
+			const option3 = selectEl.querySelector(
+				'option[value="3"]',
+			) as HTMLOptionElement;
+			select.setSelectedOptions([option3]);
+			await waitFor(50);
+
+			const displayEl = select.getValueDisplayElement();
+			expect(displayEl?.textContent?.trim()).toBe('Third');
+
+			select.openDropdown();
+			await waitFor(100);
+			const dropdownOption = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="3"]');
+			expect(dropdownOption?.classList.contains('selected')).toBe(true);
+			expect(dropdownOption?.getAttribute('aria-selected')).toBe('true');
+		});
+	});
 });
 

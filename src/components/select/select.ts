@@ -1283,16 +1283,19 @@ export class KTSelect extends KTComponent {
 	 */
 	private _syncNativeSelectValue(): void {
 		const selectedOptions = this.getSelectedOptions();
+		const selectEl = this._element as HTMLSelectElement;
 
 		if (this._config.multiple) {
-			// For multiple select, the selected options are marked via option.selected
-			// The native select's value property will return the first selected option's value
-			// FormData will include all selected values automatically
+			// For multiple select, set each native option's selected from internal state
+			const selectedSet = new Set(selectedOptions);
+			Array.from(selectEl.options).forEach((option) => {
+				option.selected = selectedSet.has(option.value);
+			});
 		} else {
 			// For single select, set the value attribute explicitly
 			const selectedValue =
 				selectedOptions.length > 0 ? selectedOptions[0] : '';
-			(this._element as HTMLSelectElement).value = selectedValue;
+			selectEl.value = selectedValue;
 		}
 	}
 
@@ -1502,6 +1505,8 @@ export class KTSelect extends KTComponent {
 	public setSelectedOptions(options: HTMLOptionElement[]) {
 		const values = Array.from(options).map((option) => option.value);
 		this._state.setSelectedOptions(values);
+		this.updateSelectedOptionDisplay();
+		this._updateSelectedOptionClass();
 	}
 
 	/**
