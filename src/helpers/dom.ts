@@ -3,7 +3,6 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-/* eslint-disable max-len */
 import KTUtils from './utils';
 import { KTOffsetType, KTOptionType, KTViewPortType } from '../types';
 
@@ -130,7 +129,6 @@ const KTDom = {
 		for (
 			element && element !== document.documentElement;
 			(element = element.parentElement as HTMLElement);
-
 		) {
 			if (selector) {
 				if (element.matches(selector)) {
@@ -183,7 +181,6 @@ const KTDom = {
 			return false;
 		}
 
-		// eslint-disable-next-line max-len
 		return (
 			getComputedStyle(element).getPropertyValue('visibility') === 'visible'
 		);

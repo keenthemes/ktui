@@ -53,7 +53,6 @@ export class KTSelectCombobox {
 			this._toggleClearButtonVisibility(this._searchInputElement.value);
 			// this._select.showAllOptions(); // showAllOptions might be too broad, filtering is managed by typing.
 		});
-
 	}
 
 	/**

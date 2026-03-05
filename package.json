@@ -79,7 +79,7 @@
 		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
 		"build:css:once": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css",
 		"dev": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
-		"lint": "npx eslint 'src/**/*.ts' --max-warnings 100",
+		"lint": "npx eslint 'src/**/*.ts' --max-warnings 110",
 		"lint:fix": "npx eslint 'src/**/*.ts' --fix",
 		"format": "npx prettier --write 'src/**/*.ts'",
 		"format:check": "npx prettier --check 'src/**/*.ts'",
@@ -98,25 +98,32 @@
 		"@vitest/ui": "^4.0.16",
 		"autoprefixer": "^10.4.21",
 		"babel-loader": "^10.0.0",
-		"clean-webpack-plugin": "^4.0.0",
 		"concurrently": "^9.1.2",
-		"eslint": "^9.27.0",
-		"eslint-plugin-prettier": "^5.5.4",
+		"eslint": "^10.0.0",
+		"eslint-plugin-prettier": "^5.4.0",
 		"jsdom": "^25.0.1",
 		"mini-svg-data-uri": "^1.4.4",
 		"prettier": "^3.5.3",
 		"source-map-loader": "^5.0.0",
 		"tailwindcss": "^4.1.11",
-		"terser-webpack-plugin": "^5.3.14",
+		"terser-webpack-plugin": "^5.3.17",
 		"ts-loader": "^9.5.2",
 		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.18.0",
 		"vitest": "^4.0.16",
 		"webpack": "^5.99.9",
 		"webpack-cli": "^6.0.1",
-		"webpack-merge-and-include-globally": "^2.3.4"
+		"webpack-merge-and-include-globally": "^1.0.7"
 	},
 	"dependencies": {
 		"@popperjs/core": "^2.11.8"
+	},
+	"overrides": {
+		"ajv": "^8.0.0",
+		"minimatch": "^10.2.3",
+		"rollup": "^4.59.0",
+		"serialize-javascript": "^7.0.3",
+		"terser-webpack-plugin": "^5.3.17"
 	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com"

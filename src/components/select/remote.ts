@@ -48,7 +48,7 @@ export class KTSelectRemote {
 		this._lastQuery = query || '';
 		this._currentPage = page;
 
-		let url = this._buildUrl(query, page);
+		const url = this._buildUrl(query, page);
 
 		// Dispatch search start event
 		this._dispatchEvent('remoteSearchStart');
@@ -146,12 +146,10 @@ export class KTSelectRemote {
 	 */
 	private _processData(data: any): KTSelectOptionData[] {
 		try {
-
 			let processedData = data;
 
 			// Extract data from the API property if specified
 			if (this._config.apiDataProperty && data[this._config.apiDataProperty]) {
-
 				// If pagination metadata is available, extract it
 				if (this._config.pagination) {
 					if (data.total_pages) {
@@ -172,7 +170,6 @@ export class KTSelectRemote {
 				console.warn('Remote data is not an array:', processedData);
 				return [];
 			}
-
 
 			// Map data to KTSelectOptionData format
 			const mappedData = processedData.map((item: any): KTSelectOptionData => {
@@ -235,7 +232,6 @@ export class KTSelectRemote {
 		const valueField = this._config.dataValueField || 'id';
 		const labelField = this._config.dataFieldText || 'title';
 
-
 		// Extract values using improved getValue function
 		const getValue = (obj: any, path: string): any => {
 			if (!path || !obj) return null;
@@ -255,7 +251,6 @@ export class KTSelectRemote {
 					}
 					result = result[part];
 				}
-
 
 				return result;
 			} catch (error) {

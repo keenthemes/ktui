@@ -1,5 +1,4 @@
 const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = (env) => {
@@ -91,18 +90,14 @@ module.exports = (env) => {
 			path: path.resolve(__dirname, 'dist'),
 			filename: '[name].js',
 			library: { type: 'umd' },
+			clean: { keep: /styles\.css$/ },
 		},
 		devtool: false, // Disable sourcemaps for normal JS files
 		optimization: {
 			...baseConfig.optimization,
 			minimize: false, // Disable minimization for normal JS files
 		},
-		plugins: [
-			...baseConfig.plugins,
-			new CleanWebpackPlugin({
-				cleanOnceBeforeBuildPatterns: ['**/*', '!styles.css'],
-			}),
-		],
+		plugins: [...baseConfig.plugins],
 	};
 
 	const minifiedConfig = {
@@ -112,6 +107,7 @@ module.exports = (env) => {
 			filename: '[name].min.js',
 			sourceMapFilename: '[name].min.js.map',
 			library: { type: 'umd' },
+			clean: { keep: /styles\.css$/ },
 		},
 		devtool: 'source-map', // Enable sourcemaps for minified JS files
 		optimization: {

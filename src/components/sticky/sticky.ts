@@ -415,7 +415,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 		// Clean up state
 		this._disable();
-		if (this._attributeRoot && document.body.hasAttribute(this._attributeRoot)) {
+		if (
+			this._attributeRoot &&
+			document.body.hasAttribute(this._attributeRoot)
+		) {
 			document.body.removeAttribute(this._attributeRoot);
 		}
 

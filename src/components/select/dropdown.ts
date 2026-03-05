@@ -408,7 +408,6 @@ export class KTSelectDropdown extends KTComponent {
 			transitionComplete = true;
 			clearTimeout(fallbackTimer);
 
-
 			this._dropdownElement.classList.add('hidden');
 			this._dropdownElement.classList.remove('open');
 			this._toggleElement.classList.remove('active');
@@ -420,7 +419,6 @@ export class KTSelectDropdown extends KTComponent {
 			this._isOpen = false;
 
 			// Events will be handled by KTSelect
-
 		};
 
 		KTDom.transitionEnd(this._dropdownElement, completeTransition);

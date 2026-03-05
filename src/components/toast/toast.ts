@@ -415,8 +415,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		if (options.beep) {
 			try {
 				// Use Web Audio API for a short beep
-				const ctx = new (window.AudioContext ||
-					(window as any).webkitAudioContext)();
+				const ctx = new (
+					window.AudioContext || (window as any).webkitAudioContext
+				)();
 				const o = ctx.createOscillator();
 				const g = ctx.createGain();
 				o.type = 'sine';

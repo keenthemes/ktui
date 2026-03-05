@@ -3,7 +3,15 @@
  * Tests the fixes for concurrent request handling, request cancellation, and stale response detection
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi, type MockedFunction } from 'vitest';
+import {
+	describe,
+	it,
+	expect,
+	beforeEach,
+	afterEach,
+	vi,
+	type MockedFunction,
+} from 'vitest';
 import { KTDataTable } from '../datatable';
 import { waitFor } from './setup';
 
@@ -45,7 +53,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 			return new Promise<Response>((resolve, reject) => {
 				const timeout = setTimeout(() => {
 					if (options?.signal?.aborted) {
-						reject(new DOMException('The operation was aborted.', 'AbortError'));
+						reject(
+							new DOMException('The operation was aborted.', 'AbortError'),
+						);
 					} else {
 						resolve(
 							new Response(
@@ -56,7 +66,10 @@ describe('KTDataTable Race Condition Fixes', () => {
 									],
 									totalCount: 2,
 								}),
-								{ status: 200, headers: { 'Content-Type': 'application/json' } },
+								{
+									status: 200,
+									headers: { 'Content-Type': 'application/json' },
+								},
 							),
 						);
 					}
@@ -66,7 +79,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 				if (options?.signal) {
 					options.signal.addEventListener('abort', () => {
 						clearTimeout(timeout);
-						reject(new DOMException('The operation was aborted.', 'AbortError'));
+						reject(
+							new DOMException('The operation was aborted.', 'AbortError'),
+						);
 					});
 				}
 			});
@@ -83,9 +98,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('AbortController Integration', () => {
 		it('should create AbortController for remote data requests', async () => {
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			await waitFor(150);
 
@@ -95,9 +113,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should use _isFetching flag to prevent concurrent requests', async () => {
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			// Try to trigger search during initial fetch
 			datatable.search('test'); // Should be blocked by _isFetching
@@ -109,9 +130,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should allow new request after previous completes', async () => {
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			// Wait for initial fetch to complete
 			await waitFor(150);
@@ -127,9 +151,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 		it('should abort previous request when _performFetchRequest is called again', async () => {
 			// This tests the AbortController logic directly by making multiple sequential requests
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			await waitFor(150); // Complete initial request
 
@@ -154,33 +181,38 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('Request ID Sequencing', () => {
 		it('should assign incremental request IDs for sequential requests', async () => {
-			let requestIds: number[] = [];
+			const requestIds: number[] = [];
 			let callCount = 0;
 
 			// Mock to capture request sequence
-			mockFetch.mockImplementation((url: RequestInfo | URL, options?: RequestInit) => {
-				callCount++;
-				const id = callCount;
-				requestIds.push(id);
+			mockFetch.mockImplementation(
+				(url: RequestInfo | URL, options?: RequestInit) => {
+					callCount++;
+					const id = callCount;
+					requestIds.push(id);
 
-				return new Promise((resolve) => {
-					setTimeout(() => {
-						resolve(
-							new Response(
-								JSON.stringify({
-									data: [{ id: id, name: `Item ${id}` }],
-									totalCount: 1,
-								}),
-								{ status: 200 },
-							),
-						);
-					}, 50);
-				});
-			});
+					return new Promise((resolve) => {
+						setTimeout(() => {
+							resolve(
+								new Response(
+									JSON.stringify({
+										data: [{ id: id, name: `Item ${id}` }],
+										totalCount: 1,
+									}),
+									{ status: 200 },
+								),
+							);
+						}, 50);
+					});
+				},
+			);
 
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			await waitFor(100); // Complete initial request
 
@@ -197,9 +229,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 		it('should have request ID validation logic in place', async () => {
 			// This tests that request IDs are tracked internally
 			// The actual stale response scenario is prevented by _isFetching flag
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			await waitFor(150); // Complete initial
 
@@ -220,9 +255,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('_isFetching Flag Management', () => {
 		it('should prevent concurrent fetch executions', async () => {
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			// Try to trigger reload immediately (should be blocked by initial fetch)
 			datatable.reload(); // Blocked by _isFetching
@@ -236,9 +274,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should reset _isFetching flag after fetch completes', async () => {
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			await waitFor(150); // Wait for initial fetch
 
@@ -251,28 +292,31 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 		it('should reset _isFetching flag even after fetch error', async () => {
 			let callCount = 0;
-			mockFetch.mockImplementation((url: RequestInfo | URL, options?: RequestInit) => {
-				callCount++;
-				if (callCount === 1) {
-					// Return invalid JSON to trigger parse error
+			mockFetch.mockImplementation(
+				(url: RequestInfo | URL, options?: RequestInit) => {
+					callCount++;
+					if (callCount === 1) {
+						// Return invalid JSON to trigger parse error
+						return Promise.resolve(new Response('Not JSON', { status: 200 }));
+					}
 					return Promise.resolve(
-						new Response('Not JSON', { status: 200 }),
+						new Response(
+							JSON.stringify({
+								data: [{ id: 1, name: 'Success' }],
+								totalCount: 1,
+							}),
+							{ status: 200 },
+						),
 					);
-				}
-				return Promise.resolve(
-					new Response(
-						JSON.stringify({
-							data: [{ id: 1, name: 'Success' }],
-							totalCount: 1,
-						}),
-						{ status: 200 },
-					),
-				);
-			});
+				},
+			);
 
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			await waitFor(150); // Initial request triggers parse error
 
@@ -286,7 +330,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('Loading Spinner Management', () => {
 		it('should show spinner during fetch', async () => {
-			const element = container.querySelector('[data-kt-datatable="true"]') as HTMLElement;
+			const element = container.querySelector(
+				'[data-kt-datatable="true"]',
+			) as HTMLElement;
 			const datatable = new KTDataTable(element, {
 				apiEndpoint: '/api/data',
 			});
@@ -301,7 +347,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should keep spinner visible during overlapping requests', async () => {
-			const element = container.querySelector('[data-kt-datatable="true"]') as HTMLElement;
+			const element = container.querySelector(
+				'[data-kt-datatable="true"]',
+			) as HTMLElement;
 			const datatable = new KTDataTable(element, {
 				apiEndpoint: '/api/data',
 			});
@@ -323,7 +371,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should not flicker spinner during rapid interactions', async () => {
-			const element = container.querySelector('[data-kt-datatable="true"]') as HTMLElement;
+			const element = container.querySelector(
+				'[data-kt-datatable="true"]',
+			) as HTMLElement;
 			const datatable = new KTDataTable(element, {
 				apiEndpoint: '/api/data',
 			});
@@ -362,7 +412,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 		it('should fire fetch event for successful requests', async () => {
 			const fetchEvents: any[] = [];
 
-			const element = container.querySelector('[data-kt-datatable="true"]') as HTMLElement;
+			const element = container.querySelector(
+				'[data-kt-datatable="true"]',
+			) as HTMLElement;
 			element.addEventListener('fetch', (e) => {
 				fetchEvents.push(e);
 			});
@@ -383,7 +435,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 		it('should fire fetched event after successful data load', async () => {
 			const fetchedEvents: any[] = [];
 
-			const element = container.querySelector('[data-kt-datatable="true"]') as HTMLElement;
+			const element = container.querySelector(
+				'[data-kt-datatable="true"]',
+			) as HTMLElement;
 			element.addEventListener('fetched', (e) => {
 				fetchedEvents.push(e);
 			});
@@ -401,7 +455,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 		it('should not fire error events for AbortError', async () => {
 			const errorEvents: any[] = [];
 
-			const element = container.querySelector('[data-kt-datatable="true"]') as HTMLElement;
+			const element = container.querySelector(
+				'[data-kt-datatable="true"]',
+			) as HTMLElement;
 			element.addEventListener('error.kt.datatable', (e) => {
 				errorEvents.push(e);
 			});
@@ -422,7 +478,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('Backward Compatibility', () => {
 		it('should work with local data mode (no AbortController needed)', async () => {
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!);
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+			);
 
 			// Should not call fetch for local data
 			expect(mockFetch).not.toHaveBeenCalled();
@@ -434,9 +492,12 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should maintain existing API compatibility', async () => {
-			const datatable = new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
-				apiEndpoint: '/api/data',
-			});
+			const datatable = new KTDataTable(
+				container.querySelector('[data-kt-datatable="true"]')!,
+				{
+					apiEndpoint: '/api/data',
+				},
+			);
 
 			await waitFor(150);
 
@@ -452,4 +513,3 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 	});
 });
-

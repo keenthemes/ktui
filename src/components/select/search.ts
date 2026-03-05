@@ -39,7 +39,6 @@ export class KTSelectSearch {
 			this._searchInput = this._select.getSearchInput();
 
 			if (this._searchInput) {
-
 				// First remove any existing listeners to prevent duplicates
 				this._removeEventListeners();
 
@@ -195,7 +194,9 @@ export class KTSelectSearch {
 			try {
 				this._searchInput?.focus();
 				// Check if focus was successful
-				const isFocused = document.activeElement === this._searchInput || this._searchInput === document.activeElement;
+				const isFocused =
+					document.activeElement === this._searchInput ||
+					this._searchInput === document.activeElement;
 				if (isFocused) {
 					// Focus successful
 					return;
@@ -250,8 +251,11 @@ export class KTSelectSearch {
 					const optionValue = optionToSelect.getAttribute('data-value');
 					if (optionValue) {
 						const config = this._select.getConfig();
-						const isAlreadySelected = !config.multiple && this._select.getSelectedOptions().includes(optionValue);
-						const shouldClose = !config.multiple && config.closeOnEnter !== false;
+						const isAlreadySelected =
+							!config.multiple &&
+							this._select.getSelectedOptions().includes(optionValue);
+						const shouldClose =
+							!config.multiple && config.closeOnEnter !== false;
 
 						if (isAlreadySelected && shouldClose) {
 							this._select.closeDropdown();

@@ -3,10 +3,6 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-/* eslint-disable guard-for-in */
-/* eslint-disable max-len */
-/* eslint-disable require-jsdoc */
-
 declare global {
 	interface Window {
 		KTGlobalComponentsConfig: object;
@@ -144,7 +140,11 @@ export default class KTComponent {
 	 * already-initialized instance so handlers that hold a reference to _config see updates.
 	 */
 	protected _mergeConfig(config: object): void {
-		if (config && typeof config === 'object' && Object.keys(config).length > 0) {
+		if (
+			config &&
+			typeof config === 'object' &&
+			Object.keys(config).length > 0
+		) {
 			Object.assign(this._config, config);
 		}
 	}

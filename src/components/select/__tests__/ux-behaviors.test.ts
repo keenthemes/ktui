@@ -781,9 +781,7 @@ describe('KTSelect UX Behaviors', () => {
 
 			// Registry should be empty (we can't directly access private static, but we can verify behavior)
 			// Opening another dropdown should work without issues
-			const selectEl2 = createSelectElement([
-				{ value: 'a', text: 'Option A' },
-			]);
+			const selectEl2 = createSelectElement([{ value: 'a', text: 'Option A' }]);
 			container.appendChild(selectEl2);
 			const select2 = new KTSelect(selectEl2, { height: 250 });
 			await waitForInit(select2);
@@ -810,9 +808,7 @@ describe('KTSelect UX Behaviors', () => {
 			await waitFor(100);
 
 			// Creating a new select should work without issues
-			const selectEl2 = createSelectElement([
-				{ value: 'a', text: 'Option A' },
-			]);
+			const selectEl2 = createSelectElement([{ value: 'a', text: 'Option A' }]);
 			container.appendChild(selectEl2);
 			const select2 = new KTSelect(selectEl2, { height: 250 });
 			await waitForInit(select2);
@@ -1041,7 +1037,9 @@ describe('KTSelect UX Behaviors', () => {
 
 			const option = select
 				.getDropdownElement()
-				?.querySelector('[data-kt-select-option][data-value="1"]') as HTMLElement;
+				?.querySelector(
+					'[data-kt-select-option][data-value="1"]',
+				) as HTMLElement;
 
 			expect(option).toBeTruthy();
 			option.click();
@@ -1263,4 +1261,3 @@ describe('KTSelect UX Behaviors', () => {
 		});
 	});
 });
-
