@@ -241,10 +241,13 @@ export class KTSelectSearch {
 				break;
 			case 'Enter':
 				event.preventDefault();
-				const firstAvailableOption = this._focusManager.focusFirst();
+				// Use currently focused option (from arrow keys); only fall back to first if none focused
+				const optionToSelect =
+					this._focusManager.getFocusedOption() ??
+					this._focusManager.focusFirst();
 
-				if (firstAvailableOption) {
-					const optionValue = firstAvailableOption.getAttribute('data-value');
+				if (optionToSelect) {
+					const optionValue = optionToSelect.getAttribute('data-value');
 					if (optionValue) {
 						const config = this._select.getConfig();
 						const isAlreadySelected = !config.multiple && this._select.getSelectedOptions().includes(optionValue);

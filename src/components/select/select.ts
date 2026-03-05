@@ -2465,6 +2465,15 @@ export class KTSelect extends KTComponent {
 	 * Centralized keyboard event handler for all select modes
 	 */
 	private _handleKeyboardEvent(event: KeyboardEvent) {
+		// When search is enabled and focus is on the search input, let the search module be the sole
+		// handler for Enter (and Space). This avoids the select's FocusManager from selecting the wrong option.
+		if (
+			this._searchInputElement &&
+			event.target === this._searchInputElement &&
+			(event.key === 'Enter' || event.key === ' ')
+		) {
+			return;
+		}
 		// If the event target is the search input and the event was already handled (defaultPrevented),
 		// then return early to avoid duplicate processing by this broader handler.
 		if (event.target === this._searchInputElement && event.defaultPrevented) {

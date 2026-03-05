@@ -367,6 +367,19 @@ export class FocusManager {
 			return options[this._focusedOptionIndex];
 		}
 
+		// Fallback: DOM may have focus class applied (e.g. by arrow keys from search input)
+		// while _focusedOptionIndex is out of sync. Use the option that has the focus class.
+		const focusedEl = this._element.querySelector(
+			`${this._optionsSelector}.${this._focusClass}`,
+		) as HTMLElement | null;
+		if (focusedEl && !focusedEl.classList.contains('hidden') && focusedEl.style.display !== 'none') {
+			const idx = options.indexOf(focusedEl);
+			if (idx >= 0) {
+				this._focusedOptionIndex = idx;
+				return focusedEl;
+			}
+		}
+
 		return null;
 	}
 
