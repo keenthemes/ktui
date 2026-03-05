@@ -268,6 +268,98 @@ describe('KTSelect UX Behaviors', () => {
 			expect(select.getSelectedOptions()).toContain('1');
 		});
 
+		it('should select focused option (not first) when Enter is pressed after ArrowDown with search enabled (issue #108)', async () => {
+			const selectEl = createSelectElement([
+				{ value: 'apple', text: 'Apple' },
+				{ value: 'google', text: 'Google' },
+				{ value: 'amazon', text: 'Amazon' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input (user has not used arrow keys yet)
+			searchInput.focus();
+			await waitFor(50);
+
+			// Simulate user pressing ArrowDown twice: first moves to first option, second to second (Google).
+			// Enter must select the currently focused option (Google), not always the first (Apple).
+			const arrowDownEvent = (opts?: Partial<KeyboardEvent>) =>
+				new KeyboardEvent('keydown', {
+					key: 'ArrowDown',
+					bubbles: true,
+					cancelable: true,
+					...opts,
+				});
+			searchInput.dispatchEvent(arrowDownEvent());
+			await waitFor(20);
+			searchInput.dispatchEvent(arrowDownEvent());
+			await waitFor(20);
+
+			// Press Enter - should select the focused option (Google), not the first (Apple)
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			await waitFor(150);
+
+			// The highlighted option (google) must be selected, not the first (apple)
+			expect(select.getSelectedOptions()).toContain('google');
+			expect(select.getSelectedOptions()).not.toContain('apple');
+			expect(select.isDropdownOpen()).toBe(false);
+		});
+
+		it('should select focused option when Enter is pressed after ArrowDown then ArrowUp (last option focused)', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+				{ value: '3', text: 'Option 3' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			searchInput!.focus();
+			await waitFor(50);
+
+			// ArrowDown focuses first option; ArrowUp from first wraps to last (3). Enter selects focused.
+			searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+			await waitFor(20);
+			searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+			await waitFor(20);
+
+			searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+			await waitFor(150);
+
+			expect(select.getSelectedOptions()).toContain('3');
+		});
+
 		it('should close dropdown and trigger selection when Enter is pressed after typing search query', async () => {
 			const selectEl = createSelectElement([
 				{ value: '1', text: 'Apple' },
