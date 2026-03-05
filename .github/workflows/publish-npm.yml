@@ -26,7 +26,7 @@ jobs:
         run: npm run build:lib
 
       - name: Build css
-        run: npm run build:css
+        run: npm run build:css:once
 
       - name: Build package
         run: npm run build:prod
@@ -77,6 +77,6 @@ jobs:
 
       - name: Publish to npmjs.org
         if: steps.check-npm.outputs.exists != 'true'
-        run: npm publish --registry https://registry.npmjs.org/ --access public
+        run: npm run publish:npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
