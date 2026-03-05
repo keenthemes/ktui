@@ -66,6 +66,24 @@ describe('KTSelect UX Behaviors', () => {
 		vi.clearAllMocks();
 	});
 
+	describe('refresh() before init (issue #109)', () => {
+		it('should not throw when refresh() is called immediately after getOrCreateInstance()', () => {
+			const selectEl = createSelectElement();
+			container.appendChild(selectEl);
+
+			// Simulate framework (e.g. Angular) setting default value by code before KTSelect init
+			(selectEl as HTMLSelectElement).value = '2';
+
+			// getOrCreateInstance returns synchronously; _setupComponent runs in a later microtask.
+			// Calling refresh() here used to throw because _dropdownContentElement was undefined.
+			const instance = KTSelect.getOrCreateInstance(selectEl, { height: 250 });
+
+			expect(() => {
+				instance.refresh();
+			}).not.toThrow();
+		});
+	});
+
 	describe('Search Autofocus Enhancement', () => {
 		it('should focus search input when dropdown opens with searchAutofocus enabled', async () => {
 			const selectEl = createSelectElement();

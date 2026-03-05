@@ -1374,6 +1374,7 @@ export class KTSelect extends KTComponent {
 	 * Update CSS classes for selected options
 	 */
 	private _updateSelectedOptionClass(): void {
+		if (!this._dropdownContentElement) return;
 		const allOptions = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		);
@@ -2166,7 +2167,9 @@ export class KTSelect extends KTComponent {
 					this._fireEvent('refreshError');
 				});
 		} else {
-			// For static selects, just sync visual state
+			// For static selects, bail out if called before init (e.g. right after getOrCreateInstance)
+			if (!this._dropdownContentElement) return;
+			// Sync visual state
 			this._syncSelectionFromNative();
 
 			// Reapply ARIA attributes
