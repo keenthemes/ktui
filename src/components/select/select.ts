@@ -1273,16 +1273,19 @@ export class KTSelect extends KTComponent {
 	 */
 	private _syncNativeSelectValue(): void {
 		const selectedOptions = this.getSelectedOptions();
+		const selectEl = this._element as HTMLSelectElement;
 
 		if (this._config.multiple) {
-			// For multiple select, the selected options are marked via option.selected
-			// The native select's value property will return the first selected option's value
-			// FormData will include all selected values automatically
+			// For multiple select, set each native option's selected from internal state
+			const selectedSet = new Set(selectedOptions);
+			Array.from(selectEl.options).forEach((option) => {
+				option.selected = selectedSet.has(option.value);
+			});
 		} else {
 			// For single select, set the value attribute explicitly
 			const selectedValue =
 				selectedOptions.length > 0 ? selectedOptions[0] : '';
-			(this._element as HTMLSelectElement).value = selectedValue;
+			selectEl.value = selectedValue;
 		}
 	}
 
@@ -1361,6 +1364,7 @@ export class KTSelect extends KTComponent {
 	 * Update CSS classes for selected options
 	 */
 	private _updateSelectedOptionClass(): void {
+		if (!this._dropdownContentElement) return;
 		const allOptions = this._dropdownContentElement.querySelectorAll(
 			`[data-kt-select-option]`,
 		);
@@ -1491,6 +1495,8 @@ export class KTSelect extends KTComponent {
 	public setSelectedOptions(options: HTMLOptionElement[]) {
 		const values = Array.from(options).map((option) => option.value);
 		this._state.setSelectedOptions(values);
+		this.updateSelectedOptionDisplay();
+		this._updateSelectedOptionClass();
 	}
 
 	/**
@@ -2146,7 +2152,9 @@ export class KTSelect extends KTComponent {
 					this._fireEvent('refreshError');
 				});
 		} else {
-			// For static selects, just sync visual state
+			// For static selects, bail out if called before init (e.g. right after getOrCreateInstance)
+			if (!this._dropdownContentElement) return;
+			// Sync visual state
 			this._syncSelectionFromNative();
 
 			// Reapply ARIA attributes
@@ -2440,6 +2448,15 @@ export class KTSelect extends KTComponent {
 	 * Centralized keyboard event handler for all select modes
 	 */
 	private _handleKeyboardEvent(event: KeyboardEvent) {
+		// When search is enabled and focus is on the search input, let the search module be the sole
+		// handler for Enter (and Space). This avoids the select's FocusManager from selecting the wrong option.
+		if (
+			this._searchInputElement &&
+			event.target === this._searchInputElement &&
+			(event.key === 'Enter' || event.key === ' ')
+		) {
+			return;
+		}
 		// If the event target is the search input and the event was already handled (defaultPrevented),
 		// then return early to avoid duplicate processing by this broader handler.
 		if (event.target === this._searchInputElement && event.defaultPrevented) {
