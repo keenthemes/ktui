@@ -716,19 +716,44 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _localTableHeaderInvalidate(): boolean {
 		const { originalData } = this.getState();
 
-		// Count only th elements with data-kt-datatable-column attribute
-		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
-			? this._theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-		const currentTableHeaders = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		).length;
-
 		const totalColumns = originalData.length
 			? Object.keys(originalData[0]).length
 			: 0;
 
+		// Count th elements with data-kt-datatable-column; when none (e.g. multi-row headers), use logical column count so we don't falsely invalidate
+		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
+			? this._theadElement.querySelectorAll('th')
+			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
+		const thsWithColumn = Array.from(allThs).filter((th) =>
+			th.hasAttribute('data-kt-datatable-column'),
+		);
+		const currentTableHeaders =
+			thsWithColumn.length > 0
+				? thsWithColumn.length
+				: this._getLogicalColumnCount();
+
 		return currentTableHeaders !== totalColumns;
+	}
+
+	/**
+	 * Returns the logical data column count (number of data columns), used for multi-row headers
+	 * where querySelectorAll('th') would overcount. Prefers state.originalData, then first tbody row td count.
+	 * @returns {number} Number of data columns, or 0 if unknown
+	 */
+	private _getLogicalColumnCount(): number {
+		const { originalData } = this.getState();
+		if (originalData && originalData.length > 0) {
+			return Object.keys(originalData[0]).length;
+		}
+		if (this._tbodyElement) {
+			const firstRow = this._tbodyElement.querySelector<HTMLTableRowElement>(
+				'tr',
+			);
+			if (firstRow) {
+				return firstRow.querySelectorAll<HTMLTableCellElement>('td').length;
+			}
+		}
+		return 0;
 	}
 
 	/**
@@ -1026,9 +1051,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
 			th.hasAttribute('data-kt-datatable-column'),
 		);
-		// When no th has data-kt-datatable-column, use all ths so we still render by column index (data extracted with numeric keys)
+		// When no th has data-kt-datatable-column (e.g. multi-row headers), use logical column count from tbody so we don't overcount thead cells
 		const columnsToRender: HTMLTableCellElement[] =
-			ths.length > 0 ? ths : Array.from(allThs);
+			ths.length > 0 ? ths : [];
+		const logicalColumnCount =
+			ths.length > 0 ? ths.length : this._getLogicalColumnCount();
 
 		this._data.forEach((item: T, rowIndex: number) => {
 			const row = document.createElement('tr');
@@ -1043,9 +1070,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					? this.getState().originalDataAttributes[rowIndex]
 					: null;
 
-				// Use columnsToRender so tables without data-kt-datatable-column still get cells (by index)
-				columnsToRender.forEach((th, colIndex) => {
-					const colName = th.getAttribute('data-kt-datatable-column');
+				for (let colIndex = 0; colIndex < logicalColumnCount; colIndex++) {
+					const th = columnsToRender[colIndex];
+					const colName = th?.getAttribute('data-kt-datatable-column');
 					const td = document.createElement('td');
 					let value: any;
 					if (colName && Object.prototype.hasOwnProperty.call(item, colName)) {
@@ -1073,7 +1100,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					}
 
 					row.appendChild(td);
-				});
+				}
 			} else {
 				Object.keys(this._config.columns).forEach(
 					(key: keyof T, colIndex: number) => {
@@ -1127,9 +1154,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _noticeOnTable(message: string = ''): void {
 		const row = this._tableElement.tBodies[0].insertRow();
 		const cell = row.insertCell();
-		cell.colSpan = this._theadElement
-			? this._theadElement.querySelectorAll('th').length
-			: 0;
+		const logicalCount = this._getLogicalColumnCount();
+		// Use logical column count so multi-row headers don't overcount; fallback to 1 when 0 so message still displays
+		cell.colSpan = logicalCount > 0 ? logicalCount : 1;
 		cell.innerHTML = message;
 	}
 
