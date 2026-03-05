@@ -92,19 +92,19 @@
 }
 
 @custom-variant kt-datatable-sort-asc {
-	&.[data-kt-datatable-column-sort='asc']:where([data-kt-datatable] *) {
+	&.[aria-sort='asc']:where([data-kt-datatable] *) {
 		@slot;
 	}
-	[data-kt-datatable] [data-kt-datatable-column-sort='asc'] & {
+	[data-kt-datatable] [aria-sort='asc'] & {
 		@slot;
 	}
 }
 
 @custom-variant kt-datatable-sort-desc {
-	&.[data-kt-datatable-column-sort='desc']:where([data-kt-datatable] *) {
+	&.[aria-sort='desc']:where([data-kt-datatable] *) {
 		@slot;
 	}
-	[data-kt-datatable] [data-kt-datatable-column-sort='desc'] & {
+	[data-kt-datatable] [aria-sort='desc'] & {
 		@slot;
 	}
 }

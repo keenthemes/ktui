@@ -107,7 +107,8 @@ module.exports = (env) => {
 			filename: '[name].min.js',
 			sourceMapFilename: '[name].min.js.map',
 			library: { type: 'umd' },
-			clean: { keep: /styles\.css$/ },
+			// Keep ktui.js (from normalConfig) and styles.css so both builds coexist
+			clean: { keep: /(?:styles\.css|ktui\.js)$/ },
 		},
 		devtool: 'source-map', // Enable sourcemaps for minified JS files
 		optimization: {
