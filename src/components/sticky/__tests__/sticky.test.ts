@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as KTDomModule from '../../../helpers/dom';
 import { KTSticky } from '../sticky';
-import { waitFor } from '../../datatable/__tests__/setup';´
+import { waitFor } from '../../datatable/__tests__/setup';
 
 describe('KTSticky', () => {
 	let stickyEl: HTMLElement;
