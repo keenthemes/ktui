@@ -27,7 +27,7 @@ Use this skill when working with [KtUI](https://ktui.io)—free Tailwind UI comp
 ## Documentation
 
 - **Official docs:** [https://ktui.io](https://ktui.io) — use for component APIs, examples, and markup.
-- **Doc paths:** Getting started: `ktui.io/docs/installation`, `ktui.io/docs/theming`, `ktui.io/docs/typescript`, `ktui.io/docs/dark-mode`, `ktui.io/docs/rtl`, `ktui.io/docs/changelog`. Components: `ktui.io/docs/<component>` (e.g. `ktui.io/docs/modal`, `ktui.io/docs/tooltip`, `ktui.io/docs/datatable`, `ktui.io/docs/dropdown`).
+- **Doc paths:** Getting started: `ktui.io/docs/installation`, `ktui.io/docs/theming`, `ktui.io/docs/typescript`, `ktui.io/docs/dark-mode`, `ktui.io/docs/rtl`, `ktui.io/docs/changelog`. Components: `ktui.io/docs/<component>` (e.g. `ktui.io/docs/modal`, `ktui.io/docs/tooltip`, `ktui.io/docs/datatable`, `ktui.io/docs/dropdown`, `ktui.io/docs/repeater`).
 - Prefer docs and examples from ktui.io over inferring markup or options.
 
 ## Common pitfalls
@@ -38,4 +38,4 @@ Use this skill when working with [KtUI](https://ktui.io)—free Tailwind UI comp
 
 ## Component list (reference)
 
-Components exported from `@keenthemes/ktui` include: KTDropdown, KTModal, KTDrawer, KTCollapse, KTDismiss, KTTabs, KTAccordion, KTScrollspy, KTScrollable, KTScrollto, KTSticky, KTReparent, KTToggle, KTTooltip, KTStepper, KTThemeSwitch, KTImageInput, KTTogglePassword, KTDataTable, KTSelect, KTToast, KTRating. See the package exports or ktui.io for the full list and usage.
+Components exported from `@keenthemes/ktui` include: KTDropdown, KTModal, KTDrawer, KTCollapse, KTDismiss, KTTabs, KTAccordion, KTScrollspy, KTScrollable, KTScrollto, KTSticky, KTReparent, KTToggle, KTTooltip, KTStepper, KTThemeSwitch, KTImageInput, KTTogglePassword, KTDataTable, KTSelect, KTToast, KTRating, KTRepeater. See the package exports or ktui.io for the full list and usage.
