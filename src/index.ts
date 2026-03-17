@@ -28,6 +28,7 @@ import { KTTogglePassword } from './components/toggle-password';
 import { KTDataTable } from './components/datatable';
 import { KTSelect } from './components/select';
 import { KTToast } from './components/toast';
+import { KTRating } from './components/rating';
 
 export { KTDropdown } from './components/dropdown';
 export { KTModal } from './components/modal';
@@ -50,6 +51,7 @@ export { KTTogglePassword } from './components/toggle-password';
 export { KTDataTable } from './components/datatable';
 export { KTSelect } from './components/select';
 export { KTToast } from './components/toast';
+export { KTRating } from './components/rating';
 
 const KTComponents = {
 	init(): void {
@@ -74,6 +76,7 @@ const KTComponents = {
 		KTDataTable.init();
 		KTSelect.init();
 		KTToast.init();
+		KTRating.init();
 	},
 };
 
@@ -104,6 +107,7 @@ declare global {
 		KTDataTable: typeof KTDataTable;
 		KTSelect: typeof KTSelect;
 		KTToast: typeof KTToast;
+		KTRating: typeof KTRating;
 		KTComponents: typeof KTComponents;
 	}
 }
