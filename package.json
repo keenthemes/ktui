@@ -5,7 +5,7 @@
 	"homepage": "https://ktui.io",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/keenthemes/ktui.git"
+		"url": "git+https://github.com/keenthemes/ktui.git"
 	},
 	"keywords": [
 		"reui",

@@ -2790,3 +2790,7 @@ export class KTSelect extends KTComponent {
 		super.dispose();
 	}
 }
+
+if (typeof window !== 'undefined') {
+	window.KTSelect = KTSelect;
+}
