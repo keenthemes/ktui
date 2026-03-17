@@ -75,7 +75,7 @@
 		"build:webpack": "webpack --mode=development",
 		"build:webpack:watch": "webpack --env watch=true --mode=development",
 		"build:prod": "webpack --env production --mode=production",
-		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
+		"build:lib": "tsc -p tsconfig.lib.json --outDir lib/cjs && tsc -p tsconfig.lib.json -m es6 --outDir lib/esm",
 		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
 		"build:css:once": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css",
 		"dev": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
