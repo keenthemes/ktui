@@ -223,6 +223,30 @@ For specific cases, you can use the `rtl:*` Tailwind modifier to easily control 
 
 ---
 
+## Agent skills
+
+KTUI ships [Agent Skills](https://agentskills.io) so that agentic coding tools (e.g. Cursor, Claude Code) can use KtUI correctly—imports, init pattern, and docs. You can install skills in two ways; both use the same content from this package.
+
+### Install from npm (recommended)
+
+After installing the package, copy or symlink the skills you need from the package into your project or your agent’s skills directory:
+
+- **Location:** `node_modules/@keenthemes/ktui/skills/`
+- **Example (Cursor):** Copy or symlink a skill into `.cursor/skills/`, e.g.  
+  `cp -r node_modules/@keenthemes/ktui/skills/ktui-components .cursor/skills/`
+
+### Install via CLI (skills CLI)
+
+You can also install from the GitHub repo using the [skills CLI](https://skills.sh/docs) (no separate registration required). The repo must contain a top-level `skills/` directory with skill subfolders, each having a valid `SKILL.md`; once that is on the default branch, run:
+
+```bash
+npx skills add keenthemes/ktui
+```
+
+Choose the **Symlink** option when prompted to keep one copy and simplify updates. Both this method and the npm copy above provide the same skill content. Skills appear on the [skills.sh](https://skills.sh) leaderboard automatically as users install them (anonymous telemetry).
+
+---
+
 ## License
 
 KTUI is distributed under the MIT license. See [LICENSE.md](https://github.com/keenthemes/ktui/blob/main/LICENSE.md) for full details.
