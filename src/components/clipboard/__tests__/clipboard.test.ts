@@ -389,7 +389,9 @@ describe('KTClipboard', () => {
 			action: 'cut',
 		});
 
-		const input = document.getElementById('kt-clipboard-target') as HTMLInputElement;
+		const input = document.getElementById(
+			'kt-clipboard-target',
+		) as HTMLInputElement;
 		expect(input.value).toBe('cut value');
 
 		new KTClipboard(trigger);
@@ -434,4 +436,3 @@ describe('KTClipboard', () => {
 		expect(KTClipboard.getInstance(trigger)).toBeNull();
 	});
 });
-

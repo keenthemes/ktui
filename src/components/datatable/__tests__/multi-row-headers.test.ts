@@ -89,7 +89,7 @@ describe('KTDataTable - Multi-row header column count', () => {
 
 	it('should render exactly 17 columns when thead has multi-row headers and no data-kt-datatable-column', async () => {
 		createMultiRowHeaderTable(2);
-		const datatable = new KTDataTable(container, { stateSave: false });
+		new KTDataTable(container, { stateSave: false });
 		await vi.runAllTimersAsync();
 
 		const tbody = tableElement.tBodies[0];
@@ -107,7 +107,7 @@ describe('KTDataTable - Multi-row header column count', () => {
 		createMultiRowHeaderTable(0);
 		const tbody = tableElement.querySelector('tbody');
 		expect(tbody).toBeDefined();
-		const datatable = new KTDataTable(container, { stateSave: false });
+		new KTDataTable(container, { stateSave: false });
 		await vi.runAllTimersAsync();
 
 		const noticeRow = tableElement.tBodies[0].querySelector('tr');

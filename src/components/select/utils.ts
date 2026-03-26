@@ -372,7 +372,11 @@ export class FocusManager {
 		const focusedEl = this._element.querySelector(
 			`${this._optionsSelector}.${this._focusClass}`,
 		) as HTMLElement | null;
-		if (focusedEl && !focusedEl.classList.contains('hidden') && focusedEl.style.display !== 'none') {
+		if (
+			focusedEl &&
+			!focusedEl.classList.contains('hidden') &&
+			focusedEl.style.display !== 'none'
+		) {
 			const idx = options.indexOf(focusedEl);
 			if (idx >= 0) {
 				this._focusedOptionIndex = idx;

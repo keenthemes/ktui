@@ -49,4 +49,3 @@ export interface KTClipboardInterface {
 	off(eventType: string, eventId: string): void;
 	dispose(): void;
 }
-

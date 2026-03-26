@@ -151,7 +151,8 @@ export class KTClipboard extends KTComponent implements KTClipboardInterface {
 
 	private async _writeText(text: string): Promise<boolean> {
 		// Native Clipboard API (requires secure context).
-		const clipboard = typeof navigator !== 'undefined' ? navigator.clipboard : null;
+		const clipboard =
+			typeof navigator !== 'undefined' ? navigator.clipboard : null;
 		const writeText =
 			clipboard && typeof clipboard.writeText === 'function'
 				? clipboard.writeText.bind(clipboard)
@@ -205,9 +206,7 @@ export class KTClipboard extends KTComponent implements KTClipboardInterface {
 					return;
 				}
 
-				targetElForCut = KTDom.getElement(
-					targetSelector,
-				) as HTMLElement | null;
+				targetElForCut = KTDom.getElement(targetSelector) as HTMLElement | null;
 
 				if (!targetElForCut || !this._isInputLike(targetElForCut)) {
 					this._setCopiedClass(false);
@@ -246,11 +245,8 @@ export class KTClipboard extends KTComponent implements KTClipboardInterface {
 
 				// For `cut`, clear the editable target after successful clipboard write.
 				if (action === 'cut' && targetElForCut) {
-					(targetElForCut as HTMLInputElement | HTMLTextAreaElement).value =
-						'';
-					targetElForCut.dispatchEvent(
-						new Event('input', { bubbles: true }),
-					);
+					(targetElForCut as HTMLInputElement | HTMLTextAreaElement).value = '';
+					targetElForCut.dispatchEvent(new Event('input', { bubbles: true }));
 				}
 
 				this._setCopiedClass(true);
@@ -289,7 +285,8 @@ export class KTClipboard extends KTComponent implements KTClipboardInterface {
 				action,
 				text: null,
 				target: null,
-				error: 'Missing clipboard source (provide data-kt-clipboard-text or data-kt-clipboard-target).',
+				error:
+					'Missing clipboard source (provide data-kt-clipboard-text or data-kt-clipboard-target).',
 			};
 
 			this._fireEvent(errorEventName, payload);
@@ -398,7 +395,9 @@ export class KTClipboard extends KTComponent implements KTClipboardInterface {
 		element: HTMLElement,
 		config?: KTClipboardConfigInterface,
 	): KTClipboard {
-		return this.getInstance(element) || new KTClipboard(element, config ?? undefined);
+		return (
+			this.getInstance(element) || new KTClipboard(element, config ?? undefined)
+		);
 	}
 
 	public static createInstances(): void {
@@ -415,4 +414,3 @@ export class KTClipboard extends KTComponent implements KTClipboardInterface {
 if (typeof window !== 'undefined') {
 	window.KTClipboard = KTClipboard;
 }
-

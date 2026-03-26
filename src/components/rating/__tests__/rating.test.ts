@@ -104,7 +104,9 @@ describe('KTRating', () => {
 			const instance = new KTRating(ratingEl);
 			instance.setValue(3);
 			expect(instance.getValue()).toBe(3);
-			const checked = ratingEl.querySelector<HTMLInputElement>('input[type="radio"]:checked');
+			const checked = ratingEl.querySelector<HTMLInputElement>(
+				'input[type="radio"]:checked',
+			);
 			expect(checked?.value).toBe('3');
 			instance.dispose();
 		});
@@ -121,8 +123,11 @@ describe('KTRating', () => {
 		it('dispatches kt.rating.change when user selects a value', () => {
 			const instance = new KTRating(ratingEl);
 			const events: CustomEvent[] = [];
-			ratingEl.addEventListener('kt.rating.change', ((e: CustomEvent) => events.push(e)) as EventListener);
-			const radio3 = ratingEl.querySelector<HTMLInputElement>('input[type="radio"][value="3"]');
+			ratingEl.addEventListener('kt.rating.change', ((e: CustomEvent) =>
+				events.push(e)) as EventListener);
+			const radio3 = ratingEl.querySelector<HTMLInputElement>(
+				'input[type="radio"][value="3"]',
+			);
 			expect(radio3).not.toBeNull();
 			radio3!.checked = true;
 			radio3!.dispatchEvent(new Event('change', { bubbles: true }));
@@ -226,7 +231,9 @@ describe('KTRating', () => {
 			ratingEl.setAttribute('data-kt-rating-value', '2');
 			const instance = new KTRating(ratingEl);
 			expect(instance.getValue()).toBe(2);
-			const checked = ratingEl.querySelector<HTMLInputElement>('input[type="radio"]:checked');
+			const checked = ratingEl.querySelector<HTMLInputElement>(
+				'input[type="radio"]:checked',
+			);
 			expect(checked?.value).toBe('2');
 			instance.dispose();
 		});
