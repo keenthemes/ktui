@@ -184,6 +184,95 @@ describe('KTClipboard', () => {
 		expect(errorEvents.length).toBe(1);
 	});
 
+	it('dispatches error when data-kt-clipboard-text attribute is present but empty (and ignores target)', async () => {
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(navigator, 'clipboard', {
+			value: { writeText: writeTextMock },
+			configurable: true,
+		});
+
+		const { trigger } = createFixture({
+			withPredefinedText: true,
+			predefinedTextAttributeEmpty: true,
+			withTarget: true,
+			targetType: 'input',
+			targetValue: 'should not be used',
+			action: 'copy',
+		});
+
+		const successEvents: CustomEvent[] = [];
+		trigger.addEventListener('kt.clipboard.success', (e) =>
+			successEvents.push(e as CustomEvent),
+		);
+		const errorEvents: CustomEvent[] = [];
+		trigger.addEventListener('kt.clipboard.error', (e) =>
+			errorEvents.push(e as CustomEvent),
+		);
+
+		new KTClipboard(trigger);
+		trigger.click();
+		await flushPromises();
+
+		expect(writeTextMock).not.toHaveBeenCalled();
+		expect(successEvents.length).toBe(0);
+		expect(errorEvents.length).toBe(1);
+	});
+
+	it('dispatches error when Clipboard API writeText rejects', async () => {
+		const writeTextMock = vi
+			.fn()
+			.mockRejectedValue(new Error('NotAllowedError: permission denied'));
+		Object.defineProperty(navigator, 'clipboard', {
+			value: { writeText: writeTextMock },
+			configurable: true,
+		});
+
+		const { trigger } = createFixture({
+			withPredefinedText: true,
+			predefinedTextValue: 'hello',
+			action: 'copy',
+		});
+
+		const errorEvents: CustomEvent[] = [];
+		trigger.addEventListener('kt.clipboard.error', (e) =>
+			errorEvents.push(e as CustomEvent),
+		);
+
+		new KTClipboard(trigger);
+		trigger.click();
+		await flushPromises();
+
+		expect(writeTextMock).toHaveBeenCalledTimes(1);
+		expect(errorEvents.length).toBe(1);
+	});
+
+	it('dispatches error for cut with predefined text when target is missing', async () => {
+		const writeTextMock = vi.fn().mockResolvedValue(undefined);
+		Object.defineProperty(navigator, 'clipboard', {
+			value: { writeText: writeTextMock },
+			configurable: true,
+		});
+
+		const { trigger } = createFixture({
+			withPredefinedText: true,
+			predefinedTextValue: 'hello',
+			withTarget: false,
+			action: 'cut',
+		});
+
+		const errorEvents: CustomEvent[] = [];
+		trigger.addEventListener('kt.clipboard.error', (e) =>
+			errorEvents.push(e as CustomEvent),
+		);
+
+		new KTClipboard(trigger);
+		trigger.click();
+		await flushPromises();
+
+		expect(writeTextMock).not.toHaveBeenCalled();
+		expect(errorEvents.length).toBe(1);
+	});
+
 	it('copies from input target value', async () => {
 		const writeTextMock = vi.fn().mockResolvedValue(undefined);
 		Object.defineProperty(navigator, 'clipboard', {
