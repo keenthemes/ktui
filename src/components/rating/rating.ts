@@ -79,7 +79,8 @@ export class KTRating extends KTComponent implements KTRatingInterface {
 		const svg = `<svg class="shrink-0 size-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">${path}</svg>`;
 
 		const container = document.createElement('div');
-		container.className = 'kt-rating flex flex-row-reverse justify-end items-center gap-0';
+		container.className =
+			'kt-rating flex flex-row-reverse justify-end items-center gap-0';
 		container.setAttribute('role', readonly ? 'img' : 'group');
 		container.setAttribute('aria-label', `Rating: ${value} of ${max}`);
 		if (readonly) {
@@ -141,13 +142,21 @@ export class KTRating extends KTComponent implements KTRatingInterface {
 			'text-muted-foreground/50 dark:text-muted-foreground/50';
 		const filledTokens = filledClass.split(' ');
 		const unfilledTokens = unfilledClass.split(' ');
-		this._container.querySelectorAll<HTMLElement>('.kt-rating-label').forEach((label) => {
-			const v = parseInt(label.getAttribute('data-kt-rating-value') || '0', 10);
-			const filled = v <= (val ?? 0);
-			label.classList.remove(...filledTokens, ...unfilledTokens);
-			label.classList.add(...(filled ? filledTokens : unfilledTokens));
-		});
-		this._container.setAttribute('aria-valuenow', val != null ? String(val) : '0');
+		this._container
+			.querySelectorAll<HTMLElement>('.kt-rating-label')
+			.forEach((label) => {
+				const v = parseInt(
+					label.getAttribute('data-kt-rating-value') || '0',
+					10,
+				);
+				const filled = v <= (val ?? 0);
+				label.classList.remove(...filledTokens, ...unfilledTokens);
+				label.classList.add(...(filled ? filledTokens : unfilledTokens));
+			});
+		this._container.setAttribute(
+			'aria-valuenow',
+			val != null ? String(val) : '0',
+		);
 		this._container.setAttribute('aria-label', `Rating: ${val ?? 0} of ${max}`);
 	}
 
@@ -189,9 +198,11 @@ export class KTRating extends KTComponent implements KTRatingInterface {
 				this._updateInteractiveDisplay();
 			}
 		} else {
-			this._container.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((r) => {
-				r.checked = false;
-			});
+			this._container
+				.querySelectorAll<HTMLInputElement>('input[type="radio"]')
+				.forEach((r) => {
+					r.checked = false;
+				});
 			this._updateInteractiveDisplay();
 		}
 	}

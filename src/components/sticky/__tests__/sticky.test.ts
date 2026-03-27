@@ -15,8 +15,13 @@ describe('KTSticky', () => {
 	beforeEach(() => {
 		document.body.innerHTML = '';
 		scrollTop = 0;
-		vi.spyOn(KTDomModule.default, 'getScrollTop').mockImplementation(() => scrollTop);
-		vi.spyOn(KTDomModule.default, 'getViewPort').mockReturnValue({ height: 800, width: 1024 });
+		vi.spyOn(KTDomModule.default, 'getScrollTop').mockImplementation(
+			() => scrollTop,
+		);
+		vi.spyOn(KTDomModule.default, 'getViewPort').mockReturnValue({
+			height: 800,
+			width: 1024,
+		});
 
 		wrapper = document.createElement('div');
 		wrapper.setAttribute('data-kt-sticky-wrapper', 'true');
@@ -151,7 +156,9 @@ describe('KTSticky', () => {
 		it('fires change event when sticky becomes active and when released', async () => {
 			const instance = new KTSticky(stickyEl);
 			const changes: { active: boolean }[] = [];
-			instance.on('change', (payload: { active: boolean }) => changes.push(payload));
+			instance.on('change', (payload: { active: boolean }) =>
+				changes.push(payload),
+			);
 
 			scrollTop = 150;
 			window.dispatchEvent(new Event('scroll', { bubbles: true }));

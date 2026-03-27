@@ -30,6 +30,7 @@ import { KTSelect } from './components/select';
 import { KTToast } from './components/toast';
 import { KTRating } from './components/rating';
 import { KTRepeater } from './components/repeater';
+import { KTClipboard } from './components/clipboard';
 
 export { KTDropdown } from './components/dropdown';
 export { KTModal } from './components/modal';
@@ -54,6 +55,7 @@ export { KTSelect } from './components/select';
 export { KTToast } from './components/toast';
 export { KTRating } from './components/rating';
 export { KTRepeater } from './components/repeater';
+export { KTClipboard } from './components/clipboard';
 
 export type {
 	KTAccordionConfigInterface,
@@ -109,6 +111,10 @@ export type {
 	KTRepeaterConfigInterface,
 	KTRepeaterInterface,
 } from './components/repeater';
+export type {
+	KTClipboardConfigInterface,
+	KTClipboardInterface,
+} from './components/clipboard';
 export type {
 	KTScrollableConfigInterface,
 	KTScrollableInterface,
@@ -180,6 +186,7 @@ const KTComponents = {
 		KTToast.init();
 		KTRating.init();
 		KTRepeater.init();
+		KTClipboard.init();
 	},
 };
 
@@ -212,6 +219,7 @@ declare global {
 		KTToast: typeof KTToast;
 		KTRating: typeof KTRating;
 		KTRepeater: typeof KTRepeater;
+		KTClipboard: typeof KTClipboard;
 		KTComponents: typeof KTComponents;
 	}
 }

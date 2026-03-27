@@ -746,9 +746,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			return Object.keys(originalData[0]).length;
 		}
 		if (this._tbodyElement) {
-			const firstRow = this._tbodyElement.querySelector<HTMLTableRowElement>(
-				'tr',
-			);
+			const firstRow =
+				this._tbodyElement.querySelector<HTMLTableRowElement>('tr');
 			if (firstRow) {
 				return firstRow.querySelectorAll<HTMLTableCellElement>('td').length;
 			}
@@ -1052,8 +1051,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			th.hasAttribute('data-kt-datatable-column'),
 		);
 		// When no th has data-kt-datatable-column (e.g. multi-row headers), use logical column count from tbody so we don't overcount thead cells
-		const columnsToRender: HTMLTableCellElement[] =
-			ths.length > 0 ? ths : [];
+		const columnsToRender: HTMLTableCellElement[] = ths.length > 0 ? ths : [];
 		const logicalColumnCount =
 			ths.length > 0 ? ths.length : this._getLogicalColumnCount();
 

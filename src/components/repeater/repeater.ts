@@ -23,8 +23,8 @@ export class KTRepeater extends KTComponent implements KTRepeaterInterface {
 		wrapper: '',
 		limit: 0,
 	};
-	protected override _config: KTRepeaterConfigInterface =
-		this._defaultConfig as KTRepeaterConfigInterface;
+	protected override _config: KTRepeaterConfigInterface = this
+		._defaultConfig as KTRepeaterConfigInterface;
 	protected _wrapperElement: HTMLElement | null = null;
 	protected _deleteHandler: (e: Event) => void;
 
@@ -155,7 +155,9 @@ export class KTRepeater extends KTComponent implements KTRepeaterInterface {
 		element: HTMLElement,
 		config?: KTRepeaterConfigInterface,
 	): KTRepeater {
-		return this.getInstance(element) || new KTRepeater(element, config ?? undefined);
+		return (
+			this.getInstance(element) || new KTRepeater(element, config ?? undefined)
+		);
 	}
 
 	public static createInstances(): void {
