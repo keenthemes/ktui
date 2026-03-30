@@ -20,4 +20,8 @@ export default [
 			'no-case-declarations': 'warn',
 		},
 	},
+	{
+		// Keep test files linted with the same rules as src (no hiding).
+		files: ['src/**/__tests__/**/*.ts', 'src/**/*.test.ts', 'src/**/*.spec.ts'],
+	},
 ];

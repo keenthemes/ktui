@@ -150,7 +150,8 @@ describe('KTRepeater', () => {
 			const { trigger } = createFixture();
 			const instance = new KTRepeater(trigger);
 			const events: CustomEvent[] = [];
-			trigger.addEventListener('add', ((e: Event) => events.push(e as CustomEvent)) as EventListener);
+			trigger.addEventListener('add', ((e: Event) =>
+				events.push(e as CustomEvent)) as EventListener);
 			instance.add();
 			expect(events.length).toBe(1);
 			expect(events[0].detail?.payload?.element).toBeInstanceOf(HTMLElement);
@@ -182,7 +183,10 @@ describe('KTRepeater', () => {
 		});
 
 		it('re-enables trigger when a clone is removed (delete) and count drops below limit', () => {
-			const { wrapper, trigger } = createFixture({ limit: 2, withDeleteInTarget: true });
+			const { wrapper, trigger } = createFixture({
+				limit: 2,
+				withDeleteInTarget: true,
+			});
 			const instance = new KTRepeater(trigger);
 			instance.add();
 			expect(wrapper.children.length).toBe(2);
@@ -213,7 +217,9 @@ describe('KTRepeater', () => {
 			instance.add();
 			expect(wrapper.children.length).toBe(2);
 			const firstClone = wrapper.children[1];
-			const deleteBtn = firstClone.querySelector('[data-kt-repeater-delete]') as HTMLElement;
+			const deleteBtn = firstClone.querySelector(
+				'[data-kt-repeater-delete]',
+			) as HTMLElement;
 			deleteBtn.click();
 			expect(wrapper.children.length).toBe(1);
 			instance.dispose();
@@ -224,7 +230,9 @@ describe('KTRepeater', () => {
 			const instance = new KTRepeater(trigger);
 			expect(wrapper.children.length).toBe(1);
 			const onlyRow = wrapper.children[0];
-			const deleteBtn = onlyRow.querySelector('[data-kt-repeater-delete]') as HTMLElement;
+			const deleteBtn = onlyRow.querySelector(
+				'[data-kt-repeater-delete]',
+			) as HTMLElement;
 			deleteBtn.click();
 			expect(wrapper.children.length).toBe(1);
 			instance.dispose();
@@ -233,12 +241,17 @@ describe('KTRepeater', () => {
 
 	describe('predefined (hidden) template', () => {
 		it('clones from hidden template and appends to wrapper', () => {
-			const { wrapper, trigger } = createFixture({ hiddenTemplate: true, withInitialChild: false });
+			const { wrapper, trigger } = createFixture({
+				hiddenTemplate: true,
+				withInitialChild: false,
+			});
 			expect(wrapper.children.length).toBe(0);
 			const instance = new KTRepeater(trigger);
 			instance.add();
 			expect(wrapper.children.length).toBe(1);
-			expect(wrapper.querySelector('input[placeholder="Enter Name"]')).not.toBeNull();
+			expect(
+				wrapper.querySelector('input[placeholder="Enter Name"]'),
+			).not.toBeNull();
 			instance.dispose();
 		});
 	});

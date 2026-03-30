@@ -67,11 +67,7 @@ describe('KTDataTable - Currency/numeric sort', () => {
 			noop,
 		);
 
-		const data = [
-			{ price: '£5' },
-			{ price: '£20' },
-			{ price: '£123' },
-		];
+		const data = [{ price: '£5' }, { price: '£20' }, { price: '£123' }];
 		const sorted = handler.sortData(data, 'price', 'desc');
 
 		const numericOrder = sorted.map((row) =>
@@ -92,11 +88,7 @@ describe('KTDataTable - Currency/numeric sort', () => {
 			noop,
 		);
 
-		const data = [
-			{ price: '£123' },
-			{ price: '£20' },
-			{ price: '£5' },
-		];
+		const data = [{ price: '£123' }, { price: '£20' }, { price: '£5' }];
 		const sorted = handler.sortData(data, 'price', 'asc');
 
 		// String sort: "£123" < "£20" < "£5" (1 < 2 < 5)

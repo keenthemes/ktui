@@ -119,42 +119,35 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 
 		// Store scroll handler reference for cleanup
 		this._scrollHandler = () => {
-
 			this._isScrolling = true;
 
-			if(this._isActive() === true){
-
+			if (this._isActive() === true) {
 				this._debounceScroll(() => {
-
 					this._isScrolling = false;
 					this._process();
-
 				}, 200);
-
-			}else{
-
+			} else {
 				this._isScrolling = false;
 				this._process();
-
 			}
-
 		};
 
 		if (this._targetElement) {
 			if (this._targetElement === document) {
-				window.addEventListener('scroll', this._scrollHandler, { passive: true });
+				window.addEventListener('scroll', this._scrollHandler, {
+					passive: true,
+				});
 			} else {
 				(this._targetElement as HTMLElement).addEventListener(
 					'scroll',
 					this._scrollHandler,
-					{ passive: true }
+					{ passive: true },
 				);
 			}
 		}
 	}
 
 	protected _debounceScroll(callback: () => void, delay: number = 200): void {
-
 		if (this._scrollTimeout) {
 			clearTimeout(this._scrollTimeout);
 		}
@@ -162,7 +155,6 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		this._scrollTimeout = setTimeout(() => {
 			callback();
 		}, delay);
-
 	}
 
 	protected _process(): void {
@@ -352,7 +344,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		const activeClassList = this._getOption('activeClass') as string;
 		if (activeClassList) {
 			KTDom.addClass(this._element, activeClassList);
-		}else{
+		} else {
 			const classList = this._getOption('class') as string;
 			if (classList) {
 				KTDom.addClass(this._element, classList);
@@ -387,10 +379,10 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		const activeClassList = this._getOption('activeClass') as string;
 		if (activeClassList) {
 			KTDom.removeClass(this._element, activeClassList);
-		}else{
+		} else {
 			const classList = this._getOption('class') as string;
 			if (classList) {
-					KTDom.removeClass(this._element, classList);
+				KTDom.removeClass(this._element, classList);
 			}
 		}
 
@@ -399,12 +391,11 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 			KTDom.addClass(this._element, releaseClassList);
 		}
 
-		if(this._eventTriggerState === false){
+		if (this._eventTriggerState === false) {
 			const releaseDelay = this._getOption('releaseDelay') as number;
-			if(releaseDelay && this._timeoutState === null){
+			if (releaseDelay && this._timeoutState === null) {
 				this._timeoutState = setTimeout(() => {
-
-					if (!this._element){
+					if (!this._element) {
 						return;
 					}
 
@@ -413,12 +404,11 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 					}
 
 					this._timeoutState = null;
-
 				}, releaseDelay);
-			}else{
+			} else {
 				this._resetStyles();
 			}
-		}else{
+		} else {
 			this._timeoutState = null;
 		}
 	}

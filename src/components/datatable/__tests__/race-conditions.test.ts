@@ -43,7 +43,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 		// Mock fetch to track requests and signals
 		abortSignals = [];
-		mockFetch = vi.fn<typeof fetch>((url, options) => {
+		mockFetch = vi.fn<typeof fetch>((_url, options) => {
 			// Store abort signal for verification
 			if (options?.signal) {
 				abortSignals.push(options.signal);
@@ -98,12 +98,9 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('AbortController Integration', () => {
 		it('should create AbortController for remote data requests', async () => {
-			const datatable = new KTDataTable(
-				container.querySelector('[data-kt-datatable="true"]')!,
-				{
-					apiEndpoint: '/api/data',
-				},
-			);
+			new KTDataTable(container.querySelector('[data-kt-datatable="true"]')!, {
+				apiEndpoint: '/api/data',
+			});
 
 			await waitFor(150);
 
@@ -186,7 +183,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 			// Mock to capture request sequence
 			mockFetch.mockImplementation(
-				(url: RequestInfo | URL, options?: RequestInit) => {
+				(_url: RequestInfo | URL, _options?: RequestInit) => {
 					callCount++;
 					const id = callCount;
 					requestIds.push(id);
@@ -293,7 +290,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 		it('should reset _isFetching flag even after fetch error', async () => {
 			let callCount = 0;
 			mockFetch.mockImplementation(
-				(url: RequestInfo | URL, options?: RequestInit) => {
+				(_url: RequestInfo | URL, _options?: RequestInit) => {
 					callCount++;
 					if (callCount === 1) {
 						// Return invalid JSON to trigger parse error
@@ -333,7 +330,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
 			) as HTMLElement;
-			const datatable = new KTDataTable(element, {
+			new KTDataTable(element, {
 				apiEndpoint: '/api/data',
 			});
 
@@ -410,7 +407,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('Event Handling During Race Conditions', () => {
 		it('should fire fetch event for successful requests', async () => {
-			const fetchEvents: any[] = [];
+			const fetchEvents: Event[] = [];
 
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
@@ -433,7 +430,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should fire fetched event after successful data load', async () => {
-			const fetchedEvents: any[] = [];
+			const fetchedEvents: Event[] = [];
 
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
@@ -442,7 +439,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 				fetchedEvents.push(e);
 			});
 
-			const datatable = new KTDataTable(element, {
+			new KTDataTable(element, {
 				apiEndpoint: '/api/data',
 			});
 
@@ -453,7 +450,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 		});
 
 		it('should not fire error events for AbortError', async () => {
-			const errorEvents: any[] = [];
+			const errorEvents: Event[] = [];
 
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',

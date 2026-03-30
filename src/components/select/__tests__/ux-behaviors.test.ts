@@ -349,12 +349,30 @@ describe('KTSelect UX Behaviors', () => {
 			await waitFor(50);
 
 			// ArrowDown focuses first option; ArrowUp from first wraps to last (3). Enter selects focused.
-			searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+			searchInput.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'ArrowDown',
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
 			await waitFor(20);
-			searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+			searchInput.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'ArrowUp',
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
 			await waitFor(20);
 
-			searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+			searchInput.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'Enter',
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
 			await waitFor(150);
 
 			expect(select.getSelectedOptions()).toContain('3');
