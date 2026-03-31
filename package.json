@@ -120,7 +120,6 @@
 		"@popperjs/core": "^2.11.8"
 	},
 	"overrides": {
-		"ajv": "6.14.0",
 		"minimatch": "^10.2.3",
 		"rollup": "^4.59.0",
 		"serialize-javascript": "^7.0.3",
