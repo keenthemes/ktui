@@ -15,6 +15,13 @@
 		display: none;
 	}
 
+	[data-kt-carousel-thumbnail]:not(:disabled),
+	[data-kt-carousel-pagination-item]:not(:disabled),
+	[data-kt-carousel-prev]:not(:disabled),
+	[data-kt-carousel-next]:not(:disabled) {
+		cursor: pointer;
+	}
+
 	/* Smooth active-state visuals when `data-kt-carousel-thumbnail-active` toggles */
 	[data-kt-carousel-thumbnail] {
 		transition-property: border-color, background-color, color, box-shadow, opacity;
