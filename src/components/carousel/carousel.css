@@ -1,0 +1,17 @@
+/**
+ * KTCarousel — hide native scrollbars on the scrollable viewport and thumbnail
+ * strips (horizontal/vertical overflow). Scrolling still works via trackpad,
+ * wheel, drag, and programmatic scrollTo.
+ */
+@layer components {
+	[data-kt-carousel-viewport],
+	[data-kt-carousel-thumbnails] {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	[data-kt-carousel-viewport]::-webkit-scrollbar,
+	[data-kt-carousel-thumbnails]::-webkit-scrollbar {
+		display: none;
+	}
+}

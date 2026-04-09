@@ -394,18 +394,33 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		this._index = this._nearestIndex();
 	}
 
+	/**
+	 * Scroll the viewport only. Avoid `Element.scrollIntoView`, which walks
+	 * ancestor scroll containers and can pull the whole docs page to an embedded
+	 * carousel (e.g. autoplay ticking on `/docs/carousel`).
+	 */
 	private _scrollToIndex(index: number, behavior: ScrollBehavior): void {
 		if (!this._viewport) return;
 		const slide = this._slides[index];
 		if (!slide) return;
 
 		this._programmaticScroll = true;
+		const vp = this._viewport;
 		const centered = this._getOption('centered') === true;
-		slide.scrollIntoView({
-			behavior,
-			block: 'nearest',
-			inline: centered ? 'center' : 'start',
-		});
+		const slideRect = slide.getBoundingClientRect();
+		const vpRect = vp.getBoundingClientRect();
+		let left = vp.scrollLeft + slideRect.left - vpRect.left;
+		if (centered) {
+			left -= (vp.clientWidth - slideRect.width) / 2;
+		}
+		const maxScroll = Math.max(0, vp.scrollWidth - vp.clientWidth);
+		left = Math.max(0, Math.min(left, maxScroll));
+
+		try {
+			vp.scrollTo({ left, top: vp.scrollTop, behavior });
+		} catch {
+			vp.scrollLeft = left;
+		}
 
 		const reset = () => {
 			this._programmaticScroll = false;

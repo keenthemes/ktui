@@ -1,7 +1,7 @@
 /**
  * Tests for KTCarousel component
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { KTCarousel } from '../carousel';
 
 function buildCarouselHtml(options?: {
@@ -68,25 +68,57 @@ function buildCarouselHtml(options?: {
 			scrollLeft = v;
 		},
 	});
+	Object.defineProperty(viewport, 'scrollWidth', {
+		configurable: true,
+		get: () => slides.length * gap,
+	});
+	Object.defineProperty(viewport, 'clientWidth', {
+		configurable: true,
+		get: () => gap,
+	});
 
-	const origScrollIntoView = HTMLElement.prototype.scrollIntoView;
-	HTMLElement.prototype.scrollIntoView = function (
-		this: HTMLElement,
-		opts?: boolean | ScrollIntoViewOptions,
-	) {
-		const inline = typeof opts === 'object' ? opts.inline : undefined;
-		if (inline === 'center' || inline === 'start' || inline === 'nearest') {
-			const idx = slides.indexOf(this as HTMLElement);
-			if (idx >= 0) scrollLeft = idx * gap;
+	const vpScreenLeft = 10;
+	vi.spyOn(viewport, 'getBoundingClientRect').mockReturnValue({
+		left: vpScreenLeft,
+		top: 0,
+		width: gap,
+		height: 100,
+		right: vpScreenLeft + gap,
+		bottom: 100,
+		x: vpScreenLeft,
+		y: 0,
+		toJSON: () => ({}),
+	} as DOMRect);
+
+	slides.forEach((slide, i) => {
+		vi.spyOn(slide, 'getBoundingClientRect').mockImplementation(() => {
+			const visualLeft = vpScreenLeft + i * gap - scrollLeft;
+			return {
+				left: visualLeft,
+				top: 0,
+				width: gap,
+				height: 100,
+				right: visualLeft + gap,
+				bottom: 100,
+				x: visualLeft,
+				y: 0,
+				toJSON: () => ({}),
+			} as DOMRect;
+		});
+	});
+
+	viewport.scrollTo = ((opts: ScrollToOptions) => {
+		if (typeof opts.left === 'number') {
+			scrollLeft = opts.left;
 		}
-	};
+	}) as typeof viewport.scrollTo;
 
 	return {
 		root,
 		viewport,
 		slides,
 		restoreScrollIntoView: () => {
-			HTMLElement.prototype.scrollIntoView = origScrollIntoView;
+			/* no-op; mocks cleared in afterEach */
 		},
 	};
 }
