@@ -74,8 +74,9 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 	private _programmaticScrollPrevIndex: number | null = null;
 	private _programmaticScrollTargetIndex: number | null = null;
 	private _programmaticScrollUserInitiated = false;
-	private _programmaticScrollFallbackTimer: ReturnType<typeof setTimeout> | null =
-		null;
+	private _programmaticScrollFallbackTimer: ReturnType<
+		typeof setTimeout
+	> | null = null;
 	private _scrollSyncRaf = 0;
 	private _pauseAutoplay: (() => void) | null = null;
 	private _resumeAutoplay: (() => void) | null = null;
@@ -84,6 +85,10 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 	private _dragging = false;
 	private _dragMoved = false;
 	private _pointerId: number | null = null;
+	private _prevButtons: HTMLElement[] = [];
+	private _nextButtons: HTMLElement[] = [];
+	private _currentLabels: HTMLElement[] = [];
+	private _totalLabels: HTMLElement[] = [];
 
 	constructor(
 		element: HTMLElement,
@@ -116,7 +121,7 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		this._bindDraggable();
 		this._bindAutoHeight();
 
-		this._syncIndexFromScroll(false);
+		this._syncIndexFromScroll();
 		this._updateInfo();
 		this._updatePaginationState();
 		this._updateThumbState(false);
@@ -176,6 +181,20 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 
 	private _bindControls(): void {
 		if (!this._element) return;
+		const root = this._element;
+
+		this._prevButtons = Array.from(
+			root.querySelectorAll<HTMLElement>(SELECTOR_PREV),
+		);
+		this._nextButtons = Array.from(
+			root.querySelectorAll<HTMLElement>(SELECTOR_NEXT),
+		);
+		this._currentLabels = Array.from(
+			root.querySelectorAll<HTMLElement>(SELECTOR_CURRENT),
+		);
+		this._totalLabels = Array.from(
+			root.querySelectorAll<HTMLElement>(SELECTOR_TOTAL),
+		);
 
 		this._onPrevClick = (e: Event) => {
 			e.preventDefault();
@@ -186,44 +205,41 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 			this.next(true);
 		};
 
-		this._element
-			.querySelectorAll<HTMLElement>(SELECTOR_PREV)
-			.forEach((btn) => {
-				btn.addEventListener('click', this._onPrevClick!);
-			});
-		this._element
-			.querySelectorAll<HTMLElement>(SELECTOR_NEXT)
-			.forEach((btn) => {
-				btn.addEventListener('click', this._onNextClick!);
-			});
+		this._prevButtons.forEach((btn) => {
+			btn.addEventListener('click', this._onPrevClick!);
+		});
+		this._nextButtons.forEach((btn) => {
+			btn.addEventListener('click', this._onNextClick!);
+		});
 
+		this._bindIndexedClickStrips(
+			SELECTOR_PAGINATION,
+			SELECTOR_PAGINATION_ITEM,
+			this._paginationHandlers,
+		);
+		this._bindIndexedClickStrips(
+			SELECTOR_THUMBS,
+			SELECTOR_THUMB,
+			this._thumbHandlers,
+		);
+	}
+
+	private _bindIndexedClickStrips(
+		stripSelector: string,
+		itemSelector: string,
+		handlers: Array<{ el: HTMLElement; fn: (e: Event) => void }>,
+	): void {
+		if (!this._element) return;
 		this._element
-			.querySelectorAll<HTMLElement>(SELECTOR_PAGINATION)
-			.forEach((root) => {
-				const items = root.querySelectorAll<HTMLElement>(
-					SELECTOR_PAGINATION_ITEM,
-				);
-				items.forEach((item, i) => {
+			.querySelectorAll<HTMLElement>(stripSelector)
+			.forEach((strip) => {
+				strip.querySelectorAll<HTMLElement>(itemSelector).forEach((item, i) => {
 					const fn = (e: Event) => {
 						e.preventDefault();
 						this.goTo(i, true);
 					};
 					item.addEventListener('click', fn);
-					this._paginationHandlers.push({ el: item, fn });
-				});
-			});
-
-		this._element
-			.querySelectorAll<HTMLElement>(SELECTOR_THUMBS)
-			.forEach((root) => {
-				const items = root.querySelectorAll<HTMLElement>(SELECTOR_THUMB);
-				items.forEach((item, i) => {
-					const fn = (e: Event) => {
-						e.preventDefault();
-						this.goTo(i, true);
-					};
-					item.addEventListener('click', fn);
-					this._thumbHandlers.push({ el: item, fn });
+					handlers.push({ el: item, fn });
 				});
 			});
 	}
@@ -236,17 +252,10 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 			this._scrollSyncRaf = requestAnimationFrame(() => {
 				this._scrollSyncRaf = 0;
 				const prev = this._index;
-				this._syncIndexFromScroll(true);
-				if (prev !== this._index) {
-					this._updateInfo();
-					this._updatePaginationState();
-					this._updateThumbState(false);
-					this._applyAutoHeight();
-					this._observeActiveSlideForHeight();
-					if (!this._programmaticScroll) {
-						this._dispatchChange(this._index, prev, true);
-					}
-				}
+				this._applyScrollDerivedIndexChange(prev, {
+					dispatch: !this._programmaticScroll,
+					userInitiated: true,
+				});
 			});
 		};
 
@@ -263,15 +272,10 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 				return;
 			}
 			const prev = this._index;
-			this._syncIndexFromScroll(true);
-			if (prev !== this._index) {
-				this._updateInfo();
-				this._updatePaginationState();
-				this._updateThumbState(false);
-				this._applyAutoHeight();
-				this._observeActiveSlideForHeight();
-				this._dispatchChange(this._index, prev, true);
-			}
+			this._applyScrollDerivedIndexChange(prev, {
+				dispatch: true,
+				userInitiated: true,
+			});
 		};
 
 		this._viewport.addEventListener(
@@ -413,9 +417,40 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		return best;
 	}
 
-	private _syncIndexFromScroll(_userInitiated: boolean): void {
+	private _syncIndexFromScroll(): void {
 		if (this._slides.length === 0) return;
 		this._index = this._nearestIndex();
+	}
+
+	private _applyScrollDerivedIndexChange(
+		prevIndex: number,
+		options: { dispatch: boolean; userInitiated: boolean },
+	): void {
+		this._syncIndexFromScroll();
+		if (prevIndex === this._index) return;
+		this._updateInfo();
+		this._updatePaginationState();
+		this._updateThumbState(false);
+		this._applyAutoHeight();
+		this._observeActiveSlideForHeight();
+		if (options.dispatch) {
+			this._dispatchChange(this._index, prevIndex, options.userInitiated);
+		}
+	}
+
+	private _setStripItemsActiveState(
+		handlers: Array<{ el: HTMLElement; fn: (e: Event) => void }>,
+		activeDataAttr: string,
+	): void {
+		handlers.forEach(({ el }, i) => {
+			const active = i === this._index;
+			if (active) {
+				el.setAttribute('aria-current', 'true');
+			} else {
+				el.removeAttribute('aria-current');
+			}
+			el.toggleAttribute(activeDataAttr, active);
+		});
 	}
 
 	/**
@@ -585,41 +620,29 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		if (!this._element) return;
 		const total = this._slides.length;
 		const cur = total === 0 ? 0 : this._index + 1;
+		const curStr = String(cur);
+		const totalStr = String(total);
 
-		this._element
-			.querySelectorAll<HTMLElement>(SELECTOR_CURRENT)
-			.forEach((el) => {
-				el.textContent = String(cur);
-			});
-		this._element
-			.querySelectorAll<HTMLElement>(SELECTOR_TOTAL)
-			.forEach((el) => {
-				el.textContent = String(total);
-			});
+		this._currentLabels.forEach((label) => {
+			label.textContent = curStr;
+		});
+		this._totalLabels.forEach((label) => {
+			label.textContent = totalStr;
+		});
 	}
 
 	private _updatePaginationState(): void {
-		this._paginationHandlers.forEach(({ el }, i) => {
-			const active = i === this._index;
-			if (active) {
-				el.setAttribute('aria-current', 'true');
-			} else {
-				el.removeAttribute('aria-current');
-			}
-			el.toggleAttribute('data-kt-carousel-pagination-active', active);
-		});
+		this._setStripItemsActiveState(
+			this._paginationHandlers,
+			'data-kt-carousel-pagination-active',
+		);
 	}
 
 	private _updateThumbState(alignStripSmooth: boolean): void {
-		this._thumbHandlers.forEach(({ el }, i) => {
-			const active = i === this._index;
-			if (active) {
-				el.setAttribute('aria-current', 'true');
-			} else {
-				el.removeAttribute('aria-current');
-			}
-			el.toggleAttribute('data-kt-carousel-thumbnail-active', active);
-		});
+		this._setStripItemsActiveState(
+			this._thumbHandlers,
+			'data-kt-carousel-thumbnail-active',
+		);
 		this._scrollActiveThumbnailsIntoView(
 			alignStripSmooth ? this._scrollBehavior() : 'auto',
 		);
@@ -720,18 +743,14 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 
 		if (this._element) {
 			if (this._onPrevClick) {
-				this._element
-					.querySelectorAll<HTMLElement>(SELECTOR_PREV)
-					.forEach((btn) =>
-						btn.removeEventListener('click', this._onPrevClick!),
-					);
+				this._prevButtons.forEach((btn) =>
+					btn.removeEventListener('click', this._onPrevClick!),
+				);
 			}
 			if (this._onNextClick) {
-				this._element
-					.querySelectorAll<HTMLElement>(SELECTOR_NEXT)
-					.forEach((btn) =>
-						btn.removeEventListener('click', this._onNextClick!),
-					);
+				this._nextButtons.forEach((btn) =>
+					btn.removeEventListener('click', this._onNextClick!),
+				);
 			}
 			this._paginationHandlers.forEach(({ el, fn }) => {
 				el.removeEventListener('click', fn);
@@ -780,6 +799,11 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		this._onPointerDown = null;
 		this._onPointerMove = null;
 		this._onPointerUp = null;
+
+		this._prevButtons = [];
+		this._nextButtons = [];
+		this._currentLabels = [];
+		this._totalLabels = [];
 
 		super.dispose();
 	}
