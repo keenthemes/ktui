@@ -14,7 +14,7 @@ import { EventManager } from './utils';
 export class KTSelectTags {
 	private _select: KTSelect;
 	private _config: KTSelectConfigInterface;
-	private _valueDisplayElement: HTMLElement;
+	private _valueDisplayElement: HTMLElement | null;
 	private _eventManager: EventManager;
 
 	/**
@@ -32,21 +32,23 @@ export class KTSelectTags {
 	 * Renders selected options as tags in the display element
 	 */
 	public updateTagsDisplay(selectedOptions: string[]): void {
+		if (!this._valueDisplayElement) return;
+		const valueDisplayElement = this._valueDisplayElement;
 		// Remove any existing tag elements
-		const wrapper = this._valueDisplayElement.parentElement;
+		const wrapper = valueDisplayElement.parentElement;
 		if (!wrapper) return;
 
 		// If no options selected, ensure placeholder is shown
 		if (selectedOptions.length === 0) {
 			// Clear any existing content and show placeholder
-			this._valueDisplayElement.innerHTML = '';
+			valueDisplayElement.innerHTML = '';
 			const placeholderEl = defaultTemplates.placeholder(this._config);
-			this._valueDisplayElement.appendChild(placeholderEl);
+			valueDisplayElement.appendChild(placeholderEl);
 			return;
 		}
 
 		// Clear all existing content before adding tags
-		this._valueDisplayElement.innerHTML = '';
+		valueDisplayElement.innerHTML = '';
 
 		// Insert each tag before the display element
 		selectedOptions.forEach((optionValue) => {
@@ -62,7 +64,8 @@ export class KTSelectTags {
 			if (!optionElement) {
 				const originalOptions = this._select
 					.getElement()
-					.querySelectorAll('option');
+					?.querySelectorAll('option');
+				if (!originalOptions) return;
 				for (const opt of Array.from(originalOptions)) {
 					if ((opt as HTMLOptionElement).value === optionValue) {
 						optionElement = opt as HTMLOptionElement;
@@ -70,6 +73,7 @@ export class KTSelectTags {
 					}
 				}
 			}
+			if (!optionElement) return;
 
 			const tag = defaultTemplates.tag(optionElement, this._config);
 
@@ -85,7 +89,7 @@ export class KTSelectTags {
 			}
 
 			// Insert tag inside the display element
-			this._valueDisplayElement.appendChild(tag);
+			valueDisplayElement.appendChild(tag);
 		});
 	}
 
@@ -101,6 +105,8 @@ export class KTSelectTags {
 	 * Clean up resources used by this module
 	 */
 	public destroy(): void {
-		this._eventManager.removeAllListeners(null);
+		if (this._valueDisplayElement) {
+			this._eventManager.removeAllListeners(this._valueDisplayElement);
+		}
 	}
 }

@@ -131,6 +131,7 @@ export type {
 	KTPinInputEventPayloadInterface,
 	KTPinInputInterface,
 } from './components/pin-input';
+export type {
 	KTCarouselConfigInterface,
 	KTCarouselChangePayloadInterface,
 	KTCarouselInterface,

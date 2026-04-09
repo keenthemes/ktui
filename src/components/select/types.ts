@@ -15,7 +15,7 @@ export interface KTSelectOption {
 }
 
 export interface KTSelectOptionData {
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 export interface KTSelectState {

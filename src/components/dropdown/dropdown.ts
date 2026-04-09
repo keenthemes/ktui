@@ -120,7 +120,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 		this._toggle();
 	}
 
-	protected _mouseover(event: MouseEvent): void {
+	protected _mouseover(_event: MouseEvent): void {
 		if (this._disabled) return;
 
 		if (this._getOption('trigger') !== 'hover') return;
@@ -244,7 +244,6 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 	}
 
 	protected _initPopper(): void {
-		const isRtl = KTDom.isRTL();
 		let reference: HTMLElement;
 		const attach = this._getOption('attach') as string;
 
@@ -607,7 +606,7 @@ export class KTDropdown extends KTComponent implements KTDropdownInterface {
 				if (menu) {
 					KTData.remove(menu as HTMLElement, 'dropdownElement');
 				}
-			} catch (e) {
+			} catch {
 				// Ignore errors for individual elements
 			}
 		});

@@ -8,6 +8,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createSortHandler } from '../datatable-sort';
+import { KTDataTableConfigInterface } from '../types';
 
 describe('KTDataTable - Currency/numeric sort', () => {
 	let thead: HTMLTableSectionElement;
@@ -29,7 +30,7 @@ describe('KTDataTable - Currency/numeric sort', () => {
 			},
 		};
 		const handler = createSortHandler(
-			config as any,
+			config as KTDataTableConfigInterface,
 			thead,
 			() => ({ sortField: null, sortOrder: '' }),
 			noop,
@@ -58,7 +59,7 @@ describe('KTDataTable - Currency/numeric sort', () => {
 			},
 		};
 		const handler = createSortHandler(
-			config as any,
+			config as KTDataTableConfigInterface,
 			thead,
 			() => ({ sortField: null, sortOrder: '' }),
 			noop,
@@ -79,7 +80,7 @@ describe('KTDataTable - Currency/numeric sort', () => {
 	it('without sortType numeric, sorts lexicographically (e.g. £123 before £20)', () => {
 		const config = { columns: {} };
 		const handler = createSortHandler(
-			config as any,
+			config as KTDataTableConfigInterface,
 			thead,
 			() => ({ sortField: null, sortOrder: '' }),
 			noop,

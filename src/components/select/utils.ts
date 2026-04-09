@@ -5,7 +5,6 @@
 
 // utils.ts
 
-import { defaultTemplates } from './templates';
 import { KTSelectConfigInterface } from './config';
 
 /**
@@ -99,7 +98,7 @@ export class FocusManager {
 	constructor(
 		element: HTMLElement,
 		optionsSelector: string = '[data-kt-select-option]',
-		config?: KTSelectConfigInterface,
+		_config?: KTSelectConfigInterface,
 	) {
 		this._element = element;
 		this._optionsSelector = optionsSelector;
@@ -121,8 +120,7 @@ export class FocusManager {
 			const target = e.target as HTMLElement;
 			const optionElement = target.closest(this._optionsSelector);
 
-			if (optionElement) {
-			}
+			void optionElement;
 		});
 	}
 
@@ -442,7 +440,7 @@ export class EventManager {
 		element: HTMLElement,
 		event: string,
 		handler: EventListenerOrEventListenerObject,
-		context?: any,
+		context?: unknown,
 	): void {
 		if (!element) return;
 
@@ -514,12 +512,12 @@ export class EventManager {
  * Debounce function to limit how often a function can be called
  */
 export function debounce(
-	func: (...args: any[]) => void,
+	func: (...args: unknown[]) => void,
 	delay: number,
-): (...args: any[]) => void {
+): (...args: unknown[]) => void {
 	let timeout: ReturnType<typeof setTimeout>;
 
-	return function (...args: any[]) {
+	return function (...args: unknown[]) {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => func(...args), delay);
 	};
@@ -531,7 +529,7 @@ export function debounce(
  */
 export function renderTemplateString(
 	template: string,
-	data: Record<string, any>,
+	data: Record<string, unknown>,
 ): string {
 	return template.replace(/{{(\w+)}}/g, (_, key) =>
 		data[key] !== undefined && data[key] !== null ? String(data[key]) : '',

@@ -4,7 +4,6 @@
  */
 
 import KTData from '../../helpers/data';
-import KTDom from '../../helpers/dom';
 import KTComponent from '../component';
 import {
 	KTTogglePasswordConfigInterface,

@@ -448,8 +448,6 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 		if (!drawerElement) {
 			// If element is a toggle button and drawer element wasn't found, return null
 			// The handleToggle() will handle waiting for the element to appear
-			if (element.hasAttribute('data-kt-drawer-toggle')) {
-			}
 			return null;
 		}
 
@@ -485,10 +483,8 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 
 	public static handleResize(): void {
 		window.addEventListener('resize', () => {
-			let timer;
-
 			KTUtils.throttle(
-				timer,
+				undefined,
 				() => {
 					document
 						.querySelectorAll('[data-kt-drawer-initialized]')
@@ -512,8 +508,7 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 			'click',
 			(rawEvent: MouseEvent) => {
 				const target = rawEvent.target as HTMLElement;
-				if (target && target.hasAttribute('data-kt-drawer-toggle')) {
-				}
+				void (target && target.hasAttribute('data-kt-drawer-toggle'));
 			},
 			true,
 		); // Use capture phase to catch before any stopPropagation
@@ -534,15 +529,6 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 				if (drawer) {
 					drawer.toggle(target);
 				} else {
-					// Drawer element not found - wait for it to appear (handles persisted Livewire components)
-					// Check if drawer exists in persisted components (might be in header that's persisted)
-					const persistedHeader =
-						document.querySelector('[wire\\:id]')?.closest('[wire\\:id]') ||
-						document.querySelector('header#header');
-					const drawerInPersisted = persistedHeader
-						? persistedHeader.querySelector(selector)
-						: null;
-
 					// Wait longer for persisted components that may take time to render
 					// Also check if drawer exists in persisted header component
 					KTDrawer.waitForElement(selector, 5000).then((drawerElement) => {
@@ -706,11 +692,10 @@ export class KTDrawer extends KTComponent implements KTDrawerInterface {
 					instance.hide(); // This will clean up backdrop and state
 				}
 				// Clear KTData entries
-				const hadDrawer = KTData.has(element as HTMLElement, 'drawer');
 				KTData.remove(element as HTMLElement, 'drawer');
 				// Remove initialization attribute to allow fresh initialization
 				element.removeAttribute('data-kt-drawer-initialized');
-			} catch (e) {
+			} catch {
 				// Ignore errors for individual elements
 			}
 		});

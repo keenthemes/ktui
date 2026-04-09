@@ -40,8 +40,8 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		field: keyof T | number,
 		order: KTDataTableSortOrderInterface,
 	) => void,
-	fireEvent: (eventName: string, eventData?: any) => void,
-	dispatchEvent: (eventName: string, eventData?: any) => void,
+	fireEvent: (eventName: string, eventData?: object) => void,
+	dispatchEvent: (eventName: string, eventData?: object) => void,
 	updateData: () => void,
 ): KTDataTableSortAPI<T> {
 	// Helper to compare values for sorting (string)
@@ -93,7 +93,9 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		| {
 				sortType?: 'string' | 'numeric';
 				sortValue?: (
-					cellValue: unknown,
+					cellValue:
+						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
+						| string,
 					rowData: KTDataTableDataInterface,
 				) => number | string;
 		  }
@@ -121,8 +123,18 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 			const bRaw = b[sortField as keyof T] as unknown;
 
 			if (typeof sortValueFn === 'function') {
-				const aVal = sortValueFn(aRaw, a as KTDataTableDataInterface);
-				const bVal = sortValueFn(bRaw, b as KTDataTableDataInterface);
+				const aVal = sortValueFn(
+					aRaw as
+						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
+						| string,
+					a as KTDataTableDataInterface,
+				);
+				const bVal = sortValueFn(
+					bRaw as
+						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
+						| string,
+					b as KTDataTableDataInterface,
+				);
 				const aNum = typeof aVal === 'number' ? aVal : parseNumeric(aVal);
 				const bNum = typeof bVal === 'number' ? bVal : parseNumeric(bVal);
 				if (typeof aVal === 'number' && typeof bVal === 'number') {
@@ -131,8 +143,16 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 				return compareValues(aVal, bVal, sortOrder);
 			}
 			if (useNumeric) {
-				const aNum = parseNumeric(aRaw);
-				const bNum = parseNumeric(bRaw);
+				const aNum = parseNumeric(
+					aRaw as
+						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
+						| string,
+				);
+				const bNum = parseNumeric(
+					bRaw as
+						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
+						| string,
+				);
 				return compareNumeric(aNum, bNum, sortOrder);
 			}
 			return compareValues(aRaw, bRaw, sortOrder);

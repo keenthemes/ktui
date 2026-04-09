@@ -85,8 +85,11 @@
 		"format": "npx prettier --write 'src/**/*.ts'",
 		"format:check": "npx prettier --check 'src/**/*.ts'",
 		"type-check": "npx tsc --noEmit --project tsconfig.lib.json",
+		"type-check:strict": "npx tsc --noEmit --project tsconfig.lib.json --strict",
 		"validate": "npm run lint && npm run format:check && npm run type-check",
-		"validate:fix": "npm run lint:fix && npm run format",
+		"validate:strict": "npm run lint && npm run format:check && npm run type-check:strict",
+		"validate:fix": "npm run lint:fix && npm run format && npm run type-check",
+		"release:prep": "npm run lint && npm run format:check && npm run type-check && npm run test && npm run build:lib && npm run build",
 		"publish:npm": "node scripts/publish-npm.js",
 		"publish:github": "npm publish"
 	},

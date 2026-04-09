@@ -136,7 +136,7 @@ export function getTemplateStrings(
 ): typeof coreTemplateStrings {
 	const templates =
 		config && typeof config === 'object' && 'templates' in config
-			? (config as any).templates
+			? (config as KTSelectConfigInterface).templates
 			: undefined;
 
 	if (templates) {
@@ -264,7 +264,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		config: KTSelectConfigInterface,
 	): HTMLElement => {
 		const isHtmlOption = option instanceof HTMLOptionElement;
-		let optionData: Record<string, any>;
+		let optionData: Record<string, unknown>;
 
 		if (isHtmlOption) {
 			// If it's a plain HTMLOptionElement, construct data similarly to how KTSelectOption would
@@ -288,14 +288,14 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 			).getOptionDataForTemplate();
 		}
 
-		let content = optionData?.text?.trim(); // Default content to option's text
+		let content = String(optionData?.text || '').trim(); // Default content to option's text
 
 		if (config.optionTemplate) {
 			// Use the user-provided template string, rendering with the full optionData.
 			// renderTemplateString will replace {{key}} with values from optionData.
 			content = renderTemplateString(config.optionTemplate, optionData);
 		} else {
-			content = optionData.text || optionData.content; // Prefer explicit text, fallback to content
+			content = String(optionData.text || optionData.content || '');
 		}
 
 		// Use the core option template string as the base structure.
@@ -326,7 +326,7 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 		}
 
 		// Ensure data-text attribute is set to the original, clean text for searching/filtering
-		element.setAttribute('data-text', optionData?.text?.trim() || '');
+		element.setAttribute('data-text', String(optionData?.text || '').trim());
 
 		return element;
 	},
@@ -402,7 +402,12 @@ export const defaultTemplates: KTSelectTemplateInterface = {
 
 			// Replace all {{varname}} in option.innerHTML with values from _config.optionsConfig
 			Object.entries(
-				(config.optionsConfig as any)?.[optionValue] || {},
+				(
+					config.optionsConfig as unknown as Record<
+						string,
+						Record<string, unknown>
+					>
+				)?.[optionValue] || {},
 			).forEach(([key, val]) => {
 				if (
 					typeof val === 'string' ||

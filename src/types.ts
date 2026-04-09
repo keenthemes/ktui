@@ -20,4 +20,4 @@ export declare type KTOffsetType = {
 	bottom: number;
 };
 
-export declare type KTOptionType = string | number | boolean | object;
+export declare type KTOptionType = string | number | boolean | object | null;

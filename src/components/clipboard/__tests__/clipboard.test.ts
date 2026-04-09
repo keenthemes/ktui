@@ -80,7 +80,7 @@ function createFixture(options?: {
 }
 
 describe('KTClipboard', () => {
-	let originalExecCommand: any;
+	let originalExecCommand: Document['execCommand'];
 
 	beforeEach(() => {
 		// Ensure a clean clipboard state between tests.
@@ -90,7 +90,7 @@ describe('KTClipboard', () => {
 	afterEach(() => {
 		document.body.innerHTML = '';
 		// Restore execCommand (if it was replaced).
-		document.execCommand = originalExecCommand as any;
+		document.execCommand = originalExecCommand;
 	});
 
 	it('copies predefined text (text wins over target)', async () => {
@@ -135,7 +135,7 @@ describe('KTClipboard', () => {
 		});
 
 		const execCommandMock = vi.fn().mockReturnValue(true);
-		document.execCommand = execCommandMock as any;
+		document.execCommand = execCommandMock as Document['execCommand'];
 
 		const { trigger } = createFixture({
 			withPredefinedText: true,
@@ -163,7 +163,7 @@ describe('KTClipboard', () => {
 		});
 
 		const execCommandMock = vi.fn().mockReturnValue(false);
-		document.execCommand = execCommandMock as any;
+		document.execCommand = execCommandMock as Document['execCommand'];
 
 		const { trigger } = createFixture({
 			withPredefinedText: true,

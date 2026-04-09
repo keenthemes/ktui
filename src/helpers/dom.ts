@@ -16,21 +16,17 @@ const KTDom = {
 		return dir === 'rtl';
 	},
 
-	isElement(element: HTMLElement): boolean {
-		if (element && element instanceof HTMLElement) {
-			return true;
-		} else {
-			return false;
-		}
+	isElement(element: unknown): element is HTMLElement {
+		return element instanceof HTMLElement;
 	},
 
-	getElement(element: HTMLElement | string): HTMLElement {
+	getElement(element: HTMLElement | string | null): HTMLElement | null {
 		if (this.isElement(element)) {
-			return element as HTMLElement;
+			return element;
 		}
 
-		if (element && (element as string).length > 0) {
-			return document.querySelector(KTUtils.parseSelector(element as string));
+		if (typeof element === 'string' && element.length > 0) {
+			return document.querySelector(KTUtils.parseSelector(element));
 		}
 
 		return null;
@@ -151,7 +147,7 @@ const KTDom = {
 
 	children(element: HTMLElement, selector: string): Array<HTMLElement> {
 		if (!element || !element.childNodes) {
-			return null;
+			return [];
 		}
 
 		const result: Array<HTMLElement> = [];
@@ -170,7 +166,7 @@ const KTDom = {
 		return result;
 	},
 
-	child(element: HTMLElement, selector: string): HTMLElement {
+	child(element: HTMLElement, selector: string): HTMLElement | null {
 		const children = KTDom.children(element, selector);
 
 		return children ? children[0] : null;
@@ -236,7 +232,7 @@ const KTDom = {
 	},
 
 	reflow(element: HTMLElement): void {
-		element.offsetHeight;
+		void element.offsetHeight;
 	},
 
 	insertAfter(element: HTMLElement, referenceNode: HTMLElement) {
@@ -277,7 +273,7 @@ const KTDom = {
 		return 1;
 	},
 
-	isParentOrElementHidden(element: HTMLElement): boolean {
+	isParentOrElementHidden(element: HTMLElement | null): boolean {
 		if (!element) {
 			return false;
 		}
@@ -380,9 +376,10 @@ const KTDom = {
 		for (const key of keys) {
 			let normalizedKey = key.replace(prefix, '');
 			normalizedKey = KTUtils.uncapitalize(normalizedKey);
-			attributes[normalizedKey] = KTUtils.parseDataAttribute(
-				element.dataset[key],
-			);
+			const datasetValue = element.dataset[key];
+			if (typeof datasetValue === 'string') {
+				attributes[normalizedKey] = KTUtils.parseDataAttribute(datasetValue);
+			}
 		}
 
 		return attributes;

@@ -413,7 +413,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		}
 	}
 
-	protected _resetStyles = function () {
+	protected _resetStyles(): void {
 		this._element.style.top = '';
 		this._element.style.bottom = '';
 		this._element.style.insetInlineStart = '';
@@ -425,7 +425,7 @@ export class KTSticky extends KTComponent implements KTStickyInterface {
 		this._element.style.right = '';
 		this._element.style.zIndex = '';
 		this._element.style.position = '';
-	};
+	}
 
 	protected _update(): void {
 		this._timeoutState = null;
