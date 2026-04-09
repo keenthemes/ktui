@@ -70,6 +70,12 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 	}> = [];
 	private _thumbHandlers: Array<{ el: HTMLElement; fn: (e: Event) => void }> =
 		[];
+	private _programmaticScrollPrevIndex: number | null = null;
+	private _programmaticScrollTargetIndex: number | null = null;
+	private _programmaticScrollUserInitiated = false;
+	private _programmaticScrollFallbackTimer: ReturnType<typeof setTimeout> | null =
+		null;
+	private _scrollSyncRaf = 0;
 	private _pauseAutoplay: (() => void) | null = null;
 	private _resumeAutoplay: (() => void) | null = null;
 	private _dragStartX = 0;
@@ -111,7 +117,7 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		this._syncIndexFromScroll(false);
 		this._updateInfo();
 		this._updatePaginationState();
-		this._updateThumbState();
+		this._updateThumbState(false);
 		this._startAutoplay();
 	}
 
@@ -213,21 +219,21 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 	private _bindScrollSync(): void {
 		if (!this._viewport) return;
 
-		let raf = 0;
 		this._onScroll = () => {
-			if (this._programmaticScroll) return;
-			if (raf) cancelAnimationFrame(raf);
-			raf = requestAnimationFrame(() => {
-				raf = 0;
+			if (this._scrollSyncRaf) cancelAnimationFrame(this._scrollSyncRaf);
+			this._scrollSyncRaf = requestAnimationFrame(() => {
+				this._scrollSyncRaf = 0;
 				const prev = this._index;
 				this._syncIndexFromScroll(true);
 				if (prev !== this._index) {
 					this._updateInfo();
 					this._updatePaginationState();
-					this._updateThumbState();
+					this._updateThumbState(false);
 					this._applyAutoHeight();
 					this._observeActiveSlideForHeight();
-					this._dispatchChange(this._index, prev, true);
+					if (!this._programmaticScroll) {
+						this._dispatchChange(this._index, prev, true);
+					}
 				}
 			});
 		};
@@ -237,13 +243,19 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		});
 
 		this._onScrollEnd = () => {
-			if (this._programmaticScroll) return;
+			if (this._programmaticScroll) {
+				const t = this._programmaticScrollTargetIndex;
+				if (t !== null && this._nearestIndex() === t) {
+					queueMicrotask(() => this._completeProgrammaticScroll());
+				}
+				return;
+			}
 			const prev = this._index;
 			this._syncIndexFromScroll(true);
 			if (prev !== this._index) {
 				this._updateInfo();
 				this._updatePaginationState();
-				this._updateThumbState();
+				this._updateThumbState(false);
 				this._applyAutoHeight();
 				this._observeActiveSlideForHeight();
 				this._dispatchChange(this._index, prev, true);
@@ -422,13 +434,61 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 			vp.scrollLeft = left;
 		}
 
-		const reset = () => {
-			this._programmaticScroll = false;
-		};
-		setTimeout(reset, behavior === 'smooth' ? 400 : 0);
-		requestAnimationFrame(() => {
-			if (behavior === 'auto') reset();
+		queueMicrotask(() => {
+			if (
+				this._programmaticScroll &&
+				this._programmaticScrollTargetIndex !== null &&
+				this._nearestIndex() === this._programmaticScrollTargetIndex
+			) {
+				this._completeProgrammaticScroll();
+			}
 		});
+
+		this._clearProgrammaticScrollFallbackTimer();
+		const fallbackMs = behavior === 'smooth' ? 550 : 50;
+		this._programmaticScrollFallbackTimer = setTimeout(() => {
+			this._programmaticScrollFallbackTimer = null;
+			this._completeProgrammaticScroll();
+		}, fallbackMs);
+	}
+
+	private _clearProgrammaticScrollFallbackTimer(): void {
+		if (this._programmaticScrollFallbackTimer !== null) {
+			clearTimeout(this._programmaticScrollFallbackTimer);
+			this._programmaticScrollFallbackTimer = null;
+		}
+	}
+
+	private _completeProgrammaticScroll(): void {
+		if (!this._programmaticScroll) return;
+		const prev = this._programmaticScrollPrevIndex;
+		const targetIdx = this._programmaticScrollTargetIndex;
+		const userInitiated = this._programmaticScrollUserInitiated;
+		if (prev === null || targetIdx === null) {
+			this._programmaticScroll = false;
+			this._programmaticScrollPrevIndex = null;
+			this._programmaticScrollTargetIndex = null;
+			return;
+		}
+
+		if (this._scrollSyncRaf) {
+			cancelAnimationFrame(this._scrollSyncRaf);
+			this._scrollSyncRaf = 0;
+		}
+		this._clearProgrammaticScrollFallbackTimer();
+
+		this._programmaticScroll = false;
+		this._programmaticScrollPrevIndex = null;
+		this._programmaticScrollTargetIndex = null;
+		this._programmaticScrollUserInitiated = false;
+
+		this._index = targetIdx;
+		this._updateInfo();
+		this._updatePaginationState();
+		this._updateThumbState(true);
+		this._applyAutoHeight();
+		this._observeActiveSlideForHeight();
+		this._dispatchChange(targetIdx, prev, userInitiated);
 	}
 
 	public goTo(index: number, userInitiated = false): void {
@@ -441,14 +501,11 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		const prev = this._index;
 		if (target === prev) return;
 
-		this._index = target;
+		this._clearProgrammaticScrollFallbackTimer();
+		this._programmaticScrollPrevIndex = prev;
+		this._programmaticScrollTargetIndex = target;
+		this._programmaticScrollUserInitiated = userInitiated;
 		this._scrollToIndex(target, this._scrollBehavior());
-		this._updateInfo();
-		this._updatePaginationState();
-		this._updateThumbState();
-		this._applyAutoHeight();
-		this._observeActiveSlideForHeight();
-		this._dispatchChange(target, prev, userInitiated);
 	}
 
 	public next(userInitiated = false): void {
@@ -541,7 +598,7 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		});
 	}
 
-	private _updateThumbState(): void {
+	private _updateThumbState(alignStripSmooth: boolean): void {
 		this._thumbHandlers.forEach(({ el }, i) => {
 			const active = i === this._index;
 			if (active) {
@@ -551,6 +608,65 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 			}
 			el.toggleAttribute('data-kt-carousel-thumbnail-active', active);
 		});
+		this._scrollActiveThumbnailsIntoView(
+			alignStripSmooth ? this._scrollBehavior() : 'auto',
+		);
+	}
+
+	/**
+	 * Keep the active thumb visible inside each thumbnail strip by scrolling
+	 * that container only (no `scrollIntoView`, which can scroll ancestor pages).
+	 */
+	private _scrollActiveThumbnailsIntoView(behavior: ScrollBehavior): void {
+		if (!this._element) return;
+		const pad = 6;
+		this._element
+			.querySelectorAll<HTMLElement>(SELECTOR_THUMBS)
+			.forEach((strip) => {
+				const items = strip.querySelectorAll<HTMLElement>(SELECTOR_THUMB);
+				const thumb = items[this._index];
+				if (!thumb) return;
+				this._alignElementInScrollContainer(thumb, strip, pad, behavior);
+			});
+	}
+
+	private _alignElementInScrollContainer(
+		el: HTMLElement,
+		container: HTMLElement,
+		pad: number,
+		behavior: ScrollBehavior,
+	): void {
+		const c = container.getBoundingClientRect();
+		const r = el.getBoundingClientRect();
+		let left = container.scrollLeft;
+		let top = container.scrollTop;
+
+		if (container.scrollWidth > container.clientWidth + 1) {
+			if (r.left < c.left + pad) {
+				left += r.left - c.left - pad;
+			} else if (r.right > c.right - pad) {
+				left += r.right - c.right + pad;
+			}
+			const maxL = Math.max(0, container.scrollWidth - container.clientWidth);
+			left = Math.max(0, Math.min(left, maxL));
+		}
+
+		if (container.scrollHeight > container.clientHeight + 1) {
+			if (r.top < c.top + pad) {
+				top += r.top - c.top - pad;
+			} else if (r.bottom > c.bottom - pad) {
+				top += r.bottom - c.bottom + pad;
+			}
+			const maxT = Math.max(0, container.scrollHeight - container.clientHeight);
+			top = Math.max(0, Math.min(top, maxT));
+		}
+
+		try {
+			container.scrollTo({ left, top, behavior });
+		} catch {
+			container.scrollLeft = left;
+			container.scrollTop = top;
+		}
 	}
 
 	private _startAutoplay(): void {
@@ -576,6 +692,14 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 
 	public override dispose(): void {
 		this._stopAutoplay();
+		this._clearProgrammaticScrollFallbackTimer();
+		if (this._scrollSyncRaf) {
+			cancelAnimationFrame(this._scrollSyncRaf);
+			this._scrollSyncRaf = 0;
+		}
+		this._programmaticScroll = false;
+		this._programmaticScrollPrevIndex = null;
+		this._programmaticScrollTargetIndex = null;
 
 		if (this._resizeObserver) {
 			this._resizeObserver.disconnect();

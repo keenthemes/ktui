@@ -130,51 +130,58 @@ describe('KTCarousel', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('goTo sets index immediately', () => {
+	it('goTo sets index after navigation settles', async () => {
 		const { root, restoreScrollIntoView } = buildCarouselHtml();
 		try {
 			const c = new KTCarousel(root);
 			expect(c.getSlideCount()).toBe(3);
 			c.goTo(2);
+			await Promise.resolve();
 			expect(c.getIndex()).toBe(2);
 		} finally {
 			restoreScrollIntoView();
 		}
 	});
 
-	it('next advances and prev goes back', () => {
+	it('next advances and prev goes back', async () => {
 		const { root, restoreScrollIntoView } = buildCarouselHtml();
 		try {
 			const c = new KTCarousel(root);
 			c.next(true);
+			await Promise.resolve();
 			expect(c.getIndex()).toBe(1);
 			c.prev(true);
+			await Promise.resolve();
 			expect(c.getIndex()).toBe(0);
 		} finally {
 			restoreScrollIntoView();
 		}
 	});
 
-	it('next at last without infinite does nothing', () => {
+	it('next at last without infinite does nothing', async () => {
 		const { root, restoreScrollIntoView } = buildCarouselHtml();
 		try {
 			const c = new KTCarousel(root);
 			c.goTo(2);
+			await Promise.resolve();
 			c.next(true);
+			await Promise.resolve();
 			expect(c.getIndex()).toBe(2);
 		} finally {
 			restoreScrollIntoView();
 		}
 	});
 
-	it('next at last with infinite wraps to 0', () => {
+	it('next at last with infinite wraps to 0', async () => {
 		const { root, restoreScrollIntoView } = buildCarouselHtml({
 			infinite: true,
 		});
 		try {
 			const c = new KTCarousel(root);
 			c.goTo(2);
+			await Promise.resolve();
 			c.next(true);
+			await Promise.resolve();
 			expect(c.getIndex()).toBe(0);
 		} finally {
 			restoreScrollIntoView();
@@ -204,13 +211,14 @@ describe('KTCarousel', () => {
 		}
 	});
 
-	it('dispatches change event on next', () => {
+	it('dispatches change event on next', async () => {
 		const { root, restoreScrollIntoView } = buildCarouselHtml();
 		try {
 			const c = new KTCarousel(root);
 			const spy = vi.fn();
 			root.addEventListener('kt.carousel.change', spy);
 			c.next(true);
+			await Promise.resolve();
 			expect(spy).toHaveBeenCalled();
 		} finally {
 			restoreScrollIntoView();
