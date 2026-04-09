@@ -161,7 +161,7 @@ describe('KTRepeater', () => {
 
 	describe('limit', () => {
 		it('does not add more clones when at limit', () => {
-			const { trigger } = createFixture({ limit: 2 });
+			const { trigger, wrapper } = createFixture({ limit: 2 });
 			const instance = new KTRepeater(trigger);
 			expect(wrapper.children.length).toBe(1);
 			instance.add();
@@ -201,7 +201,7 @@ describe('KTRepeater', () => {
 		});
 
 		it('allows unlimited clones when limit is 0 or omitted', () => {
-			const { trigger } = createFixture();
+			const { trigger, wrapper } = createFixture();
 			trigger.removeAttribute('data-kt-repeater-limit');
 			const instance = new KTRepeater(trigger);
 			for (let i = 0; i < 5; i++) instance.add();
