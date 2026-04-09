@@ -50,7 +50,7 @@ const KTUtils = {
 		}
 	},
 
-	parseJson(value: string): JSON {
+	parseJson(value: string): unknown | null {
 		return value && value.length > 0
 			? JSON.parse(decodeURIComponent(value))
 			: null;
@@ -134,6 +134,9 @@ const KTUtils = {
 	},
 
 	stringToObject: <T>(value: KTOptionType): T | null => {
+		if (value === null) {
+			return null;
+		}
 		try {
 			const parsed = JSON.parse(value.toString() as string);
 			if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {

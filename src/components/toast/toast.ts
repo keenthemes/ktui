@@ -261,7 +261,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		// Enforce maxToasts
 		if (
 			container.children.length >=
-			(this.globalConfig.maxToasts || DEFAULT_CONFIG.maxToasts)
+			(this.globalConfig.maxToasts ?? DEFAULT_CONFIG.maxToasts ?? 5)
 		) {
 			const firstToast = container.firstElementChild;
 			if (firstToast) {
@@ -297,7 +297,10 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		};
 
 		const toast = document.createElement('div');
-		toast.className = `kt-toast kt-alert ${variantMap[options.variant] || ''} ${appearanceMap[options.appearance] || ''} ${sizeMap[options.size] || ''} ${options.className || ''} ${classNames.toast || ''}`;
+		const variantClass = variantMap[options.variant ?? 'info'] || '';
+		const appearanceClass = appearanceMap[options.appearance ?? 'solid'] || '';
+		const sizeClass = sizeMap[options.size ?? 'md'] || '';
+		toast.className = `kt-toast kt-alert ${variantClass} ${appearanceClass} ${sizeClass} ${options.className || ''} ${classNames.toast || ''}`;
 		// ARIA support
 		toast.setAttribute('role', options.role || 'status');
 		toast.setAttribute('aria-live', 'polite');
@@ -393,10 +396,11 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		toast.classList.add(dirClass);
 
 		// Enforce maxToasts: remove oldest if needed
-		const maxToasts =
+		const maxToasts: number =
 			options.maxToasts ??
 			this.globalConfig.maxToasts ??
-			DEFAULT_CONFIG.maxToasts;
+			DEFAULT_CONFIG.maxToasts ??
+			5;
 		const currentToasts = Array.from(container.children) as HTMLElement[];
 		if (currentToasts.length >= maxToasts && currentToasts.length > 0) {
 			const oldestToast = currentToasts[currentToasts.length - 1];
@@ -451,7 +455,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 
 		// Auto-dismiss
 		let timeoutId: number | undefined = undefined;
-		let remaining = duration;
+		let remaining = duration ?? 0;
 		let startTime: number | undefined;
 		let paused = false;
 		let progressEl: HTMLElement | null = null;
