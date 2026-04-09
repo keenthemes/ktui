@@ -25,12 +25,10 @@ const KTEventHandler = {
 
 		const eventId = KTUtils.geUID('event');
 
-		KTDelegatedEventHandlers[eventId] = (
-			event: Event & { target: HTMLElement },
-		) => {
+		KTDelegatedEventHandlers[eventId] = (event: Event) => {
 			// Fix: Check selector dynamically instead of pre-computing targets
 			// This allows event delegation to work with dynamically added elements
-			let target = event.target as HTMLElement;
+			let target = event.target as HTMLElement | null;
 
 			while (target && target !== element) {
 				// Check if current target matches the selector

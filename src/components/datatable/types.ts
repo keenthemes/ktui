@@ -3,11 +3,13 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
+import { KTOptionType } from '../../types';
+
 // Define the sort order and filter criteria types
 export type KTDataTableSortOrderInterface = 'asc' | 'desc' | '';
 
 export interface KTDataTableDataInterface {
-	[key: string]: string | number | boolean | object;
+	[key: string]: KTOptionType;
 }
 
 export interface KTDataTableAttributeInterface {

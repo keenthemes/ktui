@@ -18,7 +18,7 @@ export class KTSelectSearch {
 	private _config: KTSelectConfigInterface;
 
 	// Public handler for search input (made public for event binding)
-	public handleSearchInput: (...args: any[]) => void;
+	public handleSearchInput: (event: Event) => void;
 
 	constructor(select: KTSelect) {
 		this._select = select;
@@ -223,25 +223,26 @@ export class KTSelectSearch {
 	/**
 	 * Handles keydown events on the search input for navigation and actions.
 	 */
-	private _handleSearchKeyDown(event: KeyboardEvent): void {
-		const key = event.key;
+	private _handleSearchKeyDown(event: Event): void {
+		const keyEvent = event as KeyboardEvent;
+		const key = keyEvent.key;
 
 		switch (key) {
 			case ' ': // Spacebar
 				// Do nothing, allow space to be typed into the input
 				// Stop propagation to prevent parent handlers from processing this event
-				event.stopPropagation();
+				keyEvent.stopPropagation();
 				break;
 			case 'ArrowDown':
-				event.preventDefault();
+				keyEvent.preventDefault();
 				this._focusManager.focusNext();
 				break;
 			case 'ArrowUp':
-				event.preventDefault();
+				keyEvent.preventDefault();
 				this._focusManager.focusPrevious();
 				break;
 			case 'Enter':
-				event.preventDefault();
+				keyEvent.preventDefault();
 				// Use currently focused option (from arrow keys); only fall back to first if none focused
 				const optionToSelect =
 					this._focusManager.getFocusedOption() ??
@@ -273,7 +274,7 @@ export class KTSelectSearch {
 				}
 				break;
 			case 'Escape':
-				event.preventDefault();
+				keyEvent.preventDefault();
 				this._searchInput.value = '';
 				this.clearSearch();
 				this._resetAllOptions();

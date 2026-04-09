@@ -127,7 +127,7 @@ export class KTSelectDropdown extends KTComponent {
 	/**
 	 * Handle clicks outside the dropdown
 	 */
-	private _handleOutsideClick(event: MouseEvent): void {
+	private _handleOutsideClick(event: Event): void {
 		if (!this._isOpen) return;
 
 		const target = event.target as HTMLElement;

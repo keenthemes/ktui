@@ -13,6 +13,7 @@ import {
 	KTDataTableColumnFilterInterface,
 	KTDataTableAttributeInterface,
 } from './types';
+import { KTOptionType } from '../../types';
 import KTUtils from '../../helpers/utils';
 import KTComponents from '../../index';
 import KTData from '../../helpers/data';
@@ -284,22 +285,20 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 							return false;
 						}
 
-						return Object.values(item).some(
-							(value: string | number | boolean) => {
-								if (
-									typeof value !== 'string' &&
-									typeof value !== 'number' &&
-									typeof value !== 'boolean'
-								) {
-									return false;
-								}
+						return Object.values(item).some((value: KTOptionType) => {
+							if (
+								typeof value !== 'string' &&
+								typeof value !== 'number' &&
+								typeof value !== 'boolean'
+							) {
+								return false;
+							}
 
-								const valueText = String(value)
-									.replace(/<[^>]*>|&nbsp;/g, '')
-									.toLowerCase();
-								return valueText.includes(search.toLowerCase());
-							},
-						);
+							const valueText = String(value)
+								.replace(/<[^>]*>|&nbsp;/g, '')
+								.toLowerCase();
+							return valueText.includes(search.toLowerCase());
+						});
 					});
 				},
 			},
@@ -590,10 +589,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		let _temp = (this._data = [...originalData] as T[]);
 
 		if (search) {
+			const searchTerm = typeof search === 'string' ? search : '';
 			_temp = this._data = this._config.search.callback.call(
 				this,
 				this._data,
-				search,
+				searchTerm,
 			) as T[];
 		}
 
