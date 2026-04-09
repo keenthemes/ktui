@@ -32,6 +32,7 @@ import { KTRating } from './components/rating';
 import { KTRepeater } from './components/repeater';
 import { KTClipboard } from './components/clipboard';
 import { KTRangeSlider } from './components/range-slider';
+import { KTCarousel } from './components/carousel';
 
 export { KTDropdown } from './components/dropdown';
 export { KTModal } from './components/modal';
@@ -58,6 +59,7 @@ export { KTRating } from './components/rating';
 export { KTRepeater } from './components/repeater';
 export { KTClipboard } from './components/clipboard';
 export { KTRangeSlider } from './components/range-slider';
+export { KTCarousel } from './components/carousel';
 
 export type {
 	KTAccordionConfigInterface,
@@ -122,6 +124,11 @@ export type {
 	KTRangeSliderEventPayloadInterface,
 	KTRangeSliderInterface,
 } from './components/range-slider';
+export type {
+	KTCarouselConfigInterface,
+	KTCarouselChangePayloadInterface,
+	KTCarouselInterface,
+} from './components/carousel';
 export type {
 	KTScrollableConfigInterface,
 	KTScrollableInterface,
@@ -195,6 +202,7 @@ const KTComponents = {
 		KTRepeater.init();
 		KTClipboard.init();
 		KTRangeSlider.init();
+		KTCarousel.init();
 	},
 };
 
@@ -229,6 +237,7 @@ declare global {
 		KTRepeater: typeof KTRepeater;
 		KTClipboard: typeof KTClipboard;
 		KTRangeSlider: typeof KTRangeSlider;
+		KTCarousel: typeof KTCarousel;
 		KTComponents: typeof KTComponents;
 	}
 }
