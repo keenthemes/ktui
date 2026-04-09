@@ -16,21 +16,17 @@ const KTDom = {
 		return dir === 'rtl';
 	},
 
-	isElement(element: HTMLElement): boolean {
-		if (element && element instanceof HTMLElement) {
-			return true;
-		} else {
-			return false;
-		}
+	isElement(element: unknown): element is HTMLElement {
+		return element instanceof HTMLElement;
 	},
 
-	getElement(element: HTMLElement | string): HTMLElement {
+	getElement(element: HTMLElement | string): HTMLElement | null {
 		if (this.isElement(element)) {
-			return element as HTMLElement;
+			return element;
 		}
 
-		if (element && (element as string).length > 0) {
-			return document.querySelector(KTUtils.parseSelector(element as string));
+		if (typeof element === 'string' && element.length > 0) {
+			return document.querySelector(KTUtils.parseSelector(element));
 		}
 
 		return null;
