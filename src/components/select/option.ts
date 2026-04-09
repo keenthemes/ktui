@@ -13,6 +13,10 @@ export class KTSelectOption extends KTComponent {
 	protected override readonly _config: KTSelectConfigInterface; // Holds option-specific data from data-kt-*
 	private _globalConfig: KTSelectConfigInterface; // Main select's config
 
+	private _elementWithInstance(): HTMLElement & { instance?: KTSelectOption } {
+		return this._element as HTMLElement & { instance?: KTSelectOption };
+	}
+
 	constructor(element: HTMLElement, config?: KTSelectConfigInterface) {
 		super();
 
@@ -22,7 +26,13 @@ export class KTSelectOption extends KTComponent {
 		this._buildConfig();
 
 		// Clean the config
-		this._config = (this._config as any)[''] || {};
+		const configRecord = this._config as unknown as Record<
+			string,
+			KTSelectConfigInterface
+		>;
+		this._config =
+			(configRecord[''] as KTSelectConfigInterface) ||
+			({} as KTSelectConfigInterface);
 
 		// Add the option config to the global config
 		// Ensure optionsConfig is initialized
@@ -42,7 +52,7 @@ export class KTSelectOption extends KTComponent {
 
 		// Don't store in KTData to avoid Singleton pattern issues
 		// Each option should be a unique instance
-		(element as any).instance = this;
+		this._elementWithInstance().instance = this;
 	}
 
 	public get id(): string {
@@ -61,7 +71,7 @@ export class KTSelectOption extends KTComponent {
 	 * Gathers all necessary data for rendering this option,
 	 * including standard HTML attributes and custom data-kt-* attributes.
 	 */
-	public getOptionDataForTemplate(): Record<string, any> {
+	public getOptionDataForTemplate(): Record<string, unknown> {
 		const el = this.getHTMLOptionElement();
 		const text = el.textContent || '';
 		return {

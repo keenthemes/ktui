@@ -140,7 +140,7 @@ const KTUtils = {
 				return parsed as T;
 			}
 			return null;
-		} catch (error) {
+		} catch {
 			return null;
 		}
 	},

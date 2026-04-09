@@ -112,7 +112,7 @@ export interface KTSelectConfigInterface {
 	clearAllText?: string;
 	enableSelectAll?: boolean;
 	showSelectedCount?: boolean;
-	renderSelected?: (selectedOptions: any[]) => string; // Assuming any[] for now, adjust based on your option data structure
+	renderSelected?: (selectedOptions: string[]) => string;
 
 	// Accessibility & Usability
 	label?: string;
@@ -210,7 +210,7 @@ export class KTSelectState {
 		};
 	}
 
-	public setItems(items?: any[], query?: string): Promise<void> {
+	public setItems(items?: KTSelectOption[], query?: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			if (items) {
 				this._config.items = items;

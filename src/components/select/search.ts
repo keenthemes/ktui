@@ -205,7 +205,7 @@ export class KTSelectSearch {
 				if (attempt < maxAttempts) {
 					this._focusSearchInputWithRetry(attempt + 1);
 				}
-			} catch (error) {
+			} catch {
 				// Focus failed with error, retry if we haven't exceeded max attempts
 				if (attempt < maxAttempts) {
 					this._focusSearchInputWithRetry(attempt + 1);
@@ -241,7 +241,7 @@ export class KTSelectSearch {
 				keyEvent.preventDefault();
 				this._focusManager.focusPrevious();
 				break;
-			case 'Enter':
+			case 'Enter': {
 				keyEvent.preventDefault();
 				// Use currently focused option (from arrow keys); only fall back to first if none focused
 				const optionToSelect =
@@ -273,6 +273,7 @@ export class KTSelectSearch {
 					}
 				}
 				break;
+			}
 			case 'Escape':
 				keyEvent.preventDefault();
 				this._searchInput.value = '';
@@ -378,12 +379,8 @@ export class KTSelectSearch {
 		// Restore original content before filtering, so highlighting is applied fresh.
 		this._restoreOptionContentsBeforeFilter();
 
-		const visibleCount = filterOptions(
-			options,
-			query,
-			config,
-			dropdownElement,
-			(count) => this._handleNoResults(count),
+		filterOptions(options, query, config, dropdownElement, (count) =>
+			this._handleNoResults(count),
 		);
 
 		this._select.updateSelectAllButtonState();

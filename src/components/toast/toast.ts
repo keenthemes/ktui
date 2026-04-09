@@ -439,7 +439,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 					o.stop();
 					ctx.close();
 				}, 120);
-			} catch (e) {
+			} catch {
 				/* ignore */
 			}
 		}
@@ -502,7 +502,7 @@ export class KTToast extends KTComponent implements KTToastInterface {
 						if (progressEl) {
 							progressEl.style.transition = 'transform 0ms';
 							progressEl.style.transform = `scaleX(${progressPausedAt})`;
-							progressEl.offsetHeight; // force reflow
+							void progressEl.offsetHeight; // force reflow
 							progressEl.style.transition = `transform ${remaining}ms linear`;
 							progressEl.style.transform = 'scaleX(0)';
 						}

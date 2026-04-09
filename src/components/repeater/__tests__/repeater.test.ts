@@ -2,7 +2,7 @@
  * Tests for KTRepeater component
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { KTRepeater } from '../repeater';
 
 function createFixture(options?: {
@@ -161,7 +161,7 @@ describe('KTRepeater', () => {
 
 	describe('limit', () => {
 		it('does not add more clones when at limit', () => {
-			const { wrapper, trigger } = createFixture({ limit: 2 });
+			const { trigger } = createFixture({ limit: 2 });
 			const instance = new KTRepeater(trigger);
 			expect(wrapper.children.length).toBe(1);
 			instance.add();
@@ -174,7 +174,7 @@ describe('KTRepeater', () => {
 		});
 
 		it('disables trigger when at limit', () => {
-			const { wrapper, trigger } = createFixture({ limit: 2 });
+			const { trigger } = createFixture({ limit: 2 });
 			const instance = new KTRepeater(trigger);
 			expect(trigger.hasAttribute('disabled')).toBe(false);
 			instance.add();
@@ -201,7 +201,7 @@ describe('KTRepeater', () => {
 		});
 
 		it('allows unlimited clones when limit is 0 or omitted', () => {
-			const { wrapper, trigger } = createFixture();
+			const { trigger } = createFixture();
 			trigger.removeAttribute('data-kt-repeater-limit');
 			const instance = new KTRepeater(trigger);
 			for (let i = 0; i < 5; i++) instance.add();
@@ -279,7 +279,7 @@ describe('KTRepeater', () => {
 		});
 
 		it('createInstances initializes all data-kt-repeater elements', () => {
-			const { container, wrapper, trigger } = createFixture();
+			const { container, trigger } = createFixture();
 			const trigger2 = document.createElement('button');
 			trigger2.setAttribute('data-kt-repeater', '');
 			trigger2.setAttribute('data-kt-repeater-target', '#repeater-target');

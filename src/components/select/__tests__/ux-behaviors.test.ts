@@ -34,7 +34,7 @@ describe('KTSelect UX Behaviors', () => {
 	/**
 	 * Helper to wait for KTSelect to fully initialize
 	 */
-	const waitForInit = async (select: KTSelect): Promise<void> => {
+	const waitForInit = async (_select: KTSelect): Promise<void> => {
 		// Wait for async initialization - KTSelect uses promises for setup
 		await waitFor(200);
 		// Wait for next tick to ensure all modules are initialized
@@ -52,7 +52,8 @@ describe('KTSelect UX Behaviors', () => {
 		// Clean up all KTSelect instances
 		const selects = document.querySelectorAll('.kt-select');
 		selects.forEach((select) => {
-			const instance = (select as any).instance;
+			const instance = (select as HTMLElement & { instance?: KTSelect })
+				.instance;
 			if (instance && typeof instance.destroy === 'function') {
 				instance.destroy();
 			}
@@ -60,7 +61,7 @@ describe('KTSelect UX Behaviors', () => {
 
 		// Clear document body
 		document.body.innerHTML = '';
-		container = null as any;
+		container = null as unknown as HTMLElement;
 
 		// Clear all event listeners
 		vi.clearAllMocks();

@@ -29,7 +29,7 @@ export class KTSelect extends KTComponent {
 	// Core properties
 	protected override readonly _name: string = 'select';
 	protected override readonly _dataOptionPrefix: string = 'kt-'; // Use 'kt-' prefix to support data-kt-select-option attributes
-	protected override readonly _config: KTSelectConfigInterface;
+	protected override _config: KTSelectConfigInterface;
 	protected override _defaultConfig: KTSelectConfigInterface;
 
 	// Static global configuration
@@ -81,7 +81,7 @@ export class KTSelect extends KTComponent {
 		this._state = new KTSelectState(this._config);
 		this._config = this._state.getConfig();
 
-		(element as any).instance = this;
+		(this._element as HTMLElement & { instance?: KTSelect }).instance = this;
 
 		// Initialize event manager
 		this._eventManager = new EventManager();
@@ -125,8 +125,7 @@ export class KTSelect extends KTComponent {
 	protected override _buildConfig(config: object = {}): void {
 		if (!this._element) return;
 
-		// Cast to writable to allow assignment (config is readonly but needs initialization)
-		(this._config as any) = {
+		this._config = {
 			...this._defaultConfig,
 			...KTSelect.globalConfig,
 			...this._getGlobalConfig(),
@@ -1007,13 +1006,20 @@ export class KTSelect extends KTComponent {
 	/**
 	 * Extract nested property value from object using dot notation
 	 */
-	private _getValueByKey(obj: any, key: string): any {
+	private _getValueByKey(obj: unknown, key: string): unknown {
 		if (!key || !obj) return null;
 
 		// Use reduce to walk through the object by splitting the key on dots
-		const result = key
-			.split('.')
-			.reduce((o, k) => (o && o[k] !== undefined ? o[k] : null), obj);
+		const result = key.split('.').reduce((o: unknown, k: string) => {
+			if (
+				o &&
+				typeof o === 'object' &&
+				(o as Record<string, unknown>)[k] !== undefined
+			) {
+				return (o as Record<string, unknown>)[k];
+			}
+			return null;
+		}, obj);
 
 		return result;
 	}
@@ -1507,19 +1513,6 @@ export class KTSelect extends KTComponent {
 
 		if (focusedOption) {
 			const selectedValue = focusedOption.dataset.value;
-
-			// Extract just the title text, not including description
-			let selectedText = '';
-			const titleElement = focusedOption.querySelector(
-				'[data-kt-option-title]',
-			);
-			if (titleElement) {
-				// If it has a structured content with title element
-				selectedText = titleElement.textContent?.trim() || '';
-			} else {
-				// Fallback to the whole text content
-				selectedText = focusedOption.textContent?.trim() || '';
-			}
 
 			// First trigger the selection to ensure state is updated properly
 			if (selectedValue) {
@@ -2464,7 +2457,6 @@ export class KTSelect extends KTComponent {
 		}
 
 		const isOpen = this._dropdownIsOpen;
-		const config = this._config;
 		const focusManager = this._focusManager;
 		const buffer = this._typeToSearchBuffer;
 
@@ -2588,7 +2580,7 @@ export class KTSelect extends KTComponent {
 	}
 
 	public renderDisplayTemplateForSelected(selectedValues: string[]): string {
-		const optionsConfig = (this._config.optionsConfig as any) || {};
+		const optionsConfig = this._config.optionsConfig || {};
 		const displaySeparator = this._config.displaySeparator || ', ';
 		const contentArray = Array.from(
 			new Set(

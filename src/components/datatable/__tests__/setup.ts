@@ -46,7 +46,7 @@ Object.defineProperty(window, 'matchMedia', {
 		matches: false,
 		media: query,
 		onchange: null as
-			| ((this: MediaQueryList, ev: MediaQueryListEvent) => any)
+			| ((this: MediaQueryList, ev: MediaQueryListEvent) => unknown)
 			| null,
 		addListener: () => {}, // deprecated
 		removeListener: () => {}, // deprecated

@@ -667,7 +667,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _tableConfigInvalidate(): boolean {
 		// Remove _data and _state from config
-		const { _data, _state, ...restConfig } = this._config;
+		const { _state, ...restConfig } = this._config;
 		const checksum: string = KTUtils.checksum(JSON.stringify(restConfig));
 		if (_state._configChecksum !== checksum) {
 			this._config._state._configChecksum = checksum;

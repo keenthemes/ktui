@@ -236,7 +236,7 @@ const KTDom = {
 	},
 
 	reflow(element: HTMLElement): void {
-		element.offsetHeight;
+		void element.offsetHeight;
 	},
 
 	insertAfter(element: HTMLElement, referenceNode: HTMLElement) {

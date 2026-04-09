@@ -94,7 +94,9 @@ export interface KTToastConfigInterface {
 	progress?: boolean;
 }
 
-export interface KTToastInterface {}
+export interface KTToastInterface {
+	dispose(): void;
+}
 
 export interface KTToastOptions {
 	/** Custom content for the toast. HTMLElement, function returning HTMLElement, or string (DOM id). If set, replaces all default markup. */

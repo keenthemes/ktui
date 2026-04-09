@@ -5,7 +5,7 @@
 
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
-import { filterOptions, renderTemplateString, stringToElement } from './utils';
+import { filterOptions, FocusManager } from './utils';
 import { defaultTemplates } from './templates';
 
 /**
@@ -102,7 +102,7 @@ export class KTSelectCombobox {
 
 		this._toggleClearButtonVisibility(query);
 
-		if (!(this._select as any).isDropdownOpen()) {
+		if (!this._select.isDropdownOpen()) {
 			// Use public getter
 			this._select.openDropdown();
 		}
@@ -170,7 +170,10 @@ export class KTSelectCombobox {
 		// or the main FocusManager should adjust focus if needed.
 		// For combobox, this filtering is the primary search mechanism.
 		// We might need to tell select's focus manager to focus first option.
-		(this._select as any)._focusManager.focusFirst(); // Consider if this is always right
+		const focusManager = (
+			this._select as unknown as { _focusManager?: FocusManager }
+		)._focusManager;
+		focusManager?.focusFirst();
 	}
 
 	/**

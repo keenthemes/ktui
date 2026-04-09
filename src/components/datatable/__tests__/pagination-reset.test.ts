@@ -13,7 +13,7 @@ import { KTDataTableColumnFilterInterface } from '../types';
 describe('KTDataTable - Pagination Reset', () => {
 	let container: HTMLElement;
 	let tableElement: HTMLTableElement;
-	let datatable: KTDataTable<any>;
+	let datatable: KTDataTable<Record<string, unknown>>;
 
 	/**
 	 * Helper: Create a mock datatable with sample data
@@ -177,13 +177,16 @@ describe('KTDataTable - Pagination Reset', () => {
 				// Provide custom search callback that handles objects
 				search: {
 					delay: 500,
-					callback: (data: any[], search: string | object) => {
+					callback: (
+						data: Record<string, unknown>[],
+						search: string | object,
+					) => {
 						if (!search) return data;
 						// For object search, just return all data (simplified for test)
 						if (typeof search === 'object') return data;
 						// String search
-						return data.filter((item: any) =>
-							Object.values(item).some((value: any) =>
+						return data.filter((item: Record<string, unknown>) =>
+							Object.values(item).some((value: unknown) =>
 								String(value)
 									.toLowerCase()
 									.includes((search as string).toLowerCase()),

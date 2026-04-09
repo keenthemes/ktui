@@ -22,6 +22,10 @@ export class KTSelectRemote {
 	private _lastQuery: string = '';
 	private _element: HTMLElement | null = null;
 
+	private _isRecord(value: unknown): value is Record<string, unknown> {
+		return typeof value === 'object' && value !== null;
+	}
+
 	/**
 	 * Constructor
 	 * @param config KTSelect configuration
@@ -54,13 +58,13 @@ export class KTSelectRemote {
 		this._dispatchEvent('remoteSearchStart');
 
 		return fetch(url)
-			.then((response: Response): Promise<any> => {
+			.then((response: Response): Promise<unknown> => {
 				if (!response.ok) {
 					throw new Error(`HTTP error! Status: ${response.status}`);
 				}
 				return response.json();
 			})
-			.then((data: any): KTSelectOptionData[] => {
+			.then((data: unknown): KTSelectOptionData[] => {
 				// Process the data
 				return this._processData(data);
 			})
@@ -144,25 +148,30 @@ export class KTSelectRemote {
 	 * @param data API response data
 	 * @returns Array of KTSelectOptionData
 	 */
-	private _processData(data: any): KTSelectOptionData[] {
+	private _processData(data: unknown): KTSelectOptionData[] {
 		try {
-			let processedData = data;
+			let processedData: unknown = data;
+			const dataRecord = this._isRecord(data) ? data : null;
 
 			// Extract data from the API property if specified
-			if (this._config.apiDataProperty && data[this._config.apiDataProperty]) {
+			if (
+				this._config.apiDataProperty &&
+				dataRecord &&
+				this._config.apiDataProperty in dataRecord
+			) {
 				// If pagination metadata is available, extract it
 				if (this._config.pagination) {
-					if (data.total_pages) {
-						this._totalPages = data.total_pages;
+					if (typeof dataRecord.total_pages === 'number') {
+						this._totalPages = dataRecord.total_pages;
 					}
-					if (data.total) {
+					if (typeof dataRecord.total === 'number') {
 						this._totalPages = Math.ceil(
-							data.total / (this._config.paginationLimit || 10),
+							dataRecord.total / (this._config.paginationLimit || 10),
 						);
 					}
 				}
 
-				processedData = data[this._config.apiDataProperty];
+				processedData = dataRecord[this._config.apiDataProperty];
 			}
 
 			// Ensure data is an array
@@ -172,46 +181,48 @@ export class KTSelectRemote {
 			}
 
 			// Map data to KTSelectOptionData format
-			const mappedData = processedData.map((item: any): KTSelectOptionData => {
-				const mappedItem = this._mapItemToOption(item);
+			const mappedData = processedData.map(
+				(item: unknown): KTSelectOptionData => {
+					const mappedItem = this._mapItemToOption(item);
 
-				// Add logging to trace data path extraction
-				if (
-					this._config.dataValueField &&
-					this._config.dataValueField.includes('.')
-				) {
-					// For nested paths, verify extraction worked
-					const parts = this._config.dataValueField.split('.');
-					let nestedValue = item;
+					// Add logging to trace data path extraction
+					if (
+						this._config.dataValueField &&
+						this._config.dataValueField.includes('.')
+					) {
+						// For nested paths, verify extraction worked
+						const parts = this._config.dataValueField.split('.');
+						let nestedValue: unknown = item;
 
-					// Try to navigate to the value manually for verification
-					for (const part of parts) {
-						if (
-							nestedValue &&
-							typeof nestedValue === 'object' &&
-							part in nestedValue
-						) {
-							nestedValue = nestedValue[part];
-						} else {
-							nestedValue = null;
-							break;
+						// Try to navigate to the value manually for verification
+						for (const part of parts) {
+							if (
+								nestedValue &&
+								typeof nestedValue === 'object' &&
+								part in nestedValue
+							) {
+								nestedValue = (nestedValue as Record<string, unknown>)[part];
+							} else {
+								nestedValue = null;
+								break;
+							}
+						}
+
+						// If we found a value, verify it matches what was extracted
+						if (nestedValue !== null && nestedValue !== undefined) {
+							const expectedValue = String(nestedValue);
+
+							if (mappedItem.id !== expectedValue && expectedValue) {
+								console.warn(
+									`Value mismatch! Path: ${this._config.dataValueField}, Expected: ${expectedValue}, Got: ${mappedItem.id}`,
+								);
+							}
 						}
 					}
 
-					// If we found a value, verify it matches what was extracted
-					if (nestedValue !== null && nestedValue !== undefined) {
-						const expectedValue = String(nestedValue);
-
-						if (mappedItem.id !== expectedValue && expectedValue) {
-							console.warn(
-								`Value mismatch! Path: ${this._config.dataValueField}, Expected: ${expectedValue}, Got: ${mappedItem.id}`,
-							);
-						}
-					}
-				}
-
-				return mappedItem;
-			});
+					return mappedItem;
+				},
+			);
 
 			return mappedData;
 		} catch (error) {
@@ -227,19 +238,19 @@ export class KTSelectRemote {
 	 * @param item Data item from API
 	 * @returns KTSelectOptionData object
 	 */
-	private _mapItemToOption(item: any): KTSelectOptionData {
+	private _mapItemToOption(item: unknown): KTSelectOptionData {
 		// Get the field mapping from config with fallbacks for common field names
 		const valueField = this._config.dataValueField || 'id';
 		const labelField = this._config.dataFieldText || 'title';
 
 		// Extract values using improved getValue function
-		const getValue = (obj: any, path: string): any => {
+		const getValue = (obj: unknown, path: string): unknown => {
 			if (!path || !obj) return null;
 
 			try {
 				// Handle dot notation to access nested properties
 				const parts = path.split('.');
-				let result = obj;
+				let result: unknown = obj;
 
 				for (const part of parts) {
 					if (
@@ -249,7 +260,7 @@ export class KTSelectRemote {
 					) {
 						return null;
 					}
-					result = result[part];
+					result = (result as Record<string, unknown>)[part];
 				}
 
 				return result;
@@ -261,12 +272,13 @@ export class KTSelectRemote {
 
 		// Get ID and ensure it's a string
 		let id = getValue(item, valueField);
+		const itemRecord = this._isRecord(item) ? item : {};
 		if (id === null || id === undefined) {
 			// Try common fallback fields for ID
 			const fallbackFields = ['id', 'value', 'key', 'pk'];
 			for (const field of fallbackFields) {
-				if (item[field] !== null && item[field] !== undefined) {
-					id = String(item[field]);
+				if (itemRecord[field] !== null && itemRecord[field] !== undefined) {
+					id = String(itemRecord[field]);
 					break;
 				}
 			}
@@ -292,8 +304,8 @@ export class KTSelectRemote {
 				'description',
 			];
 			for (const field of fallbackFields) {
-				if (item[field] !== null && item[field] !== undefined) {
-					title = String(item[field]);
+				if (itemRecord[field] !== null && itemRecord[field] !== undefined) {
+					title = String(itemRecord[field]);
 					break;
 				}
 			}
@@ -308,10 +320,10 @@ export class KTSelectRemote {
 
 		// Create the option object with consistent structure
 		const result: KTSelectOptionData = {
-			id: id,
-			title: title,
-			selected: Boolean(item.selected),
-			disabled: Boolean(item.disabled),
+			id: String(id),
+			title: String(title),
+			selected: Boolean(itemRecord.selected),
+			disabled: Boolean(itemRecord.disabled),
 		};
 
 		return result;
