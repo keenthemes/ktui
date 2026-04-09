@@ -309,7 +309,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 							}
 
 							const valueText = String(value)
-								.replace(/<[^>]*>|&nbsp;/g, '')
+								.replace(/<|>|&nbsp;/g, '')
 								.toLowerCase();
 							return valueText.includes(search.toLowerCase());
 						});
