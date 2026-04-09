@@ -40,6 +40,7 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 		draggable: false,
 		snap: false,
 		autoHeight: false,
+		showScrollbar: false,
 		lazy: false,
 		pauseOnHover: true,
 		changeEvent: 'kt.carousel.change',
@@ -102,6 +103,7 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 
 		this._init(element);
 		this._buildConfig(config);
+		this._syncShowScrollbarAttribute();
 
 		this._viewport = viewport;
 		this._slides = slides;
@@ -126,6 +128,16 @@ export class KTCarousel extends KTComponent implements KTCarouselInterface {
 			return false;
 		}
 		return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	}
+
+	private _syncShowScrollbarAttribute(): void {
+		if (!this._element) return;
+		const show = this._getOption('showScrollbar') === true;
+		if (show) {
+			this._element.setAttribute('data-kt-carousel-show-scrollbar', 'true');
+		} else {
+			this._element.removeAttribute('data-kt-carousel-show-scrollbar');
+		}
 	}
 
 	private static _resolveViewportStatic(root: HTMLElement): HTMLElement | null {

@@ -13,6 +13,8 @@ export interface KTCarouselConfigInterface {
 	draggable: boolean;
 	snap: boolean;
 	autoHeight: boolean;
+	/** When true, native scrollbars stay visible on the viewport and thumbnail strip. */
+	showScrollbar: boolean;
 	lazy: boolean;
 	pauseOnHover: boolean;
 	changeEvent: string;

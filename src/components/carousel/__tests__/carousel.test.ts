@@ -272,6 +272,27 @@ describe('KTCarousel', () => {
 		}
 	});
 
+	it('showScrollbar config sets data-kt-carousel-show-scrollbar on root', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			new KTCarousel(root, { showScrollbar: true });
+			expect(root.getAttribute('data-kt-carousel-show-scrollbar')).toBe('true');
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('default showScrollbar removes data-kt-carousel-show-scrollbar', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		root.setAttribute('data-kt-carousel-show-scrollbar', 'true');
+		try {
+			new KTCarousel(root, { showScrollbar: false });
+			expect(root.hasAttribute('data-kt-carousel-show-scrollbar')).toBe(false);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
 	it('snap mode does not attach pointer drag listeners', () => {
 		const { root, viewport, restoreScrollIntoView } = buildCarouselHtml({
 			snap: true,
