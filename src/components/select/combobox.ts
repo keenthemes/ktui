@@ -14,7 +14,7 @@ import { defaultTemplates } from './templates';
 export class KTSelectCombobox {
 	private _select: KTSelect;
 	private _config: KTSelectConfigInterface;
-	private _searchInputElement: HTMLInputElement;
+	private _searchInputElement: HTMLInputElement | null;
 	private _clearButtonElement: HTMLElement | null;
 	private _boundInputHandler: (event: Event) => void;
 	private _boundClearHandler: (event: MouseEvent) => void;
@@ -41,16 +41,18 @@ export class KTSelectCombobox {
 
 		this._attachEventListeners();
 
-		this._select.getElement().addEventListener('dropdown.close', () => {
+		this._select.getElement()?.addEventListener('dropdown.close', () => {
 			// When dropdown closes, if not multi-select and not using displayTemplate,
 			// ensure input shows the selected value or placeholder.
 			if (!this._config.multiple && !this._config.displayTemplate) {
 				this.updateDisplay(this._select.getSelectedOptions());
 			} else {
 				// For tags or displayTemplate, the input should be clear for typing.
-				this._searchInputElement.value = '';
+				if (this._searchInputElement) {
+					this._searchInputElement.value = '';
+				}
 			}
-			this._toggleClearButtonVisibility(this._searchInputElement.value);
+			this._toggleClearButtonVisibility(this._searchInputElement?.value ?? '');
 			// this._select.showAllOptions(); // showAllOptions might be too broad, filtering is managed by typing.
 		});
 	}
@@ -125,6 +127,7 @@ export class KTSelectCombobox {
 	private _handleClearButtonClick(event: MouseEvent): void {
 		event.preventDefault();
 		event.stopPropagation();
+		if (!this._searchInputElement) return;
 
 		this._searchInputElement.value = '';
 		this._toggleClearButtonVisibility('');
@@ -134,7 +137,7 @@ export class KTSelectCombobox {
 		this._select.clearSelection(); // This will also trigger updateSelectedOptionDisplay
 		this._select.showAllOptions(); // Show all options after clearing
 		this._select.openDropdown();
-		this._searchInputElement.focus();
+		this._searchInputElement?.focus();
 	}
 
 	/**
@@ -188,17 +191,18 @@ export class KTSelectCombobox {
 		}
 
 		if (this._config.tags && this._valuesContainerElement) {
+			const valuesContainer = this._valuesContainerElement;
+			const selectElement = this._select.getElement();
+			if (!selectElement) return;
 			// Combobox + Tags
 			selectedOptions.forEach((value) => {
 				// Ensure value is properly escaped for querySelector
-				const optionElement = this._select
-					.getElement()
-					.querySelector(
-						`option[value="${CSS.escape(value)}"]`,
-					) as HTMLOptionElement;
+				const optionElement = selectElement.querySelector(
+					`option[value="${CSS.escape(value)}"]`,
+				) as HTMLOptionElement;
 				if (optionElement) {
 					const tagElement = defaultTemplates.tag(optionElement, this._config);
-					this._valuesContainerElement.appendChild(tagElement);
+					valuesContainer.appendChild(tagElement);
 				}
 			});
 			this._searchInputElement.value = ''; // Input field is for typing new searches
@@ -222,7 +226,7 @@ export class KTSelectCombobox {
 				.map((value) => {
 					const optionEl = this._select
 						.getElement()
-						.querySelector(`option[value="${CSS.escape(value)}"]`);
+						?.querySelector(`option[value="${CSS.escape(value)}"]`);
 					return optionEl ? optionEl.textContent : '';
 				})
 				.join(', '); // Basic comma separation
@@ -236,7 +240,7 @@ export class KTSelectCombobox {
 			const selectedValue = selectedOptions[0];
 			const optionElement = this._select
 				.getElement()
-				.querySelector(`option[value="${CSS.escape(selectedValue)}"]`);
+				?.querySelector(`option[value="${CSS.escape(selectedValue)}"]`);
 			this._searchInputElement.value = optionElement
 				? optionElement.textContent || ''
 				: '';

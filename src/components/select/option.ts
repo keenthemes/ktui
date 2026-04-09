@@ -22,7 +22,7 @@ export class KTSelectOption extends KTComponent {
 
 		// Always initialize a new option instance
 		this._init(element);
-		this._globalConfig = config;
+		this._globalConfig = (config ?? {}) as KTSelectConfigInterface;
 		this._buildConfig();
 
 		// Clean the config

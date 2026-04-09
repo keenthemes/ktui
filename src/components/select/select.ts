@@ -29,6 +29,7 @@ export class KTSelect extends KTComponent {
 	// Core properties
 	protected override readonly _name: string = 'select';
 	protected override readonly _dataOptionPrefix: string = 'kt-'; // Use 'kt-' prefix to support data-kt-select-option attributes
+	protected override _element!: HTMLElement;
 	protected override _config: KTSelectConfigInterface;
 	protected override _defaultConfig: KTSelectConfigInterface;
 
@@ -142,7 +143,7 @@ export class KTSelect extends KTComponent {
 	 */
 	protected override _dispatchEvent(
 		eventType: string,
-		payload: object = null,
+		payload: object | null = null,
 	): void {
 		// Call parent method to dispatch on element (existing behavior)
 		super._dispatchEvent(eventType, payload);
@@ -176,6 +177,10 @@ export class KTSelect extends KTComponent {
 			});
 			document.dispatchEvent(namespacedEvent);
 		}
+	}
+
+	public override getElement(): HTMLElement {
+		return this._element;
 	}
 
 	/**
@@ -460,7 +465,10 @@ export class KTSelect extends KTComponent {
 				optionsContainer.appendChild(
 					defaultTemplates.error({
 						...this._config,
-						errorMessage: message,
+						errorMessage:
+							message ??
+							this._config.remoteErrorMessage ??
+							'Failed to load data',
 					}),
 				);
 				break;
@@ -753,7 +761,7 @@ export class KTSelect extends KTComponent {
 		// Create an empty dropdown first (without options) using template
 		const dropdownElement = defaultTemplates.dropdown({
 			...this._config,
-			zindex: this._config.dropdownZindex,
+			zindex: this._config.dropdownZindex ?? undefined,
 		});
 
 		// Add search input if needed
@@ -1306,7 +1314,7 @@ export class KTSelect extends KTComponent {
 		// Sync native select value for FormData support
 		this._syncNativeSelectValue();
 
-		if (tagsEnabled) {
+		if (this._config.tags && this._tagsModule) {
 			// Tags module will render tags if selectedOptions > 0, or clear them if selectedOptions === 0.
 			this._tagsModule.updateTagsDisplay(selectedOptions);
 		}
@@ -1614,7 +1622,7 @@ export class KTSelect extends KTComponent {
 	/**
 	 * Get the search input element
 	 */
-	public getSearchInput(): HTMLInputElement {
+	public getSearchInput(): HTMLInputElement | null {
 		return this._searchInputElement;
 	}
 
@@ -1678,7 +1686,7 @@ export class KTSelect extends KTComponent {
 			if (option.hasAttribute('style')) {
 				const styleAttr = option.getAttribute('style');
 
-				if (styleAttr.includes('display:')) {
+				if (styleAttr && styleAttr.includes('display:')) {
 					// If style only contains display property, remove the entire attribute
 					if (
 						styleAttr.trim() === 'display: none;' ||
@@ -1689,7 +1697,7 @@ export class KTSelect extends KTComponent {
 						// Otherwise, remove just the display property
 						option.setAttribute(
 							'style',
-							styleAttr?.replace(/display:\s*[^;]+;?/gi, '')?.trim(),
+							styleAttr.replace(/display:\s*[^;]+;?/gi, '').trim(),
 						);
 					}
 				}
@@ -1809,7 +1817,7 @@ export class KTSelect extends KTComponent {
 	 */
 	public override dispose(): void {
 		// Clean up event listeners
-		this._eventManager.removeAllListeners(null);
+		this._eventManager.removeAllListeners(this._wrapperElement);
 
 		// Dispose modules
 		if (this._dropdownModule) {
@@ -2591,7 +2599,7 @@ export class KTSelect extends KTComponent {
 						);
 						if (!option) return '';
 
-						let displayTemplate = this._config.displayTemplate;
+						let displayTemplate = this._config.displayTemplate || '{{text}}';
 						const text = option.getAttribute('data-text') || '';
 
 						// Replace all {{varname}} in option.innerHTML with values from _config
@@ -2749,21 +2757,25 @@ export class KTSelect extends KTComponent {
 			.getVisibleOptions()
 			.filter((opt) => opt.getAttribute('aria-disabled') !== 'true');
 
+		const selectAllButton = this._selectAllButton;
+		const selectAllButtonToggle = this._selectAllButtonToggle;
+		if (!selectAllButton || !selectAllButtonToggle) return;
+
 		if (visibleOptions.length === 0) {
-			this._selectAllButton.style.display = 'none';
+			selectAllButton.style.display = 'none';
 			return;
 		}
 
-		this._selectAllButton.style.display = '';
+		selectAllButton.style.display = '';
 
 		const selectedValues = new Set(this.getSelectedOptions());
 		const isAllSelected = visibleOptions.every((opt) =>
 			selectedValues.has(opt.dataset.value as string),
 		);
 
-		this._selectAllButtonToggle.textContent = isAllSelected
-			? this._config.clearAllText
-			: this._config.selectAllText;
+		selectAllButtonToggle.textContent = isAllSelected
+			? (this._config.clearAllText ?? 'Clear all')
+			: (this._config.selectAllText ?? 'Select all');
 	}
 
 	/**
