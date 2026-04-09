@@ -14,10 +14,12 @@ function buildCarouselHtml(options?: {
 	const root = document.createElement('div');
 	root.setAttribute('data-kt-carousel', 'true');
 	if (options?.lazy) root.setAttribute('data-kt-carousel-lazy', 'true');
-	if (options?.infinite) root.setAttribute('data-kt-carousel-infinite-loop', 'true');
+	if (options?.infinite)
+		root.setAttribute('data-kt-carousel-infinite-loop', 'true');
 	if (options?.autoplay) root.setAttribute('data-kt-carousel-autoplay', 'true');
 	if (options?.snap) root.setAttribute('data-kt-carousel-snap', 'true');
-	if (options?.draggable) root.setAttribute('data-kt-carousel-draggable', 'true');
+	if (options?.draggable)
+		root.setAttribute('data-kt-carousel-draggable', 'true');
 
 	const viewport = document.createElement('div');
 	viewport.setAttribute('data-kt-carousel-viewport', 'true');
@@ -301,9 +303,7 @@ describe('KTCarousel', () => {
 		try {
 			const spy = vi.spyOn(viewport, 'addEventListener');
 			new KTCarousel(root);
-			const pointerDown = spy.mock.calls.some(
-				(c) => c[0] === 'pointerdown',
-			);
+			const pointerDown = spy.mock.calls.some((c) => c[0] === 'pointerdown');
 			expect(pointerDown).toBe(false);
 		} finally {
 			restoreScrollIntoView();
@@ -317,9 +317,7 @@ describe('KTCarousel', () => {
 		try {
 			const spy = vi.spyOn(viewport, 'addEventListener');
 			new KTCarousel(root);
-			const pointerDown = spy.mock.calls.some(
-				(c) => c[0] === 'pointerdown',
-			);
+			const pointerDown = spy.mock.calls.some((c) => c[0] === 'pointerdown');
 			expect(pointerDown).toBe(true);
 		} finally {
 			restoreScrollIntoView();
