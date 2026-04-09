@@ -10,6 +10,7 @@ import {
 	KTToastConfig,
 	KTToastInstance,
 	KTToastPosition,
+	KTToastClassNames,
 } from './types';
 
 const DEFAULT_CONFIG: KTToastConfig = {
@@ -60,9 +61,9 @@ export class KTToast extends KTComponent implements KTToastInterface {
 	 * @returns The toast's HTML markup as a string.
 	 */
 	static getContent(options?: KTToastOptions) {
-		const classNames = {
-			...((this.globalConfig.classNames as any) || {}),
-			...((options?.classNames as any) || {}),
+		const classNames: Partial<KTToastClassNames> = {
+			...(this.globalConfig.classNames || {}),
+			...(options?.classNames || {}),
 		};
 
 		if (options?.content) {
@@ -237,18 +238,18 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		const position =
 			options.position || this.globalConfig.position || 'top-end';
 
-		const classNames = {
-			...((this.globalConfig.classNames as any) || {}),
-			...((options.classNames as any) || {}),
+		const classNames: Partial<KTToastClassNames> = {
+			...(this.globalConfig.classNames || {}),
+			...(options.classNames || {}),
 		};
 
 		let container = this.containerMap.get(position);
 
 		if (!container) {
 			container = document.createElement('div');
-			const classNames = {
-				...((this.globalConfig.classNames as any) || {}),
-				...((options.classNames as any) || {}),
+			const classNames: Partial<KTToastClassNames> = {
+				...(this.globalConfig.classNames || {}),
+				...(options.classNames || {}),
 			};
 			// Fallback to default hardcoded classes if not provided in options or globalConfig
 			container.className =
@@ -415,9 +416,17 @@ export class KTToast extends KTComponent implements KTToastInterface {
 		if (options.beep) {
 			try {
 				// Use Web Audio API for a short beep
-				const ctx = new (
-					window.AudioContext || (window as any).webkitAudioContext
-				)();
+				const Ctx =
+					window.AudioContext ||
+					(
+						window as Window & {
+							webkitAudioContext?: typeof AudioContext;
+						}
+					).webkitAudioContext;
+				if (!Ctx) {
+					throw new Error('Web Audio API unavailable');
+				}
+				const ctx = new Ctx();
 				const o = ctx.createOscillator();
 				const g = ctx.createGain();
 				o.type = 'sine';
@@ -566,8 +575,8 @@ export class KTToast extends KTComponent implements KTToastInterface {
 			inst?.element.remove();
 			KTToast.toasts.delete(id!);
 			// Try to call onDismiss if available in the toast instance (if stored)
-			if (typeof (inst as any).options?.onDismiss === 'function') {
-				(inst as any).options.onDismiss(id);
+			if (typeof inst.options?.onDismiss === 'function') {
+				inst.options.onDismiss(id);
 			}
 			KTToast._fireEventOnElement(inst.element, 'hidden', { id });
 			KTToast._dispatchEventOnElement(inst.element, 'hidden', { id });

@@ -36,6 +36,20 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	extends KTComponent
 	implements KTDataTableInterface
 {
+	private static asElementWithInstance(element: HTMLElement): HTMLElement & {
+		instance?: KTDataTable<KTDataTableDataInterface>;
+	} {
+		return element as HTMLElement & {
+			instance?: KTDataTable<KTDataTableDataInterface>;
+		};
+	}
+
+	private static asSearchElementWithDebounce(
+		element: HTMLInputElement,
+	): HTMLInputElement & { _debouncedSearch?: EventListener } {
+		return element as HTMLInputElement & { _debouncedSearch?: EventListener };
+	}
+
 	protected override _name: string = 'datatable';
 	protected override _config: KTDataTableConfigInterface;
 	protected override _defaultConfig: KTDataTableConfigInterface;
@@ -89,7 +103,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._buildConfig();
 
 		// Store the instance directly on the element
-		(element as any).instance = this;
+		KTDataTable.asElementWithInstance(element).instance = this;
 
 		this._initElements();
 
@@ -97,7 +111,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._checkbox = createCheckboxHandler(
 			this._element,
 			this._config,
-			(eventName: string, eventData?: any) => {
+			(eventName: string, eventData?: object) => {
 				this._fireEvent(eventName, eventData);
 				this._dispatchEvent(eventName, eventData);
 			},
@@ -532,11 +546,13 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		if (searchElement) {
 			// Check if a debounced search function already exists
-			if ((searchElement as any)._debouncedSearch) {
+			const searchWithDebounce =
+				KTDataTable.asSearchElementWithDebounce(searchElement);
+			if (searchWithDebounce._debouncedSearch) {
 				// Remove the existing debounced event listener
 				searchElement.removeEventListener(
 					'keyup',
-					(searchElement as any)._debouncedSearch,
+					searchWithDebounce._debouncedSearch,
 				);
 			}
 
@@ -546,7 +562,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			}, this._config.search.delay);
 
 			// Store the new debounced function as a property of the element
-			(searchElement as any)._debouncedSearch = debouncedSearch;
+			searchWithDebounce._debouncedSearch = debouncedSearch;
 
 			// Add the new debounced event listener
 			searchElement.addEventListener('keyup', debouncedSearch);
@@ -1072,7 +1088,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					const th = columnsToRender[colIndex];
 					const colName = th?.getAttribute('data-kt-datatable-column');
 					const td = document.createElement('td');
-					let value: any;
+					let value: KTOptionType | '';
 					if (colName && Object.prototype.hasOwnProperty.call(item, colName)) {
 						value = item[colName as keyof T];
 					} else if (Object.prototype.hasOwnProperty.call(item, colIndex)) {
@@ -1564,12 +1580,17 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			document.querySelector<HTMLInputElement>(
 				`[data-kt-datatable-search="#${tableId}"]`,
 			);
-		if (searchElement && (searchElement as any)._debouncedSearch) {
+		if (searchElement) {
+			const searchWithDebounce =
+				KTDataTable.asSearchElementWithDebounce(searchElement);
+			if (!searchWithDebounce._debouncedSearch) {
+				return;
+			}
 			searchElement.removeEventListener(
 				'keyup',
-				(searchElement as any)._debouncedSearch,
+				searchWithDebounce._debouncedSearch,
 			);
-			delete (searchElement as any)._debouncedSearch;
+			delete searchWithDebounce._debouncedSearch;
 		}
 
 		// --- 2. Remove page size dropdown event listener ---
@@ -1587,11 +1608,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		// --- 4. Dispose of handler objects (checkbox, sort) ---
 		// KTDataTableCheckboxAPI does not have a dispose method, but we can remove header checkbox listener
-		if (
-			this._checkbox &&
-			typeof (this._checkbox as any).dispose === 'function'
-		) {
-			(this._checkbox as any).dispose();
+		const checkboxWithDispose = this._checkbox as KTDataTableCheckboxAPI & {
+			dispose?: () => void;
+		};
+		if (this._checkbox && typeof checkboxWithDispose.dispose === 'function') {
+			checkboxWithDispose.dispose();
 		} else {
 			// Remove header checkbox event listener if possible
 			const headerCheckElement = this._element.querySelector<HTMLInputElement>(
@@ -1619,8 +1640,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._element.classList.remove(this._config.loadingClass);
 
 		// --- 6. Remove instance reference from the DOM element ---
-		if ((this._element as any).instance) {
-			delete (this._element as any).instance;
+		const elementWithInstance = KTDataTable.asElementWithInstance(
+			this._element,
+		);
+		if (elementWithInstance.instance) {
+			delete elementWithInstance.instance;
 		}
 
 		// --- 7. (Optional) Clear localStorage state ---
@@ -1628,9 +1652,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		// this._deleteState();
 	}
 
-	private _debounce(func: Function, wait: number) {
+	private _debounce<TArgs extends unknown[]>(
+		func: (...args: TArgs) => void,
+		wait: number,
+	): (...args: TArgs) => void {
 		let timeout: number | undefined;
-		return function (...args: any[]) {
+		return function (...args: TArgs) {
 			const later = () => {
 				clearTimeout(timeout);
 				func(...args);
@@ -1837,7 +1864,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		// Fallback to element's instance property (for manually created instances)
-		return (element as any).instance;
+		return KTDataTable.asElementWithInstance(element).instance;
 	}
 
 	/**
