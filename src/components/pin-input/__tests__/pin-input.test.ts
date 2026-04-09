@@ -71,6 +71,41 @@ describe('KTPinInput', () => {
 		instance.dispose();
 	});
 
+	it('routes a second digit to the next cell when the current cell is full', () => {
+		const root = createPinRoot({ count: 3 });
+		container.appendChild(root);
+		const instance = new KTPinInput(root);
+		const inputs = root.querySelectorAll<HTMLInputElement>(
+			'[data-kt-pin-input-item]',
+		);
+		inputs[0].value = '5';
+		inputs[0].focus();
+		inputs[0].setSelectionRange(1, 1);
+		inputs[0].dispatchEvent(
+			new KeyboardEvent('keydown', {
+				key: '6',
+				bubbles: true,
+				cancelable: true,
+			}),
+		);
+		expect(inputs[0].value).toBe('5');
+		expect(inputs[1].value).toBe('6');
+		expect(document.activeElement).toBe(inputs[2]);
+		instance.dispose();
+	});
+
+	it('sets maxLength 1 on each cell', () => {
+		const root = createPinRoot({ count: 2 });
+		container.appendChild(root);
+		const instance = new KTPinInput(root);
+		const inputs = root.querySelectorAll<HTMLInputElement>(
+			'[data-kt-pin-input-item]',
+		);
+		expect(inputs[0].maxLength).toBe(1);
+		expect(inputs[1].maxLength).toBe(1);
+		instance.dispose();
+	});
+
 	it('backspace clears cell then moves to previous when empty', () => {
 		const root = createPinRoot({ count: 3 });
 		container.appendChild(root);

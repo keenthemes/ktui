@@ -37,6 +37,7 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 	private _wasComplete = false;
 
 	private _onKeydownBound = (e: KeyboardEvent) => this._onKeydown(e);
+	private _onBeforeInputBound = (e: Event) => this._onBeforeInput(e);
 	private _onInputBound = (e: Event) => this._onInput(e);
 	private _onPasteBound = (e: ClipboardEvent) => this._onPaste(e);
 
@@ -63,6 +64,11 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 		this._prepareCells();
 
 		this._element?.addEventListener('keydown', this._onKeydownBound, true);
+		this._element?.addEventListener(
+			'beforeinput',
+			this._onBeforeInputBound,
+			true,
+		);
 		this._element?.addEventListener('input', this._onInputBound, true);
 		this._element?.addEventListener('paste', this._onPasteBound, true);
 
@@ -78,9 +84,7 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 	private _compileRegex(): void {
 		const raw = this._getOption('availableChars');
 		const pattern =
-			typeof raw === 'string' && raw.trim() !== ''
-				? raw.trim()
-				: '[0-9]';
+			typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : '[0-9]';
 		try {
 			this._charRegex = new RegExp(pattern);
 		} catch {
@@ -101,10 +105,42 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 
 	private _prepareCells(): void {
 		for (const cell of this._cells) {
-			if (cell.getAttribute('maxlength') === null) {
-				cell.setAttribute('maxlength', '1');
-			}
+			cell.maxLength = 1;
+			cell.setAttribute('maxlength', '1');
 		}
+	}
+
+	/** Single character in `cell`, sync, then focus/select next enabled cell. */
+	private _fillCellAndAdvance(cell: HTMLInputElement, char: string): void {
+		cell.value = char;
+		this._syncFromDom(this._cellIndex(cell));
+		const enabled = this._enabledCells();
+		const idx = enabled.indexOf(cell);
+		if (idx >= 0 && idx < enabled.length - 1) {
+			enabled[idx + 1].focus();
+			enabled[idx + 1].select();
+		}
+	}
+
+	/**
+	 * Route a typed character: if the cell is already full and the caret is at
+	 * the end, fill the next cell; otherwise replace/fill the active cell.
+	 */
+	private _routeCharFromCell(target: HTMLInputElement, char: string): void {
+		const start = target.selectionStart ?? 0;
+		const end = target.selectionEnd ?? 0;
+		const v = target.value;
+		const replacing = end > start;
+		const atEnd = start === end && start === v.length;
+		if (v.length >= 1 && !replacing && atEnd) {
+			const enabled = this._enabledCells();
+			const idx = enabled.indexOf(target);
+			if (idx >= 0 && idx < enabled.length - 1) {
+				this._fillCellAndAdvance(enabled[idx + 1], char);
+			}
+			return;
+		}
+		this._fillCellAndAdvance(target, char);
 	}
 
 	private _ensureHiddenInput(): void {
@@ -182,8 +218,7 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 		const value = this.getValue();
 		const enabled = this._enabledCells();
 		const filled = enabled.filter((c) => (c.value || '').length > 0).length;
-		const complete =
-			enabled.length > 0 && filled === enabled.length;
+		const complete = enabled.length > 0 && filled === enabled.length;
 		return {
 			value,
 			complete,
@@ -274,13 +309,62 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 				return;
 			}
 			e.preventDefault();
-			target.value = e.key;
-			this._syncFromDom(this._cellIndex(target));
-			const enabled = this._enabledCells();
-			const idx = enabled.indexOf(target);
-			if (idx >= 0 && idx < enabled.length - 1) {
-				enabled[idx + 1].focus();
-				enabled[idx + 1].select();
+			this._routeCharFromCell(target, e.key);
+		}
+	}
+
+	private _onBeforeInput(e: Event): void {
+		if (!('inputType' in e)) {
+			return;
+		}
+		const ie = e as InputEvent;
+		if (ie.isComposing) {
+			return;
+		}
+		const target = ie.target;
+		if (!(target instanceof HTMLInputElement)) {
+			return;
+		}
+		if (!this._cells.includes(target) || target.disabled) {
+			return;
+		}
+
+		if (
+			ie.inputType === 'insertFromPaste' ||
+			ie.inputType === 'insertFromYank'
+		) {
+			e.preventDefault();
+			return;
+		}
+
+		if (ie.inputType !== 'insertText' || ie.data == null) {
+			return;
+		}
+
+		const data = ie.data;
+		if (data.length > 1) {
+			e.preventDefault();
+			const filtered = this._filterString(data);
+			if (filtered.length) {
+				this._distributeFromIndex(this._cellIndex(target), filtered);
+			}
+			return;
+		}
+
+		if (data.length === 1 && !this._isValidChar(data)) {
+			e.preventDefault();
+			return;
+		}
+
+		if (data.length === 1) {
+			const start = target.selectionStart ?? 0;
+			const end = target.selectionEnd ?? 0;
+			const v = target.value;
+			const replacing = end > start;
+			const nextLen = replacing ? v.length - (end - start) + 1 : v.length + 1;
+			if (nextLen > 1 && !replacing) {
+				e.preventDefault();
+				this._routeCharFromCell(target, data);
 			}
 		}
 	}
@@ -295,28 +379,32 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 		}
 
 		const v = target.value;
-		if (v.length <= 1) {
-			if (v.length === 1 && !this._isValidChar(v)) {
-				target.value = '';
+		if (v.length > 1) {
+			const filtered = this._filterString(v);
+			target.value = '';
+			if (filtered.length) {
+				this._distributeFromIndex(this._cellIndex(target), filtered);
+			} else {
 				this._syncFromDom(this._cellIndex(target));
-				return;
-			}
-			this._syncFromDom(this._cellIndex(target));
-			if (v.length === 1) {
-				const enabled = this._enabledCells();
-				const idx = enabled.indexOf(target);
-				if (idx >= 0 && idx < enabled.length - 1) {
-					enabled[idx + 1].focus();
-					enabled[idx + 1].select();
-				}
 			}
 			return;
 		}
 
-		// Mobile / autofill: multiple characters in one cell
-		const filtered = this._filterString(v);
-		target.value = '';
-		this._distributeFromIndex(this._cellIndex(target), filtered);
+		if (v.length === 1 && !this._isValidChar(v)) {
+			target.value = '';
+			this._syncFromDom(this._cellIndex(target));
+			return;
+		}
+
+		this._syncFromDom(this._cellIndex(target));
+		if (v.length === 1) {
+			const enabled = this._enabledCells();
+			const idx = enabled.indexOf(target);
+			if (idx >= 0 && idx < enabled.length - 1) {
+				enabled[idx + 1].focus();
+				enabled[idx + 1].select();
+			}
+		}
 	}
 
 	private _onPaste(e: ClipboardEvent): void {
@@ -375,6 +463,11 @@ export class KTPinInput extends KTComponent implements KTPinInputInterface {
 	public override dispose(): void {
 		if (this._element) {
 			this._element.removeEventListener('keydown', this._onKeydownBound, true);
+			this._element.removeEventListener(
+				'beforeinput',
+				this._onBeforeInputBound,
+				true,
+			);
 			this._element.removeEventListener('input', this._onInputBound, true);
 			this._element.removeEventListener('paste', this._onPasteBound, true);
 		}
