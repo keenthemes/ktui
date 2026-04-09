@@ -1,0 +1,326 @@
+/**
+ * Tests for KTCarousel component
+ */
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { KTCarousel } from '../carousel';
+
+function buildCarouselHtml(options?: {
+	infinite?: boolean;
+	autoplay?: boolean;
+	lazy?: boolean;
+	snap?: boolean;
+	draggable?: boolean;
+}) {
+	const root = document.createElement('div');
+	root.setAttribute('data-kt-carousel', 'true');
+	if (options?.lazy) root.setAttribute('data-kt-carousel-lazy', 'true');
+	if (options?.infinite)
+		root.setAttribute('data-kt-carousel-infinite-loop', 'true');
+	if (options?.autoplay) root.setAttribute('data-kt-carousel-autoplay', 'true');
+	if (options?.snap) root.setAttribute('data-kt-carousel-snap', 'true');
+	if (options?.draggable)
+		root.setAttribute('data-kt-carousel-draggable', 'true');
+
+	const viewport = document.createElement('div');
+	viewport.setAttribute('data-kt-carousel-viewport', 'true');
+	viewport.style.overflow = 'auto';
+	viewport.style.width = '200px';
+
+	for (let i = 0; i < 3; i++) {
+		const slide = document.createElement('div');
+		slide.setAttribute('data-kt-carousel-item', 'true');
+		slide.style.width = '200px';
+		slide.style.flexShrink = '0';
+		slide.textContent = `S${i}`;
+		viewport.appendChild(slide);
+	}
+
+	const next = document.createElement('button');
+	next.type = 'button';
+	next.setAttribute('data-kt-carousel-next', 'true');
+	const prev = document.createElement('button');
+	prev.type = 'button';
+	prev.setAttribute('data-kt-carousel-prev', 'true');
+
+	root.appendChild(viewport);
+	root.appendChild(prev);
+	root.appendChild(next);
+	document.body.appendChild(root);
+
+	const slides = Array.from(
+		viewport.querySelectorAll<HTMLElement>('[data-kt-carousel-item]'),
+	);
+	const gap = 200;
+	slides.forEach((slide, i) => {
+		Object.defineProperty(slide, 'offsetLeft', {
+			configurable: true,
+			get: () => i * gap,
+		});
+		Object.defineProperty(slide, 'offsetHeight', {
+			configurable: true,
+			get: () => 100,
+		});
+	});
+
+	let scrollLeft = 0;
+	Object.defineProperty(viewport, 'scrollLeft', {
+		configurable: true,
+		get: () => scrollLeft,
+		set: (v: number) => {
+			scrollLeft = v;
+		},
+	});
+	Object.defineProperty(viewport, 'scrollWidth', {
+		configurable: true,
+		get: () => slides.length * gap,
+	});
+	Object.defineProperty(viewport, 'clientWidth', {
+		configurable: true,
+		get: () => gap,
+	});
+
+	const vpScreenLeft = 10;
+	vi.spyOn(viewport, 'getBoundingClientRect').mockReturnValue({
+		left: vpScreenLeft,
+		top: 0,
+		width: gap,
+		height: 100,
+		right: vpScreenLeft + gap,
+		bottom: 100,
+		x: vpScreenLeft,
+		y: 0,
+		toJSON: () => ({}),
+	} as DOMRect);
+
+	slides.forEach((slide, i) => {
+		vi.spyOn(slide, 'getBoundingClientRect').mockImplementation(() => {
+			const visualLeft = vpScreenLeft + i * gap - scrollLeft;
+			return {
+				left: visualLeft,
+				top: 0,
+				width: gap,
+				height: 100,
+				right: visualLeft + gap,
+				bottom: 100,
+				x: visualLeft,
+				y: 0,
+				toJSON: () => ({}),
+			} as DOMRect;
+		});
+	});
+
+	viewport.scrollTo = ((opts: ScrollToOptions) => {
+		if (typeof opts.left === 'number') {
+			scrollLeft = opts.left;
+		}
+	}) as typeof viewport.scrollTo;
+
+	return {
+		root,
+		viewport,
+		slides,
+		restoreScrollIntoView: () => {
+			/* no-op; mocks cleared in afterEach */
+		},
+	};
+}
+
+describe('KTCarousel', () => {
+	afterEach(() => {
+		document.body.innerHTML = '';
+		vi.useRealTimers();
+		vi.restoreAllMocks();
+	});
+
+	it('goTo sets index after navigation settles', async () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			const c = new KTCarousel(root);
+			expect(c.getSlideCount()).toBe(3);
+			c.goTo(2);
+			await Promise.resolve();
+			expect(c.getIndex()).toBe(2);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('next advances and prev goes back', async () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			const c = new KTCarousel(root);
+			c.next(true);
+			await Promise.resolve();
+			expect(c.getIndex()).toBe(1);
+			c.prev(true);
+			await Promise.resolve();
+			expect(c.getIndex()).toBe(0);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('next at last without infinite does nothing', async () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			const c = new KTCarousel(root);
+			c.goTo(2);
+			await Promise.resolve();
+			c.next(true);
+			await Promise.resolve();
+			expect(c.getIndex()).toBe(2);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('next at last with infinite wraps to 0', async () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml({
+			infinite: true,
+		});
+		try {
+			const c = new KTCarousel(root);
+			c.goTo(2);
+			await Promise.resolve();
+			c.next(true);
+			await Promise.resolve();
+			expect(c.getIndex()).toBe(0);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('dispose clears instance', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			const c = new KTCarousel(root);
+			c.dispose();
+			expect(KTCarousel.getInstance(root)).toBeNull();
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('dispose is idempotent', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			const c = new KTCarousel(root);
+			c.dispose();
+			c.dispose();
+			expect(KTCarousel.getInstance(root)).toBeNull();
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('dispatches change event on next', async () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			const c = new KTCarousel(root);
+			const spy = vi.fn();
+			root.addEventListener('kt.carousel.change', spy);
+			c.next(true);
+			await Promise.resolve();
+			expect(spy).toHaveBeenCalled();
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('createInstances skips lazy roots', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml({ lazy: true });
+		try {
+			KTCarousel.createInstances();
+			expect(KTCarousel.getInstance(root)).toBeNull();
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('prefers-reduced-motion disables autoplay timer', () => {
+		vi.useFakeTimers();
+		const mm = vi.fn().mockImplementation((q: string) => ({
+			matches: q.includes('prefers-reduced-motion'),
+			media: q,
+			onchange: null,
+			addListener: vi.fn(),
+			removeListener: vi.fn(),
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn(),
+			dispatchEvent: vi.fn(),
+		}));
+		vi.stubGlobal('matchMedia', mm);
+
+		const { root, restoreScrollIntoView } = buildCarouselHtml({
+			autoplay: true,
+		});
+		try {
+			const c = new KTCarousel(root);
+			vi.advanceTimersByTime(20000);
+			expect(c.getIndex()).toBe(0);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('getOrCreateInstance returns same instance', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			const a = KTCarousel.getOrCreateInstance(root);
+			const b = KTCarousel.getOrCreateInstance(root);
+			expect(a).toBe(b);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('showScrollbar config sets data-kt-carousel-show-scrollbar on root', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		try {
+			new KTCarousel(root, { showScrollbar: true });
+			expect(root.getAttribute('data-kt-carousel-show-scrollbar')).toBe('true');
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('default showScrollbar removes data-kt-carousel-show-scrollbar', () => {
+		const { root, restoreScrollIntoView } = buildCarouselHtml();
+		root.setAttribute('data-kt-carousel-show-scrollbar', 'true');
+		try {
+			new KTCarousel(root, { showScrollbar: false });
+			expect(root.hasAttribute('data-kt-carousel-show-scrollbar')).toBe(false);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('snap mode does not attach pointer drag listeners', () => {
+		const { root, viewport, restoreScrollIntoView } = buildCarouselHtml({
+			snap: true,
+			draggable: true,
+		});
+		try {
+			const spy = vi.spyOn(viewport, 'addEventListener');
+			new KTCarousel(root);
+			const pointerDown = spy.mock.calls.some((c) => c[0] === 'pointerdown');
+			expect(pointerDown).toBe(false);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+
+	it('draggable without snap attaches pointerdown', () => {
+		const { root, viewport, restoreScrollIntoView } = buildCarouselHtml({
+			draggable: true,
+		});
+		try {
+			const spy = vi.spyOn(viewport, 'addEventListener');
+			new KTCarousel(root);
+			const pointerDown = spy.mock.calls.some((c) => c[0] === 'pointerdown');
+			expect(pointerDown).toBe(true);
+		} finally {
+			restoreScrollIntoView();
+		}
+	});
+});

@@ -1,0 +1,42 @@
+/**
+ * KTCarousel — by default hides native scrollbars on the viewport and thumbnail
+ * strips; scrolling still works via trackpad, wheel, drag, and scrollTo.
+ * Set `data-kt-carousel-show-scrollbar="true"` on the root to keep scrollbars visible.
+ */
+@layer components {
+	[data-kt-carousel]:not([data-kt-carousel-show-scrollbar="true"])
+		[data-kt-carousel-viewport],
+	[data-kt-carousel]:not([data-kt-carousel-show-scrollbar="true"])
+		[data-kt-carousel-thumbnails] {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	[data-kt-carousel]:not([data-kt-carousel-show-scrollbar="true"])
+		[data-kt-carousel-viewport]::-webkit-scrollbar,
+	[data-kt-carousel]:not([data-kt-carousel-show-scrollbar="true"])
+		[data-kt-carousel-thumbnails]::-webkit-scrollbar {
+		display: none;
+	}
+
+	[data-kt-carousel-thumbnail]:not(:disabled),
+	[data-kt-carousel-pagination-item]:not(:disabled),
+	[data-kt-carousel-prev]:not(:disabled),
+	[data-kt-carousel-next]:not(:disabled) {
+		cursor: pointer;
+	}
+
+	/* Smooth active-state visuals when `data-kt-carousel-thumbnail-active` toggles */
+	[data-kt-carousel-thumbnail] {
+		transition-property: border-color, background-color, color, box-shadow, opacity;
+		transition-duration: 0.2s;
+		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		[data-kt-carousel-thumbnail] {
+			transition-duration: 0.01ms;
+			transition-property: none;
+		}
+	}
+}
