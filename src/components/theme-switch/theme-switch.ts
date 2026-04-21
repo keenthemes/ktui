@@ -20,12 +20,14 @@ export class KTThemeSwitch
 	extends KTComponent
 	implements KTThemeSwitchInterface
 {
-	protected override _name: string = 'theme-swtich';
+	protected override _name: string = 'theme-switch';
 	protected override _defaultConfig: KTThemeSwitchConfigInterface = {
 		mode: 'light',
 	};
 	protected _mode: KTThemeSwitchModeType | null = null;
 	protected _currentMode: KTThemeSwitchModeType | null = null;
+	protected _themeSwitchToggleEventId: string = '';
+	protected _themeSwitchSetEventId: string = '';
 
 	constructor(
 		element: HTMLElement | HTMLHtmlElement,
@@ -48,7 +50,7 @@ export class KTThemeSwitch
 	protected _handlers(): void {
 		if (!this._element) return;
 
-		KTEventHandler.on(
+		this._themeSwitchToggleEventId = KTEventHandler.on(
 			document.body,
 			'[data-kt-theme-switch-toggle]',
 			'click',
@@ -57,7 +59,7 @@ export class KTThemeSwitch
 			},
 		);
 
-		KTEventHandler.on(
+		this._themeSwitchSetEventId = KTEventHandler.on(
 			document.body,
 			'[data-kt-theme-switch-set]',
 			'click',
@@ -141,7 +143,23 @@ export class KTThemeSwitch
 	}
 
 	public setMode(mode: KTThemeSwitchModeType) {
-		this.setMode(mode);
+		this._setMode(mode);
+	}
+
+	public override dispose(): void {
+		if (this._themeSwitchToggleEventId) {
+			KTEventHandler.off(
+				document.body,
+				'click',
+				this._themeSwitchToggleEventId,
+			);
+			this._themeSwitchToggleEventId = '';
+		}
+		if (this._themeSwitchSetEventId) {
+			KTEventHandler.off(document.body, 'click', this._themeSwitchSetEventId);
+			this._themeSwitchSetEventId = '';
+		}
+		super.dispose();
 	}
 
 	public static getInstance(): KTThemeSwitch {
