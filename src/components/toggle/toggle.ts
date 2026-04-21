@@ -25,6 +25,7 @@ export class KTToggle extends KTComponent implements KTToggleInterface {
 	};
 	protected override _config: KTToggleConfigInterface = this._defaultConfig;
 	protected _targetElement: HTMLElement;
+	protected _clickHandler: (() => void) | null = null;
 
 	constructor(
 		element: HTMLElement,
@@ -48,9 +49,18 @@ export class KTToggle extends KTComponent implements KTToggleInterface {
 	protected _handlers(): void {
 		if (!this._element) return;
 
-		this._element.addEventListener('click', () => {
+		this._clickHandler = () => {
 			this._toggle();
-		});
+		};
+		this._element.addEventListener('click', this._clickHandler);
+	}
+
+	public override dispose(): void {
+		if (this._element && this._clickHandler) {
+			this._element.removeEventListener('click', this._clickHandler);
+			this._clickHandler = null;
+		}
+		super.dispose();
 	}
 
 	private _getTargetElement(): HTMLElement | null {
