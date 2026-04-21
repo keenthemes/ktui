@@ -49,18 +49,17 @@ export class KTModal extends KTComponent implements KTModalInterface {
 	protected _handlers() {
 		this._element.addEventListener('click', (event: Event) => {
 			const target = event.target as HTMLElement;
-			const currentTarget = event.currentTarget as HTMLElement;
+			const modalContent = this._element.querySelector('.kt-modal-content');
 
-			// Only proceed if clicking directly on the backdrop (modal element itself)
-			// This prevents closing when clicking inside modal content or any child elements
-			// (including dropdowns rendered via dropdownContainer pointing to modal)
-			if (target !== currentTarget) {
-				// Stop propagation for clicks inside dropdowns to prevent dropdown from closing
-				// Check if click is inside a dropdown element (KT Select dropdown)
-				const dropdownElement = target.closest('[data-kt-select-dropdown]');
-				if (dropdownElement) {
-					event.stopPropagation();
-				}
+			// Stop propagation for clicks inside dropdowns rendered within modal content.
+			const dropdownElement = target.closest('[data-kt-select-dropdown]');
+			if (dropdownElement) {
+				event.stopPropagation();
+				return;
+			}
+
+			// Dismiss when clicking anywhere outside modal content.
+			if (modalContent && modalContent.contains(target)) {
 				return;
 			}
 
@@ -205,6 +204,14 @@ export class KTModal extends KTComponent implements KTModalInterface {
 		const zindex: number = parseInt(KTDom.getCssProp(this._element, 'z-index'));
 		this._backdropElement = document.createElement('DIV');
 		this._backdropElement.setAttribute('data-kt-modal-backdrop', 'true');
+		this._backdropElement.addEventListener('click', () => {
+			if (
+				this._getOption('backdropStatic') === false &&
+				KTUtils.stringToBoolean(this._getOption('persistent')) === false
+			) {
+				this._hide();
+			}
+		});
 		this._backdropElement.style.zIndex = (zindex - 1).toString();
 		document.body.append(this._backdropElement);
 		KTDom.reflow(this._backdropElement);
@@ -280,8 +287,9 @@ export class KTModal extends KTComponent implements KTModalInterface {
 	}
 
 	public static handleToggle(): void {
+		// wire:navigate / morph can replace document.body; <html> stays stable.
 		KTEventHandler.on(
-			document.body,
+			document.documentElement,
 			'[data-kt-modal-toggle]',
 			'click',
 			(event: Event, target: HTMLElement) => {
@@ -301,7 +309,7 @@ export class KTModal extends KTComponent implements KTModalInterface {
 
 	public static handleDismiss(): void {
 		KTEventHandler.on(
-			document.body,
+			document.documentElement,
 			'[data-kt-modal-dismiss]',
 			'click',
 			(event: Event, target: HTMLElement) => {
