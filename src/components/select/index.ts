@@ -15,4 +15,4 @@ export {
 	EventManager,
 	TypeToSearchBuffer,
 } from './utils';
-export { KTSelectConfigInterface, KTSelectOption } from './config';
+export type { KTSelectConfigInterface, KTSelectOption } from './config';
