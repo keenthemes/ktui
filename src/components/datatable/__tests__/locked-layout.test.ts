@@ -157,68 +157,28 @@ describe('KTDataTable locked layout plugin', () => {
 		).toBeGreaterThan(0);
 	});
 
-	it('uses opaque fallback background for locked header columns with alpha colors', async () => {
+	it('does not set inline background color for locked header columns', async () => {
 		const { container, table } = createDatatableFixture();
-		const firstHeaderCell = table.querySelector(
-			'th[data-kt-datatable-column="id"]',
+
+		new KTDataTable<DataRow>(container, {
+			stateSave: false,
+			columns: {
+				id: { title: 'ID' },
+				name: { title: 'Name' },
+				status: { title: 'Status' },
+			},
+			lockedLayout: {
+				stickyHeader: true,
+				stickyColumns: { left: ['id'] },
+			},
+		});
+
+		await vi.runAllTimersAsync();
+
+		const lockedHeaderCell = table.querySelector(
+			'th.kt-datatable-locked-left',
 		) as HTMLTableCellElement | null;
-		expect(firstHeaderCell).not.toBeNull();
-		if (!firstHeaderCell) {
-			return;
-		}
-
-		const originalGetComputedStyle = window.getComputedStyle;
-		const rootComputedStyle = {
-			backgroundColor: 'rgb(255, 255, 255)',
-			getPropertyValue: (name: string) =>
-				name === '--color-card' ? 'rgb(255, 255, 255)' : '',
-		} as CSSStyleDeclaration;
-		const tableComputedStyle = {
-			backgroundColor: 'rgb(255, 255, 255)',
-			getPropertyValue: (_name: string) => '',
-		} as CSSStyleDeclaration;
-		const alphaHeaderStyle = {
-			backgroundColor: 'oklch(0.97 0.01 250 / 0.4)',
-			getPropertyValue: (_name: string) => '',
-		} as CSSStyleDeclaration;
-		window.getComputedStyle = vi.fn((element: Element) => {
-			if (element === container) {
-				return rootComputedStyle;
-			}
-			if (element === table) {
-				return tableComputedStyle;
-			}
-			if (element === firstHeaderCell) {
-				return alphaHeaderStyle;
-			}
-			return originalGetComputedStyle(element);
-		}) as typeof window.getComputedStyle;
-
-		try {
-			new KTDataTable<DataRow>(container, {
-				stateSave: false,
-				columns: {
-					id: { title: 'ID' },
-					name: { title: 'Name' },
-					status: { title: 'Status' },
-				},
-				lockedLayout: {
-					stickyHeader: true,
-					stickyColumns: { left: ['id'] },
-				},
-			});
-
-			await vi.runAllTimersAsync();
-
-			const lockedHeaderCell = table.querySelector(
-				'th.kt-datatable-locked-left',
-			) as HTMLTableCellElement | null;
-			expect(lockedHeaderCell).not.toBeNull();
-			expect(lockedHeaderCell?.style.backgroundColor).toBe(
-				'rgb(255, 255, 255)',
-			);
-		} finally {
-			window.getComputedStyle = originalGetComputedStyle;
-		}
+		expect(lockedHeaderCell).not.toBeNull();
+		expect(lockedHeaderCell?.style.backgroundColor).toBe('');
 	});
 });

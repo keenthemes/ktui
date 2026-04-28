@@ -105,6 +105,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		this._init(element);
 		this._buildConfig();
+		this._normalizePageSizeConfig();
 
 		// Store the instance directly on the element
 		KTDataTable.asElementWithInstance(element).instance = this;
@@ -147,6 +148,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		if (this._config.stateSave) {
 			this._loadState();
+			this._normalizePageState();
 		}
 
 		this._updateData();
@@ -165,6 +167,37 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		return null;
+	}
+
+	private _normalizePageSizeConfig(): void {
+		const configuredPageSizes = Array.isArray(this._config.pageSizes)
+			? this._config.pageSizes
+			: [];
+		const pageSizes = configuredPageSizes
+			.map((size) => Number(size))
+			.filter((size) => Number.isFinite(size) && size > 0)
+			.map((size) => Math.floor(size));
+		const fallbackPageSizes = [5, 10, 20, 30, 50];
+		this._config.pageSizes =
+			pageSizes.length > 0 ? Array.from(new Set(pageSizes)) : fallbackPageSizes;
+
+		const configuredPageSize = Number(this._config.pageSize);
+		this._config.pageSize =
+			Number.isFinite(configuredPageSize) && configuredPageSize > 0
+				? Math.floor(configuredPageSize)
+				: this._config.pageSizes[0];
+	}
+
+	private _normalizePageState(): void {
+		const statePageSize = Number(this._config._state.pageSize);
+		this._config._state.pageSize =
+			Number.isFinite(statePageSize) && statePageSize > 0
+				? Math.floor(statePageSize)
+				: this._config.pageSize;
+
+		const statePage = Number(this._config._state.page);
+		this._config._state.page =
+			Number.isFinite(statePage) && statePage > 0 ? Math.floor(statePage) : 1;
 	}
 
 	private _getLayoutPluginContext(): KTDataTableLayoutPluginContextInterface {
@@ -605,7 +638,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._fireEvent('fetch');
 		this._dispatchEvent('fetch');
 
-		const { sortField, sortOrder, page, pageSize, search } = this.getState();
+		const { sortField, sortOrder, pageSize, search } = this.getState();
+		const normalizedPageSize = Math.max(
+			1,
+			Number(pageSize) || Number(this._config.pageSize) || 1,
+		);
 		let { originalData } = this.getState();
 
 		// If the table element or the original data is not defined, bail
@@ -656,19 +693,25 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			}
 		}
 
-		// If there is data, slice it to the current page size
-		if (this._data?.length > 0) {
-			// Calculate the start and end indices for the current page
-			const startIndex = (page - 1) * pageSize;
-			const endIndex = startIndex + pageSize;
+		// Determine number of total rows
+		this._config._state.totalItems = _temp.length;
+		const totalPages = Math.max(
+			1,
+			Math.ceil(this._config._state.totalItems / normalizedPageSize),
+		);
+		const normalizedPage = Math.min(
+			Math.max(1, this.getState().page),
+			totalPages,
+		);
+		this._config._state.page = normalizedPage;
 
+		// Draw the data
+		if (this._data?.length > 0) {
+			const startIndex = (normalizedPage - 1) * normalizedPageSize;
+			const endIndex = startIndex + normalizedPageSize;
 			this._data = this._data.slice(startIndex, endIndex) as T[];
 		}
 
-		// Determine number of total rows
-		this._config._state.totalItems = _temp.length;
-
-		// Draw the data
 		await this._draw();
 		this._fireEvent('fetched');
 		this._dispatchEvent('fetched');
@@ -1015,8 +1058,20 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {Promise<void>} A promise that resolves when the table and pagination controls are updated
 	 */
 	private async _draw(): Promise<void> {
+		const normalizedPageSize = Math.max(
+			1,
+			Number(this.getState().pageSize) || Number(this._config.pageSize) || 1,
+		);
 		this._config._state.totalPages =
-			Math.ceil(this.getState().totalItems / this.getState().pageSize) || 0;
+			Math.ceil(this.getState().totalItems / normalizedPageSize) || 0;
+		if (this._config._state.totalPages > 0) {
+			this._config._state.page = Math.min(
+				Math.max(1, this.getState().page),
+				this._config._state.totalPages,
+			);
+		} else {
+			this._config._state.page = 1;
+		}
 
 		this._fireEvent('draw');
 		this._dispatchEvent('draw');
@@ -1067,6 +1122,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		this._updateTableContent(tbodyElement);
+		if (!this._config.apiEndpoint) {
+			this._config._state._contentChecksum = KTUtils.checksum(
+				JSON.stringify(tbodyElement.innerHTML),
+			);
+		}
 
 		return tbodyElement;
 	}
@@ -1242,20 +1302,17 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			return _sizeElement;
 		}
 
-		// Wait for the element to be attached to the DOM
-		setTimeout(() => {
-			// Create <option> elements for each page size option
-			const options = this._config.pageSizes.map((size: number) => {
-				const option = document.createElement('option') as HTMLOptionElement;
-				option.value = String(size);
-				option.text = String(size);
-				option.selected = this.getState().pageSize === size;
-				return option;
-			});
+		// Create <option> elements for each page size option
+		const options = this._config.pageSizes.map((size: number) => {
+			const option = document.createElement('option') as HTMLOptionElement;
+			option.value = String(size);
+			option.text = String(size);
+			option.selected = this.getState().pageSize === size;
+			return option;
+		});
 
-			// Add the <option> elements to the provided element
-			_sizeElement.append(...options);
-		}, 100);
+		// Add the <option> elements to the provided element
+		_sizeElement.append(...options);
 
 		// Create an event listener for the "change" event on the element
 		const _pageSizeControlsEvent = (event: Event) => {
@@ -1297,7 +1354,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		_infoElement: HTMLElement,
 		_paginationElement: HTMLElement,
 	): HTMLElement {
-		if (!_infoElement || !_paginationElement || this._data.length === 0) {
+		const totalItems = Math.max(0, Number(this.getState().totalItems) || 0);
+		if (!_infoElement || !_paginationElement || totalItems === 0) {
 			return null;
 		}
 
@@ -1317,19 +1375,16 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @param _infoElement The element to set the info text in.
 	 */
 	private _setPaginationInfoText(_infoElement: HTMLElement): void {
+		const page = Math.max(1, Number(this.getState().page) || 1);
+		const pageSize = Math.max(1, Number(this.getState().pageSize) || 1);
+		const totalItems = Math.max(0, Number(this.getState().totalItems) || 0);
+		const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+		const end = totalItems === 0 ? 0 : Math.min(page * pageSize, totalItems);
+
 		_infoElement.textContent = this._config.info
-			.replace(
-				'{start}',
-				(this.getState().page - 1) * this.getState().pageSize + 1 + '',
-			)
-			.replace(
-				'{end}',
-				Math.min(
-					this.getState().page * this.getState().pageSize,
-					this.getState().totalItems,
-				) + '',
-			)
-			.replace('{total}', this.getState().totalItems + '');
+			.replace('{start}', String(start))
+			.replace('{end}', String(end))
+			.replace('{total}', String(totalItems));
 	}
 
 	/**

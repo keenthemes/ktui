@@ -121,176 +121,14 @@ const setStickyEdge = (
 	}
 };
 
-const isTransparentColor = (value: string): boolean => {
-	const color = value.trim().toLowerCase();
-	return (
-		color === '' ||
-		color === 'transparent' ||
-		color === 'rgba(0, 0, 0, 0)' ||
-		color === 'rgba(0,0,0,0)'
-	);
-};
-
-const hasPartialAlpha = (value: string): boolean => {
-	const color = value.trim().toLowerCase();
-	const rgbaMatch = color.match(
-		/^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*([0-9]*\.?[0-9]+)\s*\)$/,
-	);
-	if (!rgbaMatch) {
-		const slashAlphaMatch = color.match(/\/\s*([0-9]*\.?[0-9]+)\s*\)$/);
-		if (slashAlphaMatch) {
-			const alpha = Number.parseFloat(slashAlphaMatch[1]);
-			return Number.isFinite(alpha) && alpha > 0 && alpha < 1;
-		}
-		return false;
-	}
-
-	const alpha = Number.parseFloat(rgbaMatch[1]);
-	return Number.isFinite(alpha) && alpha > 0 && alpha < 1;
-};
-
-const parseRgbLikeColor = (
-	value: string,
-): { r: number; g: number; b: number; a: number } | null => {
-	const color = value.trim().toLowerCase();
-	const rgbMatch = color.match(
-		/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/,
-	);
-	if (rgbMatch) {
-		return {
-			r: Number.parseInt(rgbMatch[1], 10),
-			g: Number.parseInt(rgbMatch[2], 10),
-			b: Number.parseInt(rgbMatch[3], 10),
-			a: 1,
-		};
-	}
-
-	const rgbaMatch = color.match(
-		/^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([0-9]*\.?[0-9]+)\s*\)$/,
-	);
-	if (rgbaMatch) {
-		return {
-			r: Number.parseInt(rgbaMatch[1], 10),
-			g: Number.parseInt(rgbaMatch[2], 10),
-			b: Number.parseInt(rgbaMatch[3], 10),
-			a: Number.parseFloat(rgbaMatch[4]),
-		};
-	}
-
-	return null;
-};
-
-const clampColorChannel = (value: number): number => {
-	return Math.min(255, Math.max(0, Math.round(value)));
-};
-
-const blendRgbaOverRgb = (
-	foreground: { r: number; g: number; b: number; a: number },
-	background: { r: number; g: number; b: number },
-): { r: number; g: number; b: number } => {
-	return {
-		r: clampColorChannel(
-			foreground.r * foreground.a + background.r * (1 - foreground.a),
-		),
-		g: clampColorChannel(
-			foreground.g * foreground.a + background.g * (1 - foreground.a),
-		),
-		b: clampColorChannel(
-			foreground.b * foreground.a + background.b * (1 - foreground.a),
-		),
-	};
-};
-
-const resolveStickyBackgroundColor = (element: HTMLElement): string => {
-	let pendingPartialAlphaColor: {
-		r: number;
-		g: number;
-		b: number;
-		a: number;
-	} | null = null;
-	let current: HTMLElement | null = element;
-	while (current) {
-		const color = window.getComputedStyle(current).backgroundColor;
-		if (isTransparentColor(color)) {
-			current = current.parentElement;
-			continue;
-		}
-
-		const parsedColor = parseRgbLikeColor(color);
-		if (!parsedColor) {
-			return color;
-		}
-
-		if (parsedColor.a >= 1) {
-			if (!pendingPartialAlphaColor) {
-				return color;
-			}
-
-			const blended = blendRgbaOverRgb(pendingPartialAlphaColor, {
-				r: parsedColor.r,
-				g: parsedColor.g,
-				b: parsedColor.b,
-			});
-			return `rgb(${blended.r}, ${blended.g}, ${blended.b})`;
-		}
-
-		if (!pendingPartialAlphaColor && hasPartialAlpha(color)) {
-			pendingPartialAlphaColor = parsedColor;
-		}
-		current = current.parentElement;
-	}
-
-	if (pendingPartialAlphaColor) {
-		const blended = blendRgbaOverRgb(pendingPartialAlphaColor, {
-			r: 255,
-			g: 255,
-			b: 255,
-		});
-		return `rgb(${blended.r}, ${blended.g}, ${blended.b})`;
-	}
-
-	return '#ffffff';
-};
-
-const resolveCellBackgroundColor = (
-	element: HTMLElement,
-	fallbackColor: string,
-): string => {
-	const resolved = resolveStickyBackgroundColor(element);
-	return isTransparentColor(resolved) || hasPartialAlpha(resolved)
-		? fallbackColor
-		: resolved;
-};
-
-const resolveLockedBaseBackgroundColor = (
-	rootElement: HTMLElement,
-	tableElement: HTMLTableElement,
-): string => {
-	const rootStyle = window.getComputedStyle(rootElement);
-	const tableStyle = window.getComputedStyle(tableElement);
-	const cssVarColor =
-		rootStyle.getPropertyValue('--color-card').trim() ||
-		rootStyle.getPropertyValue('--color-background').trim() ||
-		tableStyle.getPropertyValue('--color-card').trim() ||
-		tableStyle.getPropertyValue('--color-background').trim();
-
-	if (cssVarColor && cssVarColor.toLowerCase() !== 'transparent') {
-		return cssVarColor;
-	}
-
-	return resolveStickyBackgroundColor(tableElement);
-};
-
 const ensureStickyCell = (
 	element: HTMLElement,
 	className: string,
 	zIndex: number,
-	backgroundColor?: string,
 ): void => {
 	element.classList.add(LOCKED_CELL_CLASS, className);
 	element.style.position = 'sticky';
 	element.style.zIndex = String(zIndex);
-	element.style.backgroundColor = backgroundColor || '';
 };
 
 const markIntersectionZIndex = (element: HTMLElement): void => {
@@ -334,7 +172,6 @@ const applyStickyRows = (
 	headerHeight: number,
 	topCount: number,
 	bottomCount: number,
-	baseBackgroundColor: string,
 ): void => {
 	const rows = Array.from(tbodyElement.rows);
 
@@ -343,12 +180,7 @@ const applyStickyRows = (
 		const rowTop = topOffset;
 		Array.from(row.cells).forEach((cell) => {
 			const td = cell as HTMLTableCellElement;
-			ensureStickyCell(
-				td,
-				LOCKED_TOP_ROW_CLASS,
-				ROW_Z_INDEX,
-				resolveCellBackgroundColor(td, baseBackgroundColor),
-			);
+			ensureStickyCell(td, LOCKED_TOP_ROW_CLASS, ROW_Z_INDEX);
 			td.style.top = `${rowTop}px`;
 		});
 		topOffset += row.getBoundingClientRect().height;
@@ -362,12 +194,7 @@ const applyStickyRows = (
 			const rowBottom = bottomOffset;
 			Array.from(row.cells).forEach((cell) => {
 				const td = cell as HTMLTableCellElement;
-				ensureStickyCell(
-					td,
-					LOCKED_BOTTOM_ROW_CLASS,
-					ROW_Z_INDEX,
-					resolveCellBackgroundColor(td, baseBackgroundColor),
-				);
+				ensureStickyCell(td, LOCKED_BOTTOM_ROW_CLASS, ROW_Z_INDEX);
 				td.style.bottom = `${rowBottom}px`;
 			});
 			bottomOffset += row.getBoundingClientRect().height;
@@ -422,7 +249,6 @@ const applyStickyColumns = (
 	tableElement: HTMLTableElement,
 	theadElement: HTMLTableSectionElement,
 	config: KTDataTableConfigInterface,
-	baseBackgroundColor: string,
 ): void => {
 	const lockedColumns = config.lockedLayout?.stickyColumns;
 	if (!lockedColumns) {
@@ -446,12 +272,7 @@ const applyStickyColumns = (
 
 		const width = cells[0].getBoundingClientRect().width;
 		cells.forEach((cell) => {
-			ensureStickyCell(
-				cell,
-				LOCKED_LEFT_CLASS,
-				COLUMN_Z_INDEX,
-				resolveCellBackgroundColor(cell, baseBackgroundColor),
-			);
+			ensureStickyCell(cell, LOCKED_LEFT_CLASS, COLUMN_Z_INDEX);
 			setStickyEdge(cell, 'left', leftOffset, direction);
 		});
 		leftOffset += width;
@@ -471,12 +292,7 @@ const applyStickyColumns = (
 
 		const width = cells[0].getBoundingClientRect().width;
 		cells.forEach((cell) => {
-			ensureStickyCell(
-				cell,
-				LOCKED_RIGHT_CLASS,
-				COLUMN_Z_INDEX,
-				resolveCellBackgroundColor(cell, baseBackgroundColor),
-			);
+			ensureStickyCell(cell, LOCKED_RIGHT_CLASS, COLUMN_Z_INDEX);
 			setStickyEdge(cell, 'right', rightOffset, direction);
 		});
 		rightOffset += width;
@@ -510,10 +326,6 @@ export const createStickyLayoutPlugin =
 				ctx.tableElement.style.borderSpacing = '0';
 
 				const lockedLayout = ctx.config.lockedLayout || {};
-				const lockedBaseBackgroundColor = resolveLockedBaseBackgroundColor(
-					ctx.rootElement,
-					ctx.tableElement,
-				);
 				const headerHeight = applyStickyHeader(
 					ctx.theadElement,
 					lockedLayout.stickyHeader === true,
@@ -524,14 +336,12 @@ export const createStickyLayoutPlugin =
 					headerHeight,
 					toPositiveInteger(lockedLayout.stickyRows?.top),
 					toPositiveInteger(lockedLayout.stickyRows?.bottom),
-					lockedBaseBackgroundColor,
 				);
 
 				applyStickyColumns(
 					ctx.tableElement,
 					ctx.theadElement,
 					ctx.config,
-					lockedBaseBackgroundColor,
 				);
 			} finally {
 				isApplying = false;

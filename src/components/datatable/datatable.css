@@ -80,9 +80,15 @@
 	[data-kt-datatable] .kt-datatable-locked-cell {
 		overflow: hidden;
 		isolation: isolate;
+		background-color: var(--color-card, var(--color-background, #ffffff));
 	}
 
 	[data-kt-datatable] .kt-datatable-locked-header {
+		background-color: color-mix(
+			in srgb,
+			var(--color-muted, rgb(0, 0, 0)) 40%,
+			transparent
+		);
 		box-shadow: inset 0 -1px 0 0 var(--color-border, rgba(0, 0, 0, 0.08));
 	}
 
