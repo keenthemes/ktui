@@ -52,9 +52,36 @@
 		"tailwind clipboard"
 	],
 	"author": "@keenthemes",
-	"types": "lib/esm/index.d.ts",
-	"main": "lib/cjs/index.js",
-	"module": "lib/esm/index.js",
+	"types": "lib/esm/legacy.d.ts",
+	"main": "lib/cjs/legacy.js",
+	"module": "lib/esm/legacy.js",
+	"exports": {
+		".": {
+			"types": "./lib/esm/legacy.d.ts",
+			"import": "./lib/esm/legacy.js",
+			"require": "./lib/cjs/legacy.js"
+		},
+		"./core": {
+			"types": "./lib/esm/index.d.ts",
+			"import": "./lib/esm/index.js",
+			"require": "./lib/cjs/index.js"
+		},
+		"./init-all": {
+			"types": "./lib/esm/init-all.d.ts",
+			"import": "./lib/esm/init-all.js",
+			"require": "./lib/cjs/init-all.js"
+		},
+		"./components/*": {
+			"types": "./lib/esm/components/*/index.d.ts",
+			"import": "./lib/esm/components/*/index.js",
+			"require": "./lib/cjs/components/*/index.js"
+		},
+		"./src/*": "./src/*",
+		"./lib/*": "./lib/*",
+		"./styles.css": "./styles.css",
+		"./dist/*": "./dist/*",
+		"./package.json": "./package.json"
+	},
 	"license": "MIT",
 	"files": [
 		"dist",

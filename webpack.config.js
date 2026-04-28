@@ -6,7 +6,7 @@ module.exports = (env) => {
 		mode: env.production ? 'production' : 'development',
 		watch: env.watch === 'true' || false,
 		entry: {
-			ktui: './src/index.ts',
+			ktui: './src/legacy.ts',
 			// '../index': './src/index.ts',
 
 			// 'ktui.data': './src/helpers/data.ts',

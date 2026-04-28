@@ -15,7 +15,7 @@
 		"moduleResolution": "node",
 		"skipLibCheck": true
 	},
-	"include": ["src/components"],
+	"include": ["src/**/*.ts"],
 	"exclude": [
 		"node_modules",
 		"dist",

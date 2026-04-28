@@ -188,7 +188,7 @@ export type {
 	KTTooltipInterface,
 } from './components/tooltip';
 
-const KTComponents = {
+export const KTComponents = {
 	init(): void {
 		KTDropdown.init();
 		KTContextMenu.init();
@@ -260,7 +260,3 @@ declare global {
 }
 
 export default KTComponents;
-
-KTDom.ready(() => {
-	KTComponents.init();
-});
