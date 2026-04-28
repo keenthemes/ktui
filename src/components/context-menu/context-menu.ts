@@ -13,10 +13,7 @@ import KTDom from '../../helpers/dom';
 import KTData from '../../helpers/data';
 import KTEventHandler from '../../helpers/event-handler';
 import KTComponent from '../component';
-import {
-	KTContextMenuConfigInterface,
-	KTContextMenuInterface,
-} from './types';
+import { KTContextMenuConfigInterface, KTContextMenuInterface } from './types';
 
 declare global {
 	interface Window {
@@ -47,7 +44,8 @@ export class KTContextMenu
 		flip: true,
 		overflow: false,
 	};
-	protected override _config: KTContextMenuConfigInterface = this._defaultConfig;
+	protected override _config: KTContextMenuConfigInterface =
+		this._defaultConfig;
 	protected _menuElement: HTMLElement;
 	protected _targetElement: HTMLElement;
 	protected _isTransitioning = false;
@@ -105,12 +103,16 @@ export class KTContextMenu
 		if (container === 'body') {
 			document.body.appendChild(this._menuElement);
 		} else {
-			document.querySelector(container as string)?.appendChild(this._menuElement);
+			document
+				.querySelector(container as string)
+				?.appendChild(this._menuElement);
 		}
 	}
 
 	protected _setupNestedSubmenus(): void {
-		const submenus = this._menuElement.querySelectorAll('[data-kt-context-menu]');
+		const submenus = this._menuElement.querySelectorAll(
+			'[data-kt-context-menu]',
+		);
 		submenus.forEach((submenu) => {
 			new KTContextMenu(submenu as HTMLElement);
 		});
@@ -162,7 +164,9 @@ export class KTContextMenu
 		this._menuElement.style.opacity = '0';
 		KTDom.reflow(this._menuElement);
 		this._menuElement.style.opacity = '1';
-		this._menuElement.classList.remove(this._getOption('hiddenClass') as string);
+		this._menuElement.classList.remove(
+			this._getOption('hiddenClass') as string,
+		);
 		this._menuElement.classList.add('open');
 		this._element.classList.add('open');
 
@@ -255,7 +259,8 @@ export class KTContextMenu
 					.map((value) => parseInt(value.trim(), 10))
 			: [0, 0];
 
-		const strategy = this._getOption('overflow') === true ? 'absolute' : 'fixed';
+		const strategy =
+			this._getOption('overflow') === true ? 'absolute' : 'fixed';
 		const altAxis = this._getOption('flip') !== false;
 		return {
 			placement,
@@ -316,9 +321,9 @@ export class KTContextMenu
 		) as HTMLElement | null;
 		if (initializedParent) return initializedParent;
 
-		const container = reference?.closest('[data-kt-context-menu]') as
-			| HTMLElement
-			| null;
+		const container = reference?.closest(
+			'[data-kt-context-menu]',
+		) as HTMLElement | null;
 		if (container) return container;
 
 		if (
@@ -443,7 +448,9 @@ export class KTContextMenu
 			const contextMenuEl = document.querySelector(
 				'.open[data-kt-context-menu-initialized]',
 			) as HTMLElement | null;
-			const contextMenu = KTContextMenu.getInstance(contextMenuEl as HTMLElement);
+			const contextMenu = KTContextMenu.getInstance(
+				contextMenuEl as HTMLElement,
+			);
 			if (!contextMenu || !contextMenu._getOption('keyboard')) return;
 
 			if (
