@@ -157,6 +157,33 @@ describe('KTDataTable locked layout plugin', () => {
 		).toBeGreaterThan(0);
 	});
 
+	it('keeps pagination state when using locked columns in local mode', async () => {
+		const { container } = createDatatableFixture();
+
+		const datatable = new KTDataTable<DataRow>(container, {
+			stateSave: false,
+			pageSize: 2,
+			columns: {
+				id: { title: 'ID' },
+				name: { title: 'Name' },
+				status: { title: 'Status' },
+			},
+			lockedLayout: {
+				stickyHeader: true,
+				stickyColumns: { left: ['id'] },
+			},
+		});
+
+		await vi.runAllTimersAsync();
+		expect(datatable.getState().totalPages).toBe(2);
+
+		datatable.goPage(2);
+		await vi.runAllTimersAsync();
+		expect(datatable.getState().page).toBe(2);
+		expect(datatable.getState().totalPages).toBe(2);
+		expect(datatable.getState().totalItems).toBe(rows.length);
+	});
+
 	it('does not set inline background color for locked header columns', async () => {
 		const { container, table } = createDatatableFixture();
 

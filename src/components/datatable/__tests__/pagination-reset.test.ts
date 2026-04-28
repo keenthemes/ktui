@@ -552,6 +552,24 @@ describe('KTDataTable - Pagination Reset', () => {
 	});
 
 	describe('Edge Cases', () => {
+		it('keeps total pages stable when navigating to page 2 in local mode', () => {
+			const { container } = createMockDataTable(6);
+			datatable = new KTDataTable(container, {
+				pageSize: 5,
+				stateSave: false,
+			});
+
+			expect(datatable.getState().totalPages).toBe(2);
+			datatable.goPage(2);
+			expect(datatable.getState().page).toBe(2);
+			expect(datatable.getState().totalPages).toBe(2);
+
+			// Trigger another redraw cycle to ensure local mode does not shrink original data.
+			datatable.reload();
+			expect(datatable.getState().page).toBe(2);
+			expect(datatable.getState().totalPages).toBe(2);
+		});
+
 		it('should handle search reset on page 1 (no-op)', () => {
 			const { container } = createMockDataTable(25);
 			datatable = new KTDataTable(container, {

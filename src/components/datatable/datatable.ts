@@ -644,14 +644,18 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			Number(pageSize) || Number(this._config.pageSize) || 1,
 		);
 		let { originalData } = this.getState();
+		const skipDomInvalidation = Boolean(
+			this._config.lockedLayout || this._config.layoutPlugin,
+		);
 
 		// If the table element or the original data is not defined, bail
 		if (
 			!this._tableElement ||
 			originalData === undefined ||
-			this._tableConfigInvalidate() ||
-			this._localTableHeaderInvalidate() ||
-			this._localTableContentInvalidate()
+			(!skipDomInvalidation &&
+				(this._tableConfigInvalidate() ||
+					this._localTableHeaderInvalidate() ||
+					this._localTableContentInvalidate()))
 		) {
 			this._deleteState();
 
@@ -725,6 +729,13 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {boolean} `true` if the table content has been invalidated, `false` otherwise.
 	 */
 	private _localTableContentInvalidate(): boolean {
+		// Layout plugins (locked rows/columns) mutate tbody markup after draw.
+		// Ignore checksum invalidation in this mode so pagination does not
+		// treat the rendered page slice as the new source dataset.
+		if (this._config.lockedLayout || this._config.layoutPlugin) {
+			return false;
+		}
+
 		const checksum: string = KTUtils.checksum(
 			JSON.stringify(this._tbodyElement.innerHTML),
 		);
@@ -1089,6 +1100,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		this._layoutPlugin?.afterDraw?.(this._getLayoutPluginContext());
+		if (!this._config.apiEndpoint) {
+			this._config._state._contentChecksum = KTUtils.checksum(
+				JSON.stringify(this._tbodyElement.innerHTML),
+			);
+		}
 
 		this._fireEvent('drew');
 		this._dispatchEvent('drew');
@@ -1122,11 +1138,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		this._updateTableContent(tbodyElement);
-		if (!this._config.apiEndpoint) {
-			this._config._state._contentChecksum = KTUtils.checksum(
-				JSON.stringify(tbodyElement.innerHTML),
-			);
-		}
 
 		return tbodyElement;
 	}
