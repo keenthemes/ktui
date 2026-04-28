@@ -8,6 +8,7 @@ import KTUtils from './helpers/utils';
 import KTEventHandler from './helpers/event-handler';
 import KTData from './helpers/data';
 import { KTDropdown } from './components/dropdown';
+import { KTContextMenu } from './components/context-menu';
 import { KTModal } from './components/modal';
 import { KTDrawer } from './components/drawer';
 import { KTCollapse } from './components/collapse';
@@ -36,6 +37,7 @@ import { KTPinInput } from './components/pin-input';
 import { KTCarousel } from './components/carousel';
 
 export { KTDropdown } from './components/dropdown';
+export { KTContextMenu } from './components/context-menu';
 export { KTModal } from './components/modal';
 export { KTDrawer } from './components/drawer';
 export { KTCollapse } from './components/collapse';
@@ -96,6 +98,10 @@ export type {
 	KTDropdownConfigInterface,
 	KTDropdownInterface,
 } from './components/dropdown';
+export type {
+	KTContextMenuConfigInterface,
+	KTContextMenuInterface,
+} from './components/context-menu';
 export type {
 	KTImageInputConfigInterface,
 	KTImageInputInterface,
@@ -185,6 +191,7 @@ export type {
 const KTComponents = {
 	init(): void {
 		KTDropdown.init();
+		KTContextMenu.init();
 		KTModal.init();
 		KTDrawer.init();
 		KTCollapse.init();
@@ -221,6 +228,7 @@ declare global {
 		KTEventHandler: typeof KTEventHandler;
 		KTData: typeof KTData;
 		KTDropdown: typeof KTDropdown;
+		KTContextMenu: typeof KTContextMenu;
 		KTModal: typeof KTModal;
 		KTDrawer: typeof KTDrawer;
 		KTCollapse: typeof KTCollapse;

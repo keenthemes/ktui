@@ -17,6 +17,7 @@
 @import './src/components/drawer/drawer.css';
 @import './src/components/dropdown/dropdown.css';
 @import './src/components/dropdown/dropdown-menu.css';
+@import './src/components/context-menu/context-menu.css';
 @import './src/components/image-input/image-input.css';
 @import './src/components/input/input.css';
 @import './src/components/input/input-group.css';
