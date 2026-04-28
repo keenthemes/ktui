@@ -69,6 +69,36 @@ export interface KTDataTableResponseDataInterface {
 	totalCount: number;
 }
 
+export interface KTDataTableLockedRowsConfigInterface {
+	top?: number;
+	bottom?: number;
+}
+
+export interface KTDataTableLockedColumnsConfigInterface {
+	left?: string[];
+	right?: string[];
+}
+
+export interface KTDataTableLockedLayoutConfigInterface {
+	stickyHeader?: boolean;
+	stickyRows?: KTDataTableLockedRowsConfigInterface;
+	stickyColumns?: KTDataTableLockedColumnsConfigInterface;
+}
+
+export interface KTDataTableLayoutPluginContextInterface {
+	rootElement: HTMLElement;
+	tableElement: HTMLTableElement;
+	theadElement: HTMLTableSectionElement;
+	tbodyElement: HTMLTableSectionElement;
+	config: KTDataTableConfigInterface;
+}
+
+export interface KTDataTableLayoutPluginInterface {
+	beforeDraw?: (ctx: KTDataTableLayoutPluginContextInterface) => void;
+	afterDraw?: (ctx: KTDataTableLayoutPluginContextInterface) => void;
+	dispose?: (ctx: KTDataTableLayoutPluginContextInterface) => void;
+}
+
 // Define the DataTable options type
 export interface KTDataTableConfigInterface {
 	requestMethod?: string;
@@ -186,6 +216,9 @@ export interface KTDataTableConfigInterface {
 		checkedClass?: string;
 		preserveSelection?: boolean;
 	};
+
+	lockedLayout?: KTDataTableLockedLayoutConfigInterface;
+	layoutPlugin?: KTDataTableLayoutPluginInterface;
 
 	_state?: KTDataTableStateInterface;
 	_data?: KTDataTableDataInterface[];

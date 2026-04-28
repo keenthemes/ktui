@@ -12,6 +12,8 @@ import {
 	KTDataTableStateInterface,
 	KTDataTableColumnFilterInterface,
 	KTDataTableAttributeInterface,
+	KTDataTableLayoutPluginContextInterface,
+	KTDataTableLayoutPluginInterface,
 } from './types';
 import { KTOptionType } from '../../types';
 import KTUtils from '../../helpers/utils';
@@ -22,6 +24,7 @@ import {
 	KTDataTableCheckboxAPI,
 } from './datatable-checkbox';
 import { createSortHandler, KTDataTableSortAPI } from './datatable-sort';
+import { createStickyLayoutPlugin } from './datatable-layout-plugin';
 
 /**
  * Custom DataTable plugin class with server-side API, pagination, and sorting
@@ -69,6 +72,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _checkbox: KTDataTableCheckboxAPI;
 	private _sortHandler: KTDataTableSortAPI<T>;
+	private _layoutPlugin: KTDataTableLayoutPluginInterface | null = null;
 
 	private _data: T[] = [];
 	private _isFetching: boolean = false;
@@ -106,6 +110,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		KTDataTable.asElementWithInstance(element).instance = this;
 
 		this._initElements();
+		this._layoutPlugin = this._createLayoutPlugin();
 
 		// Initialize checkbox handler
 		this._checkbox = createCheckboxHandler(
@@ -148,6 +153,28 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		this._fireEvent('init');
 		this._dispatchEvent('init');
+	}
+
+	private _createLayoutPlugin(): KTDataTableLayoutPluginInterface | null {
+		if (this._config.layoutPlugin) {
+			return this._config.layoutPlugin;
+		}
+
+		if (this._config.lockedLayout) {
+			return createStickyLayoutPlugin();
+		}
+
+		return null;
+	}
+
+	private _getLayoutPluginContext(): KTDataTableLayoutPluginContextInterface {
+		return {
+			rootElement: this._element,
+			tableElement: this._tableElement,
+			theadElement: this._theadElement,
+			tbodyElement: this._tbodyElement,
+			config: this._config,
+		};
 	}
 
 	/**
@@ -993,6 +1020,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		this._fireEvent('draw');
 		this._dispatchEvent('draw');
+		this._layoutPlugin?.beforeDraw?.(this._getLayoutPluginContext());
 
 		this._dispose();
 
@@ -1004,6 +1032,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (this._infoElement && this._paginationElement) {
 			this._updatePagination();
 		}
+
+		this._layoutPlugin?.afterDraw?.(this._getLayoutPluginContext());
 
 		this._fireEvent('drew');
 		this._dispatchEvent('drew');
@@ -1029,6 +1059,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		// Create the table body with the new data
 		const tbodyElement =
 			this._tableElement.createTBody() as HTMLTableSectionElement;
+		this._tbodyElement = tbodyElement;
 
 		// Apply the original class to the new tbody element
 		if (this._originalTbodyClass) {
@@ -1574,6 +1605,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * This method is called before re-rendering or when disposing the component.
 	 */
 	private _dispose() {
+		this._layoutPlugin?.dispose?.(this._getLayoutPluginContext());
+
 		// --- 1. Remove search input event listener (debounced) ---
 		const tableId: string = this._tableId();
 		const searchElement: HTMLInputElement | null =
