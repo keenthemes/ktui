@@ -700,6 +700,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
 			th.hasAttribute('data-kt-datatable-column'),
 		);
+		const columnsByIndex: HTMLTableCellElement[] =
+			ths.length > 0 && ths.length !== allThs.length ? Array.from(allThs) : ths;
 
 		rows.forEach((row: HTMLTableRowElement) => {
 			const dataRow: T = {} as T;
@@ -707,7 +709,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				{} as KTDataTableAttributeInterface;
 
 			row.querySelectorAll<HTMLTableCellElement>('td').forEach((td, index) => {
-				const colName = ths[index]?.getAttribute('data-kt-datatable-column');
+				const colName = columnsByIndex[index]?.getAttribute(
+					'data-kt-datatable-column',
+				);
 				if (colName) {
 					dataRow[colName as keyof T] = td.innerHTML?.trim() as T[keyof T];
 				} else {
@@ -745,7 +749,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		);
 		const currentTableHeaders =
 			thsWithColumn.length > 0
-				? thsWithColumn.length
+				? thsWithColumn.length !== allThs.length
+					? allThs.length
+					: thsWithColumn.length
 				: this._getLogicalColumnCount();
 
 		return currentTableHeaders !== totalColumns;
@@ -1066,10 +1072,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
 			th.hasAttribute('data-kt-datatable-column'),
 		);
-		// When no th has data-kt-datatable-column (e.g. multi-row headers), use logical column count from tbody so we don't overcount thead cells
-		const columnsToRender: HTMLTableCellElement[] = ths.length > 0 ? ths : [];
+		// In mixed-column tables (e.g. checkbox + data columns), preserve non-data columns by using header index.
+		const columnsToRender: HTMLTableCellElement[] =
+			ths.length > 0 && ths.length !== allThs.length ? Array.from(allThs) : ths;
+		// When no th has data-kt-datatable-column (e.g. multi-row headers), use logical column count from tbody so we don't overcount thead cells.
 		const logicalColumnCount =
-			ths.length > 0 ? ths.length : this._getLogicalColumnCount();
+			columnsToRender.length > 0
+				? columnsToRender.length
+				: this._getLogicalColumnCount();
 
 		this._data.forEach((item: T, rowIndex: number) => {
 			const row = document.createElement('tr');
