@@ -11,10 +11,8 @@ import {
 	KTDataTableSortOrderInterface,
 	KTDataTableStateInterface,
 	KTDataTableColumnFilterInterface,
-	KTDataTableAttributeInterface,
 } from './types';
 import { KTOptionType } from '../../types';
-import KTUtils from '../../helpers/utils';
 import KTComponents from '../../index';
 import KTData from '../../helpers/data';
 import {
@@ -22,6 +20,19 @@ import {
 	KTDataTableCheckboxAPI,
 } from './datatable-checkbox';
 import { createSortHandler, KTDataTableSortAPI } from './datatable-sort';
+import {
+	KTDataTableCleanup,
+	KTDataTableEventAdapter,
+	KTDataTablePaginationRenderer,
+	KTDataTableStateStore,
+	KTDataTableTableRenderer,
+} from './datatable-contracts';
+import { createDataTableEventAdapter } from './datatable-event-adapter';
+import { KTDataTableLocalDataProvider } from './datatable-local-provider';
+import { KTDataTableRemoteDataProvider } from './datatable-remote-provider';
+import { KTDataTableConfigStateStore } from './datatable-state-store';
+import { KTDataTableDomPaginationRenderer } from './datatable-pagination-renderer';
+import { KTDataTableDomTableRenderer } from './datatable-table-renderer';
 
 /**
  * Custom DataTable plugin class with server-side API, pagination, and sorting
@@ -69,21 +80,16 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _checkbox: KTDataTableCheckboxAPI;
 	private _sortHandler: KTDataTableSortAPI<T>;
+	private _eventAdapter: KTDataTableEventAdapter;
+	private _stateStore: KTDataTableStateStore;
+	private _localProvider: KTDataTableLocalDataProvider<T>;
+	private _remoteProvider: KTDataTableRemoteDataProvider<T>;
+	private _tableRenderer: KTDataTableTableRenderer<T>;
+	private _paginationRenderer: KTDataTablePaginationRenderer;
+	private _cleanupCallbacks: KTDataTableCleanup[] = [];
 
 	private _data: T[] = [];
 	private _isFetching: boolean = false;
-
-	/**
-	 * AbortController for cancelling previous fetch requests
-	 * Used to prevent race conditions when multiple requests are triggered rapidly
-	 */
-	private _abortController: AbortController | null = null;
-
-	/**
-	 * Request ID counter for tracking request sequence
-	 * Used to detect and ignore stale responses from older requests
-	 */
-	private _requestId: number = 0;
 
 	constructor(element: HTMLElement, config?: KTDataTableConfigInterface) {
 		super();
@@ -101,20 +107,25 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		this._init(element);
 		this._buildConfig();
+		this._stateStore = new KTDataTableConfigStateStore(this._config);
+		this._eventAdapter = createDataTableEventAdapter(
+			this._fireEvent.bind(this),
+			this._dispatchEvent.bind(this),
+		);
 
 		// Store the instance directly on the element
 		KTDataTable.asElementWithInstance(element).instance = this;
 
 		this._initElements();
+		this._tableRenderer = new KTDataTableDomTableRenderer<T>();
+		this._paginationRenderer = new KTDataTableDomPaginationRenderer();
+		this._initDataProviders();
 
 		// Initialize checkbox handler
 		this._checkbox = createCheckboxHandler(
 			this._element,
 			this._config,
-			(eventName: string, eventData?: object) => {
-				this._fireEvent(eventName, eventData);
-				this._dispatchEvent(eventName, eventData);
-			},
+			this._emit.bind(this),
 		);
 
 		// Initialize sort handler
@@ -126,8 +137,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				sortOrder: this.getState().sortOrder,
 			}),
 			(field, order) => {
-				this._config._state.sortField = field as never;
-				this._config._state.sortOrder = order;
+				this._stateStore.setSort(field as never, order);
 			},
 			this._fireEvent.bind(this),
 			this._dispatchEvent.bind(this),
@@ -146,8 +156,33 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		this._updateData();
 
-		this._fireEvent('init');
-		this._dispatchEvent('init');
+		this._emit('init');
+	}
+
+	private _emit(eventName: string, eventData?: object): void {
+		this._eventAdapter.emit(eventName, eventData);
+	}
+
+	private _initDataProviders(): void {
+		this._localProvider = new KTDataTableLocalDataProvider<T>({
+			config: this._config,
+			elements: () => ({
+				tableElement: this._tableElement,
+				tbodyElement: this._tbodyElement,
+				theadElement: this._theadElement,
+			}),
+			getLogicalColumnCount: this._getLogicalColumnCount.bind(this),
+			storeOriginalClasses: this._storeOriginalClasses.bind(this),
+			stateStore: this._stateStore,
+		});
+
+		this._remoteProvider = new KTDataTableRemoteDataProvider<T>({
+			config: this._config,
+			createUrl: this._createUrl.bind(this),
+			eventAdapter: this._eventAdapter,
+			noticeOnTable: this._noticeOnTable.bind(this),
+			stateStore: this._stateStore,
+		});
 	}
 
 	/**
@@ -480,14 +515,20 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		try {
 			this._showSpinner(); // Show spinner before fetching data
 
-			// Fetch data and finalize - properly await to ensure finally block runs after completion
-			if (typeof this._config.apiEndpoint === 'undefined') {
-				await this._fetchDataFromLocal();
-				await this._finalize();
-			} else {
-				await this._fetchDataFromServer();
-				await this._finalize();
+			this._emit('fetch');
+			const result =
+				typeof this._config.apiEndpoint === 'undefined'
+					? this._localProvider.fetchSync()
+					: await this._remoteProvider.fetch();
+
+			if (!result.skipped) {
+				this._data = result.data;
+				this._stateStore.patchState({ totalItems: result.totalItems });
+				await this._draw();
+				this._emit('fetched');
 			}
+
+			await this._finalize();
 		} finally {
 			// Finally block now correctly executes after promises resolve, not immediately
 			this._isFetching = false;
@@ -570,194 +611,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	/**
-	 * Fetch data from the DOM
-	 * Fetch data from the table element and save it to the `originalData` state property.
-	 * This method is used when the data is not fetched from the server via an API endpoint.
-	 */
-	private async _fetchDataFromLocal(): Promise<void> {
-		this._fireEvent('fetch');
-		this._dispatchEvent('fetch');
-
-		const { sortField, sortOrder, page, pageSize, search } = this.getState();
-		let { originalData } = this.getState();
-
-		// If the table element or the original data is not defined, bail
-		if (
-			!this._tableElement ||
-			originalData === undefined ||
-			this._tableConfigInvalidate() ||
-			this._localTableHeaderInvalidate() ||
-			this._localTableContentInvalidate()
-		) {
-			this._deleteState();
-
-			const { originalData, originalDataAttributes } =
-				this._localExtractTableContent();
-
-			this._config._state.originalData = originalData;
-			this._config._state.originalDataAttributes = originalDataAttributes;
-		}
-
-		// Update the original data variable
-		originalData = this.getState().originalData;
-
-		// Clone the original data
-		let _temp = (this._data = [...originalData] as T[]);
-
-		if (search) {
-			const searchTerm = typeof search === 'string' ? search : '';
-			_temp = this._data = this._config.search.callback.call(
-				this,
-				this._data,
-				searchTerm,
-			) as T[];
-		}
-
-		// If sorting is defined, sort the data
-		if (
-			sortField !== undefined &&
-			sortOrder !== undefined &&
-			sortOrder !== ''
-		) {
-			if (typeof this._config.sort.callback === 'function') {
-				this._data = this._config.sort.callback.call(
-					this,
-					this._data,
-					sortField as string,
-					sortOrder,
-				) as T[];
-			}
-		}
-
-		// If there is data, slice it to the current page size
-		if (this._data?.length > 0) {
-			// Calculate the start and end indices for the current page
-			const startIndex = (page - 1) * pageSize;
-			const endIndex = startIndex + pageSize;
-
-			this._data = this._data.slice(startIndex, endIndex) as T[];
-		}
-
-		// Determine number of total rows
-		this._config._state.totalItems = _temp.length;
-
-		// Draw the data
-		await this._draw();
-		this._fireEvent('fetched');
-		this._dispatchEvent('fetched');
-	}
-
-	/**
-	 * Checks if the table content has been invalidated by comparing the current checksum of the table body
-	 * with the stored checksum in the state. If the checksums are different, the state is updated with the
-	 * new checksum and `true` is returned. Otherwise, `false` is returned.
-	 *
-	 * @returns {boolean} `true` if the table content has been invalidated, `false` otherwise.
-	 */
-	private _localTableContentInvalidate(): boolean {
-		const checksum: string = KTUtils.checksum(
-			JSON.stringify(this._tbodyElement.innerHTML),
-		);
-		if (this.getState()._contentChecksum !== checksum) {
-			this._config._state._contentChecksum = checksum;
-			return true;
-		}
-		return false;
-	}
-
-	private _tableConfigInvalidate(): boolean {
-		// Remove _data and _state from config
-		const { _state, ...restConfig } = this._config;
-		const checksum: string = KTUtils.checksum(JSON.stringify(restConfig));
-		if (_state._configChecksum !== checksum) {
-			this._config._state._configChecksum = checksum;
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Extract the table content and returns it as an object containing an array of original data and an array of original data attributes.
-	 *
-	 * @returns {{originalData: T[], originalDataAttributes: KTDataTableAttributeInterface[]}} - An object containing an array of original data and an array of original data attributes.
-	 */
-	private _localExtractTableContent(): {
-		originalData: T[];
-		originalDataAttributes: KTDataTableAttributeInterface[];
-	} {
-		const originalData: T[] = [];
-		const originalDataAttributes: KTDataTableAttributeInterface[] = [];
-
-		this._storeOriginalClasses();
-
-		const rows = this._tbodyElement.querySelectorAll<HTMLTableRowElement>('tr');
-
-		// Filter th elements to only include those with data-kt-datatable-column attribute
-		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
-			? this._theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		);
-		const columnsByIndex: HTMLTableCellElement[] =
-			ths.length > 0 && ths.length !== allThs.length ? Array.from(allThs) : ths;
-
-		rows.forEach((row: HTMLTableRowElement) => {
-			const dataRow: T = {} as T;
-			const dataRowAttribute: KTDataTableAttributeInterface =
-				{} as KTDataTableAttributeInterface;
-
-			row.querySelectorAll<HTMLTableCellElement>('td').forEach((td, index) => {
-				const colName = columnsByIndex[index]?.getAttribute(
-					'data-kt-datatable-column',
-				);
-				if (colName) {
-					dataRow[colName as keyof T] = td.innerHTML?.trim() as T[keyof T];
-				} else {
-					// Store the original HTML for fallback
-					dataRow[index as keyof T] = td.innerHTML?.trim() as T[keyof T];
-				}
-			});
-
-			if (Object.keys(dataRow).length > 0) {
-				originalData.push(dataRow);
-				originalDataAttributes.push(dataRowAttribute);
-			}
-		});
-
-		return { originalData, originalDataAttributes };
-	}
-
-	/**
-	 * Check if the table header is invalidated
-	 * @returns {boolean} - Returns true if the table header is invalidated, false otherwise
-	 */
-	private _localTableHeaderInvalidate(): boolean {
-		const { originalData } = this.getState();
-
-		const totalColumns = originalData.length
-			? Object.keys(originalData[0]).length
-			: 0;
-
-		// Count th elements with data-kt-datatable-column; when none (e.g. multi-row headers), use logical column count so we don't falsely invalidate
-		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
-			? this._theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-		const thsWithColumn = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		);
-		const currentTableHeaders =
-			thsWithColumn.length > 0
-				? thsWithColumn.length !== allThs.length
-					? allThs.length
-					: thsWithColumn.length
-				: this._getLogicalColumnCount();
-
-		return currentTableHeaders !== totalColumns;
-	}
-
-	/**
 	 * Returns the logical data column count (number of data columns), used for multi-row headers
 	 * where querySelectorAll('th') would overcount. Prefers state.originalData, then first tbody row td count.
 	 * @returns {number} Number of data columns, or 0 if unknown
@@ -775,184 +628,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			}
 		}
 		return 0;
-	}
-
-	/**
-	 * Fetch data from the server
-	 */
-	private async _fetchDataFromServer(): Promise<void> {
-		// Increment request ID to track this specific request
-		const currentRequestId = ++this._requestId;
-
-		this._fireEvent('fetch');
-		this._dispatchEvent('fetch');
-
-		const queryParams = this._getQueryParamsForFetchRequest();
-
-		let response: Response;
-		try {
-			response = await this._performFetchRequest(queryParams);
-		} catch (error) {
-			// Silently ignore AbortError - request was cancelled
-			if ((error as Error).name === 'AbortError') {
-				return;
-			}
-			throw error;
-		}
-
-		// Check if this response is stale (a newer request has been initiated)
-		if (currentRequestId !== this._requestId) {
-			// Ignore stale response - a more recent request is in progress or has completed
-			return;
-		}
-
-		let responseData = null;
-
-		try {
-			responseData = await response.json();
-		} catch (error) {
-			// Fire event with complete error context for application handling
-			this._fireEvent('parseError', {
-				response,
-				error: String(error),
-				status: response.status,
-				statusText: response.statusText,
-			});
-			this._dispatchEvent('parseError', {
-				response,
-				error: String(error),
-				status: response.status,
-				statusText: response.statusText,
-			});
-			return;
-		}
-
-		// Double-check request ID after JSON parsing (additional safety)
-		if (currentRequestId !== this._requestId) {
-			return;
-		}
-
-		this._fireEvent('fetched', { response: responseData });
-		this._dispatchEvent('fetched', { response: responseData });
-
-		// Use the mapResponse function to transform the data if provided
-		if (typeof this._config.mapResponse === 'function') {
-			responseData = this._config.mapResponse.call(this, responseData);
-		}
-
-		this._data = responseData.data;
-
-		this._config._state.totalItems = responseData.totalCount;
-
-		await this._draw();
-		this._fireEvent('fetched');
-		this._dispatchEvent('fetched');
-	}
-
-	/**
-	 * Get the query params for a fetch request
-	 * @returns The query params for the fetch request
-	 */
-	private _getQueryParamsForFetchRequest(): URLSearchParams {
-		// Get the current state of the datatable
-		const { page, pageSize, sortField, sortOrder, filters, search } =
-			this.getState();
-
-		// Create a new URLSearchParams object to store the query params
-		let queryParams = new URLSearchParams();
-
-		// Add the current page number and page size to the query params
-		queryParams.set('page', String(page));
-		queryParams.set('size', String(pageSize));
-
-		// If there is a sort order and field set, add them to the query params
-		if (sortOrder !== undefined) {
-			queryParams.set('sortOrder', String(sortOrder));
-		}
-
-		if (sortField !== undefined) {
-			queryParams.set('sortField', String(sortField));
-		}
-
-		// If there are any filters set, add them to the query params
-		if (Array.isArray(filters) && filters.length) {
-			queryParams.set(
-				'filters',
-				JSON.stringify(
-					filters.map((filter: KTDataTableColumnFilterInterface) => ({
-						// Map the filter object to a simpler object with just the necessary properties
-						column: filter.column,
-						type: filter.type,
-						value: filter.value,
-					})),
-				),
-			);
-		}
-
-		if (search) {
-			queryParams.set(
-				'search',
-				typeof search === 'object' ? JSON.stringify(search) : search,
-			);
-		}
-
-		// If a mapRequest function is provided, call it with the query params object
-		if (typeof this._config.mapRequest === 'function') {
-			queryParams = this._config.mapRequest.call(this, queryParams);
-		}
-
-		// Return the query params object
-		return queryParams;
-	}
-
-	private async _performFetchRequest(
-		queryParams: URLSearchParams,
-	): Promise<Response> {
-		const requestMethod: RequestInit['method'] = this._config.requestMethod;
-		let requestBody: RequestInit['body'] | undefined = undefined;
-
-		// Cancel previous request to prevent race conditions
-		if (this._abortController) {
-			this._abortController.abort();
-		}
-
-		// Create new AbortController for this request
-		this._abortController = new AbortController();
-
-		// If the request method is POST, send the query params as the request body
-		if (requestMethod === 'POST') {
-			requestBody = queryParams;
-		} else if (requestMethod === 'GET') {
-			// If the request method is GET, append the query params to the API endpoint
-			const apiEndpointWithQueryParams = this._createUrl(
-				this._config.apiEndpoint,
-			);
-			apiEndpointWithQueryParams.search = queryParams.toString();
-			this._config.apiEndpoint = apiEndpointWithQueryParams.toString();
-		}
-
-		return fetch(this._config.apiEndpoint, {
-			method: requestMethod,
-			body: requestBody,
-			headers: this._config.requestHeaders,
-			...(this._config.requestCredentials && {
-				credentials: this._config.requestCredentials,
-			}),
-			// Add abort signal if available
-			...(this._abortController && { signal: this._abortController.signal }),
-		}).catch((error) => {
-			// Silently ignore AbortError - this is expected when requests are cancelled
-			if (error.name === 'AbortError') {
-				return Promise.reject(error);
-			}
-
-			// Trigger an error event for non-abort errors
-			this._fireEvent('error', { error });
-			this._dispatchEvent('error', { error });
-
-			this._noticeOnTable('Error performing fetch request: ' + String(error));
-			throw error;
-		});
 	}
 
 	/**
@@ -994,11 +669,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {Promise<void>} A promise that resolves when the table and pagination controls are updated
 	 */
 	private async _draw(): Promise<void> {
-		this._config._state.totalPages =
-			Math.ceil(this.getState().totalItems / this.getState().pageSize) || 0;
+		this._stateStore.patchState({
+			totalPages:
+				Math.ceil(this.getState().totalItems / this.getState().pageSize) || 0,
+		});
 
-		this._fireEvent('draw');
-		this._dispatchEvent('draw');
+		this._emit('draw');
 
 		this._dispose();
 
@@ -1011,8 +687,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._updatePagination();
 		}
 
-		this._fireEvent('drew');
-		this._dispatchEvent('drew');
+		this._emit('drew');
 
 		// Spinner is hidden in _finalize() to ensure it stays visible until the entire request completes
 		// Removed duplicate _hideSpinner() call here to prevent premature hiding
@@ -1027,147 +702,18 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {HTMLTableSectionElement} The new table body element
 	 */
 	private _updateTable(): HTMLTableSectionElement {
-		// Clear the existing table contents using a more efficient method
-		while (this._tableElement.tBodies.length) {
-			this._tableElement.removeChild(this._tableElement.tBodies[0]);
-		}
-
-		// Create the table body with the new data
-		const tbodyElement =
-			this._tableElement.createTBody() as HTMLTableSectionElement;
-
-		// Apply the original class to the new tbody element
-		if (this._originalTbodyClass) {
-			tbodyElement.className = this._originalTbodyClass;
-		}
-
-		this._updateTableContent(tbodyElement);
-
-		return tbodyElement;
-	}
-
-	/**
-	 * Update the table content
-	 * @param tbodyElement The table body element
-	 * @returns {HTMLTableSectionElement} The updated table body element
-	 */
-	private _updateTableContent(
-		tbodyElement: HTMLTableSectionElement,
-	): HTMLTableSectionElement {
-		const fragment = document.createDocumentFragment();
-
-		tbodyElement.textContent = ''; // Clear the tbody element
-
-		if (this._data.length === 0) {
-			this._noticeOnTable(this._config.infoEmpty || '');
-			return tbodyElement;
-		}
-
-		// Filter th elements to only include those with data-kt-datatable-column attribute
-		// This prevents creating blank td elements for merged header cells (colspan/rowspan)
-		const allThs: NodeListOf<HTMLTableCellElement> = this._theadElement
-			? this._theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		);
-		// In mixed-column tables (e.g. checkbox + data columns), preserve non-data columns by using header index.
-		const columnsToRender: HTMLTableCellElement[] =
-			ths.length > 0 && ths.length !== allThs.length ? Array.from(allThs) : ths;
-		// When no th has data-kt-datatable-column (e.g. multi-row headers), use logical column count from tbody so we don't overcount thead cells.
-		const logicalColumnCount =
-			columnsToRender.length > 0
-				? columnsToRender.length
-				: this._getLogicalColumnCount();
-
-		this._data.forEach((item: T, rowIndex: number) => {
-			const row = document.createElement('tr');
-
-			// Apply original tr class if available
-			if (this._originalTrClasses && this._originalTrClasses[rowIndex]) {
-				row.className = this._originalTrClasses[rowIndex];
-			}
-
-			if (!this._config.columns) {
-				const dataRowAttributes = this.getState().originalDataAttributes
-					? this.getState().originalDataAttributes[rowIndex]
-					: null;
-
-				for (let colIndex = 0; colIndex < logicalColumnCount; colIndex++) {
-					const th = columnsToRender[colIndex];
-					const colName = th?.getAttribute('data-kt-datatable-column');
-					const td = document.createElement('td');
-					let value: KTOptionType | '';
-					if (colName && Object.prototype.hasOwnProperty.call(item, colName)) {
-						value = item[colName as keyof T];
-					} else if (Object.prototype.hasOwnProperty.call(item, colIndex)) {
-						value = item[colIndex as keyof T];
-					} else {
-						value = '';
-					}
-					td.innerHTML = value as string;
-
-					// Apply original td class if available
-					if (
-						this._originalTdClasses &&
-						this._originalTdClasses[rowIndex] &&
-						this._originalTdClasses[rowIndex][colIndex]
-					) {
-						td.className = this._originalTdClasses[rowIndex][colIndex];
-					}
-
-					if (dataRowAttributes && dataRowAttributes[colIndex]) {
-						for (const attr in dataRowAttributes[colIndex]) {
-							td.setAttribute(attr, dataRowAttributes[colIndex][attr]);
-						}
-					}
-
-					row.appendChild(td);
-				}
-			} else {
-				Object.keys(this._config.columns).forEach(
-					(key: keyof T, colIndex: number) => {
-						const td = document.createElement('td');
-						const columnDef = this._config.columns[key as string];
-
-						// Apply original td class if available
-						if (
-							this._originalTdClasses &&
-							this._originalTdClasses[rowIndex] &&
-							this._originalTdClasses[rowIndex][colIndex]
-						) {
-							td.className = this._originalTdClasses[rowIndex][colIndex];
-						}
-
-						if (typeof columnDef.render === 'function') {
-							const result = columnDef.render.call(this, item[key], item, this);
-							if (
-								result instanceof HTMLElement ||
-								result instanceof DocumentFragment
-							) {
-								td.appendChild(result);
-							} else if (typeof result === 'string') {
-								td.innerHTML = result as string;
-							}
-						} else {
-							td.textContent = item[key] as string;
-						}
-
-						if (typeof columnDef.createdCell === 'function') {
-							columnDef.createdCell.call(this, td, item[key], item, row);
-						}
-
-						row.appendChild(td);
-					},
-				);
-			}
-
-			fragment.appendChild(row);
+		return this._tableRenderer.render({
+			config: this._config,
+			context: this,
+			data: this._data,
+			getLogicalColumnCount: this._getLogicalColumnCount.bind(this),
+			getState: this.getState.bind(this),
+			originalTbodyClass: this._originalTbodyClass,
+			originalTrClasses: this._originalTrClasses,
+			originalTdClasses: this._originalTdClasses,
+			tableElement: this._tableElement,
+			theadElement: this._theadElement,
 		});
-
-		tbodyElement.appendChild(fragment);
-		return tbodyElement;
 	}
 
 	/**
@@ -1176,80 +722,28 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {void}
 	 */
 	private _noticeOnTable(message: string = ''): void {
-		const row = this._tableElement.tBodies[0].insertRow();
-		const cell = row.insertCell();
-		const logicalCount = this._getLogicalColumnCount();
-		// Use logical column count so multi-row headers don't overcount; fallback to 1 when 0 so message still displays
-		cell.colSpan = logicalCount > 0 ? logicalCount : 1;
-		cell.innerHTML = message;
+		this._tableRenderer.notice(
+			this._tableElement,
+			this._getLogicalColumnCount.bind(this),
+			message,
+		);
 	}
 
 	private _updatePagination(): void {
-		this._removeChildElements(this._sizeElement);
-		this._createPageSizeControls(this._sizeElement);
+		const cleanup = this._paginationRenderer.render({
+			config: this._config,
+			dataLength: this._data.length,
+			infoElement: this._infoElement,
+			paginateData: this._paginateData.bind(this),
+			paginationElement: this._paginationElement,
+			reloadPageSize: this._reloadPageSize.bind(this),
+			sizeElement: this._sizeElement,
+			state: this.getState(),
+		});
 
-		this._removeChildElements(this._paginationElement);
-		this._createPaginationControls(this._infoElement, this._paginationElement);
-	}
-
-	/**
-	 * Removes all child elements from the given container element.
-	 * @param container The container element to remove the child elements from.
-	 */
-	private _removeChildElements(container: HTMLElement): void {
-		if (!container) {
-			return;
+		if (typeof cleanup === 'function') {
+			this._cleanupCallbacks.push(cleanup);
 		}
-
-		// Loop through all child elements of the container and remove them one by one
-		while (container.firstChild) {
-			// Remove the first child element (which is the first element in the list of child elements)
-			container.removeChild(container.firstChild);
-		}
-	}
-
-	/**
-	 * Creates a container element for the items per page selector.
-	 * @param _sizeElement The element to create the page size controls in.
-	 * @returns The container element.
-	 */
-	private _createPageSizeControls(
-		_sizeElement: HTMLSelectElement,
-	): HTMLSelectElement {
-		// If no element is provided, return early
-		if (!_sizeElement) {
-			return _sizeElement;
-		}
-
-		// Wait for the element to be attached to the DOM
-		setTimeout(() => {
-			// Create <option> elements for each page size option
-			const options = this._config.pageSizes.map((size: number) => {
-				const option = document.createElement('option') as HTMLOptionElement;
-				option.value = String(size);
-				option.text = String(size);
-				option.selected = this.getState().pageSize === size;
-				return option;
-			});
-
-			// Add the <option> elements to the provided element
-			_sizeElement.append(...options);
-		}, 100);
-
-		// Create an event listener for the "change" event on the element
-		const _pageSizeControlsEvent = (event: Event) => {
-			// When the element changes, reload the page with the new page size and page number 1
-			this._reloadPageSize(
-				Number((event.target as HTMLSelectElement).value),
-				1,
-			);
-		};
-
-		// Bind the event listener to the component instance
-		_sizeElement.onchange = _pageSizeControlsEvent.bind(this);
-
-		// Return the element
-		return _sizeElement;
 	}
 
 	/**
@@ -1259,36 +753,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	private _reloadPageSize(pageSize: number, page: number = 1): void {
 		// Update the page size and page number in the state
-		this._config._state.pageSize = pageSize;
-		this._config._state.page = page;
+		this._stateStore.setPageSize(pageSize, page);
 
 		// Update the data with the new page size and page number
 		this._updateData();
-	}
-
-	/**
-	 * Creates the pagination controls for the component.
-	 * @param _infoElement The element to set the info text in.
-	 * @param _paginationElement The element to create the pagination controls in.
-	 * @return {HTMLElement} The element containing the pagination controls.
-	 */
-	private _createPaginationControls(
-		_infoElement: HTMLElement,
-		_paginationElement: HTMLElement,
-	): HTMLElement {
-		if (!_infoElement || !_paginationElement || this._data.length === 0) {
-			return null;
-		}
-
-		this._setPaginationInfoText(_infoElement);
-		const paginationContainer =
-			this._createPaginationContainer(_paginationElement);
-
-		if (paginationContainer) {
-			this._createPaginationButtons(paginationContainer);
-		}
-
-		return paginationContainer;
 	}
 
 	/**
@@ -1453,11 +921,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			return;
 		}
 
-		this._fireEvent('pagination', { page: page });
-		this._dispatchEvent('pagination', { page: page });
+		this._emit('pagination', { page: page });
 
 		if (page >= 1 && page <= this.getState().totalPages) {
-			this._config._state.page = page;
+			this._stateStore.setPage(page);
 			this._updateData();
 		}
 	}
@@ -1508,8 +975,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {void}
 	 */
 	private _saveState(): void {
-		this._fireEvent('stateSave');
-		this._dispatchEvent('stateSave');
+		this._emit('stateSave');
 
 		const ns: string = this._tableNamespace();
 
@@ -1531,7 +997,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		try {
 			const state = JSON.parse(stateString) as KTDataTableStateInterface;
-			if (state) this._config._state = state;
+			if (state) this._stateStore.replaceState(state);
 			return state;
 		} catch {}
 
@@ -1584,6 +1050,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * This method is called before re-rendering or when disposing the component.
 	 */
 	private _dispose() {
+		this._cleanupCallbacks.forEach((cleanup) => cleanup());
+		this._cleanupCallbacks = [];
+
 		// --- 1. Remove search input event listener (debounced) ---
 		const tableId: string = this._tableId();
 		const searchElement: HTMLInputElement | null =
@@ -1593,14 +1062,13 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (searchElement) {
 			const searchWithDebounce =
 				KTDataTable.asSearchElementWithDebounce(searchElement);
-			if (!searchWithDebounce._debouncedSearch) {
-				return;
+			if (searchWithDebounce._debouncedSearch) {
+				searchElement.removeEventListener(
+					'keyup',
+					searchWithDebounce._debouncedSearch,
+				);
+				delete searchWithDebounce._debouncedSearch;
 			}
-			searchElement.removeEventListener(
-				'keyup',
-				searchWithDebounce._debouncedSearch,
-			);
-			delete searchWithDebounce._debouncedSearch;
 		}
 
 		// --- 2. Remove page size dropdown event listener ---
@@ -1682,31 +1150,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {KTDataTableStateInterface} The current state of the table.
 	 */
 	public getState(): KTDataTableStateInterface {
-		return {
-			/**
-			 * The current page number.
-			 */
-			page: 1,
-			/**
-			 * The field that the data is sorted by.
-			 */
-			sortField: null,
-			/**
-			 * The sort order (ascending or descending).
-			 */
-			sortOrder: '',
-			/**
-			 * The number of rows to display per page.
-			 */
-			pageSize: this._config.pageSize,
-
-			filters: [],
-
-			/**
-			 * Any additional state that may have been stored in the config.
-			 */
-			...this._config._state,
-		};
+		return this._stateStore.getState();
 	}
 
 	/**
@@ -1722,10 +1166,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			field,
 		);
 		this._sortHandler.setSortIcon(field as keyof T, sortOrder);
-		this._config._state.sortField = field as never;
-		this._config._state.sortOrder = sortOrder;
-		this._fireEvent('sort', { field, order: sortOrder });
-		this._dispatchEvent('sort', { field, order: sortOrder });
+		this._stateStore.setSort(field as never, sortOrder);
+		this._emit('sort', { field, order: sortOrder });
 		this._updateData();
 	}
 
@@ -1763,16 +1205,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * Triggers the 'reload' event and the 'kt.datatable.reload' custom event.
 	 */
 	public reload(): void {
-		this._fireEvent('reload');
-		this._dispatchEvent('reload');
+		this._emit('reload');
 
 		// Fetch the data from the server using the current sort and filter settings
 		this._updateData();
 	}
 
 	public redraw(page: number = 1): void {
-		this._fireEvent('redraw');
-		this._dispatchEvent('redraw');
+		this._emit('redraw');
 
 		this._paginateData(page);
 	}
@@ -1805,23 +1245,17 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @throws Error if the filter object is null or undefined.
 	 */
 	public setFilter(filter: KTDataTableColumnFilterInterface): KTDataTable<T> {
-		this._config._state.filters = [
-			...(this.getState().filters || []).filter(
-				(f) => f.column !== filter.column,
-			),
-			filter,
-		];
-		this._config._state.page = 1;
+		this._stateStore.setFilter(filter);
 		return this;
 	}
 
 	public override dispose(): void {
+		this._remoteProvider?.dispose();
 		this._dispose();
 	}
 
 	public search(query: string | object): void {
-		this._config._state.search = query;
-		this._config._state.page = 1;
+		this._stateStore.setSearch(query);
 		this.reload();
 	}
 
@@ -1934,8 +1368,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	public check(): void {
 		this._checkbox.check();
-		this._fireEvent('checked');
-		this._dispatchEvent('checked');
+		this._emit('checked');
 	}
 
 	/**
@@ -1944,8 +1377,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	public uncheck(): void {
 		this._checkbox.uncheck();
-		this._fireEvent('unchecked');
-		this._dispatchEvent('unchecked');
+		this._emit('unchecked');
 	}
 
 	/**
