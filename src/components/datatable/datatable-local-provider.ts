@@ -27,8 +27,7 @@ interface KTDataTableLocalProviderOptions<T extends KTDataTableDataInterface> {
 
 export class KTDataTableLocalDataProvider<
 	T extends KTDataTableDataInterface,
-> implements KTDataTableDataProvider<T>
-{
+> implements KTDataTableDataProvider<T> {
 	constructor(private readonly options: KTDataTableLocalProviderOptions<T>) {}
 
 	public async fetch(): Promise<KTDataTableProviderResult<T>> {

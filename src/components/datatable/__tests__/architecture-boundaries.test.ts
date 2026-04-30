@@ -139,7 +139,8 @@ describe('KTDataTable architecture boundaries', () => {
 
 		const provider = new KTDataTableRemoteDataProvider({
 			config,
-			createUrl: (pathOrUrl: string) => new URL(pathOrUrl, window.location.origin),
+			createUrl: (pathOrUrl: string) =>
+				new URL(pathOrUrl, window.location.origin),
 			eventAdapter: { emit },
 			noticeOnTable: vi.fn(),
 			stateStore,
@@ -157,10 +158,7 @@ describe('KTDataTable architecture boundaries', () => {
 	it('renders table body output through the table renderer', () => {
 		const config = createConfig();
 		const stateStore = new KTDataTableConfigStateStore(config);
-		stateStore.setOriginalData(
-			[{ id: '1', name: 'Ada' }],
-			[],
-		);
+		stateStore.setOriginalData([{ id: '1', name: 'Ada' }], []);
 		const table = document.createElement('table');
 		const thead = table.createTHead();
 		thead.innerHTML = `
@@ -236,9 +234,13 @@ describe('KTDataTable architecture boundaries', () => {
 		`;
 		document.body.appendChild(element);
 
-		const fetchSpy = vi.fn().mockResolvedValue(
-			new Response(JSON.stringify({ data: [{ name: 'Ada' }], totalCount: 1 })),
-		);
+		const fetchSpy = vi
+			.fn()
+			.mockResolvedValue(
+				new Response(
+					JSON.stringify({ data: [{ name: 'Ada' }], totalCount: 1 }),
+				),
+			);
 		global.fetch = fetchSpy;
 
 		new KTDataTable(element, { stateSave: false });

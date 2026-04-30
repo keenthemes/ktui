@@ -9,9 +9,7 @@ import {
 	KTDataTablePaginationRendererInput,
 } from './datatable-contracts';
 
-export class KTDataTableDomPaginationRenderer
-	implements KTDataTablePaginationRenderer
-{
+export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRenderer {
 	public render(
 		input: KTDataTablePaginationRendererInput,
 	): KTDataTableCleanup | void {
@@ -71,7 +69,11 @@ export class KTDataTableDomPaginationRenderer
 	private createPaginationControls(
 		input: KTDataTablePaginationRendererInput,
 	): HTMLElement {
-		if (!input.infoElement || !input.paginationElement || input.dataLength === 0) {
+		if (
+			!input.infoElement ||
+			!input.paginationElement ||
+			input.dataLength === 0
+		) {
 			return null;
 		}
 
@@ -81,7 +83,9 @@ export class KTDataTableDomPaginationRenderer
 		return input.paginationElement;
 	}
 
-	private setPaginationInfoText(input: KTDataTablePaginationRendererInput): void {
+	private setPaginationInfoText(
+		input: KTDataTablePaginationRendererInput,
+	): void {
 		input.infoElement.textContent = input.config.info
 			.replace(
 				'{start}',
@@ -89,8 +93,10 @@ export class KTDataTableDomPaginationRenderer
 			)
 			.replace(
 				'{end}',
-				Math.min(input.state.page * input.state.pageSize, input.state.totalItems) +
-					'',
+				Math.min(
+					input.state.page * input.state.pageSize,
+					input.state.totalItems,
+				) + '',
 			)
 			.replace('{total}', input.state.totalItems + '');
 	}
