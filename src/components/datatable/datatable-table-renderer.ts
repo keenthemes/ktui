@@ -130,7 +130,7 @@ export class KTDataTableDomTableRenderer<
 			td.innerHTML = value as string;
 
 			this.applyOriginalTdClass(input, td, rowIndex, colIndex);
-			this.applyDataRowAttributes(td, dataRowAttributes, colIndex);
+			this.applyDataRowAttributes(td, dataRowAttributes ?? null, colIndex);
 
 			row.appendChild(td);
 		}
@@ -142,39 +142,47 @@ export class KTDataTableDomTableRenderer<
 		item: T,
 		rowIndex: number,
 	): void {
-		Object.keys(input.config.columns).forEach(
-			(key: keyof T, colIndex: number) => {
-				const td = document.createElement('td');
-				const columnDef = input.config.columns[key as string];
+		const columns = input.config.columns;
+		if (!columns) {
+			return;
+		}
 
-				this.applyOriginalTdClass(input, td, rowIndex, colIndex);
+		Object.keys(columns).forEach((key, colIndex) => {
+			const columnDef = columns[key];
+			if (!columnDef) {
+				return;
+			}
+			const colKey = key as keyof T;
 
-				if (typeof columnDef.render === 'function') {
-					const result = columnDef.render.call(
-						input.context,
-						item[key],
-						item,
-						input.context,
-					);
-					if (
-						result instanceof HTMLElement ||
-						result instanceof DocumentFragment
-					) {
-						td.appendChild(result);
-					} else if (typeof result === 'string') {
-						td.innerHTML = result as string;
-					}
-				} else {
-					td.textContent = item[key] as string;
+			const td = document.createElement('td');
+
+			this.applyOriginalTdClass(input, td, rowIndex, colIndex);
+
+			if (typeof columnDef.render === 'function') {
+				const result = columnDef.render.call(
+					input.context,
+					item[colKey],
+					item,
+					input.context,
+				);
+				if (
+					result instanceof HTMLElement ||
+					result instanceof DocumentFragment
+				) {
+					td.appendChild(result);
+				} else if (typeof result === 'string') {
+					td.innerHTML = result as string;
 				}
+			} else {
+				td.textContent = item[colKey] as string;
+			}
 
-				if (typeof columnDef.createdCell === 'function') {
-					columnDef.createdCell.call(input.context, td, item[key], item, row);
-				}
+			if (typeof columnDef.createdCell === 'function') {
+				columnDef.createdCell.call(input.context, td, item[colKey], item, row);
+			}
 
-				row.appendChild(td);
-			},
-		);
+			row.appendChild(td);
+		});
 	}
 
 	private applyOriginalTdClass(
@@ -194,7 +202,7 @@ export class KTDataTableDomTableRenderer<
 
 	private applyDataRowAttributes(
 		td: HTMLTableCellElement,
-		dataRowAttributes: KTDataTableAttributeInterface,
+		dataRowAttributes: KTDataTableAttributeInterface | null,
 		colIndex: number,
 	): void {
 		if (dataRowAttributes && dataRowAttributes[colIndex]) {
