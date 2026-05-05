@@ -10,7 +10,7 @@ import { filterOptions, FocusManager, EventManager } from './utils';
 
 export class KTSelectSearch {
 	private _select: KTSelect;
-	private _searchInput: HTMLInputElement;
+	private _searchInput: HTMLInputElement | null;
 	private _noResultsElement: HTMLElement | null = null;
 	private _originalOptionContents = new Map<string, string>();
 	private _eventManager: EventManager;
@@ -18,7 +18,7 @@ export class KTSelectSearch {
 	private _config: KTSelectConfigInterface;
 
 	// Public handler for search input (made public for event binding)
-	public handleSearchInput: (...args: any[]) => void;
+	public handleSearchInput: (event: Event) => void;
 
 	constructor(select: KTSelect) {
 		this._select = select;
@@ -39,7 +39,6 @@ export class KTSelectSearch {
 			this._searchInput = this._select.getSearchInput();
 
 			if (this._searchInput) {
-
 				// First remove any existing listeners to prevent duplicates
 				this._removeEventListeners();
 
@@ -61,7 +60,7 @@ export class KTSelectSearch {
 				this._eventManager.addListener(this._searchInput, 'blur', () => {
 					// Small delay to prevent race conditions with selection
 					setTimeout(() => {
-						if (!this._searchInput.value) {
+						if (!this._searchInput?.value) {
 							this._resetAllOptions();
 							this.clearSearch();
 						}
@@ -75,12 +74,12 @@ export class KTSelectSearch {
 				) {
 					this._select
 						.getElement()
-						.addEventListener('remoteSearchStart', () => {
+						?.addEventListener('remoteSearchStart', () => {
 							// Reset focused option when remote search starts
 							this._focusManager.resetFocus();
 						});
 
-					this._select.getElement().addEventListener('remoteSearchEnd', () => {
+					this._select.getElement()?.addEventListener('remoteSearchEnd', () => {
 						// After remote search completes, refresh our option cache
 						this.refreshOptionCache();
 					});
@@ -89,7 +88,7 @@ export class KTSelectSearch {
 				// Listen for dropdown close to reset options - ATTACH TO WRAPPER
 				this._select
 					.getWrapperElement()
-					.addEventListener('dropdown.close', () => {
+					?.addEventListener('dropdown.close', () => {
 						this._focusManager.resetFocus();
 						const config = this._select.getConfig();
 
@@ -99,7 +98,9 @@ export class KTSelectSearch {
 						// Respect clearSearchOnClose config option
 						if (config.clearSearchOnClose) {
 							// Clear the search input field
-							this._searchInput.value = '';
+							if (this._searchInput) {
+								this._searchInput.value = '';
+							}
 							// Reset all options to their original state
 							this._resetAllOptions();
 							// Clear any "no results" message
@@ -117,7 +118,7 @@ export class KTSelectSearch {
 					});
 
 				// Clear highlights when an option is selected - ATTACH TO ORIGINAL SELECT (standard 'change' event)
-				this._select.getElement().addEventListener('change', () => {
+				this._select.getElement()?.addEventListener('change', () => {
 					this.clearSearch();
 
 					// Close dropdown only for single select mode, and only if closeOnEnter is not false
@@ -132,7 +133,7 @@ export class KTSelectSearch {
 				// Consolidated 'dropdown.show' event listener - ATTACH TO WRAPPER
 				this._select
 					.getWrapperElement()
-					.addEventListener('dropdown.show', () => {
+					?.addEventListener('dropdown.show', () => {
 						this._focusManager.resetFocus(); // Always clear previous focus state
 
 						if (this._searchInput?.value) {
@@ -195,7 +196,9 @@ export class KTSelectSearch {
 			try {
 				this._searchInput?.focus();
 				// Check if focus was successful
-				const isFocused = document.activeElement === this._searchInput || this._searchInput === document.activeElement;
+				const isFocused =
+					document.activeElement === this._searchInput ||
+					this._searchInput === document.activeElement;
 				if (isFocused) {
 					// Focus successful
 					return;
@@ -204,7 +207,7 @@ export class KTSelectSearch {
 				if (attempt < maxAttempts) {
 					this._focusSearchInputWithRetry(attempt + 1);
 				}
-			} catch (error) {
+			} catch {
 				// Focus failed with error, retry if we haven't exceeded max attempts
 				if (attempt < maxAttempts) {
 					this._focusSearchInputWithRetry(attempt + 1);
@@ -222,43 +225,62 @@ export class KTSelectSearch {
 	/**
 	 * Handles keydown events on the search input for navigation and actions.
 	 */
-	private _handleSearchKeyDown(event: KeyboardEvent): void {
-		const key = event.key;
+	private _handleSearchKeyDown(event: Event): void {
+		const keyEvent = event as KeyboardEvent;
+		const key = keyEvent.key;
 
 		switch (key) {
 			case ' ': // Spacebar
 				// Do nothing, allow space to be typed into the input
 				// Stop propagation to prevent parent handlers from processing this event
-				event.stopPropagation();
+				keyEvent.stopPropagation();
 				break;
 			case 'ArrowDown':
-				event.preventDefault();
+				keyEvent.preventDefault();
 				this._focusManager.focusNext();
 				break;
 			case 'ArrowUp':
-				event.preventDefault();
+				keyEvent.preventDefault();
 				this._focusManager.focusPrevious();
 				break;
-			case 'Enter':
-				event.preventDefault();
-				// Always attempt to select the first available option in the list.
-				// focusFirst() finds, focuses, and returns the first visible, non-disabled option.
-				const firstAvailableOption = this._focusManager.focusFirst();
+			case 'Enter': {
+				keyEvent.preventDefault();
+				// Use currently focused option (from arrow keys); only fall back to first if none focused
+				const optionToSelect =
+					this._focusManager.getFocusedOption() ??
+					this._focusManager.focusFirst();
 
-				if (firstAvailableOption) {
-					const optionValue = firstAvailableOption.getAttribute('data-value');
+				if (optionToSelect) {
+					const optionValue = optionToSelect.getAttribute('data-value');
 					if (optionValue) {
-						// toggleSelection() already handles closing the dropdown based on closeOnEnter config
-						// for single-select mode, so we don't need to call closeDropdown() here
-						this._select.toggleSelection(optionValue);
-						// If closeOnEnter is false, dropdown remains open for additional selections
+						const config = this._select.getConfig();
+						const isAlreadySelected =
+							!config.multiple &&
+							this._select.getSelectedOptions().includes(optionValue);
+						const shouldClose =
+							!config.multiple && config.closeOnEnter !== false;
+
+						if (isAlreadySelected && shouldClose) {
+							this._select.closeDropdown();
+						} else {
+							this._select.toggleSelection(optionValue);
+						}
+
+						// Focus display element after closing so user can press Enter again
+						if (shouldClose) {
+							setTimeout(() => {
+								this._select.getDisplayElement()?.focus();
+							}, 0);
+						}
 					}
 				}
-				// If no available option, do nothing (dropdown remains open)
 				break;
+			}
 			case 'Escape':
-				event.preventDefault();
-				this._searchInput.value = '';
+				keyEvent.preventDefault();
+				if (this._searchInput) {
+					this._searchInput.value = '';
+				}
 				this.clearSearch();
 				this._resetAllOptions();
 				this._clearNoResultsMessage();
@@ -326,8 +348,9 @@ export class KTSelectSearch {
 
 		// For remote search, KTSelect component handles it.
 		// KTSelect will call refreshAfterSearch on this module when remote data is updated.
+		const minLength = config.searchMinLength ?? 0;
 		if (config.remote && config.searchParam) {
-			if (query.length < config.searchMinLength) {
+			if (query.length < minLength) {
 				this._resetAllOptions();
 				this._clearNoResultsMessage();
 				this._focusManager.focusFirst(); // Focus first if query too short
@@ -336,7 +359,7 @@ export class KTSelectSearch {
 		}
 
 		// For local search
-		if (query.length >= config.searchMinLength) {
+		if (query.length >= minLength) {
 			this._filterOptions(query);
 			this._focusManager.focusFirst(); // Focus first visible option after local filtering
 		} else {
@@ -361,12 +384,8 @@ export class KTSelectSearch {
 		// Restore original content before filtering, so highlighting is applied fresh.
 		this._restoreOptionContentsBeforeFilter();
 
-		const visibleCount = filterOptions(
-			options,
-			query,
-			config,
-			dropdownElement,
-			(count) => this._handleNoResults(count),
+		filterOptions(options, query, config, dropdownElement, (count) =>
+			this._handleNoResults(count),
 		);
 
 		this._select.updateSelectAllButtonState();

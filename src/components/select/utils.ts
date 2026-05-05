@@ -5,7 +5,6 @@
 
 // utils.ts
 
-import { defaultTemplates } from './templates';
 import { KTSelectConfigInterface } from './config';
 
 /**
@@ -99,7 +98,7 @@ export class FocusManager {
 	constructor(
 		element: HTMLElement,
 		optionsSelector: string = '[data-kt-select-option]',
-		config?: KTSelectConfigInterface,
+		_config?: KTSelectConfigInterface,
 	) {
 		this._element = element;
 		this._optionsSelector = optionsSelector;
@@ -121,8 +120,7 @@ export class FocusManager {
 			const target = e.target as HTMLElement;
 			const optionElement = target.closest(this._optionsSelector);
 
-			if (optionElement) {
-			}
+			void optionElement;
 		});
 	}
 
@@ -227,7 +225,7 @@ export class FocusManager {
 			this._focusedOptionIndex === null
 				? 0
 				: (this._focusedOptionIndex + 1) % options.length;
-		let startIdx = idx;
+		const startIdx = idx;
 		do {
 			const option = options[idx];
 			if (
@@ -255,7 +253,7 @@ export class FocusManager {
 			this._focusedOptionIndex === null
 				? options.length - 1
 				: (this._focusedOptionIndex - 1 + options.length) % options.length;
-		let startIdx = idx;
+		const startIdx = idx;
 		do {
 			const option = options[idx];
 			if (
@@ -367,6 +365,23 @@ export class FocusManager {
 			return options[this._focusedOptionIndex];
 		}
 
+		// Fallback: DOM may have focus class applied (e.g. by arrow keys from search input)
+		// while _focusedOptionIndex is out of sync. Use the option that has the focus class.
+		const focusedEl = this._element.querySelector(
+			`${this._optionsSelector}.${this._focusClass}`,
+		) as HTMLElement | null;
+		if (
+			focusedEl &&
+			!focusedEl.classList.contains('hidden') &&
+			focusedEl.style.display !== 'none'
+		) {
+			const idx = options.indexOf(focusedEl);
+			if (idx >= 0) {
+				this._focusedOptionIndex = idx;
+				return focusedEl;
+			}
+		}
+
 		return null;
 	}
 
@@ -425,7 +440,7 @@ export class EventManager {
 		element: HTMLElement,
 		event: string,
 		handler: EventListenerOrEventListenerObject,
-		context?: any,
+		context?: unknown,
 	): void {
 		if (!element) return;
 
@@ -497,12 +512,12 @@ export class EventManager {
  * Debounce function to limit how often a function can be called
  */
 export function debounce(
-	func: (...args: any[]) => void,
+	func: (...args: unknown[]) => void,
 	delay: number,
-): (...args: any[]) => void {
+): (...args: unknown[]) => void {
 	let timeout: ReturnType<typeof setTimeout>;
 
-	return function (...args: any[]) {
+	return function (...args: unknown[]) {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => func(...args), delay);
 	};
@@ -514,7 +529,7 @@ export function debounce(
  */
 export function renderTemplateString(
 	template: string,
-	data: Record<string, any>,
+	data: Record<string, unknown>,
 ): string {
 	return template.replace(/{{(\w+)}}/g, (_, key) =>
 		data[key] !== undefined && data[key] !== null ? String(data[key]) : '',

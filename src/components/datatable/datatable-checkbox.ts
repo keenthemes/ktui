@@ -25,7 +25,7 @@ export interface KTDataTableCheckboxAPI {
 export function createCheckboxHandler(
 	element: HTMLElement,
 	config: KTDataTableConfigInterface,
-	fireEvent: (eventName: string, eventData?: any) => void,
+	fireEvent: (eventName: string, eventData?: object) => void,
 ): KTDataTableCheckboxAPI {
 	let headerChecked = false;
 	let headerCheckElement: HTMLInputElement | null = null;
@@ -36,7 +36,8 @@ export function createCheckboxHandler(
 
 	// Helper: get selectedRows from state, always as string[]
 	function getSelectedRows(): string[] {
-		if (!config._state) config._state = {} as any;
+		if (!config._state)
+			config._state = {} as unknown as KTDataTableConfigInterface['_state'];
 		if (!Array.isArray(config._state.selectedRows))
 			config._state.selectedRows = [];
 		return config._state.selectedRows.map(String);
@@ -44,7 +45,8 @@ export function createCheckboxHandler(
 
 	// Helper: set selectedRows in state
 	function setSelectedRows(rows: string[]) {
-		if (!config._state) config._state = {} as any;
+		if (!config._state)
+			config._state = {} as unknown as KTDataTableConfigInterface['_state'];
 		config._state.selectedRows = Array.from(new Set(rows.map(String)));
 	}
 
@@ -118,7 +120,7 @@ export function createCheckboxHandler(
 	}
 
 	// When the header checkbox is toggled
-	function checkboxToggle(event?: Event) {
+	function checkboxToggle(_event?: Event) {
 		const checked = !isChecked();
 		// Update state first, then fire events
 		change(checked);

@@ -6,7 +6,9 @@
 import KTDom from './helpers/dom';
 import KTUtils from './helpers/utils';
 import KTEventHandler from './helpers/event-handler';
+import KTData from './helpers/data';
 import { KTDropdown } from './components/dropdown';
+import { KTContextMenu } from './components/context-menu';
 import { KTModal } from './components/modal';
 import { KTDrawer } from './components/drawer';
 import { KTCollapse } from './components/collapse';
@@ -27,8 +29,16 @@ import { KTTogglePassword } from './components/toggle-password';
 import { KTDataTable } from './components/datatable';
 import { KTSelect } from './components/select';
 import { KTToast } from './components/toast';
+import { KTRating } from './components/rating';
+import { KTRepeater } from './components/repeater';
+import { KTClipboard } from './components/clipboard';
+import { KTRangeSlider } from './components/range-slider';
+import { KTPinInput } from './components/pin-input';
+import { KTInputNumber } from './components/input-number';
+import { KTCarousel } from './components/carousel';
 
 export { KTDropdown } from './components/dropdown';
+export { KTContextMenu } from './components/context-menu';
 export { KTModal } from './components/modal';
 export { KTDrawer } from './components/drawer';
 export { KTCollapse } from './components/collapse';
@@ -49,10 +59,146 @@ export { KTTogglePassword } from './components/toggle-password';
 export { KTDataTable } from './components/datatable';
 export { KTSelect } from './components/select';
 export { KTToast } from './components/toast';
+export { KTRating } from './components/rating';
+export { KTRepeater } from './components/repeater';
+export { KTClipboard } from './components/clipboard';
+export { KTRangeSlider } from './components/range-slider';
+export { KTPinInput } from './components/pin-input';
+export { KTInputNumber } from './components/input-number';
+export { KTCarousel } from './components/carousel';
 
-const KTComponents = {
+export type {
+	KTAccordionConfigInterface,
+	KTAccordionInterface,
+} from './components/accordion';
+export type {
+	KTCollapseConfigInterface,
+	KTCollapseInterface,
+} from './components/collapse';
+export type {
+	KTDataTableSortOrderInterface,
+	KTDataTableDataInterface,
+	KTDataTableState,
+	KTDataTableInterface,
+	KTDataTableResponseDataInterface,
+	KTDataTableConfigInterface,
+	KTDataTableColumnFilterTypeInterface,
+	KTDataTableColumnFilterInterface,
+	KTDataTableCheckConfigInterface,
+	KTDataTableCheckInterface,
+	KTDataTableCheckChangePayloadInterface,
+} from './components/datatable';
+export type {
+	KTDismissConfigInterface,
+	KTDismissInterface,
+} from './components/dismiss';
+export type {
+	KTDrawerConfigInterface,
+	KTDrawerInterface,
+} from './components/drawer';
+export type {
+	KTDropdownConfigInterface,
+	KTDropdownInterface,
+} from './components/dropdown';
+export type {
+	KTContextMenuConfigInterface,
+	KTContextMenuInterface,
+} from './components/context-menu';
+export type {
+	KTImageInputConfigInterface,
+	KTImageInputInterface,
+} from './components/image-input';
+export type {
+	KTModalConfigInterface,
+	KTModalInterface,
+} from './components/modal';
+export type {
+	KTRatingConfigInterface,
+	KTRatingInterface,
+	KTRatingSymbolType,
+} from './components/rating';
+export type {
+	KTReparentConfigInterface,
+	KTReparentInterface,
+} from './components/reparent';
+export type {
+	KTRepeaterConfigInterface,
+	KTRepeaterInterface,
+} from './components/repeater';
+export type {
+	KTClipboardConfigInterface,
+	KTClipboardInterface,
+} from './components/clipboard';
+export type {
+	KTRangeSliderConfigInterface,
+	KTRangeSliderEventPayloadInterface,
+	KTRangeSliderInterface,
+} from './components/range-slider';
+export type {
+	KTPinInputConfigInterface,
+	KTPinInputEventPayloadInterface,
+	KTPinInputInterface,
+} from './components/pin-input';
+export type {
+	KTInputNumberConfigInterface,
+	KTInputNumberEventPayloadInterface,
+	KTInputNumberInterface,
+} from './components/input-number';
+export type {
+	KTCarouselConfigInterface,
+	KTCarouselChangePayloadInterface,
+	KTCarouselInterface,
+} from './components/carousel';
+export type {
+	KTScrollableConfigInterface,
+	KTScrollableInterface,
+} from './components/scrollable';
+export type {
+	KTScrollspyConfigInterface,
+	KTScrollspyInterface,
+} from './components/scrollspy';
+export type {
+	KTScrolltoConfigInterface,
+	KTScrolltoInterface,
+} from './components/scrollto';
+export type {
+	KTSelectConfigInterface,
+	KTSelectOption,
+} from './components/select';
+export type {
+	KTStepperConfigInterface,
+	KTStepperInterface,
+} from './components/stepper';
+export type {
+	KTStickyConfigInterface,
+	KTStickyInterface,
+} from './components/sticky';
+export type { KTTabsConfigInterface, KTTabsInterface } from './components/tabs';
+export type {
+	KTThemeSwitchConfigInterface,
+	KTThemeSwitchInterface,
+} from './components/theme-switch';
+export type {
+	KTToastConfigInterface,
+	KTToastInterface,
+} from './components/toast';
+export type {
+	KTToggleConfigInterface,
+	KTToggleInterface,
+} from './components/toggle';
+export type {
+	KTTogglePasswordConfigInterface,
+	KTTogglePasswordInterface,
+} from './components/toggle-password';
+export type {
+	KTTooltipConfigInterface,
+	KTTooltipInterface,
+} from './components/tooltip';
+
+export const KTComponents = {
 	init(): void {
 		KTDropdown.init();
+		KTContextMenu.init();
 		KTModal.init();
 		KTDrawer.init();
 		KTCollapse.init();
@@ -73,6 +219,13 @@ const KTComponents = {
 		KTDataTable.init();
 		KTSelect.init();
 		KTToast.init();
+		KTRating.init();
+		KTRepeater.init();
+		KTClipboard.init();
+		KTRangeSlider.init();
+		KTPinInput.init();
+		KTInputNumber.init();
+		KTCarousel.init();
 	},
 };
 
@@ -81,7 +234,9 @@ declare global {
 		KTUtils: typeof KTUtils;
 		KTDom: typeof KTDom;
 		KTEventHandler: typeof KTEventHandler;
+		KTData: typeof KTData;
 		KTDropdown: typeof KTDropdown;
+		KTContextMenu: typeof KTContextMenu;
 		KTModal: typeof KTModal;
 		KTDrawer: typeof KTDrawer;
 		KTCollapse: typeof KTCollapse;
@@ -102,12 +257,15 @@ declare global {
 		KTDataTable: typeof KTDataTable;
 		KTSelect: typeof KTSelect;
 		KTToast: typeof KTToast;
+		KTRating: typeof KTRating;
+		KTRepeater: typeof KTRepeater;
+		KTClipboard: typeof KTClipboard;
+		KTRangeSlider: typeof KTRangeSlider;
+		KTPinInput: typeof KTPinInput;
+		KTInputNumber: typeof KTInputNumber;
+		KTCarousel: typeof KTCarousel;
 		KTComponents: typeof KTComponents;
 	}
 }
 
 export default KTComponents;
-
-KTDom.ready(() => {
-	KTComponents.init();
-});

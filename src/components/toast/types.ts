@@ -60,6 +60,7 @@ export interface KTToastClassNames {
 	message?: string; // Message
 	toolbar?: string; // Toolbar
 	actions?: string; // Actions
+	progress?: string; // Progress indicator
 }
 
 /**
@@ -93,7 +94,9 @@ export interface KTToastConfigInterface {
 	progress?: boolean;
 }
 
-export interface KTToastInterface {}
+export interface KTToastInterface {
+	dispose(): void;
+}
 
 export interface KTToastOptions {
 	/** Custom content for the toast. HTMLElement, function returning HTMLElement, or string (DOM id). If set, replaces all default markup. */
@@ -169,4 +172,5 @@ export interface KTToastInstance {
 	id: string; // Toast unique ID
 	element: HTMLElement; // Toast DOM element
 	timeoutId: number; // Timer ID for auto-dismiss
+	options?: KTToastOptions; // Resolved options used to create this toast
 }

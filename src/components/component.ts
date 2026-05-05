@@ -3,10 +3,6 @@
  * Copyright 2025 by Keenthemes Inc
  */
 
-/* eslint-disable guard-for-in */
-/* eslint-disable max-len */
-/* eslint-disable require-jsdoc */
-
 declare global {
 	interface Window {
 		KTGlobalComponentsConfig: object;
@@ -23,9 +19,35 @@ export default class KTComponent {
 	protected _name: string;
 	protected _defaultConfig: object;
 	protected _config: object;
-	protected _events: Map<string, Map<string, CallableFunction>>;
+	protected _events: Map<string, Map<string, CallableFunction>> = new Map();
 	protected _uid: string | null = null;
 	protected _element: HTMLElement | null = null;
+
+	/**
+	 * Check if component should skip initialization
+	 * Returns true if element already has an instance and is still connected to DOM
+	 * Returns false if element should be initialized (no instance or disconnected)
+	 * @param element The element to check
+	 * @returns true if initialization should be skipped, false otherwise
+	 */
+	protected _shouldSkipInit(element: HTMLElement): boolean {
+		if (!KTData.has(element, this._name)) {
+			return false;
+		}
+
+		const existingInstance = KTData.get(element, this._name) as KTComponent;
+
+		// If element is not connected to DOM, dispose old instance and allow reinitialization
+		if (element.isConnected === false) {
+			if (existingInstance && typeof existingInstance.dispose === 'function') {
+				existingInstance.dispose();
+			}
+			return false;
+		}
+
+		// Element is connected and has instance, skip initialization
+		return true;
+	}
 
 	protected _init(element: HTMLElement | null) {
 		element = KTDom.getElement(element);
@@ -45,7 +67,7 @@ export default class KTComponent {
 
 	protected async _fireEvent(
 		eventType: string,
-		payload: object = null,
+		payload: object | null = null,
 	): Promise<void> {
 		const callbacks = this._events.get(eventType);
 
@@ -64,7 +86,10 @@ export default class KTComponent {
 		);
 	}
 
-	protected _dispatchEvent(eventType: string, payload: object = null): void {
+	protected _dispatchEvent(
+		eventType: string,
+		payload: object | null = null,
+	): void {
 		const event = new CustomEvent(eventType, {
 			detail: { payload },
 			bubbles: true,
@@ -78,6 +103,9 @@ export default class KTComponent {
 
 	protected _getOption(name: string): KTOptionType {
 		const value = this._config[name as keyof object];
+		if (!this._element) {
+			return value as KTOptionType;
+		}
 		const reponsiveValue = KTDom.getCssProp(
 			this._element,
 			`--kt-${this._name}-${KTUtils.camelReverseCase(name)}`,
@@ -113,6 +141,20 @@ export default class KTComponent {
 		};
 	}
 
+	/**
+	 * Merge config into the existing _config in place. Use when re-applying config to an
+	 * already-initialized instance so handlers that hold a reference to _config see updates.
+	 */
+	protected _mergeConfig(config: object): void {
+		if (
+			config &&
+			typeof config === 'object' &&
+			Object.keys(config).length > 0
+		) {
+			Object.assign(this._config, config);
+		}
+	}
+
 	public dispose(): void {
 		if (!this._element) return;
 
@@ -127,7 +169,11 @@ export default class KTComponent {
 			this._events.set(eventType, new Map());
 		}
 
-		this._events.get(eventType).set(eventId, callback);
+		const eventMap = this._events.get(eventType);
+		if (!eventMap) {
+			return eventId;
+		}
+		eventMap.set(eventId, callback);
 
 		return eventId;
 	}
@@ -140,7 +186,7 @@ export default class KTComponent {
 		return this._getOption(name as keyof object);
 	}
 
-	public getElement(): HTMLElement {
+	public getElement(): HTMLElement | null {
 		if (!this._element) return null;
 		return this._element;
 	}

@@ -5,7 +5,9 @@
 		"outDir": "./dist/",
 		"sourceMap": true,
 		"declaration": false,
-		"noImplicitAny": true,
+		"strict": true,
+		"strictNullChecks": false,
+		"strictPropertyInitialization": false,
 		"module": "commonjs",
 		"target": "es5",
 		"allowJs": true,
@@ -13,7 +15,7 @@
 		"moduleResolution": "node",
 		"skipLibCheck": true
 	},
-	"include": ["src/components"],
+	"include": ["src/**/*.ts"],
 	"exclude": [
 		"node_modules",
 		"dist",

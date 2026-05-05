@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Select in Input Group</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-md mt-10 mx-auto">
+		<form class="flex flex-col gap-8">
+			<div>
+				<p class="mb-3 text-sm font-medium text-gray-600">Reference: input group with text input</p>
+				<div class="kt-input-group">
+					<span class="kt-input-addon">Framework</span>
+					<input class="kt-input" type="text" placeholder="Start addon" />
+				</div>
+			</div>
+
+			<div>
+				<p class="mb-3 text-sm font-medium text-gray-600">Select in input group (addon before)</p>
+				<div class="kt-input-group">
+					<span class="kt-input-addon">Framework</span>
+					<select
+						class="kt-select"
+						data-kt-select="true"
+						data-kt-select-placeholder="Select a framework"
+						data-kt-select-config='{"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"}'
+					>
+						<option value="react">React</option>
+						<option value="nextjs">Next.js</option>
+						<option value="angular">Angular</option>
+						<option value="vue">Vue</option>
+						<option value="svelte">Svelte</option>
+						<option value="blazor">Blazor</option>
+					</select>
+				</div>
+			</div>
+
+			<div>
+				<p class="mb-3 text-sm font-medium text-gray-600">Select in input group (addon after)</p>
+				<div class="kt-input-group">
+					<select
+						class="kt-select"
+						data-kt-select="true"
+						data-kt-select-placeholder="Select a framework"
+						data-kt-select-config='{"optionsClass": "kt-scrollable overflow-auto max-h-[250px]"}'
+					>
+						<option value="react">React</option>
+						<option value="nextjs">Next.js</option>
+						<option value="angular">Angular</option>
+						<option value="vue">Vue</option>
+					</select>
+					<span class="kt-input-addon">.com</span>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>

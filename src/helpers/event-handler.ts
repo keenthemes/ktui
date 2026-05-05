@@ -14,28 +14,28 @@ const KTDelegatedEventHandlers: KTDelegatedEventHandlersInterface = {};
 
 const KTEventHandler = {
 	on: function (
-		element: HTMLElement,
+		element: HTMLElement | null,
 		selector: string,
 		eventName: string,
 		handler: KTCallableType,
 	): string {
 		if (element === null) {
-			return null;
+			return '';
 		}
 
 		const eventId = KTUtils.geUID('event');
 
-		KTDelegatedEventHandlers[eventId] = (
-			event: Event & { target: HTMLElement },
-		) => {
-			const targets = element.querySelectorAll(selector);
-			let target = event.target;
+		KTDelegatedEventHandlers[eventId] = (event?: Event) => {
+			if (!event) return;
+			// Fix: Check selector dynamically instead of pre-computing targets
+			// This allows event delegation to work with dynamically added elements
+			let target = event.target as HTMLElement | null;
 
 			while (target && target !== element) {
-				for (let i = 0, j = targets.length; i < j; i++) {
-					if (target === targets[i]) {
-						handler.call(this, event, target);
-					}
+				// Check if current target matches the selector
+				if (target.matches && target.matches(selector)) {
+					handler.call(this, event, target);
+					return; // Stop bubbling once we've handled it
 				}
 
 				target = target.parentNode as HTMLElement;

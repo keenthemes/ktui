@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Search Autofocus Test</title>
+	<link rel="stylesheet" href="../../dist/styles.css">
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+	<div class="bg-white rounded-lg shadow p-8 w-full max-w-sm mt-10 mx-auto">
+		<form class="flex flex-col gap-6">
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-search-autofocus">Search with Autofocus (Default)</label>
+				<select
+					class="kt-select"
+					data-kt-select="true"
+					data-kt-select-enable-search="true"
+					data-kt-select-search-placeholder="Search..."
+					data-kt-select-placeholder="Select a brand..."
+					data-kt-select-config='{
+						"optionsClass": "kt-scrollable overflow-auto max-h-[250px]",
+						"searchAutofocus": true
+					}'
+				>
+					<option value="apple">Apple</option>
+					<option value="google">Google</option>
+					<option value="amazon">Amazon</option>
+					<option value="facebook">Facebook</option>
+					<option value="twitter">Twitter</option>
+					<option value="keenthemes">Keenthemes</option>
+					<option value="github">GitHub</option>
+					<option value="instagram">Instagram</option>
+					<option value="youtube">YouTube</option>
+					<option value="linkedin">LinkedIn</option>
+					<option value="whatsapp">WhatsApp</option>
+					<option value="telegram">Telegram</option>
+					<option value="tiktok">TikTok</option>
+					<option value="snapchat">Snapchat</option>
+					<option value="pinterest">Pinterest</option>
+					<option value="twitch">Twitch</option>
+					<option value="vimeo">Vimeo</option>
+					<option value="yelp">Yelp</option>
+					<option value="spotify">Spotify</option>
+				</select>
+				<p class="mt-2 text-sm text-gray-500">Open dropdown - search input should automatically receive focus</p>
+			</div>
+
+			<div>
+				<label class="block mb-2 font-medium text-gray-700" for="select-search-no-autofocus">Search without Autofocus</label>
+				<select
+					class="kt-select"
+					data-kt-select="true"
+					data-kt-select-enable-search="true"
+					data-kt-select-search-placeholder="Search..."
+					data-kt-select-placeholder="Select a framework..."
+					data-kt-select-config='{
+						"optionsClass": "kt-scrollable overflow-auto max-h-[250px]",
+						"searchAutofocus": false
+					}'
+				>
+					<option value="react">React</option>
+					<option value="nextjs">Next.js</option>
+					<option value="angular">Angular</option>
+					<option value="vue">Vue</option>
+					<option value="svelte">Svelte</option>
+					<option value="ember">Ember</option>
+					<option value="nuxt">Nuxt.js</option>
+					<option value="remix">Remix</option>
+				</select>
+				<p class="mt-2 text-sm text-gray-500">Open dropdown - search input should NOT automatically receive focus</p>
+			</div>
+		</form>
+
+		<div class="mt-8 p-4 bg-gray-100 rounded-lg">
+			<h3 class="font-semibold mb-2">Test Instructions:</h3>
+			<ol class="list-decimal list-inside text-sm text-gray-700 space-y-1">
+				<li>Click on the first select to open dropdown</li>
+				<li>Check if search input automatically receives focus (cursor should be in search box)</li>
+				<li>Type immediately - should work without clicking</li>
+				<li>Close dropdown and click on second select</li>
+				<li>Search input should NOT have focus automatically</li>
+			</ol>
+		</div>
+	</div>
+	<script src="../../dist/ktui.js"></script>
+</body>
+
+</html>

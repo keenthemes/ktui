@@ -3,6 +3,10 @@ name: Publish to npm
 on:
   release:
     types: [created]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   publish:
@@ -24,12 +28,31 @@ jobs:
         run: npm run build:lib
 
       - name: Build css
-        run: npm run build:css
+        run: npm run build:css:once
 
       - name: Build package
         run: npm run build:prod
 
+      - name: Get package version
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Check if version exists on npm
+        id: check-npm
+        run: |
+          if npm view @keenthemes/ktui@${{ steps.package-version.outputs.version }} version --registry=https://registry.npmjs.org/ 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} already exists on npm"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Version ${{ steps.package-version.outputs.version }} not found on npm"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
       - name: Publish to npm
-        run: npm publish --access public
+        if: steps.check-npm.outputs.exists != 'true'
+        run: npm run publish:npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -9,6 +9,7 @@
 @import './src/components/btn/btn.css';
 @import './src/components/label/label.css';
 @import './src/components/card/card.css';
+@import './src/components/carousel/carousel.css';
 @import './src/components/checkbox/checkbox.css';
 @import './src/components/collapse/collapse.css';
 @import './src/components/datatable/datatable.css';
@@ -16,6 +17,7 @@
 @import './src/components/drawer/drawer.css';
 @import './src/components/dropdown/dropdown.css';
 @import './src/components/dropdown/dropdown-menu.css';
+@import './src/components/context-menu/context-menu.css';
 @import './src/components/image-input/image-input.css';
 @import './src/components/input/input.css';
 @import './src/components/input/input-group.css';
@@ -43,6 +45,7 @@
 @import './src/components/kbd/kbd.css';
 @import './src/components/breadcrumb/breadcrumb.css';
 @import './src/components/toast/toast.css';
+@import './src/components/rating/rating.css';
 
 /** Dark Mode Variant **/
 @custom-variant dark (&:is(.dark *));

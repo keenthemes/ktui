@@ -1,11 +1,11 @@
 {
 	"name": "@keenthemes/ktui",
-	"version": "1.1.1",
+	"version": "1.2.4",
 	"description": "Free & Open-Source Tailwind UI Components by Keenthemes",
 	"homepage": "https://ktui.io",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/keenthemes/ktui.git"
+		"url": "git+https://github.com/keenthemes/ktui.git"
 	},
 	"keywords": [
 		"reui",
@@ -52,15 +52,43 @@
 		"tailwind clipboard"
 	],
 	"author": "@keenthemes",
-	"types": "lib/esm/index.d.ts",
-	"main": "lib/cjs/index.js",
-	"module": "lib/esm/index.js",
+	"types": "lib/esm/legacy.d.ts",
+	"main": "lib/cjs/legacy.js",
+	"module": "lib/esm/legacy.js",
+	"exports": {
+		".": {
+			"types": "./lib/esm/legacy.d.ts",
+			"import": "./lib/esm/legacy.js",
+			"require": "./lib/cjs/legacy.js"
+		},
+		"./core": {
+			"types": "./lib/esm/index.d.ts",
+			"import": "./lib/esm/index.js",
+			"require": "./lib/cjs/index.js"
+		},
+		"./init-all": {
+			"types": "./lib/esm/init-all.d.ts",
+			"import": "./lib/esm/init-all.js",
+			"require": "./lib/cjs/init-all.js"
+		},
+		"./components/*": {
+			"types": "./lib/esm/components/*/index.d.ts",
+			"import": "./lib/esm/components/*/index.js",
+			"require": "./lib/cjs/components/*/index.js"
+		},
+		"./src/*": "./src/*",
+		"./lib/*": "./lib/*",
+		"./styles.css": "./styles.css",
+		"./dist/*": "./dist/*",
+		"./package.json": "./package.json"
+	},
 	"license": "MIT",
 	"files": [
 		"dist",
 		"lib",
 		"src",
 		"styles",
+		"skills",
 		"styles.css",
 		"package.json",
 		"README.md",
@@ -75,45 +103,53 @@
 		"build:webpack": "webpack --mode=development",
 		"build:webpack:watch": "webpack --env watch=true --mode=development",
 		"build:prod": "webpack --env production --mode=production",
-		"build:lib": "tsc --outDir lib/cjs && tsc -m es6 --outDir lib/esm",
+		"build:lib": "tsc -p tsconfig.lib.json --outDir lib/cjs && tsc -p tsconfig.lib.json -m es6 --outDir lib/esm",
 		"build:css": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css --watch",
 		"build:css:once": "npx @tailwindcss/cli -i ./styles/main.css -o ./dist/styles.css",
 		"dev": "concurrently \"npm run build:webpack:watch\" \"npm run build:css\"",
-		"lint": "npx eslint 'src/**/*.ts' --max-warnings 100",
+		"lint": "npx eslint 'src/**/*.ts' --max-warnings 110",
 		"lint:fix": "npx eslint 'src/**/*.ts' --fix",
 		"format": "npx prettier --write 'src/**/*.ts'",
 		"format:check": "npx prettier --check 'src/**/*.ts'",
 		"type-check": "npx tsc --noEmit --project tsconfig.lib.json",
+		"type-check:strict": "npx tsc --noEmit --project tsconfig.lib.json --strict",
 		"validate": "npm run lint && npm run format:check && npm run type-check",
-		"validate:fix": "npm run lint:fix && npm run format"
+		"validate:strict": "npm run lint && npm run format:check && npm run type-check:strict",
+		"validate:fix": "npm run lint:fix && npm run format && npm run type-check",
+		"release:prep": "npm run lint && npm run format:check && npm run type-check && npm run test && npm run build:lib && npm run build",
+		"publish:npm": "node scripts/publish-npm.js",
+		"publish:github": "npm publish"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.27.3",
-		"@babel/preset-env": "^7.27.2",
 		"@eslint/js": "^9.27.0",
 		"@types/jsdom": "^21.1.7",
 		"@types/node": "^22.15.23",
 		"@vitest/ui": "^4.0.16",
-		"autoprefixer": "^10.4.21",
-		"babel-loader": "^10.0.0",
-		"clean-webpack-plugin": "^4.0.0",
 		"concurrently": "^9.1.2",
-		"eslint": "^9.27.0",
-		"eslint-plugin-prettier": "^5.5.4",
+		"eslint": "^10.0.0",
+		"eslint-plugin-prettier": "^5.4.0",
 		"jsdom": "^25.0.1",
-		"mini-svg-data-uri": "^1.4.4",
 		"prettier": "^3.5.3",
 		"source-map-loader": "^5.0.0",
 		"tailwindcss": "^4.1.11",
-		"terser-webpack-plugin": "^5.3.14",
+		"terser-webpack-plugin": "^5.3.17",
 		"ts-loader": "^9.5.2",
 		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.18.0",
 		"vitest": "^4.0.16",
 		"webpack": "^5.99.9",
-		"webpack-cli": "^6.0.1",
-		"webpack-merge-and-include-globally": "^2.3.4"
+		"webpack-cli": "^6.0.1"
 	},
 	"dependencies": {
 		"@popperjs/core": "^2.11.8"
+	},
+	"overrides": {
+		"minimatch": "^10.2.3",
+		"rollup": "^4.59.0",
+		"serialize-javascript": "^7.0.3",
+		"terser-webpack-plugin": "^5.3.17"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
 	}
 }

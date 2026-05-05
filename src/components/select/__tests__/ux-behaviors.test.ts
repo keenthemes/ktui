@@ -34,7 +34,7 @@ describe('KTSelect UX Behaviors', () => {
 	/**
 	 * Helper to wait for KTSelect to fully initialize
 	 */
-	const waitForInit = async (select: KTSelect): Promise<void> => {
+	const waitForInit = async (_select: KTSelect): Promise<void> => {
 		// Wait for async initialization - KTSelect uses promises for setup
 		await waitFor(200);
 		// Wait for next tick to ensure all modules are initialized
@@ -52,7 +52,8 @@ describe('KTSelect UX Behaviors', () => {
 		// Clean up all KTSelect instances
 		const selects = document.querySelectorAll('.kt-select');
 		selects.forEach((select) => {
-			const instance = (select as any).instance;
+			const instance = (select as HTMLElement & { instance?: KTSelect })
+				.instance;
 			if (instance && typeof instance.destroy === 'function') {
 				instance.destroy();
 			}
@@ -60,10 +61,28 @@ describe('KTSelect UX Behaviors', () => {
 
 		// Clear document body
 		document.body.innerHTML = '';
-		container = null as any;
+		container = null as unknown as HTMLElement;
 
 		// Clear all event listeners
 		vi.clearAllMocks();
+	});
+
+	describe('refresh() before init (issue #109)', () => {
+		it('should not throw when refresh() is called immediately after getOrCreateInstance()', () => {
+			const selectEl = createSelectElement();
+			container.appendChild(selectEl);
+
+			// Simulate framework (e.g. Angular) setting default value by code before KTSelect init
+			(selectEl as HTMLSelectElement).value = '2';
+
+			// getOrCreateInstance returns synchronously; _setupComponent runs in a later microtask.
+			// Calling refresh() here used to throw because _dropdownContentElement was undefined.
+			const instance = KTSelect.getOrCreateInstance(selectEl, { height: 250 });
+
+			expect(() => {
+				instance.refresh();
+			}).not.toThrow();
+		});
 	});
 
 	describe('Search Autofocus Enhancement', () => {
@@ -249,6 +268,452 @@ describe('KTSelect UX Behaviors', () => {
 			// First option should be selected
 			expect(select.getSelectedOptions()).toContain('1');
 		});
+
+		it('should select focused option (not first) when Enter is pressed after ArrowDown with search enabled (issue #108)', async () => {
+			const selectEl = createSelectElement([
+				{ value: 'apple', text: 'Apple' },
+				{ value: 'google', text: 'Google' },
+				{ value: 'amazon', text: 'Amazon' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input (user has not used arrow keys yet)
+			searchInput.focus();
+			await waitFor(50);
+
+			// Simulate user pressing ArrowDown twice: first moves to first option, second to second (Google).
+			// Enter must select the currently focused option (Google), not always the first (Apple).
+			const arrowDownEvent = (opts?: Partial<KeyboardEvent>) =>
+				new KeyboardEvent('keydown', {
+					key: 'ArrowDown',
+					bubbles: true,
+					cancelable: true,
+					...opts,
+				});
+			searchInput.dispatchEvent(arrowDownEvent());
+			await waitFor(20);
+			searchInput.dispatchEvent(arrowDownEvent());
+			await waitFor(20);
+
+			// Press Enter - should select the focused option (Google), not the first (Apple)
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			await waitFor(150);
+
+			// The highlighted option (google) must be selected, not the first (apple)
+			expect(select.getSelectedOptions()).toContain('google');
+			expect(select.getSelectedOptions()).not.toContain('apple');
+			expect(select.isDropdownOpen()).toBe(false);
+		});
+
+		it('should select focused option when Enter is pressed after ArrowDown then ArrowUp (last option focused)', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+				{ value: '3', text: 'Option 3' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			searchInput!.focus();
+			await waitFor(50);
+
+			// ArrowDown focuses first option; ArrowUp from first wraps to last (3). Enter selects focused.
+			searchInput.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'ArrowDown',
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
+			await waitFor(20);
+			searchInput.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'ArrowUp',
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
+			await waitFor(20);
+
+			searchInput.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'Enter',
+					bubbles: true,
+					cancelable: true,
+				}),
+			);
+			await waitFor(150);
+
+			expect(select.getSelectedOptions()).toContain('3');
+		});
+
+		it('should close dropdown and trigger selection when Enter is pressed after typing search query', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Apple' },
+				{ value: '2', text: 'Banana' },
+				{ value: '3', text: 'Cherry' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Set up change event listener to verify selection-complete lifecycle
+			const changeHandler = vi.fn();
+			selectEl.addEventListener('change', changeHandler);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input
+			searchInput.focus();
+			await waitFor(50);
+
+			// Type search query
+			searchInput.value = 'App';
+			const inputEvent = new Event('input', { bubbles: true });
+			searchInput.dispatchEvent(inputEvent);
+			await waitFor(100); // Wait for filtering
+
+			// Verify dropdown is still open
+			expect(select.isDropdownOpen()).toBe(true);
+
+			// Press Enter
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			await waitFor(200);
+
+			// Dropdown should be closed
+			expect(select.isDropdownOpen()).toBe(false);
+
+			// Selection should be made
+			expect(select.getSelectedOptions()).toContain('1');
+
+			// Change event should be dispatched (selection-complete lifecycle)
+			expect(changeHandler).toHaveBeenCalledTimes(1);
+
+			// Cleanup
+			selectEl.removeEventListener('change', changeHandler);
+		});
+
+		it('should close dropdown and trigger selection when Enter is pressed with filtered results', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Red Apple' },
+				{ value: '2', text: 'Green Apple' },
+				{ value: '3', text: 'Banana' },
+				{ value: '4', text: 'Cherry' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Set up change event listener
+			const changeHandler = vi.fn();
+			selectEl.addEventListener('change', changeHandler);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input
+			searchInput.focus();
+			await waitFor(50);
+
+			// Type search query that filters to multiple results
+			searchInput.value = 'Apple';
+			const inputEvent = new Event('input', { bubbles: true });
+			searchInput.dispatchEvent(inputEvent);
+			await waitFor(150); // Wait for filtering
+
+			// Verify dropdown is still open and options are filtered
+			expect(select.isDropdownOpen()).toBe(true);
+
+			// Press Enter - should select first filtered option
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			await waitFor(200);
+
+			// Dropdown should be closed
+			expect(select.isDropdownOpen()).toBe(false);
+
+			// First filtered option should be selected
+			expect(select.getSelectedOptions()).toContain('1');
+
+			// Change event should be dispatched
+			expect(changeHandler).toHaveBeenCalledTimes(1);
+			const event = changeHandler.mock.calls[0][0] as CustomEvent;
+			expect(event.detail?.payload?.value).toBe('1');
+			expect(event.detail?.payload?.selected).toBe(true);
+
+			// Cleanup
+			selectEl.removeEventListener('change', changeHandler);
+		});
+
+		it('should trigger change event when Enter selects option (selection-complete lifecycle)', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+				{ value: '3', text: 'Option 3' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Set up listeners for both element and document events
+			const elementChangeHandler = vi.fn();
+			const documentChangeHandler = vi.fn();
+			selectEl.addEventListener('change', elementChangeHandler);
+			document.addEventListener('kt-select:change', documentChangeHandler);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input
+			searchInput.focus();
+			await waitFor(50);
+
+			// Press Enter
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			await waitFor(200);
+
+			// Element change event should be dispatched
+			expect(elementChangeHandler).toHaveBeenCalledTimes(1);
+			const elementEvent = elementChangeHandler.mock.calls[0][0] as CustomEvent;
+			expect(elementEvent.detail?.payload?.value).toBe('1');
+			expect(elementEvent.detail?.payload?.selected).toBe(true);
+
+			// Document change event should be dispatched (global events enabled by default)
+			expect(documentChangeHandler).toHaveBeenCalledTimes(1);
+			const docEvent = documentChangeHandler.mock.calls[0][0] as CustomEvent;
+			expect(docEvent.detail?.instance).toBe(select);
+			expect(docEvent.detail?.element).toBe(selectEl);
+			expect(docEvent.detail?.payload?.value).toBe('1');
+
+			// Cleanup
+			selectEl.removeEventListener('change', elementChangeHandler);
+			document.removeEventListener('kt-select:change', documentChangeHandler);
+		});
+
+		it('should close dropdown when Enter is pressed even if first option is already selected', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+				{ value: '3', text: 'Option 3' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Select the first option first
+			select.toggleSelection('1');
+			await waitFor(100);
+			expect(select.getSelectedOptions()).toContain('1');
+
+			// Open dropdown again
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input
+			searchInput.focus();
+			await waitFor(50);
+
+			// Press Enter - even though first option is already selected, dropdown should close
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			await waitFor(200);
+
+			// Dropdown should be closed even though option was already selected
+			expect(select.isDropdownOpen()).toBe(false);
+		});
+
+		it('should not close dropdown when Enter is pressed with no available options', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Apple' },
+				{ value: '2', text: 'Banana' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input
+			searchInput.focus();
+			await waitFor(50);
+
+			// Type search query that matches no results
+			searchInput.value = 'XYZ123NoMatch';
+			const inputEvent = new Event('input', { bubbles: true });
+			searchInput.dispatchEvent(inputEvent);
+			await waitFor(150); // Wait for filtering
+
+			// Verify dropdown is still open
+			expect(select.isDropdownOpen()).toBe(true);
+
+			// Press Enter - should not close dropdown since no options available
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			await waitFor(150);
+
+			// Dropdown should remain open (no option to select)
+			expect(select.isDropdownOpen()).toBe(true);
+
+			// No selection should be made
+			expect(select.getSelectedOptions().length).toBe(0);
+		});
+
+		it('should focus display element (button) after closing dropdown with Enter key', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				enableSearch: true,
+				closeOnEnter: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			const searchInput = select.getSearchInput();
+			expect(searchInput).toBeTruthy();
+
+			// Focus search input
+			searchInput.focus();
+			await waitFor(50);
+			expect(document.activeElement).toBe(searchInput);
+
+			// Press Enter to select and close
+			const enterEvent = new KeyboardEvent('keydown', {
+				key: 'Enter',
+				bubbles: true,
+				cancelable: true,
+			});
+			searchInput.dispatchEvent(enterEvent);
+
+			// Wait for dropdown to close and focus to move
+			await waitFor(200);
+
+			// Dropdown should be closed
+			expect(select.isDropdownOpen()).toBe(false);
+
+			// Display element (button) should be focused so user can press Enter again
+			const displayElement = select.getDisplayElement();
+			expect(displayElement).toBeTruthy();
+			expect(document.activeElement).toBe(displayElement);
+		});
 	});
 
 	describe('Global Dropdown Management', () => {
@@ -335,9 +800,7 @@ describe('KTSelect UX Behaviors', () => {
 
 			// Registry should be empty (we can't directly access private static, but we can verify behavior)
 			// Opening another dropdown should work without issues
-			const selectEl2 = createSelectElement([
-				{ value: 'a', text: 'Option A' },
-			]);
+			const selectEl2 = createSelectElement([{ value: 'a', text: 'Option A' }]);
 			container.appendChild(selectEl2);
 			const select2 = new KTSelect(selectEl2, { height: 250 });
 			await waitForInit(select2);
@@ -364,9 +827,7 @@ describe('KTSelect UX Behaviors', () => {
 			await waitFor(100);
 
 			// Creating a new select should work without issues
-			const selectEl2 = createSelectElement([
-				{ value: 'a', text: 'Option A' },
-			]);
+			const selectEl2 = createSelectElement([{ value: 'a', text: 'Option A' }]);
 			container.appendChild(selectEl2);
 			const select2 = new KTSelect(selectEl2, { height: 250 });
 			await waitForInit(select2);
@@ -460,7 +921,7 @@ describe('KTSelect UX Behaviors', () => {
 			selectEl.removeEventListener('show', showHandler);
 		});
 
-		it('should use namespaced event names for document events', async () => {
+		it('should dispatch both namespaced and non-namespaced events on document', async () => {
 			const selectEl = createSelectElement();
 			container.appendChild(selectEl);
 
@@ -483,17 +944,59 @@ describe('KTSelect UX Behaviors', () => {
 			select.openDropdown();
 			await waitFor(200);
 
-			// Only namespaced event should fire on document
+			// Both events should fire on document
 			expect(namespacedHandler).toHaveBeenCalledTimes(1);
-			// Non-namespaced might be called from element bubbling, but we check the event type
+			// Non-namespaced event should also be dispatched on document (for jQuery compatibility)
 			const nonNamespacedCalls = nonNamespacedHandler.mock.calls.filter(
 				(call) => call[0].type === 'show' && call[0].target === document,
 			);
-			expect(nonNamespacedCalls.length).toBe(0);
+			expect(nonNamespacedCalls.length).toBe(1);
+
+			// Verify event detail structure is consistent
+			const namespacedEvent = namespacedHandler.mock.calls[0][0] as CustomEvent;
+			const nonNamespacedEvent = nonNamespacedCalls[0][0] as CustomEvent;
+			expect(nonNamespacedEvent.detail.instance).toBe(select);
+			expect(nonNamespacedEvent.detail.element).toBe(selectEl);
+			expect(nonNamespacedEvent.detail).toEqual(namespacedEvent.detail);
 
 			// Cleanup
 			document.removeEventListener('kt-select:show', namespacedHandler, true);
 			document.removeEventListener('show', nonNamespacedHandler, true);
+		});
+
+		it('should support jQuery-style non-namespaced event listeners on document', async () => {
+			const selectEl = createSelectElement();
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				dispatchGlobalEvents: true,
+				height: 250,
+			});
+
+			await waitForInit(select);
+
+			// Simulate jQuery-style listener: $(document).on('show', ...)
+			const showHandler = vi.fn();
+			document.addEventListener('show', showHandler);
+
+			// Open dropdown
+			select.openDropdown();
+			await waitFor(200);
+
+			// Event should be dispatched on document and handler should be called
+			// Filter to only count events dispatched directly on document (not bubbled from element)
+			const documentEvents = showHandler.mock.calls.filter(
+				(call) => call[0].target === document,
+			);
+			expect(documentEvents.length).toBe(1);
+			const event = documentEvents[0][0] as CustomEvent;
+			expect(event.type).toBe('show');
+			expect(event.target).toBe(document);
+			expect(event.detail.instance).toBe(select);
+			expect(event.detail.element).toBe(selectEl);
+
+			// Cleanup
+			document.removeEventListener('show', showHandler);
 		});
 
 		it('should include component instance and element in event detail', async () => {
@@ -553,7 +1056,9 @@ describe('KTSelect UX Behaviors', () => {
 
 			const option = select
 				.getDropdownElement()
-				?.querySelector('[data-kt-select-option][data-value="1"]') as HTMLElement;
+				?.querySelector(
+					'[data-kt-select-option][data-value="1"]',
+				) as HTMLElement;
 
 			expect(option).toBeTruthy();
 			option.click();
@@ -615,5 +1120,163 @@ describe('KTSelect UX Behaviors', () => {
 			document.removeEventListener('kt-select:show', showHandler);
 		});
 	});
-});
 
+	describe('setSelectedOptions sync', () => {
+		it('should sync native select, trigger display, and dropdown option when setSelectedOptions([option]) is called (single-select)', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+				{ value: '3', text: 'Option 3' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, { height: 250 });
+			await waitForInit(select);
+
+			const option2 = selectEl.querySelector(
+				'option[value="2"]',
+			) as HTMLOptionElement;
+			expect(option2).toBeTruthy();
+
+			select.setSelectedOptions([option2]);
+			await waitFor(50);
+
+			expect(select.getSelectedOptions()).toEqual(['2']);
+			expect((selectEl as HTMLSelectElement).value).toBe('2');
+			const displayEl = select.getValueDisplayElement();
+			expect(displayEl?.textContent?.trim()).toBe('Option 2');
+
+			select.openDropdown();
+			await waitFor(100);
+			const dropdownOption = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="2"]');
+			expect(dropdownOption?.classList.contains('selected')).toBe(true);
+			expect(dropdownOption?.getAttribute('aria-selected')).toBe('true');
+		});
+
+		it('should sync native options, trigger/tags, and dropdown when setSelectedOptions([optionA, optionB]) is called (multi-select)', async () => {
+			const selectEl = createSelectElement([
+				{ value: 'a', text: 'A' },
+				{ value: 'b', text: 'B' },
+				{ value: 'c', text: 'C' },
+			]);
+			selectEl.setAttribute('multiple', 'multiple');
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				multiple: true,
+				height: 250,
+			});
+			await waitForInit(select);
+
+			const optionA = selectEl.querySelector(
+				'option[value="a"]',
+			) as HTMLOptionElement;
+			const optionB = selectEl.querySelector(
+				'option[value="b"]',
+			) as HTMLOptionElement;
+			expect(optionA).toBeTruthy();
+			expect(optionB).toBeTruthy();
+
+			select.setSelectedOptions([optionA, optionB]);
+			await waitFor(50);
+
+			expect(select.getSelectedOptions()).toContain('a');
+			expect(select.getSelectedOptions()).toContain('b');
+			expect(select.getSelectedOptions().length).toBe(2);
+			expect(optionA.selected).toBe(true);
+			expect(optionB.selected).toBe(true);
+			const optionC = selectEl.querySelector(
+				'option[value="c"]',
+			) as HTMLOptionElement;
+			expect(optionC.selected).toBe(false);
+
+			select.openDropdown();
+			await waitFor(100);
+			const dropdownA = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="a"]');
+			const dropdownB = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="b"]');
+			expect(dropdownA?.classList.contains('selected')).toBe(true);
+			expect(dropdownB?.classList.contains('selected')).toBe(true);
+		});
+
+		it('should clear selection, native select, show placeholder, and remove selected state when setSelectedOptions([]) is called', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				placeholder: 'Choose...',
+				height: 250,
+			});
+			await waitForInit(select);
+
+			const option1 = selectEl.querySelector(
+				'option[value="1"]',
+			) as HTMLOptionElement;
+			select.setSelectedOptions([option1]);
+			await waitFor(50);
+			expect(select.getSelectedOptions()).toEqual(['1']);
+
+			select.setSelectedOptions([]);
+			await waitFor(50);
+
+			expect(select.getSelectedOptions()).toEqual([]);
+			expect((selectEl as HTMLSelectElement).value).toBe('');
+			Array.from(selectEl.options).forEach((opt) => {
+				expect(opt.selected).toBe(false);
+			});
+			const displayEl = select.getValueDisplayElement();
+			const placeholderEl = displayEl?.querySelector(
+				'[data-kt-select-placeholder]',
+			);
+			expect(placeholderEl).toBeTruthy();
+
+			select.openDropdown();
+			await waitFor(100);
+			const options = select
+				.getDropdownElement()
+				?.querySelectorAll('[data-kt-select-option]');
+			options?.forEach((opt) => {
+				expect(opt.classList.contains('selected')).toBe(false);
+				expect(opt.getAttribute('aria-selected')).toBe('false');
+			});
+		});
+
+		it('should update trigger text immediately when setSelectedOptions([option]) is called with dropdown closed, and show option selected on next open', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'First' },
+				{ value: '2', text: 'Second' },
+				{ value: '3', text: 'Third' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, { height: 250 });
+			await waitForInit(select);
+			expect(select.isDropdownOpen()).toBe(false);
+
+			const option3 = selectEl.querySelector(
+				'option[value="3"]',
+			) as HTMLOptionElement;
+			select.setSelectedOptions([option3]);
+			await waitFor(50);
+
+			const displayEl = select.getValueDisplayElement();
+			expect(displayEl?.textContent?.trim()).toBe('Third');
+
+			select.openDropdown();
+			await waitFor(100);
+			const dropdownOption = select
+				.getDropdownElement()
+				?.querySelector('[data-kt-select-option][data-value="3"]');
+			expect(dropdownOption?.classList.contains('selected')).toBe(true);
+			expect(dropdownOption?.getAttribute('aria-selected')).toBe('true');
+		});
+	});
+});

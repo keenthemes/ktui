@@ -15,17 +15,17 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Data Handling
 	items: [], // Static list of options
 	isLoading: false, // Indicates if options are being loaded asynchronously
-	onFetch: null, // Callback function to fetch options asynchronously
+	onFetch: undefined, // Callback function to fetch options asynchronously
 
 	// Remote Data Configuration
 	remote: false, // Enable/disable remote data fetching
-	dataUrl: null, // URL to fetch options from
-	apiDataProperty: null, // Property in the response object that contains the options
+	dataUrl: undefined, // URL to fetch options from
+	apiDataProperty: undefined, // Property in the response object that contains the options
 	remoteErrorMessage: 'Failed to load data', // Error message to display if remote data fetch fails
 
 	// Field Mapping
-	dataValueField: null, // Property in the option object that contains the value (default: 'id')
-	dataFieldText: null, // Property in the option object that contains the text (default: 'title')
+	dataValueField: undefined, // Property in the option object that contains the value (default: 'id')
+	dataFieldText: undefined, // Property in the option object that contains the text (default: 'title')
 
 	// Search Configuration
 	searchParam: '', // Query parameter for API search requests
@@ -60,7 +60,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	clearAllText: 'Clear all', // Text for the "Clear All" option (if implemented)
 	enableSelectAll: false, // Enable/disable "Select All" button for multi-select
 	showSelectedCount: true, // Show the number of selected options in multi-select mode
-	renderSelected: null, // Custom function to render the selected value(s) in the display area
+	renderSelected: undefined, // Custom function to render the selected value(s) in the display area
 
 	// Accessibility & Usability
 	label: 'Select an option', // Label for the select component (for screen readers)
@@ -69,10 +69,10 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	// Dropdown Configuration
 	dropdownZindex: 105, // Initial z-index value for the dropdown
 	dropdownContainer: null, // Container element for the dropdown
-	dropdownPlacement: null,
+	dropdownPlacement: undefined,
 	dropdownFlip: false,
 	dropdownPreventOverflow: false,
-	dropdownStrategy: null,
+	dropdownStrategy: undefined,
 	dropdownWidth: null, // Custom width for dropdown (e.g., '300px'), null to match toggle element width
 	closeOnOtherOpen: true, // Close other open dropdowns when this one opens
 	dispatchGlobalEvents: true, // Dispatch events on document for global listeners (jQuery compatibility)
@@ -112,7 +112,7 @@ export interface KTSelectConfigInterface {
 	clearAllText?: string;
 	enableSelectAll?: boolean;
 	showSelectedCount?: boolean;
-	renderSelected?: (selectedOptions: any[]) => string; // Assuming any[] for now, adjust based on your option data structure
+	renderSelected?: (selectedOptions: string[]) => string;
 
 	// Accessibility & Usability
 	label?: string;
@@ -201,16 +201,17 @@ export class KTSelectState {
 	}
 
 	private _initDefaultConfig(
-		config: KTSelectConfigInterface,
+		config?: KTSelectConfigInterface,
 	): KTSelectConfigInterface {
+		const resolvedConfig: Partial<KTSelectConfigInterface> = config ?? {};
 		return {
 			...DefaultConfig,
-			...config,
-			...config.config,
-		};
+			...resolvedConfig,
+			...resolvedConfig.config,
+		} as KTSelectConfigInterface;
 	}
 
-	public setItems(items?: any[], query?: string): Promise<void> {
+	public setItems(items?: KTSelectOption[], query?: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			if (items) {
 				this._config.items = items;

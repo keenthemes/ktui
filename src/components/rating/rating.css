@@ -1,0 +1,11 @@
+/**
+ * KTUI Rating component
+ * Layout and symbol styling; colors use Tailwind utilities (filled/unfilled, dark mode).
+ */
+.kt-rating {
+	display: flex;
+	align-items: center;
+}
+.kt-rating-label {
+	pointer-events: auto;
+}
