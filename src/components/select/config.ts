@@ -60,6 +60,7 @@ export const DefaultConfig: KTSelectConfigInterface = {
 	clearAllText: 'Clear all', // Text for the "Clear All" option (if implemented)
 	enableSelectAll: false, // Enable/disable "Select All" button for multi-select
 	showSelectedCount: true, // Show the number of selected options in multi-select mode
+	selectedCountText: '{{count}} selected', // Tags mode; use {{count}} placeholder
 	renderSelected: undefined, // Custom function to render the selected value(s) in the display area
 
 	// Accessibility & Usability
@@ -112,6 +113,7 @@ export interface KTSelectConfigInterface {
 	clearAllText?: string;
 	enableSelectAll?: boolean;
 	showSelectedCount?: boolean;
+	selectedCountText?: string;
 	renderSelected?: (selectedOptions: string[]) => string;
 
 	// Accessibility & Usability

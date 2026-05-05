@@ -6,7 +6,7 @@
 import { KTSelectConfigInterface } from './config';
 import { KTSelect } from './select';
 import { defaultTemplates } from './templates';
-import { EventManager } from './utils';
+import { EventManager, renderTemplateString } from './utils';
 
 /**
  * KTSelectTags - Handles tags-specific functionality for KTSelect
@@ -49,6 +49,19 @@ export class KTSelectTags {
 
 		// Clear all existing content before adding tags
 		valueDisplayElement.innerHTML = '';
+
+		// Optional summary count (config exists for tags mode; non-tag display uses templates instead)
+		if (this._config.showSelectedCount && selectedOptions.length > 0) {
+			const countEl = document.createElement('span');
+			countEl.setAttribute('data-kt-select-selected-count', 'true');
+			countEl.className = 'kt-select-selected-count';
+			countEl.setAttribute('aria-live', 'polite');
+			countEl.textContent = renderTemplateString(
+				this._config.selectedCountText ?? '{{count}} selected',
+				{ count: selectedOptions.length },
+			);
+			valueDisplayElement.appendChild(countEl);
+		}
 
 		// Insert each tag before the display element
 		selectedOptions.forEach((optionValue) => {

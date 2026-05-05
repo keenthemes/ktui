@@ -161,6 +161,10 @@
 		@apply scale-110;
 	}
 
+	.kt-select-selected-count {
+		@apply inline-flex items-center text-xs font-medium text-muted-foreground flex-shrink-0;
+	}
+
 	/* Enhanced Multi-select display container */
 	.kt-select-display[data-multiple='true'] {
 		@apply flex flex-wrap items-center gap-2 p-3 min-h-[3rem];
