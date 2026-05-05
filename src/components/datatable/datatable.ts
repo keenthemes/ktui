@@ -652,7 +652,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _createUrl(
 		pathOrUrl: string,
-		baseUrl: string | null = window.location.origin,
+		baseUrl: string | null = typeof window !== 'undefined'
+			? window.location.origin
+			: null,
 	): URL {
 		// Regular expression to check if the input is a full URL
 		const isFullUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(pathOrUrl);
@@ -666,7 +668,39 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			? pathOrUrl
 			: `/${pathOrUrl}`;
 
-		return new URL(normalizedPath, baseUrl ?? undefined);
+		// Opaque origins (e.g. srcdoc iframes) serialize as the string "null", which is not a valid URL base.
+		const bases: string[] = [];
+		if (baseUrl && baseUrl !== 'null') {
+			bases.push(baseUrl);
+		}
+		if (typeof window !== 'undefined') {
+			const href = window.location.href;
+			if (href && !bases.includes(href)) {
+				bases.push(href);
+			}
+			try {
+				if (window.parent !== window && window.parent.location?.href) {
+					const parentHref = window.parent.location.href;
+					if (parentHref && !bases.includes(parentHref)) {
+						bases.push(parentHref);
+					}
+				}
+			} catch {
+				// parent is cross-origin
+			}
+		}
+
+		for (const base of bases) {
+			try {
+				return new URL(normalizedPath, base);
+			} catch {
+				// try next base
+			}
+		}
+
+		throw new Error(
+			`KTDataTable: cannot resolve relative apiEndpoint "${pathOrUrl}" (no valid base URL; use an absolute apiEndpoint).`,
+		);
 	}
 
 	/**
@@ -988,6 +1022,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (elementWithInstance.instance) {
 			delete elementWithInstance.instance;
 		}
+
+		KTData.remove(root, this._name);
 
 		// --- 7. (Optional) Clear localStorage state ---
 		// Uncomment the following line if you want to clear state on dispose:
