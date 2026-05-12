@@ -144,7 +144,10 @@
 		"@popperjs/core": "^2.11.8"
 	},
 	"overrides": {
+		"brace-expansion": "^5.0.6",
+		"fast-uri": "^3.1.2",
 		"minimatch": "^10.2.3",
+		"postcss": "^8.5.14",
 		"rollup": "^4.59.0",
 		"serialize-javascript": "^7.0.3",
 		"terser-webpack-plugin": "^5.3.17"
