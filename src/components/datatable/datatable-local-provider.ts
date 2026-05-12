@@ -63,25 +63,24 @@ export class KTDataTableLocalDataProvider<
 
 		if (search) {
 			const searchTerm = typeof search === 'string' ? search : '';
-			filteredData = data = this.options.config.search.callback.call(
-				this,
-				data,
-				searchTerm,
-			) as T[];
+			const searchCallback = this.options.config.search?.callback;
+			if (searchCallback) {
+				filteredData = data = searchCallback.call(
+					this,
+					data,
+					searchTerm,
+				) as T[];
+			}
 		}
 
+		const sortCallback = this.options.config.sort?.callback;
 		if (
 			sortField !== undefined &&
 			sortOrder !== undefined &&
 			sortOrder !== '' &&
-			typeof this.options.config.sort.callback === 'function'
+			typeof sortCallback === 'function'
 		) {
-			data = this.options.config.sort.callback.call(
-				this,
-				data,
-				sortField as string,
-				sortOrder,
-			) as T[];
+			data = sortCallback.call(this, data, sortField as string, sortOrder) as T[];
 		}
 
 		if (data?.length > 0) {
@@ -114,7 +113,7 @@ export class KTDataTableLocalDataProvider<
 		const { _state, ...restConfig } = this.options.config;
 		const checksum: string = KTUtils.checksum(JSON.stringify(restConfig));
 
-		if (_state._configChecksum !== checksum) {
+		if ((_state?._configChecksum ?? '') !== checksum) {
 			this.options.stateStore.patchState({ _configChecksum: checksum });
 			return true;
 		}

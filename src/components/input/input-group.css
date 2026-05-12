@@ -30,8 +30,21 @@
 			@apply rounded-e-none!;
 		}
 
+		/* Leading button before field: square inline-end + drop shadow so join matches addon pattern */
+		.kt-btn:has(+ input.kt-input),
+		.kt-btn:has(+ textarea.kt-input),
+		.kt-btn:has(+ .kt-input) {
+			@apply rounded-e-none! shadow-none!;
+		}
+
+		.kt-btn:has(+ input.kt-input).kt-btn-outline,
+		.kt-btn:has(+ textarea.kt-input).kt-btn-outline,
+		.kt-btn:has(+ .kt-input).kt-btn-outline {
+			@apply border-e-0!;
+		}
+
 		.kt-input + .kt-btn {
-			@apply rounded-s-none!;
+			@apply rounded-s-none! shadow-none!;
 		}
 
 		.kt-input + .kt-btn.kt-btn-outline {

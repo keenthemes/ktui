@@ -8,8 +8,10 @@
 import {
 	KTDataTableConfigInterface,
 	KTDataTableCheckChangePayloadInterface,
+	KTDataTableStateInterface,
 } from './types';
 import KTEventHandler from '../../helpers/event-handler';
+import { KTCallableType } from '../../types';
 
 export interface KTDataTableCheckboxAPI {
 	init(): void;
@@ -29,25 +31,31 @@ export function createCheckboxHandler(
 ): KTDataTableCheckboxAPI {
 	let headerChecked = false;
 	let headerCheckElement: HTMLInputElement | null = null;
-	let targetElements: NodeListOf<HTMLInputElement> = null;
+	let targetElements: NodeListOf<HTMLInputElement> | null = null;
 
 	// Default: preserve selection across all pages
 	const preserveSelection = config.checkbox?.preserveSelection !== false;
 
+	function ensureState(): KTDataTableStateInterface {
+		let state = config._state;
+		if (!state) {
+			state = {} as KTDataTableStateInterface;
+			config._state = state;
+		}
+		return state;
+	}
+
 	// Helper: get selectedRows from state, always as string[]
 	function getSelectedRows(): string[] {
-		if (!config._state)
-			config._state = {} as unknown as KTDataTableConfigInterface['_state'];
-		if (!Array.isArray(config._state.selectedRows))
-			config._state.selectedRows = [];
-		return config._state.selectedRows.map(String);
+		const state = ensureState();
+		if (!Array.isArray(state.selectedRows)) state.selectedRows = [];
+		return state.selectedRows.map(String);
 	}
 
 	// Helper: set selectedRows in state
 	function setSelectedRows(rows: string[]) {
-		if (!config._state)
-			config._state = {} as unknown as KTDataTableConfigInterface['_state'];
-		config._state.selectedRows = Array.from(new Set(rows.map(String)));
+		const state = ensureState();
+		state.selectedRows = Array.from(new Set(rows.map(String)));
 	}
 
 	// Helper: get all visible row IDs (values)
@@ -64,14 +72,14 @@ export function createCheckboxHandler(
 	};
 
 	function init() {
-		headerCheckElement = element.querySelector<HTMLInputElement>(
-			config.attributes.check,
-		);
+		const attrs = config.attributes;
+		if (!attrs?.check || !attrs.checkbox) {
+			return;
+		}
+		headerCheckElement = element.querySelector<HTMLInputElement>(attrs.check);
 		if (!headerCheckElement) return;
 		headerChecked = headerCheckElement.checked;
-		targetElements = element.querySelectorAll(
-			config.attributes.checkbox,
-		) as NodeListOf<HTMLInputElement>;
+		targetElements = element.querySelectorAll<HTMLInputElement>(attrs.checkbox);
 		checkboxHandler();
 		reapplyCheckedStates();
 		updateHeaderCheckboxState();
@@ -79,14 +87,16 @@ export function createCheckboxHandler(
 
 	function checkboxHandler() {
 		if (!headerCheckElement) return;
+		const rowCheckboxSelector = config.attributes?.checkbox;
+		if (!rowCheckboxSelector) return;
 		headerCheckElement.addEventListener('click', checkboxListener);
 		KTEventHandler.on(
 			document.body,
-			config.attributes.checkbox,
+			rowCheckboxSelector,
 			'input',
-			(event: Event) => {
-				handleRowCheckboxChange(event as InputEvent);
-			},
+			((event?: Event) => {
+				if (event) handleRowCheckboxChange(event);
+			}) as KTCallableType,
 		);
 	}
 
@@ -233,10 +243,11 @@ export function createCheckboxHandler(
 	}
 
 	function updateState() {
-		// Called after redraw/pagination
-		targetElements = element.querySelectorAll(
-			config.attributes.checkbox,
-		) as NodeListOf<HTMLInputElement>;
+		const rowCheckSel = config.attributes?.checkbox;
+		if (!rowCheckSel) {
+			return;
+		}
+		targetElements = element.querySelectorAll<HTMLInputElement>(rowCheckSel);
 		reapplyCheckedStates();
 		updateHeaderCheckboxState();
 	}

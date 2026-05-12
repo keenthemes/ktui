@@ -13,21 +13,27 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 	public render(
 		input: KTDataTablePaginationRendererInput,
 	): KTDataTableCleanup | void {
-		this.removeChildElements(input.sizeElement);
-		this.createPageSizeControls(input);
+		if (input.sizeElement) {
+			this.removeChildElements(input.sizeElement);
+			this.createPageSizeControls(input);
+		}
 
-		this.removeChildElements(input.paginationElement);
-		this.createPaginationControls(input);
+		if (input.paginationElement) {
+			this.removeChildElements(input.paginationElement);
+			this.createPaginationControls(input);
+		}
 
 		return () => {
 			if (input.sizeElement) {
 				input.sizeElement.onchange = null;
 			}
-			this.removeChildElements(input.paginationElement);
+			if (input.paginationElement) {
+				this.removeChildElements(input.paginationElement);
+			}
 		};
 	}
 
-	private removeChildElements(container: HTMLElement): void {
+	private removeChildElements(container?: HTMLElement | null): void {
 		if (!container) {
 			return;
 		}
@@ -39,13 +45,15 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 
 	private createPageSizeControls(
 		input: KTDataTablePaginationRendererInput,
-	): HTMLSelectElement {
+	): void {
 		if (!input.sizeElement) {
-			return input.sizeElement;
+			return;
 		}
 
+		const pageSizes = input.config.pageSizes ?? [5, 10, 20, 30, 50];
+
 		setTimeout(() => {
-			const options = input.config.pageSizes.map((size: number) => {
+			const options = pageSizes.map((size: number) => {
 				const option = document.createElement('option') as HTMLOptionElement;
 				option.value = String(size);
 				option.text = String(size);
@@ -62,18 +70,12 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 				1,
 			);
 		};
-
-		return input.sizeElement;
 	}
 
 	private createPaginationControls(
 		input: KTDataTablePaginationRendererInput,
-	): HTMLElement {
-		if (
-			!input.infoElement ||
-			!input.paginationElement ||
-			input.dataLength === 0
-		) {
+	): HTMLElement | null {
+		if (!input.paginationElement || input.dataLength === 0) {
 			return null;
 		}
 
@@ -86,7 +88,13 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 	private setPaginationInfoText(
 		input: KTDataTablePaginationRendererInput,
 	): void {
-		input.infoElement.textContent = input.config.info
+		if (!input.infoElement) {
+			return;
+		}
+
+		const infoTemplate =
+			input.config.info ?? '{start}-{end} of {total}';
+		input.infoElement.textContent = infoTemplate
 			.replace(
 				'{start}',
 				(input.state.page - 1) * input.state.pageSize + 1 + '',
@@ -105,8 +113,14 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 		paginationContainer: HTMLElement,
 		input: KTDataTablePaginationRendererInput,
 	): void {
+		const pagination = input.config.pagination;
+		if (!pagination) {
+			return;
+		}
+
 		const { page: currentPage, totalPages } = input.state;
-		const { previous, next, number, more } = input.config.pagination;
+		const { previous, next, number, more } = pagination;
+		const pageMoreLimit = input.config.pageMoreLimit ?? 3;
 
 		const createButton = (
 			text: string,
@@ -135,7 +149,7 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 			const range = this.calculatePageRange(
 				currentPage,
 				totalPages,
-				input.config.pageMoreLimit,
+				pageMoreLimit,
 			);
 
 			if (range.start > 1) {

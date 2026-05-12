@@ -74,9 +74,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _originalTdClasses: string[][] = []; // Store original td classes as a 2D array [row][col]
 	private _originalThClasses: string[] = []; // Store original th classes
 
-	private _infoElement: HTMLElement;
-	private _sizeElement: HTMLSelectElement;
-	private _paginationElement: HTMLElement;
+	private _infoElement: HTMLElement | null = null;
+	private _sizeElement: HTMLSelectElement | null = null;
+	private _paginationElement: HTMLElement | null = null;
 
 	private _checkbox: KTDataTableCheckboxAPI;
 	private _sortHandler: KTDataTableSortAPI<T>;
@@ -106,6 +106,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._defaultConfig = this._initDefaultConfig(config);
 
 		this._init(element);
+		if (!this._element) {
+			return;
+		}
 		this._buildConfig();
 		this._stateStore = new KTDataTableConfigStateStore(this._config);
 		this._eventAdapter = createDataTableEventAdapter(
@@ -425,43 +428,35 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {void}
 	 */
 	private _initElements(): void {
-		/**
-		 * Data table element
-		 */
-		this._tableElement = this._element.querySelector<HTMLTableElement>(
-			this._config.attributes.table,
-		)!;
-		/**
-		 * Table body element
-		 */
+		const root = this._element;
+		const attrs = this._config.attributes;
+		if (!root || !attrs?.table) {
+			throw new Error('KTDataTable: root element and table selector are required');
+		}
+
+		const tableEl = root.querySelector<HTMLTableElement>(attrs.table);
+		if (!tableEl) {
+			throw new Error(`KTDataTable: table element not found (${attrs.table})`);
+		}
+		this._tableElement = tableEl;
+
 		this._tbodyElement =
 			this._tableElement.tBodies[0] || this._tableElement.createTBody();
-		/**
-		 * Table head element
-		 */
-		this._theadElement = this._tableElement.tHead!;
 
-		// Store original classes
+		this._theadElement =
+			this._tableElement.tHead ?? this._tableElement.createTHead();
+
 		this._storeOriginalClasses();
 
-		/**
-		 * Pagination info element
-		 */
-		this._infoElement = this._element.querySelector<HTMLElement>(
-			this._config.attributes.info,
-		)!;
-		/**
-		 * Page size dropdown element
-		 */
-		this._sizeElement = this._element.querySelector<HTMLSelectElement>(
-			this._config.attributes.size,
-		)!;
-		/**
-		 * Pagination element
-		 */
-		this._paginationElement = this._element.querySelector<HTMLElement>(
-			this._config.attributes.pagination,
-		)!;
+		this._infoElement = attrs.info
+			? root.querySelector<HTMLElement>(attrs.info)
+			: null;
+		this._sizeElement = attrs.size
+			? root.querySelector<HTMLSelectElement>(attrs.size)
+			: null;
+		this._paginationElement = attrs.pagination
+			? root.querySelector<HTMLElement>(attrs.pagination)
+			: null;
 	}
 
 	/**
@@ -540,7 +535,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {void}
 	 */
 	private _finalize(): void {
-		this._element.classList.add('datatable-initialized');
+		this._element?.classList.add('datatable-initialized');
 
 		// Initialize checkbox logic
 		this._checkbox.init();
@@ -600,7 +595,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			// Create a new debounced search function
 			const debouncedSearch = this._debounce(() => {
 				this.search(searchElement.value);
-			}, this._config.search.delay);
+			}, this._config.search?.delay ?? 500);
 
 			// Store the new debounced function as a property of the element
 			searchWithDebounce._debouncedSearch = debouncedSearch;
@@ -647,7 +642,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _createUrl(
 		pathOrUrl: string,
-		baseUrl: string | null = window.location.origin,
+		baseUrl: string | null = typeof window !== 'undefined'
+			? window.location.origin
+			: null,
 	): URL {
 		// Regular expression to check if the input is a full URL
 		const isFullUrl = /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(pathOrUrl);
@@ -661,7 +658,39 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			? pathOrUrl
 			: `/${pathOrUrl}`;
 
-		return new URL(normalizedPath, baseUrl);
+		// Opaque origins (e.g. srcdoc iframes) serialize as the string "null", which is not a valid URL base.
+		const bases: string[] = [];
+		if (baseUrl && baseUrl !== 'null') {
+			bases.push(baseUrl);
+		}
+		if (typeof window !== 'undefined') {
+			const href = window.location.href;
+			if (href && !bases.includes(href)) {
+				bases.push(href);
+			}
+			try {
+				if (window.parent !== window && window.parent.location?.href) {
+					const parentHref = window.parent.location.href;
+					if (parentHref && !bases.includes(parentHref)) {
+						bases.push(parentHref);
+					}
+				}
+			} catch {
+				// parent is cross-origin
+			}
+		}
+
+		for (const base of bases) {
+			try {
+				return new URL(normalizedPath, base);
+			} catch {
+				// try next base
+			}
+		}
+
+		throw new Error(
+			`KTDataTable: cannot resolve relative apiEndpoint "${pathOrUrl}" (no valid base URL; use an absolute apiEndpoint).`,
+		);
 	}
 
 	/**
@@ -683,7 +712,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._updateTable();
 		}
 
-		if (this._infoElement && this._paginationElement) {
+		if (this._infoElement || this._sizeElement || this._paginationElement) {
 			this._updatePagination();
 		}
 
@@ -778,38 +807,49 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	// Method to show the loading spinner
 	private _showSpinner(): void {
-		const spinner =
-			this._element.querySelector<HTMLElement>(
-				this._config.attributes.spinner,
-			) || this._createSpinner();
+		const root = this._element;
+		const spinnerSel = this._config.attributes?.spinner;
+		const fromDom =
+			root && spinnerSel
+				? root.querySelector<HTMLElement>(spinnerSel)
+				: null;
+		const spinner = fromDom ?? this._createSpinner();
 		if (spinner) {
 			spinner.style.display = 'block';
 		}
-		this._element.classList.add(this._config.loadingClass);
+		root?.classList.add(this._config.loadingClass ?? 'loading');
 	}
 
 	// Method to hide the loading spinner
 	private _hideSpinner(): void {
-		const spinner = this._element.querySelector<HTMLElement>(
-			this._config.attributes.spinner,
-		);
+		const root = this._element;
+		const spinnerSel = this._config.attributes?.spinner;
+		const spinner =
+			root && spinnerSel
+				? root.querySelector<HTMLElement>(spinnerSel)
+				: null;
 		if (spinner) {
 			spinner.style.display = 'none';
 		}
-		this._element.classList.remove(this._config.loadingClass);
+		root?.classList.remove(this._config.loadingClass ?? 'loading');
 	}
 
 	// Method to create a spinner element if it doesn't exist
-	private _createSpinner(): HTMLElement {
-		if (typeof this._config.loading === 'undefined') {
+	private _createSpinner(): HTMLElement | null {
+		const loading = this._config.loading;
+		if (!loading) {
 			return null;
 		}
 
 		const template = document.createElement('template');
-		template.innerHTML = this._config.loading.template
+		template.innerHTML = loading.template
 			.trim()
-			.replace('{content}', this._config.loading.content);
-		const spinner = template.content.firstChild as HTMLElement;
+			.replace('{content}', loading.content);
+		const first = template.content.firstChild;
+		if (!first || !(first instanceof HTMLElement)) {
+			return null;
+		}
+		const spinner = first;
 		spinner.setAttribute('data-kt-datatable-spinner', 'true');
 
 		this._tableElement.appendChild(spinner);
@@ -878,18 +918,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	private _tableId(): string {
-		let id: string = null;
-		// If the table element has an ID, use that
-		if (this._tableElement?.getAttribute('id')) {
-			id = this._tableElement.getAttribute('id') as string;
+		const tableIdAttr = this._tableElement?.getAttribute('id');
+		if (tableIdAttr) {
+			return tableIdAttr;
 		}
-
-		// If the component element has an ID, use that
-		if (this._element?.getAttribute('id')) {
-			id = this._element.getAttribute('id') as string;
+		const rootIdAttr = this._element?.getAttribute('id');
+		if (rootIdAttr) {
+			return rootIdAttr;
 		}
-
-		return id;
+		return '';
 	}
 
 	/**
@@ -897,6 +934,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * This method is called before re-rendering or when disposing the component.
 	 */
 	private _dispose() {
+		const root = this._element;
+		if (!root) {
+			return;
+		}
+
 		this._cleanupCallbacks.forEach((cleanup) => cleanup());
 		this._cleanupCallbacks = [];
 
@@ -939,12 +981,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (this._checkbox && typeof checkboxWithDispose.dispose === 'function') {
 			checkboxWithDispose.dispose();
 		} else {
-			// Remove header checkbox event listener if possible
-			const headerCheckElement = this._element.querySelector<HTMLInputElement>(
-				this._config.attributes.check,
-			);
-			if (headerCheckElement) {
-				headerCheckElement.replaceWith(headerCheckElement.cloneNode(true));
+			const checkSel = this._config.attributes?.check;
+			if (checkSel) {
+				const headerCheckElement = root.querySelector<HTMLInputElement>(checkSel);
+				if (headerCheckElement) {
+					headerCheckElement.replaceWith(headerCheckElement.cloneNode(true));
+				}
 			}
 		}
 		// KTDataTableSortAPI does not have a dispose method, but we can remove th click listeners by replacing them
@@ -956,21 +998,22 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		// --- 5. Remove spinner DOM node if it exists ---
-		const spinner = this._element.querySelector<HTMLElement>(
-			this._config.attributes.spinner,
-		);
-		if (spinner && spinner.parentNode) {
-			spinner.parentNode.removeChild(spinner);
+		const spinnerSel = this._config.attributes?.spinner;
+		if (spinnerSel) {
+			const spinner = root.querySelector<HTMLElement>(spinnerSel);
+			if (spinner?.parentNode) {
+				spinner.parentNode.removeChild(spinner);
+			}
 		}
-		this._element.classList.remove(this._config.loadingClass);
+		root.classList.remove(this._config.loadingClass ?? 'loading');
 
 		// --- 6. Remove instance reference from the DOM element ---
-		const elementWithInstance = KTDataTable.asElementWithInstance(
-			this._element,
-		);
+		const elementWithInstance = KTDataTable.asElementWithInstance(root);
 		if (elementWithInstance.instance) {
 			delete elementWithInstance.instance;
 		}
+
+		KTData.remove(root, this._name);
 
 		// --- 7. (Optional) Clear localStorage state ---
 		// Uncomment the following line if you want to clear state on dispose:

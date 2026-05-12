@@ -137,6 +137,9 @@ export class KTDataTableRemoteDataProvider<
 			this.options.config.requestMethod;
 		let requestBody: RequestInit['body'] | undefined = undefined;
 		let apiEndpoint = this.options.config.apiEndpoint;
+		if (!apiEndpoint) {
+			throw new Error('KTDataTable: apiEndpoint is required for remote fetch');
+		}
 
 		if (this.abortController) {
 			this.abortController.abort();

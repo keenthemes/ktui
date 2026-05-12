@@ -1627,10 +1627,24 @@ export class KTSelect extends KTComponent {
 	}
 
 	/**
-	 * Get selected options
+	 * Returns the current selection as **option value** strings (not labels, not DOM nodes).
+	 * For single-select, the array has zero or one entry; use {@link getValue} for a scalar.
+	 * For multiple-select, the array may contain multiple values in arbitrary order.
 	 */
 	public getSelectedOptions() {
 		return this._state.getSelectedOptions();
+	}
+
+	/**
+	 * Returns the selected option **value** for single-select, or `null` when nothing is selected.
+	 * When the select is configured with `multiple: true`, always returns `null` — use {@link getSelectedOptions} instead.
+	 */
+	public getValue(): string | null {
+		if (this._config.multiple) {
+			return null;
+		}
+		const values = this._state.getSelectedOptions();
+		return values.length > 0 ? values[0] : null;
 	}
 
 	/**
