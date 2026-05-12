@@ -6,3 +6,4 @@ scripts
 .vscode
 .env
 coverage/
+.code-review-graph
