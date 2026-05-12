@@ -74,9 +74,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _originalTdClasses: string[][] = []; // Store original td classes as a 2D array [row][col]
 	private _originalThClasses: string[] = []; // Store original th classes
 
-	private _infoElement: HTMLElement;
-	private _sizeElement: HTMLSelectElement;
-	private _paginationElement: HTMLElement;
+	private _infoElement: HTMLElement | null = null;
+	private _sizeElement: HTMLSelectElement | null = null;
+	private _paginationElement: HTMLElement | null = null;
 
 	private _checkbox: KTDataTableCheckboxAPI;
 	private _sortHandler: KTDataTableSortAPI<T>;
@@ -430,8 +430,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _initElements(): void {
 		const root = this._element;
 		const attrs = this._config.attributes;
-		if (!root || !attrs?.table || !attrs.info || !attrs.size || !attrs.pagination) {
-			throw new Error('KTDataTable: root element and table/info/size/pagination selectors are required');
+		if (!root || !attrs?.table) {
+			throw new Error('KTDataTable: root element and table selector are required');
 		}
 
 		const tableEl = root.querySelector<HTMLTableElement>(attrs.table);
@@ -448,25 +448,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		this._storeOriginalClasses();
 
-		const infoEl = root.querySelector<HTMLElement>(attrs.info);
-		if (!infoEl) {
-			throw new Error(`KTDataTable: info element not found (${attrs.info})`);
-		}
-		this._infoElement = infoEl;
-
-		const sizeEl = root.querySelector<HTMLSelectElement>(attrs.size);
-		if (!sizeEl) {
-			throw new Error(`KTDataTable: size element not found (${attrs.size})`);
-		}
-		this._sizeElement = sizeEl;
-
-		const paginationEl = root.querySelector<HTMLElement>(attrs.pagination);
-		if (!paginationEl) {
-			throw new Error(
-				`KTDataTable: pagination element not found (${attrs.pagination})`,
-			);
-		}
-		this._paginationElement = paginationEl;
+		this._infoElement = attrs.info
+			? root.querySelector<HTMLElement>(attrs.info)
+			: null;
+		this._sizeElement = attrs.size
+			? root.querySelector<HTMLSelectElement>(attrs.size)
+			: null;
+		this._paginationElement = attrs.pagination
+			? root.querySelector<HTMLElement>(attrs.pagination)
+			: null;
 	}
 
 	/**
@@ -722,7 +712,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._updateTable();
 		}
 
-		if (this._infoElement && this._paginationElement) {
+		if (this._infoElement || this._sizeElement || this._paginationElement) {
 			this._updatePagination();
 		}
 

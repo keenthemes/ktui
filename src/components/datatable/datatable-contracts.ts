@@ -83,11 +83,11 @@ export interface KTDataTableTableRenderer<T extends KTDataTableDataInterface> {
 export interface KTDataTablePaginationRendererInput {
 	config: KTDataTableConfigInterface;
 	dataLength: number;
-	infoElement: HTMLElement;
+	infoElement?: HTMLElement | null;
 	paginateData: (page: number) => void;
-	paginationElement: HTMLElement;
+	paginationElement?: HTMLElement | null;
 	reloadPageSize: (pageSize: number, page?: number) => void;
-	sizeElement: HTMLSelectElement;
+	sizeElement?: HTMLSelectElement | null;
 	state: KTDataTableStateInterface;
 }
 

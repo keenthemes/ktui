@@ -1,0 +1,152 @@
+<div
+	id="kt_datatable_sales"
+	class="kt-card-table"
+	data-kt-datatable="true"
+	data-kt-datatable-page-size="10"
+>
+	<div class="kt-table-wrapper kt-scrollable">
+		<table class="kt-table kt-table-xs kt-table-border" data-kt-datatable-table="true">
+			<thead>
+				<tr>
+					<th data-kt-datatable-column="week">Week</th>
+					<th data-kt-datatable-column="quantity">Quantity</th>
+					<th data-kt-datatable-column="gross_sales">Gross Sales</th>
+					<th data-kt-datatable-column="discounts">Discounts</th>
+					<th data-kt-datatable-column="net_sales">Net Sales</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>33-2025</td>
+					<td>9</td>
+					<td>£104.00</td>
+					<td>£16.00</td>
+					<td>£88.00</td>
+				</tr>
+				<tr>
+					<td>34-2025</td>
+					<td>11</td>
+					<td>£134.00</td>
+					<td>£22.00</td>
+					<td>£112.00</td>
+				</tr>
+				<tr>
+					<td>35-2025</td>
+					<td>19</td>
+					<td>£225.00</td>
+					<td>£30.00</td>
+					<td>£195.00</td>
+				</tr>
+				<tr>
+					<td>36-2025</td>
+					<td>30</td>
+					<td>£286.00</td>
+					<td>£47.00</td>
+					<td>£239.00</td>
+				</tr>
+				<tr>
+					<td>37-2025</td>
+					<td>49</td>
+					<td>£533.00</td>
+					<td>£75.00</td>
+					<td>£458.00</td>
+				</tr>
+				<tr>
+					<td>38-2025</td>
+					<td>35</td>
+					<td>£413.00</td>
+					<td>£56.00</td>
+					<td>£357.00</td>
+				</tr>
+				<tr>
+					<td>39-2025</td>
+					<td>107</td>
+					<td>£1,251.00</td>
+					<td>£41.00</td>
+					<td>£1,210.00</td>
+				</tr>
+				<tr>
+					<td>40-2025</td>
+					<td>108</td>
+					<td>£1,309.00</td>
+					<td>£0.00</td>
+					<td>£1,309.00</td>
+				</tr>
+				<tr>
+					<td>41-2025</td>
+					<td>140</td>
+					<td>£1,638.00</td>
+					<td>£0.00</td>
+					<td>£1,638.00</td>
+				</tr>
+				<tr>
+					<td>42-2025</td>
+					<td>216</td>
+					<td>£2,461.00</td>
+					<td>£0.00</td>
+					<td>£2,461.00</td>
+				</tr>
+				<tr>
+					<td>43-2025</td>
+					<td>287</td>
+					<td>£3,420.00</td>
+					<td>£0.00</td>
+					<td>£3,420.00</td>
+				</tr>
+				<tr>
+					<td>44-2025</td>
+					<td>989</td>
+					<td>£10,291.00</td>
+					<td>£0.00</td>
+					<td>£10,291.00</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td>Total</td>
+					<td>2,000</td>
+					<td>£22,065.00</td>
+					<td>£287.00</td>
+					<td>£21,778.00</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	<div class="kt-card-footer flex items-center justify-between gap-4 py-3">
+		<div class="flex items-center gap-2">
+			<span class="text-xs text-secondary-foreground">Rows per page</span>
+			<select class="kt-select kt-select-sm w-20" data-kt-datatable-size="true">
+				<option value="5">5</option>
+				<option value="10" selected>10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+			</select>
+		</div>
+		<div class="text-xs text-secondary-foreground" data-kt-datatable-info="true"></div>
+		<div class="kt-datatable-pagination" data-kt-datatable-pagination="true"></div>
+	</div>
+</div>
+
+<script src="../dist/ktui.js"></script>
+<script>
+	(function () {
+		function resolveDataTableClass() {
+			if (typeof window === 'undefined') return null;
+			if (window.KTDataTable) return window.KTDataTable;
+			if (window.KTUI && window.KTUI.KTDataTable) return window.KTUI.KTDataTable;
+			return null;
+		}
+
+		function initDataTable() {
+			var KTDataTable = resolveDataTableClass();
+			if (!KTDataTable || typeof KTDataTable.init !== 'function') return;
+			KTDataTable.init();
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initDataTable);
+		} else {
+			initDataTable();
+		}
+	})();
+</script>

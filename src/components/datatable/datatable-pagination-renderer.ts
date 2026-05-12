@@ -13,21 +13,27 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 	public render(
 		input: KTDataTablePaginationRendererInput,
 	): KTDataTableCleanup | void {
-		this.removeChildElements(input.sizeElement);
-		this.createPageSizeControls(input);
+		if (input.sizeElement) {
+			this.removeChildElements(input.sizeElement);
+			this.createPageSizeControls(input);
+		}
 
-		this.removeChildElements(input.paginationElement);
-		this.createPaginationControls(input);
+		if (input.paginationElement) {
+			this.removeChildElements(input.paginationElement);
+			this.createPaginationControls(input);
+		}
 
 		return () => {
 			if (input.sizeElement) {
 				input.sizeElement.onchange = null;
 			}
-			this.removeChildElements(input.paginationElement);
+			if (input.paginationElement) {
+				this.removeChildElements(input.paginationElement);
+			}
 		};
 	}
 
-	private removeChildElements(container: HTMLElement): void {
+	private removeChildElements(container?: HTMLElement | null): void {
 		if (!container) {
 			return;
 		}
@@ -69,11 +75,7 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 	private createPaginationControls(
 		input: KTDataTablePaginationRendererInput,
 	): HTMLElement | null {
-		if (
-			!input.infoElement ||
-			!input.paginationElement ||
-			input.dataLength === 0
-		) {
+		if (!input.paginationElement || input.dataLength === 0) {
 			return null;
 		}
 
@@ -86,6 +88,10 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 	private setPaginationInfoText(
 		input: KTDataTablePaginationRendererInput,
 	): void {
+		if (!input.infoElement) {
+			return;
+		}
+
 		const infoTemplate =
 			input.config.info ?? '{start}-{end} of {total}';
 		input.infoElement.textContent = infoTemplate
