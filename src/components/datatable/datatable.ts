@@ -114,6 +114,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (!this._element) {
 			return;
 		}
+		if (!this._element.hasAttribute('data-kt-datatable')) {
+			this._element.setAttribute('data-kt-datatable', 'true');
+		}
 		this._buildConfig();
 		this._normalizePageSizeConfig();
 		this._stateStore = new KTDataTableConfigStateStore(this._config);
