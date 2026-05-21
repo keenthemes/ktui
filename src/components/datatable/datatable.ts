@@ -505,7 +505,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const root = this._element;
 		const attrs = this._config.attributes;
 		if (!root || !attrs?.table) {
-			throw new Error('KTDataTable: root element and table selector are required');
+			throw new Error(
+				'KTDataTable: root element and table selector are required',
+			);
 		}
 
 		const tableEl = root.querySelector<HTMLTableElement>(attrs.table);
@@ -903,9 +905,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const root = this._element;
 		const spinnerSel = this._config.attributes?.spinner;
 		const fromDom =
-			root && spinnerSel
-				? root.querySelector<HTMLElement>(spinnerSel)
-				: null;
+			root && spinnerSel ? root.querySelector<HTMLElement>(spinnerSel) : null;
 		const spinner = fromDom ?? this._createSpinner();
 		if (spinner) {
 			spinner.style.display = 'block';
@@ -918,9 +918,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		const root = this._element;
 		const spinnerSel = this._config.attributes?.spinner;
 		const spinner =
-			root && spinnerSel
-				? root.querySelector<HTMLElement>(spinnerSel)
-				: null;
+			root && spinnerSel ? root.querySelector<HTMLElement>(spinnerSel) : null;
 		if (spinner) {
 			spinner.style.display = 'none';
 		}
@@ -1078,7 +1076,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		} else {
 			const checkSel = this._config.attributes?.check;
 			if (checkSel) {
-				const headerCheckElement = root.querySelector<HTMLInputElement>(checkSel);
+				const headerCheckElement =
+					root.querySelector<HTMLInputElement>(checkSel);
 				if (headerCheckElement) {
 					headerCheckElement.replaceWith(headerCheckElement.cloneNode(true));
 				}

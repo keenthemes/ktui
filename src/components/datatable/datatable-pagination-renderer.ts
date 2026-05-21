@@ -90,8 +90,7 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 			return;
 		}
 
-		const infoTemplate =
-			input.config.info ?? '{start}-{end} of {total}';
+		const infoTemplate = input.config.info ?? '{start}-{end} of {total}';
 		input.infoElement.textContent = infoTemplate
 			.replace(
 				'{start}',

@@ -90,14 +90,11 @@ export function createCheckboxHandler(
 		const rowCheckboxSelector = config.attributes?.checkbox;
 		if (!rowCheckboxSelector) return;
 		headerCheckElement.addEventListener('click', checkboxListener);
-		KTEventHandler.on(
-			document.body,
-			rowCheckboxSelector,
-			'input',
-			((event?: Event) => {
-				if (event) handleRowCheckboxChange(event);
-			}) as KTCallableType,
-		);
+		KTEventHandler.on(document.body, rowCheckboxSelector, 'input', ((
+			event?: Event,
+		) => {
+			if (event) handleRowCheckboxChange(event);
+		}) as KTCallableType);
 	}
 
 	// When a row checkbox is changed

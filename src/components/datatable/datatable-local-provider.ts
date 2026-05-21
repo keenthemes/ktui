@@ -8,7 +8,6 @@ import {
 	KTDataTableAttributeInterface,
 	KTDataTableConfigInterface,
 	KTDataTableDataInterface,
-	KTDataTableStateInterface,
 } from './types';
 import {
 	KTDataTableDataProvider,
@@ -17,7 +16,7 @@ import {
 	KTDataTableStateStore,
 } from './datatable-contracts';
 
-interface KTDataTableLocalProviderOptions<T extends KTDataTableDataInterface> {
+interface KTDataTableLocalProviderOptions {
 	config: KTDataTableConfigInterface;
 	elements: () => KTDataTableLocalProviderElements;
 	getLogicalColumnCount: () => number;
@@ -28,7 +27,7 @@ interface KTDataTableLocalProviderOptions<T extends KTDataTableDataInterface> {
 export class KTDataTableLocalDataProvider<
 	T extends KTDataTableDataInterface,
 > implements KTDataTableDataProvider<T> {
-	constructor(private readonly options: KTDataTableLocalProviderOptions<T>) {}
+	constructor(private readonly options: KTDataTableLocalProviderOptions) {}
 
 	public async fetch(): Promise<KTDataTableProviderResult<T>> {
 		return this.fetchSync();
@@ -84,7 +83,12 @@ export class KTDataTableLocalDataProvider<
 			sortOrder !== '' &&
 			typeof sortCallback === 'function'
 		) {
-			data = sortCallback.call(this, data, sortField as string, sortOrder) as T[];
+			data = sortCallback.call(
+				this,
+				data,
+				sortField as string,
+				sortOrder,
+			) as T[];
 		}
 
 		if (data?.length > 0) {

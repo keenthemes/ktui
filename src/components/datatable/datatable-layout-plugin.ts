@@ -338,11 +338,7 @@ export const createStickyLayoutPlugin =
 					toPositiveInteger(lockedLayout.stickyRows?.bottom),
 				);
 
-				applyStickyColumns(
-					ctx.tableElement,
-					ctx.theadElement,
-					ctx.config,
-				);
+				applyStickyColumns(ctx.tableElement, ctx.theadElement, ctx.config);
 			} finally {
 				isApplying = false;
 			}
