@@ -26,6 +26,7 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 		return () => {
 			if (input.sizeElement) {
 				input.sizeElement.onchange = null;
+				this.removeChildElements(input.sizeElement);
 			}
 			if (input.paginationElement) {
 				this.removeChildElements(input.paginationElement);
@@ -51,18 +52,15 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 		}
 
 		const pageSizes = input.config.pageSizes ?? [5, 10, 20, 30, 50];
+		const options = pageSizes.map((size: number) => {
+			const option = document.createElement('option') as HTMLOptionElement;
+			option.value = String(size);
+			option.text = String(size);
+			option.selected = input.state.pageSize === size;
+			return option;
+		});
 
-		setTimeout(() => {
-			const options = pageSizes.map((size: number) => {
-				const option = document.createElement('option') as HTMLOptionElement;
-				option.value = String(size);
-				option.text = String(size);
-				option.selected = input.state.pageSize === size;
-				return option;
-			});
-
-			input.sizeElement.append(...options);
-		}, 100);
+		input.sizeElement.append(...options);
 
 		input.sizeElement.onchange = (event: Event) => {
 			input.reloadPageSize(

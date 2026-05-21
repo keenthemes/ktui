@@ -71,6 +71,59 @@
 	[data-kt-datatable].loading table {
 		opacity: 0.6;
 	}
+
+	/* Locked layout styles */
+	[data-kt-datatable] .kt-datatable-locked-layout {
+		position: relative;
+	}
+
+	/* border-collapse: separate — use per-cell header borders instead of tr border-b */
+	[data-kt-datatable] .kt-datatable-locked-layout [data-kt-datatable-table] thead tr {
+		@apply border-b-0;
+	}
+
+	[data-kt-datatable] .kt-datatable-locked-layout [data-kt-datatable-table] thead th {
+		@apply border-b border-border;
+	}
+
+	[data-kt-datatable] .kt-datatable-locked-cell {
+		overflow: hidden;
+		isolation: isolate;
+		/* Opaque surface so horizontally scrolling cells do not show through */
+		background-color: var(--color-card, var(--color-background, #ffffff)) !important;
+	}
+
+	[data-kt-datatable] [data-kt-datatable-table] thead th.kt-datatable-locked-cell,
+	[data-kt-datatable] .kt-datatable-locked-header {
+		/* Match kt-table thead bg-muted/40 without transparency */
+		background-color: color-mix(
+			in srgb,
+			var(--color-muted, rgb(0, 0, 0)) 40%,
+			var(--color-card, var(--color-background, #ffffff))
+		) !important;
+	}
+
+	[data-kt-datatable] .kt-datatable-locked-left {
+		box-shadow: inset -1px 0 0 0 var(--color-border, rgba(0, 0, 0, 0.08));
+	}
+
+	[data-kt-datatable] .kt-datatable-locked-right {
+		box-shadow: inset 1px 0 0 0 var(--color-border, rgba(0, 0, 0, 0.08));
+	}
+
+	/* Keep row hover/checked visual states on sticky body cells */
+	[data-kt-datatable] [data-kt-datatable-table] tbody tr:hover > .kt-datatable-locked-cell {
+		/* Match kt-table row hover bg-muted/50 without transparency */
+		background-color: color-mix(
+			in srgb,
+			var(--color-muted, rgb(0, 0, 0)) 50%,
+			var(--color-card, var(--color-background, #ffffff))
+		) !important;
+	}
+
+	[data-kt-datatable] [data-kt-datatable-table] tbody tr.checked > .kt-datatable-locked-cell {
+		background-color: var(--color-muted, rgb(0, 0, 0)) !important;
+	}
 }
 
 @custom-variant kt-datatable-loading {

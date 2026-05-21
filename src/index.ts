@@ -87,6 +87,11 @@ export type {
 	KTDataTableCheckConfigInterface,
 	KTDataTableCheckInterface,
 	KTDataTableCheckChangePayloadInterface,
+	KTDataTableLockedRowsConfigInterface,
+	KTDataTableLockedColumnsConfigInterface,
+	KTDataTableLockedLayoutConfigInterface,
+	KTDataTableLayoutPluginContextInterface,
+	KTDataTableLayoutPluginInterface,
 } from './components/datatable';
 export type {
 	KTDismissConfigInterface,

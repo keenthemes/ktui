@@ -16,4 +16,9 @@ export type {
 	KTDataTableCheckConfigInterface,
 	KTDataTableCheckInterface,
 	KTDataTableCheckChangePayloadInterface,
+	KTDataTableLockedRowsConfigInterface,
+	KTDataTableLockedColumnsConfigInterface,
+	KTDataTableLockedLayoutConfigInterface,
+	KTDataTableLayoutPluginContextInterface,
+	KTDataTableLayoutPluginInterface,
 } from './types';

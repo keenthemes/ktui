@@ -11,6 +11,8 @@ import {
 	KTDataTableSortOrderInterface,
 	KTDataTableStateInterface,
 	KTDataTableColumnFilterInterface,
+	KTDataTableLayoutPluginContextInterface,
+	KTDataTableLayoutPluginInterface,
 } from './types';
 import { KTOptionType } from '../../types';
 import KTComponents from '../../index';
@@ -20,6 +22,7 @@ import {
 	KTDataTableCheckboxAPI,
 } from './datatable-checkbox';
 import { createSortHandler, KTDataTableSortAPI } from './datatable-sort';
+import { createStickyLayoutPlugin } from './datatable-layout-plugin';
 import {
 	KTDataTableCleanup,
 	KTDataTableEventAdapter,
@@ -33,6 +36,7 @@ import { KTDataTableRemoteDataProvider } from './datatable-remote-provider';
 import { KTDataTableConfigStateStore } from './datatable-state-store';
 import { KTDataTableDomPaginationRenderer } from './datatable-pagination-renderer';
 import { KTDataTableDomTableRenderer } from './datatable-table-renderer';
+import KTUtils from '../../helpers/utils';
 
 /**
  * Custom DataTable plugin class with server-side API, pagination, and sorting
@@ -80,6 +84,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _checkbox: KTDataTableCheckboxAPI;
 	private _sortHandler: KTDataTableSortAPI<T>;
+	private _layoutPlugin: KTDataTableLayoutPluginInterface | null = null;
 	private _eventAdapter: KTDataTableEventAdapter;
 	private _stateStore: KTDataTableStateStore;
 	private _localProvider: KTDataTableLocalDataProvider<T>;
@@ -95,10 +100,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		super();
 
 		if (KTData.has(element as HTMLElement, this._name)) {
-			// Already initialized (e.g. by createInstances). Merge user config so columns/sortType etc. apply.
+			// Already initialized (e.g. by createInstances). Merge demo config and redraw once.
 			const existing = KTDataTable.getInstance(element as HTMLElement);
 			if (existing && config) {
-				existing._mergeConfig(config);
+				existing._applyRuntimeConfig(config);
 			}
 			return;
 		}
@@ -109,7 +114,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (!this._element) {
 			return;
 		}
+		if (!this._element.hasAttribute('data-kt-datatable')) {
+			this._element.setAttribute('data-kt-datatable', 'true');
+		}
 		this._buildConfig();
+		this._normalizePageSizeConfig();
 		this._stateStore = new KTDataTableConfigStateStore(this._config);
 		this._eventAdapter = createDataTableEventAdapter(
 			this._fireEvent.bind(this),
@@ -120,6 +129,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		KTDataTable.asElementWithInstance(element).instance = this;
 
 		this._initElements();
+		this._layoutPlugin = this._createLayoutPlugin();
 		this._tableRenderer = new KTDataTableDomTableRenderer<T>();
 		this._paginationRenderer = new KTDataTableDomPaginationRenderer();
 		this._initDataProviders();
@@ -155,6 +165,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		if (this._config.stateSave) {
 			this._loadState();
+			this._normalizePageState();
 		}
 
 		this._updateData();
@@ -186,6 +197,69 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			noticeOnTable: this._noticeOnTable.bind(this),
 			stateStore: this._stateStore,
 		});
+	}
+
+	private _createLayoutPlugin(): KTDataTableLayoutPluginInterface | null {
+		if (this._config.layoutPlugin) {
+			return this._config.layoutPlugin;
+		}
+
+		if (this._config.lockedLayout) {
+			return createStickyLayoutPlugin();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Apply config from a late constructor call (e.g. docs demo script after auto-init).
+	 */
+	private _applyRuntimeConfig(config: KTDataTableConfigInterface): void {
+		this._mergeConfig(config);
+		this._normalizePageSizeConfig();
+		this._layoutPlugin = this._createLayoutPlugin();
+		this.reload();
+	}
+
+	private _normalizePageSizeConfig(): void {
+		const configuredPageSizes = Array.isArray(this._config.pageSizes)
+			? this._config.pageSizes
+			: [];
+		const pageSizes = configuredPageSizes
+			.map((size) => Number(size))
+			.filter((size) => Number.isFinite(size) && size > 0)
+			.map((size) => Math.floor(size));
+		const fallbackPageSizes = [5, 10, 20, 30, 50];
+		this._config.pageSizes =
+			pageSizes.length > 0 ? Array.from(new Set(pageSizes)) : fallbackPageSizes;
+
+		const configuredPageSize = Number(this._config.pageSize);
+		this._config.pageSize =
+			Number.isFinite(configuredPageSize) && configuredPageSize > 0
+				? Math.floor(configuredPageSize)
+				: this._config.pageSizes[0];
+	}
+
+	private _normalizePageState(): void {
+		const statePageSize = Number(this._config._state.pageSize);
+		this._config._state.pageSize =
+			Number.isFinite(statePageSize) && statePageSize > 0
+				? Math.floor(statePageSize)
+				: this._config.pageSize;
+
+		const statePage = Number(this._config._state.page);
+		this._config._state.page =
+			Number.isFinite(statePage) && statePage > 0 ? Math.floor(statePage) : 1;
+	}
+
+	private _getLayoutPluginContext(): KTDataTableLayoutPluginContextInterface {
+		return {
+			rootElement: this._element,
+			tableElement: this._tableElement,
+			theadElement: this._theadElement,
+			tbodyElement: this._tbodyElement,
+			config: this._config,
+		};
 	}
 
 	/**
@@ -698,11 +772,20 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {Promise<void>} A promise that resolves when the table and pagination controls are updated
 	 */
 	private async _draw(): Promise<void> {
-		this._stateStore.patchState({
-			totalPages:
-				Math.ceil(this.getState().totalItems / this.getState().pageSize) || 0,
-		});
+		const normalizedPageSize = Math.max(
+			1,
+			Number(this.getState().pageSize) || Number(this._config.pageSize) || 1,
+		);
+		const totalPages =
+			Math.ceil(this.getState().totalItems / normalizedPageSize) || 0;
+		const page =
+			totalPages > 0
+				? Math.min(Math.max(1, this.getState().page), totalPages)
+				: 1;
 
+		this._stateStore.patchState({ totalPages, page });
+
+		this._layoutPlugin?.beforeDraw?.(this._getLayoutPluginContext());
 		this._emit('draw');
 
 		this._dispose();
@@ -714,6 +797,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 		if (this._infoElement || this._sizeElement || this._paginationElement) {
 			this._updatePagination();
+		}
+
+		this._layoutPlugin?.afterDraw?.(this._getLayoutPluginContext());
+		if (!this._config.apiEndpoint) {
+			this._stateStore.patchState({
+				_contentChecksum: KTUtils.checksum(
+					JSON.stringify(this._tbodyElement.innerHTML),
+				),
+			});
 		}
 
 		this._emit('drew');
@@ -731,7 +823,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {HTMLTableSectionElement} The new table body element
 	 */
 	private _updateTable(): HTMLTableSectionElement {
-		return this._tableRenderer.render({
+		this._tbodyElement = this._tableRenderer.render({
 			config: this._config,
 			context: this,
 			data: this._data,
@@ -743,6 +835,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			tableElement: this._tableElement,
 			theadElement: this._theadElement,
 		});
+		return this._tbodyElement;
 	}
 
 	/**
@@ -934,6 +1027,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * This method is called before re-rendering or when disposing the component.
 	 */
 	private _dispose() {
+		this._layoutPlugin?.dispose?.(this._getLayoutPluginContext());
+
 		const root = this._element;
 		if (!root) {
 			return;
