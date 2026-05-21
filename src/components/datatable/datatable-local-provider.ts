@@ -37,13 +37,17 @@ export class KTDataTableLocalDataProvider<
 	public fetchSync(): KTDataTableProviderResult<T> {
 		const state = this.options.stateStore.getState();
 		let { originalData } = state;
+		const skipDomInvalidation = Boolean(
+			this.options.config.lockedLayout || this.options.config.layoutPlugin,
+		);
 
 		if (
 			!this.options.elements().tableElement ||
 			originalData === undefined ||
-			this.tableConfigInvalidate() ||
-			this.localTableHeaderInvalidate() ||
-			this.localTableContentInvalidate()
+			(!skipDomInvalidation &&
+				(this.tableConfigInvalidate() ||
+					this.localTableHeaderInvalidate() ||
+					this.localTableContentInvalidate()))
 		) {
 			const { originalData, originalDataAttributes } =
 				this.localExtractTableContent();
