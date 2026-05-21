@@ -184,6 +184,52 @@ describe('KTDataTable locked layout plugin', () => {
 		expect(datatable.getState().totalItems).toBe(rows.length);
 	});
 
+	it('uses collapsed table borders for row-only locked layout', async () => {
+		const { container, table } = createDatatableFixture();
+
+		new KTDataTable<DataRow>(container, {
+			stateSave: false,
+			lockedLayout: {
+				stickyHeader: true,
+				stickyRows: { top: 1, bottom: 1 },
+			},
+		});
+
+		await vi.runAllTimersAsync();
+
+		expect(table.classList.contains('kt-datatable-locked-layout')).toBe(true);
+		expect(
+			table.classList.contains('kt-datatable-locked-layout-separate'),
+		).toBe(false);
+		expect(table.style.borderCollapse).not.toBe('separate');
+		expect(
+			table.tHead?.classList.contains('kt-datatable-locked-header-section'),
+		).toBe(true);
+		const stickyHeaderCell = table.querySelector(
+			'th.kt-datatable-locked-header',
+		) as HTMLTableCellElement | null;
+		expect(stickyHeaderCell?.style.position).not.toBe('sticky');
+	});
+
+	it('uses separate table borders when sticky columns are enabled', async () => {
+		const { container, table } = createDatatableFixture();
+
+		new KTDataTable<DataRow>(container, {
+			stateSave: false,
+			lockedLayout: {
+				stickyHeader: true,
+				stickyColumns: { left: ['id'] },
+			},
+		});
+
+		await vi.runAllTimersAsync();
+
+		expect(
+			table.classList.contains('kt-datatable-locked-layout-separate'),
+		).toBe(true);
+		expect(table.style.borderCollapse).toBe('separate');
+	});
+
 	it('does not set inline background color for locked header columns', async () => {
 		const { container, table } = createDatatableFixture();
 

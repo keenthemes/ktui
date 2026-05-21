@@ -77,13 +77,58 @@
 		position: relative;
 	}
 
-	/* border-collapse: separate — use per-cell header borders instead of tr border-b */
-	[data-kt-datatable] .kt-datatable-locked-layout [data-kt-datatable-table] thead tr {
+	[data-kt-datatable]
+		.kt-datatable-locked-layout
+		[data-kt-datatable-table]
+		thead.kt-datatable-locked-header-section {
+		/* Sticky thead group — opaque surface, no gap above first body row */
+		background-color: color-mix(
+			in srgb,
+			var(--color-muted, rgb(0, 0, 0)) 40%,
+			var(--color-card, var(--color-background, #ffffff))
+		) !important;
+	}
+
+	/* Sticky columns use border-collapse: separate — per-cell borders replace tr border-b */
+	[data-kt-datatable]
+		.kt-datatable-locked-layout.kt-datatable-locked-layout-separate
+		[data-kt-datatable-table]
+		thead
+		tr {
 		@apply border-b-0;
 	}
 
-	[data-kt-datatable] .kt-datatable-locked-layout [data-kt-datatable-table] thead th {
+	[data-kt-datatable]
+		.kt-datatable-locked-layout.kt-datatable-locked-layout-separate
+		[data-kt-datatable-table]
+		thead
+		th {
 		@apply border-b border-border;
+	}
+
+	[data-kt-datatable]
+		.kt-datatable-locked-layout.kt-datatable-locked-layout-separate
+		[data-kt-datatable-table]
+		tbody
+		tr {
+		@apply border-b-0;
+	}
+
+	[data-kt-datatable]
+		.kt-datatable-locked-layout.kt-datatable-locked-layout-separate
+		[data-kt-datatable-table]
+		tbody
+		td {
+		@apply border-b border-border;
+	}
+
+	[data-kt-datatable]
+		.kt-datatable-locked-layout.kt-datatable-locked-layout-separate
+		[data-kt-datatable-table]
+		tbody
+		tr:last-child
+		td {
+		@apply border-b-0;
 	}
 
 	[data-kt-datatable] .kt-datatable-locked-cell {

@@ -17,6 +17,8 @@ const LOCKED_TOP_ROW_CLASS = 'kt-datatable-locked-top-row';
 const LOCKED_BOTTOM_ROW_CLASS = 'kt-datatable-locked-bottom-row';
 const LOCKED_LEFT_CLASS = 'kt-datatable-locked-left';
 const LOCKED_RIGHT_CLASS = 'kt-datatable-locked-right';
+const LOCKED_LAYOUT_SEPARATE_CLASS = 'kt-datatable-locked-layout-separate';
+const LOCKED_HEADER_SECTION_CLASS = 'kt-datatable-locked-header-section';
 
 const HEADER_Z_INDEX = 40;
 const ROW_Z_INDEX = 30;
@@ -29,6 +31,18 @@ const toPositiveInteger = (value: number | undefined): number => {
 	}
 
 	return Math.max(0, Math.floor(value));
+};
+
+const hasStickyColumns = (config: KTDataTableConfigInterface): boolean => {
+	const lockedLayout = config.lockedLayout;
+	if (!lockedLayout?.stickyColumns) {
+		return false;
+	}
+
+	return (
+		(lockedLayout.stickyColumns.left?.length || 0) > 0 ||
+		(lockedLayout.stickyColumns.right?.length || 0) > 0
+	);
 };
 
 const hasLockedLayoutConfig = (config: KTDataTableConfigInterface): boolean => {
@@ -58,10 +72,21 @@ const clearStickyStyles = (
 	tableElement: HTMLTableElement,
 	scrollContainer: HTMLElement,
 ): void => {
-	tableElement.classList.remove('kt-datatable-locked-layout');
+	tableElement.classList.remove(
+		'kt-datatable-locked-layout',
+		LOCKED_LAYOUT_SEPARATE_CLASS,
+	);
 	scrollContainer.classList.remove('kt-datatable-locked-layout-host');
 	tableElement.style.borderCollapse = '';
 	tableElement.style.borderSpacing = '';
+
+	const theadElement = tableElement.tHead;
+	if (theadElement) {
+		theadElement.classList.remove(LOCKED_HEADER_SECTION_CLASS);
+		theadElement.style.position = '';
+		theadElement.style.top = '';
+		theadElement.style.zIndex = '';
+	}
 
 	const stickyElements = tableElement.querySelectorAll<HTMLElement>(
 		`.${LOCKED_CELL_CLASS}`,
@@ -131,6 +156,23 @@ const ensureStickyCell = (
 	element.style.zIndex = String(zIndex);
 };
 
+const measureStickyHeaderHeight = (
+	theadElement: HTMLTableSectionElement,
+): number => Math.round(theadElement.offsetHeight);
+
+/** Offset for top sticky body rows so they sit flush under a sticky header. */
+const getStickyTopRowOffset = (
+	headerHeight: number,
+	useCollapsedBorders: boolean,
+): number => {
+	if (headerHeight <= 0) {
+		return 0;
+	}
+
+	// Collapsed row borders are shared between thead and the first tbody row.
+	return useCollapsedBorders ? headerHeight - 1 : headerHeight;
+};
+
 const markIntersectionZIndex = (element: HTMLElement): void => {
 	const isRowLocked =
 		element.classList.contains(LOCKED_HEADER_CLASS) ||
@@ -148,9 +190,26 @@ const markIntersectionZIndex = (element: HTMLElement): void => {
 const applyStickyHeader = (
 	theadElement: HTMLTableSectionElement,
 	enabled: boolean,
+	useSectionSticky: boolean,
 ): number => {
 	if (!enabled) {
 		return 0;
+	}
+
+	if (useSectionSticky) {
+		theadElement.classList.add(LOCKED_HEADER_SECTION_CLASS);
+		theadElement.style.position = 'sticky';
+		theadElement.style.top = '0';
+		theadElement.style.zIndex = String(HEADER_Z_INDEX);
+
+		Array.from(theadElement.rows).forEach((row) => {
+			Array.from(row.cells).forEach((cell) => {
+				const headerCell = cell as HTMLTableCellElement;
+				headerCell.classList.add(LOCKED_CELL_CLASS, LOCKED_HEADER_CLASS);
+			});
+		});
+
+		return measureStickyHeaderHeight(theadElement);
 	}
 
 	let cumulativeTop = 0;
@@ -161,7 +220,7 @@ const applyStickyHeader = (
 			ensureStickyCell(headerCell, LOCKED_HEADER_CLASS, HEADER_Z_INDEX);
 			headerCell.style.top = `${rowTop}px`;
 		});
-		cumulativeTop += row.getBoundingClientRect().height;
+		cumulativeTop += row.offsetHeight;
 	});
 
 	return cumulativeTop;
@@ -172,10 +231,11 @@ const applyStickyRows = (
 	headerHeight: number,
 	topCount: number,
 	bottomCount: number,
+	useCollapsedBorders: boolean,
 ): void => {
 	const rows = Array.from(tbodyElement.rows);
 
-	let topOffset = headerHeight;
+	let topOffset = getStickyTopRowOffset(headerHeight, useCollapsedBorders);
 	rows.slice(0, topCount).forEach((row) => {
 		const rowTop = topOffset;
 		Array.from(row.cells).forEach((cell) => {
@@ -183,7 +243,7 @@ const applyStickyRows = (
 			ensureStickyCell(td, LOCKED_TOP_ROW_CLASS, ROW_Z_INDEX);
 			td.style.top = `${rowTop}px`;
 		});
-		topOffset += row.getBoundingClientRect().height;
+		topOffset += row.offsetHeight;
 	});
 
 	let bottomOffset = 0;
@@ -197,7 +257,7 @@ const applyStickyRows = (
 				ensureStickyCell(td, LOCKED_BOTTOM_ROW_CLASS, ROW_Z_INDEX);
 				td.style.bottom = `${rowBottom}px`;
 			});
-			bottomOffset += row.getBoundingClientRect().height;
+			bottomOffset += row.offsetHeight;
 		});
 };
 
@@ -322,13 +382,19 @@ export const createStickyLayoutPlugin =
 				clearStickyStyles(ctx.tableElement, scrollContainer);
 				ctx.tableElement.classList.add('kt-datatable-locked-layout');
 				scrollContainer.classList.add('kt-datatable-locked-layout-host');
-				ctx.tableElement.style.borderCollapse = 'separate';
-				ctx.tableElement.style.borderSpacing = '0';
+
+				if (hasStickyColumns(ctx.config)) {
+					ctx.tableElement.classList.add(LOCKED_LAYOUT_SEPARATE_CLASS);
+					ctx.tableElement.style.borderCollapse = 'separate';
+					ctx.tableElement.style.borderSpacing = '0';
+				}
 
 				const lockedLayout = ctx.config.lockedLayout || {};
+				const useCollapsedBorders = !hasStickyColumns(ctx.config);
 				const headerHeight = applyStickyHeader(
 					ctx.theadElement,
 					lockedLayout.stickyHeader === true,
+					useCollapsedBorders,
 				);
 
 				applyStickyRows(
@@ -336,6 +402,7 @@ export const createStickyLayoutPlugin =
 					headerHeight,
 					toPositiveInteger(lockedLayout.stickyRows?.top),
 					toPositiveInteger(lockedLayout.stickyRows?.bottom),
+					useCollapsedBorders,
 				);
 
 				applyStickyColumns(ctx.tableElement, ctx.theadElement, ctx.config);
