@@ -100,10 +100,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		super();
 
 		if (KTData.has(element as HTMLElement, this._name)) {
-			// Already initialized (e.g. by createInstances). Merge user config so columns/sortType etc. apply.
+			// Already initialized (e.g. by createInstances). Merge demo config and redraw once.
 			const existing = KTDataTable.getInstance(element as HTMLElement);
 			if (existing && config) {
-				existing._mergeConfig(config);
+				existing._applyRuntimeConfig(config);
 			}
 			return;
 		}
@@ -209,6 +209,16 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		return null;
+	}
+
+	/**
+	 * Apply config from a late constructor call (e.g. docs demo script after auto-init).
+	 */
+	private _applyRuntimeConfig(config: KTDataTableConfigInterface): void {
+		this._mergeConfig(config);
+		this._normalizePageSizeConfig();
+		this._layoutPlugin = this._createLayoutPlugin();
+		this.reload();
 	}
 
 	private _normalizePageSizeConfig(): void {
