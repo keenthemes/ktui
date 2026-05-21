@@ -137,34 +137,37 @@
 
 	/* Enhanced Tag Styles */
 	.kt-select-tag {
-		@apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium;
-		@apply bg-accent/10 text-accent-foreground border border-border;
+		@apply inline-flex items-center gap-1 px-2 py-1 rounded-none text-xs font-medium leading-tight;
+		@apply bg-accent/10 text-accent-foreground border-[0.5px] border-border/80;
 		@apply max-w-[200px] truncate flex-shrink-0;
-		@apply shadow-sm;
-		@apply leading-tight;
 	}
 
 	.kt-select-tag-remove {
-		@apply flex items-center justify-center w-5 h-5 rounded-full;
+		@apply flex items-center justify-center size-4 rounded-full;
+		@apply border-0 bg-transparent p-0 shadow-none;
 		@apply hover:bg-accent/20 text-muted-foreground hover:text-accent-foreground;
-		@apply transition-all duration-200 cursor-pointer;
+		@apply transition-[color,background-color,transform] duration-200 cursor-pointer;
 		@apply flex-shrink-0 opacity-100;
-		@apply hover:scale-110;
+		@apply hover:scale-105;
 	}
 
 	.kt-select-tag-remove svg {
-		@apply w-3.5 h-3.5;
+		@apply size-3;
 		@apply transition-transform duration-200;
 	}
 
 	.kt-select-tag-remove:hover svg {
-		@apply scale-110;
+		@apply scale-105;
+	}
+
+	.kt-select-selected-count {
+		@apply inline-flex items-center text-xs font-medium leading-tight text-muted-foreground flex-shrink-0;
 	}
 
 	/* Enhanced Multi-select display container */
 	.kt-select-display[data-multiple='true'] {
-		@apply flex flex-wrap items-center gap-2 p-3 min-h-[3rem];
-		@apply w-full;
+		@apply flex flex-wrap items-center gap-1;
+		@apply w-full min-h-0;
 		@apply bg-background border border-input rounded-md;
 		@apply focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20;
 		@apply transition-all duration-200;
@@ -178,8 +181,8 @@
 		background-position: right 0.5rem center;
 
 		&[data-multiple='true'] {
-			@apply h-auto min-h-8.5 py-1.5 flex-wrap;
-			background-position: right 0.5rem top 0.675rem;
+			@apply h-auto min-h-8.5 py-0 flex-wrap;
+			background-position: right 0.5rem center;
 		}
 	}
 
@@ -188,8 +191,8 @@
 		background-position: right 0.5rem center;
 
 		&[data-multiple='true'] {
-			@apply h-auto min-h-7;
-			background-position: right 0.5rem top 0.575rem;
+			@apply h-auto min-h-7 py-0 flex-wrap;
+			background-position: right 0.5rem center;
 		}
 	}
 
@@ -198,8 +201,8 @@
 		background-position: right 0.6rem center;
 
 		&[data-multiple='true'] {
-			@apply h-auto min-h-10 py-2;
-			background-position: right 0.6rem top 0.85rem;
+			@apply h-auto min-h-10 py-0 flex-wrap;
+			background-position: right 0.6rem center;
 		}
 	}
 }
@@ -211,7 +214,7 @@
 			background-position: left 0.5rem center;
 
 			&[data-multiple='true'] {
-				background-position: left 0.5rem top 0.675rem;
+				background-position: left 0.5rem center;
 			}
 		}
 
@@ -219,7 +222,7 @@
 			background-position: left 0.5rem center;
 
 			&[data-multiple='true'] {
-				background-position: left 0.5rem top 0.575rem;
+				background-position: left 0.5rem center;
 			}
 		}
 
@@ -227,7 +230,7 @@
 			background-position: left 0.75rem center;
 
 			&[data-multiple='true'] {
-				background-position: left 0.75rem top 0.85rem;
+				background-position: left 0.75rem center;
 			}
 		}
 	}

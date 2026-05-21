@@ -1279,4 +1279,76 @@ describe('KTSelect UX Behaviors', () => {
 			expect(dropdownOption?.getAttribute('aria-selected')).toBe('true');
 		});
 	});
+
+	describe('getValue()', () => {
+		it('returns null for single-select with no explicit selection after clear', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, { height: 250 });
+			await waitForInit(select);
+
+			const option1 = selectEl.querySelector(
+				'option[value="1"]',
+			) as HTMLOptionElement;
+			select.setSelectedOptions([option1]);
+			await waitFor(50);
+			select.setSelectedOptions([]);
+			await waitFor(50);
+
+			expect(select.getValue()).toBe(null);
+			expect(select.getSelectedOptions()).toEqual([]);
+		});
+
+		it('returns the selected value for single-select', async () => {
+			const selectEl = createSelectElement([
+				{ value: '1', text: 'Option 1' },
+				{ value: '2', text: 'Option 2' },
+			]);
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, { height: 250 });
+			await waitForInit(select);
+
+			const option2 = selectEl.querySelector(
+				'option[value="2"]',
+			) as HTMLOptionElement;
+			select.setSelectedOptions([option2]);
+			await waitFor(50);
+
+			expect(select.getValue()).toBe('2');
+			expect(select.getSelectedOptions()).toEqual(['2']);
+		});
+
+		it('returns null for multiple-select even when options are selected', async () => {
+			const selectEl = createSelectElement([
+				{ value: 'a', text: 'A' },
+				{ value: 'b', text: 'B' },
+			]);
+			selectEl.setAttribute('multiple', 'multiple');
+			container.appendChild(selectEl);
+
+			const select = new KTSelect(selectEl, {
+				multiple: true,
+				height: 250,
+			});
+			await waitForInit(select);
+
+			const optionA = selectEl.querySelector(
+				'option[value="a"]',
+			) as HTMLOptionElement;
+			const optionB = selectEl.querySelector(
+				'option[value="b"]',
+			) as HTMLOptionElement;
+			select.setSelectedOptions([optionA, optionB]);
+			await waitFor(50);
+
+			expect(select.getValue()).toBe(null);
+			expect(select.getSelectedOptions()).toContain('a');
+			expect(select.getSelectedOptions()).toContain('b');
+		});
+	});
 });
