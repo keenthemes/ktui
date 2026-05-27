@@ -313,7 +313,7 @@ describe('KTDataTable - Pagination Reset', () => {
 			expect(datatable.getState().page).toBe(1);
 
 			// Apply third filter (page should stay at 1)
-			datatable.setFilter({ column: 'id', type: 'numeric', value: '10' });
+			datatable.setFilter({ column: 'id', type: 'numeric', value: 10 });
 			expect(datatable.getState().page).toBe(1);
 		});
 

@@ -62,6 +62,64 @@ export interface KTDataTableInterface {
 	showSpinner(): void;
 
 	hideSpinner(): void;
+
+	/**
+	 * Redraw the table, optionally navigating to a specific page.
+	 * @param page The page number to navigate to (defaults to 1)
+	 */
+	redraw(page?: number): void;
+
+	/**
+	 * Search the data using a string query or object.
+	 * @param query The search query
+	 */
+	search(query: string | object): void;
+
+	/**
+	 * Set or replace a column filter.
+	 * @param filter The filter to apply
+	 */
+	setFilter(filter: KTDataTableColumnFilterInterface): void;
+
+	/**
+	 * Get the current state of the datatable.
+	 */
+	getState(): KTDataTableStateInterface;
+
+	/**
+	 * Dispose of the datatable instance, cleaning up event listeners and DOM nodes.
+	 */
+	dispose(): void;
+
+	/**
+	 * Check if all visible rows are checked (header checkbox state).
+	 */
+	isChecked(): boolean;
+
+	/**
+	 * Toggle all visible row checkboxes.
+	 */
+	toggle(): void;
+
+	/**
+	 * Check all visible row checkboxes.
+	 */
+	check(): void;
+
+	/**
+	 * Uncheck all visible row checkboxes.
+	 */
+	uncheck(): void;
+
+	/**
+	 * Get all checked row IDs.
+	 */
+	getChecked(): string[];
+
+	/**
+	 * Reapply checked state to visible checkboxes after redraw/pagination.
+	 */
+	update(): void;
 }
 
 export interface KTDataTableResponseDataInterface {
@@ -100,7 +158,9 @@ export interface KTDataTableLayoutPluginInterface {
 }
 
 // Define the DataTable options type
-export interface KTDataTableConfigInterface {
+export interface KTDataTableConfigInterface<
+	T extends KTDataTableDataInterface = KTDataTableDataInterface,
+> {
 	requestMethod?: string;
 	requestHeaders?: { [key: string]: string };
 	requestCredentials?: RequestCredentials;
@@ -117,20 +177,18 @@ export interface KTDataTableConfigInterface {
 	stateNamespace?: string;
 	pageSizes?: number[];
 	columns?: {
-		[key: keyof KTDataTableDataInterface | string]: {
+		[key: string]: {
 			title?: string;
 			render?: (
-				item: KTDataTableDataInterface[keyof KTDataTableDataInterface] | string,
-				data: KTDataTableDataInterface,
+				item: T[keyof T] | string,
+				data: T,
 				context: KTDataTableInterface,
 			) => string | HTMLElement | DocumentFragment;
 			checkbox?: boolean;
 			createdCell?: (
 				cell: HTMLTableCellElement,
-				cellData:
-					| KTDataTableDataInterface[keyof KTDataTableDataInterface]
-					| string,
-				rowData: KTDataTableDataInterface,
+				cellData: T[keyof T] | string,
+				rowData: T,
 				row: HTMLTableRowElement,
 			) => void;
 			/**
@@ -144,10 +202,8 @@ export interface KTDataTableConfigInterface {
 			 * Use for custom formats (e.g. dates, combined fields, custom parsing).
 			 */
 			sortValue?: (
-				cellValue:
-					| KTDataTableDataInterface[keyof KTDataTableDataInterface]
-					| string,
-				rowData: KTDataTableDataInterface,
+				cellValue: T[keyof T] | string,
+				rowData: T,
 			) => number | string;
 		};
 	};
@@ -169,18 +225,15 @@ export interface KTDataTableConfigInterface {
 		};
 		// local data sort callback
 		callback?: (
-			data: KTDataTableDataInterface[],
-			sortField: keyof KTDataTableDataInterface | number,
+			data: T[],
+			sortField: keyof T | number,
 			sortOrder: KTDataTableSortOrderInterface,
-		) => KTDataTableDataInterface[];
+		) => T[];
 	};
 
 	search?: {
 		delay?: number; // delay in milliseconds
-		callback?: (
-			data: KTDataTableDataInterface[],
-			search: string,
-		) => KTDataTableDataInterface[]; // search callback
+		callback?: (data: T[], search: string) => T[]; // search callback
 	};
 
 	pagination?: {
@@ -221,7 +274,7 @@ export interface KTDataTableConfigInterface {
 	layoutPlugin?: KTDataTableLayoutPluginInterface;
 
 	_state?: KTDataTableStateInterface;
-	_data?: KTDataTableDataInterface[];
+	_data?: T[];
 
 	loadingClass?: string;
 }
@@ -231,11 +284,28 @@ export type KTDataTableColumnFilterTypeInterface =
 	| 'numeric'
 	| 'dateRange';
 
-export type KTDataTableColumnFilterInterface = {
+export interface KTDataTableTextFilterInterface {
 	column: keyof KTDataTableDataInterface;
-	type: KTDataTableColumnFilterTypeInterface;
+	type: 'text';
 	value: string;
-};
+}
+
+export interface KTDataTableNumericFilterInterface {
+	column: keyof KTDataTableDataInterface;
+	type: 'numeric';
+	value: number;
+}
+
+export interface KTDataTableDateRangeFilterInterface {
+	column: keyof KTDataTableDataInterface;
+	type: 'dateRange';
+	value: { from: string; to: string };
+}
+
+export type KTDataTableColumnFilterInterface =
+	| KTDataTableTextFilterInterface
+	| KTDataTableNumericFilterInterface
+	| KTDataTableDateRangeFilterInterface;
 
 export interface KTDataTableCheckConfigInterface {
 	target: string;
