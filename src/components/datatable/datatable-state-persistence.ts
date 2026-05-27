@@ -14,15 +14,19 @@ export interface KTDataTableStatePersistence {
 export function createStatePersistence(): KTDataTableStatePersistence {
 	function save(namespace: string, state: KTDataTableStateInterface): void {
 		if (namespace) {
-			localStorage.setItem(namespace, JSON.stringify(state));
+			try {
+				localStorage.setItem(namespace, JSON.stringify(state));
+			} catch {
+				// localStorage unavailable (e.g. Node.js without --localstorage-file)
+			}
 		}
 	}
 
 	function load(namespace: string): KTDataTableStateInterface | null {
-		const stateString = localStorage.getItem(namespace);
-		if (!stateString) return null;
-
 		try {
+			const stateString = localStorage.getItem(namespace);
+			if (!stateString) return null;
+
 			return JSON.parse(stateString) as KTDataTableStateInterface;
 		} catch {
 			return null;
@@ -31,7 +35,11 @@ export function createStatePersistence(): KTDataTableStatePersistence {
 
 	function remove(namespace: string): void {
 		if (namespace) {
-			localStorage.removeItem(namespace);
+			try {
+				localStorage.removeItem(namespace);
+			} catch {
+				// localStorage unavailable
+			}
 		}
 	}
 

