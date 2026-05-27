@@ -434,8 +434,18 @@ export const createStickyLayoutPlugin =
 				detachResizeListener();
 				applyLayout(ctx);
 
+				// Throttle re-layout with rAF to avoid running on every resize/scroll event
+				let rafId = 0;
+				const throttledApply = () => {
+					if (rafId) return;
+					rafId = requestAnimationFrame(() => {
+						rafId = 0;
+						applyLayout(ctx);
+					});
+				};
+
 				const scrollContainer = getScrollContainer(ctx.rootElement);
-				resizeHandler = () => applyLayout(ctx);
+				resizeHandler = throttledApply;
 				window.addEventListener('resize', resizeHandler);
 				scrollContainerTarget = scrollContainer;
 				scrollContainer.addEventListener('scroll', resizeHandler);

@@ -77,6 +77,49 @@ export class KTDataTableLocalDataProvider<
 			}
 		}
 
+		// Apply column filters
+		const { filters } = this.options.stateStore.getState();
+		if (filters && filters.length > 0) {
+			filteredData = data = data.filter((item: T) => {
+				return filters.every((filter) => {
+					const cellValue = item[filter.column as keyof T];
+					switch (filter.type) {
+						case 'text': {
+							if (!filter.value) return true;
+							const text = String(cellValue ?? '')
+								.replace(/<[^>]*>|&nbsp;/g, '')
+								.toLowerCase();
+							return text.includes(filter.value.toLowerCase());
+						}
+						case 'numeric': {
+							const num = parseFloat(
+								String(cellValue ?? '').replace(/[^0-9.-]/g, ''),
+							);
+							return !Number.isNaN(num) && num === filter.value;
+						}
+						case 'dateRange': {
+							if (!filter.value?.from && !filter.value?.to) return true;
+							const cellDate = new Date(String(cellValue ?? ''));
+							if (Number.isNaN(cellDate.getTime())) return false;
+							if (
+								filter.value.from &&
+								cellDate < new Date(filter.value.from)
+							)
+								return false;
+							if (
+								filter.value.to &&
+								cellDate > new Date(filter.value.to)
+							)
+								return false;
+							return true;
+						}
+						default:
+							return true;
+					}
+				});
+			}) as T[];
+		}
+
 		const sortCallback = this.options.config.sort?.callback;
 		if (
 			sortField !== undefined &&

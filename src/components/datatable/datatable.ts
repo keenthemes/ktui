@@ -574,7 +574,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._layoutPlugin?.beforeDraw?.(this._getLayoutPluginContext());
 		this._emit('draw');
 
-		this._dispose();
+		this._cleanupForRedraw();
 
 		// Update the table and pagination controls
 		if (this._theadElement && this._tbodyElement) {
@@ -754,48 +754,51 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * Clean up all event listeners, handlers, and DOM nodes created by this instance.
 	 * This method is called before re-rendering or when disposing the component.
 	 */
-	private _dispose() {
+	/**
+	 * Clean up event listeners and DOM artifacts for a redraw cycle.
+	 * Does NOT remove the instance from the registry — the datatable
+	 * remains accessible via getInstance() during the redraw window.
+	 */
+	private _cleanupForRedraw(): void {
 		this._layoutPlugin?.dispose?.(this._getLayoutPluginContext());
 
-		const root = this._element;
-		if (!root) {
+		if (!this._element) {
 			return;
 		}
 
 		this._cleanupCallbacks.forEach((cleanup) => cleanup());
 		this._cleanupCallbacks = [];
 
-		// --- 1. Remove search input event listener (debounced) ---
 		this._searchHandler.detach(this._tableId());
 
-		// --- 2. Remove page size dropdown event listener ---
 		if (this._sizeElement && this._sizeElement.onchange) {
 			this._sizeElement.onchange = null;
 		}
 
-		// --- 3. Remove all pagination button event listeners ---
 		if (this._paginationElement) {
-			// Remove all child nodes (buttons) to ensure no lingering listeners
 			while (this._paginationElement.firstChild) {
 				this._paginationElement.removeChild(this._paginationElement.firstChild);
 			}
 		}
 
-		// --- 4. Dispose of handler objects (checkbox, sort) ---
 		this._checkbox.dispose();
 		this._sortHandler.dispose();
 
-		// --- 5. Remove spinner DOM node if it exists ---
 		this._spinner.remove(this._element, this._config);
+	}
 
-		// --- 6. Remove instance reference from the DOM element ---
-		datatableRegistry.remove(root);
+	/**
+	 * Full disposal — cleans up listeners AND removes the instance from
+	 * the registry. Only called when the component is being destroyed.
+	 */
+	private _dispose(): void {
+		this._cleanupForRedraw();
 
-		KTData.remove(root, this._name);
-
-		// --- 7. (Optional) Clear localStorage state ---
-		// Uncomment the following line if you want to clear state on dispose:
-		// this._deleteState();
+		const root = this._element;
+		if (root) {
+			datatableRegistry.remove(root);
+			KTData.remove(root, this._name);
+		}
 	}
 
 	/**

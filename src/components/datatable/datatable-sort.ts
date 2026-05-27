@@ -46,6 +46,7 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 	private _fireEvent: (eventName: string, eventData?: object) => void;
 	private _dispatchEvent: (eventName: string, eventData?: object) => void;
 	private _updateData: () => void;
+	private _sortAbortController: AbortController | null = null;
 
 	constructor(
 		config: KTDataTableConfigInterface,
@@ -247,6 +248,14 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 
 	public initSort(): void {
 		if (!this._theadElement) return;
+
+		// Abort previous sort listeners before attaching new ones
+		if (this._sortAbortController) {
+			this._sortAbortController.abort();
+		}
+		this._sortAbortController = new AbortController();
+		const signal = this._sortAbortController.signal;
+
 		this.setSortIcon(
 			this._getState().sortField as keyof T,
 			this._getState().sortOrder,
@@ -278,16 +287,15 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 				this._fireEvent('sort', { field: sortField, order: sortOrder });
 				this._dispatchEvent('sort', { field: sortField, order: sortOrder });
 				this._updateData();
-			});
+			}, { signal });
 		});
 	}
 
 	public dispose(): void {
-		if (!this._theadElement) return;
-		const headers = this._theadElement.querySelectorAll('th');
-		headers.forEach((th) => {
-			th.replaceWith(th.cloneNode(true));
-		});
+		if (this._sortAbortController) {
+			this._sortAbortController.abort();
+			this._sortAbortController = null;
+		}
 	}
 }
 

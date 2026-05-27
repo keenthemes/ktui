@@ -98,7 +98,7 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 		if (!rowCheckboxSelector) return;
 		this._headerCheckElement.addEventListener('click', this._checkboxListener);
 		this._delegatedEventId = KTEventHandler.on(
-			document.body,
+			this._element,
 			rowCheckboxSelector,
 			'input',
 			((event?: Event) => {
@@ -254,7 +254,7 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 		}
 		const rowCheckboxSelector = this._config.attributes?.checkbox;
 		if (this._delegatedEventId && rowCheckboxSelector) {
-			KTEventHandler.off(document.body, 'input', this._delegatedEventId);
+			KTEventHandler.off(this._element, 'input', this._delegatedEventId);
 			this._delegatedEventId = null;
 		}
 		this._headerCheckElement = null;
