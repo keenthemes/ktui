@@ -15,6 +15,7 @@ import {
 	KTDataTableProviderResult,
 	KTDataTableStateStore,
 } from './datatable-contracts';
+import { resolveColumns } from './datatable-column-utils';
 
 interface KTDataTableLocalProviderOptions {
 	config: KTDataTableConfigInterface;
@@ -140,15 +141,7 @@ export class KTDataTableLocalDataProvider<
 		this.options.storeOriginalClasses();
 
 		const rows = tbodyElement.querySelectorAll<HTMLTableRowElement>('tr');
-		const allThs: NodeListOf<HTMLTableCellElement> = theadElement
-			? theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		);
-		const columnsByIndex: HTMLTableCellElement[] =
-			ths.length > 0 && ths.length !== allThs.length ? Array.from(allThs) : ths;
+		const { columnsByIndex } = resolveColumns(theadElement);
 
 		rows.forEach((row: HTMLTableRowElement) => {
 			const dataRow: T = {} as T;

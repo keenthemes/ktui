@@ -12,6 +12,7 @@ import {
 	KTDataTableTableRenderer,
 	KTDataTableTableRendererInput,
 } from './datatable-contracts';
+import { resolveColumns } from './datatable-column-utils';
 
 export class KTDataTableDomTableRenderer<
 	T extends KTDataTableDataInterface,
@@ -64,15 +65,7 @@ export class KTDataTableDomTableRenderer<
 			return tbodyElement;
 		}
 
-		const allThs: NodeListOf<HTMLTableCellElement> = input.theadElement
-			? input.theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		);
-		const columnsToRender: HTMLTableCellElement[] =
-			ths.length > 0 && ths.length !== allThs.length ? Array.from(allThs) : ths;
+		const { columnsByIndex: columnsToRender } = resolveColumns(input.theadElement);
 		const logicalColumnCount =
 			columnsToRender.length > 0
 				? columnsToRender.length

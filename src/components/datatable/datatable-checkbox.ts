@@ -21,6 +21,7 @@ export interface KTDataTableCheckboxAPI {
 	isChecked(): boolean;
 	getChecked(): string[];
 	updateState(): void;
+	dispose(): void;
 }
 
 // Main function to create checkbox logic for a datatable instance
@@ -32,6 +33,7 @@ export function createCheckboxHandler(
 	let headerChecked = false;
 	let headerCheckElement: HTMLInputElement | null = null;
 	let targetElements: NodeListOf<HTMLInputElement> | null = null;
+	let delegatedEventId: string | null = null;
 
 	// Default: preserve selection across all pages
 	const preserveSelection = config.checkbox?.preserveSelection !== false;
@@ -90,11 +92,14 @@ export function createCheckboxHandler(
 		const rowCheckboxSelector = config.attributes?.checkbox;
 		if (!rowCheckboxSelector) return;
 		headerCheckElement.addEventListener('click', checkboxListener);
-		KTEventHandler.on(document.body, rowCheckboxSelector, 'input', ((
-			event?: Event,
-		) => {
-			if (event) handleRowCheckboxChange(event);
-		}) as KTCallableType);
+		delegatedEventId = KTEventHandler.on(
+			document.body,
+			rowCheckboxSelector,
+			'input',
+			((event?: Event) => {
+				if (event) handleRowCheckboxChange(event);
+			}) as KTCallableType,
+		);
 	}
 
 	// When a row checkbox is changed
@@ -249,6 +254,19 @@ export function createCheckboxHandler(
 		updateHeaderCheckboxState();
 	}
 
+	function dispose() {
+		if (headerCheckElement) {
+			headerCheckElement.removeEventListener('click', checkboxListener);
+		}
+		const rowCheckboxSelector = config.attributes?.checkbox;
+		if (delegatedEventId && rowCheckboxSelector) {
+			KTEventHandler.off(document.body, 'input', delegatedEventId);
+			delegatedEventId = null;
+		}
+		headerCheckElement = null;
+		targetElements = null;
+	}
+
 	return {
 		init,
 		check,
@@ -257,5 +275,6 @@ export function createCheckboxHandler(
 		isChecked,
 		getChecked,
 		updateState,
+		dispose,
 	};
 }

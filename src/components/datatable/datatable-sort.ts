@@ -27,6 +27,7 @@ export interface KTDataTableSortAPI<T = KTDataTableDataInterface> {
 		sortField: keyof T,
 		sortOrder: KTDataTableSortOrderInterface,
 	): void;
+	dispose(): void;
 }
 
 export function createSortHandler<T = KTDataTableDataInterface>(
@@ -254,5 +255,13 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		});
 	}
 
-	return { initSort, sortData, toggleSortOrder, setSortIcon };
+	function dispose(): void {
+		if (!theadElement) return;
+		const headers = theadElement.querySelectorAll('th');
+		headers.forEach((th) => {
+			th.replaceWith(th.cloneNode(true));
+		});
+	}
+
+	return { initSort, sortData, toggleSortOrder, setSortIcon, dispose };
 }
