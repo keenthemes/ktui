@@ -294,6 +294,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					if (!data || !search) {
 						return [];
 					}
+					const searchLower = search.toLowerCase();
+					const stripHtml = /<[^>]*>|&nbsp;/g;
 					return data.filter((item: T) => {
 						if (!item) {
 							return false;
@@ -307,9 +309,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 								return false;
 							}
 							const valueText = String(value)
-								.replace(/<|>|&nbsp;/g, '')
+								.replace(stripHtml, '')
 								.toLowerCase();
-							return valueText.includes(search.toLowerCase());
+							return valueText.includes(searchLower);
 						});
 					});
 				},

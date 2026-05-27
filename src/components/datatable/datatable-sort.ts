@@ -143,6 +143,18 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 		const sortValueFn = columnDef?.sortValue;
 		const useNumeric = !sortValueFn && columnDef?.sortType === 'numeric';
 
+		// Pre-strip HTML from cell values once (instead of on every comparison).
+		// For N rows this runs N regex replacements instead of N*log(N).
+		const strippedCache = new Map<T, string>();
+		const stripHtml = (value: unknown): string =>
+			String(value).replace(/<[^>]*>|&nbsp;/g, '');
+
+		if (!sortValueFn) {
+			for (const item of data) {
+				strippedCache.set(item, stripHtml(item[sortField as keyof T]));
+			}
+		}
+
 		return data.sort((a, b) => {
 			const aRaw = a[sortField as keyof T] as unknown;
 			const bRaw = b[sortField as keyof T] as unknown;
@@ -174,19 +186,15 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 				return KTDataTableSortHandler._compareValues(aVal, bVal, sortOrder);
 			}
 			if (useNumeric) {
-				const aNum = KTDataTableSortHandler._parseNumeric(
-					aRaw as
-						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
-						| string,
-				);
-				const bNum = KTDataTableSortHandler._parseNumeric(
-					bRaw as
-						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
-						| string,
-				);
+				const aNum = KTDataTableSortHandler._parseNumeric(strippedCache.get(a) ?? aRaw);
+				const bNum = KTDataTableSortHandler._parseNumeric(strippedCache.get(b) ?? bRaw);
 				return KTDataTableSortHandler._compareNumeric(aNum, bNum, sortOrder);
 			}
-			return KTDataTableSortHandler._compareValues(aRaw, bRaw, sortOrder);
+			return KTDataTableSortHandler._compareValues(
+				strippedCache.get(a) ?? aRaw,
+				strippedCache.get(b) ?? bRaw,
+				sortOrder,
+			);
 		});
 	}
 
