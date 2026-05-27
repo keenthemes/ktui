@@ -39,6 +39,13 @@ import { KTDataTableConfigStateStore } from './datatable-state-store';
 import { KTDataTableDomPaginationRenderer } from './datatable-pagination-renderer';
 import { KTDataTableDomTableRenderer } from './datatable-table-renderer';
 import KTUtils from '../../helpers/utils';
+import { createSearchHandler } from './datatable-search-handler';
+import {
+	createStatePersistence,
+	resolveTableNamespace,
+} from './datatable-state-persistence';
+import { createSpinner } from './datatable-spinner';
+import { createDataTableRegistry } from './datatable-registry';
 
 /**
  * Custom DataTable plugin class with server-side API, pagination, and sorting
@@ -49,24 +56,14 @@ import KTUtils from '../../helpers/utils';
  * @param {HTMLElement} element The table element
  * @param {KTDataTableConfigInterface} [config] Additional configuration options
  */
+const datatableRegistry = createDataTableRegistry<
+	KTDataTable<KTDataTableDataInterface>
+>();
+
 export class KTDataTable<T extends KTDataTableDataInterface>
 	extends KTComponent
 	implements KTDataTableInterface
 {
-	private static asElementWithInstance(element: HTMLElement): HTMLElement & {
-		instance?: KTDataTable<KTDataTableDataInterface>;
-	} {
-		return element as HTMLElement & {
-			instance?: KTDataTable<KTDataTableDataInterface>;
-		};
-	}
-
-	private static asSearchElementWithDebounce(
-		element: HTMLInputElement,
-	): HTMLInputElement & { _debouncedSearch?: EventListener } {
-		return element as HTMLInputElement & { _debouncedSearch?: EventListener };
-	}
-
 	protected override _name: string = 'datatable';
 	protected override _config: KTDataTableConfigInterface;
 	protected override _defaultConfig: KTDataTableConfigInterface;
@@ -94,6 +91,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _tableRenderer: KTDataTableTableRenderer<T>;
 	private _paginationRenderer: KTDataTablePaginationRenderer;
 	private _cleanupCallbacks: KTDataTableCleanup[] = [];
+
+	private _searchHandler = createSearchHandler();
+	private _statePersistence = createStatePersistence();
+	private _spinner = createSpinner();
 
 	private _data: T[] = [];
 	private _isFetching: boolean = false;
@@ -128,7 +129,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		);
 
 		// Store the instance directly on the element
-		KTDataTable.asElementWithInstance(element).instance = this;
+		datatableRegistry.register(element, this);
 
 		this._initElements();
 		this._layoutPlugin = this._createLayoutPlugin();
@@ -403,7 +404,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (this._isFetching) return; // Prevent duplicate fetches
 		this._isFetching = true;
 		try {
-			this._showSpinner(); // Show spinner before fetching data
+			this._spinner.show(this._element, this._config, this._tableElement); // Show spinner before fetching data
 
 			this._emit('fetch');
 			const result =
@@ -440,7 +441,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._sortHandler.initSort();
 		}
 
-		this._attachSearchEvent();
+		this._searchHandler.attach(
+			this._tableId(),
+			this.getState().search,
+			this._config.search?.delay ?? 500,
+			(query) => this.search(query),
+		);
 
 		if (typeof KTComponents !== 'undefined') {
 			KTComponents.init();
@@ -449,55 +455,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		/**
 		 * Hide spinner
 		 */
-		this._hideSpinner();
-	}
-
-	/**
-	 * Attach search event to the search input element
-	 * @returns {void}
-	 */
-	private _attachSearchEvent(): void {
-		const tableId: string = this._tableId();
-		const searchElement: HTMLInputElement | null =
-			document.querySelector<HTMLInputElement>(
-				`[data-kt-datatable-search="#${tableId}"]`,
-			);
-
-		// Get search state
-		const { search } = this.getState();
-		// Set search value
-		if (searchElement) {
-			searchElement.value =
-				search === undefined || search === null
-					? ''
-					: typeof search === 'string'
-						? search
-						: String(search);
-		}
-
-		if (searchElement) {
-			// Check if a debounced search function already exists
-			const searchWithDebounce =
-				KTDataTable.asSearchElementWithDebounce(searchElement);
-			if (searchWithDebounce._debouncedSearch) {
-				// Remove the existing debounced event listener
-				searchElement.removeEventListener(
-					'keyup',
-					searchWithDebounce._debouncedSearch,
-				);
-			}
-
-			// Create a new debounced search function
-			const debouncedSearch = this._debounce(() => {
-				this.search(searchElement.value);
-			}, this._config.search?.delay ?? 500);
-
-			// Store the new debounced function as a property of the element
-			searchWithDebounce._debouncedSearch = debouncedSearch;
-
-			// Add the new debounced event listener
-			searchElement.addEventListener('keyup', debouncedSearch);
-		}
+		this._spinner.hide(this._element, this._config);
 	}
 
 	/**
@@ -712,69 +670,21 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 	}
 
-	// Method to show the loading spinner
-	private _showSpinner(): void {
-		const root = this._element;
-		const spinnerSel = this._config.attributes?.spinner;
-		const fromDom =
-			root && spinnerSel ? root.querySelector<HTMLElement>(spinnerSel) : null;
-		const spinner = fromDom ?? this._createSpinner();
-		if (spinner) {
-			spinner.style.display = 'block';
-		}
-		root?.classList.add(this._config.loadingClass ?? 'loading');
-	}
-
-	// Method to hide the loading spinner
-	private _hideSpinner(): void {
-		const root = this._element;
-		const spinnerSel = this._config.attributes?.spinner;
-		const spinner =
-			root && spinnerSel ? root.querySelector<HTMLElement>(spinnerSel) : null;
-		if (spinner) {
-			spinner.style.display = 'none';
-		}
-		root?.classList.remove(this._config.loadingClass ?? 'loading');
-	}
-
-	// Method to create a spinner element if it doesn't exist
-	private _createSpinner(): HTMLElement | null {
-		const loading = this._config.loading;
-		if (!loading) {
-			return null;
-		}
-
-		const template = document.createElement('template');
-		template.innerHTML = loading.template
-			.trim()
-			.replace('{content}', loading.content);
-		const first = template.content.firstChild;
-		if (!first || !(first instanceof HTMLElement)) {
-			return null;
-		}
-		const spinner = first;
-		spinner.setAttribute('data-kt-datatable-spinner', 'true');
-
-		this._tableElement.appendChild(spinner);
-
-		return spinner;
-	}
-
 	/**
 	 * Saves the current state of the table to local storage.
 	 * @returns {void}
 	 */
 	private _saveState(): void {
 		this._emit('stateSave');
-
-		const ns: string = this._tableNamespace();
-
-		if (ns) {
-			localStorage.setItem(
-				ns,
-				JSON.stringify(this.getState() as KTDataTableStateInterface),
-			);
-		}
+		this._statePersistence.save(
+			resolveTableNamespace(
+				this._config,
+				this._tableElement,
+				this._element,
+				this._name,
+			),
+			this.getState() as KTDataTableStateInterface,
+		);
 	}
 
 	/**
@@ -782,24 +692,26 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {Object} The saved state of the table, or null if no saved state exists.
 	 */
 	private _loadState(): KTDataTableStateInterface | null {
-		const stateString = localStorage.getItem(this._tableNamespace());
-		if (!stateString) return null;
-
-		try {
-			const state = JSON.parse(stateString) as KTDataTableStateInterface;
-			if (state) this._stateStore.replaceState(state);
-			return state;
-		} catch {}
-
-		return null;
+		const ns = resolveTableNamespace(
+			this._config,
+			this._tableElement,
+			this._element,
+			this._name,
+		);
+		const saved = this._statePersistence.load(ns);
+		if (saved) this._stateStore.replaceState(saved);
+		return saved;
 	}
 
 	private _deleteState(): void {
-		const ns = this._tableNamespace();
-
-		if (ns) {
-			localStorage.removeItem(ns);
-		}
+		this._statePersistence.remove(
+			resolveTableNamespace(
+				this._config,
+				this._tableElement,
+				this._element,
+				this._name,
+			),
+		);
 	}
 
 	/**
@@ -811,13 +723,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {string} The namespace for the table's state.
 	 */
 	private _tableNamespace(): string {
-		// Use the specified namespace, if one is given
-		if (this._config.stateNamespace) {
-			return this._config.stateNamespace;
-		}
-
-		// Fallback to the component's UID
-		return this._tableId() ?? this._name;
+		return resolveTableNamespace(
+			this._config,
+			this._tableElement,
+			this._element,
+			this._name,
+		);
 	}
 
 	private _tableId(): string {
@@ -848,22 +759,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._cleanupCallbacks = [];
 
 		// --- 1. Remove search input event listener (debounced) ---
-		const tableId: string = this._tableId();
-		const searchElement: HTMLInputElement | null =
-			document.querySelector<HTMLInputElement>(
-				`[data-kt-datatable-search="#${tableId}"]`,
-			);
-		if (searchElement) {
-			const searchWithDebounce =
-				KTDataTable.asSearchElementWithDebounce(searchElement);
-			if (searchWithDebounce._debouncedSearch) {
-				searchElement.removeEventListener(
-					'keyup',
-					searchWithDebounce._debouncedSearch,
-				);
-				delete searchWithDebounce._debouncedSearch;
-			}
-		}
+		this._searchHandler.detach(this._tableId());
 
 		// --- 2. Remove page size dropdown event listener ---
 		if (this._sizeElement && this._sizeElement.onchange) {
@@ -883,41 +779,16 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._sortHandler.dispose();
 
 		// --- 5. Remove spinner DOM node if it exists ---
-		const spinnerSel = this._config.attributes?.spinner;
-		if (spinnerSel) {
-			const spinner = root.querySelector<HTMLElement>(spinnerSel);
-			if (spinner?.parentNode) {
-				spinner.parentNode.removeChild(spinner);
-			}
-		}
-		root.classList.remove(this._config.loadingClass ?? 'loading');
+		this._spinner.remove(this._element, this._config);
 
 		// --- 6. Remove instance reference from the DOM element ---
-		const elementWithInstance = KTDataTable.asElementWithInstance(root);
-		if (elementWithInstance.instance) {
-			delete elementWithInstance.instance;
-		}
+		datatableRegistry.remove(root);
 
 		KTData.remove(root, this._name);
 
 		// --- 7. (Optional) Clear localStorage state ---
 		// Uncomment the following line if you want to clear state on dispose:
 		// this._deleteState();
-	}
-
-	private _debounce<TArgs extends unknown[]>(
-		func: (...args: TArgs) => void,
-		wait: number,
-	): (...args: TArgs) => void {
-		let timeout: number | undefined;
-		return function (...args: TArgs) {
-			const later = () => {
-				clearTimeout(timeout);
-				func(...args);
-			};
-			clearTimeout(timeout);
-			timeout = window.setTimeout(later, wait);
-		};
 	}
 
 	/**
@@ -996,20 +867,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * Show the loading spinner of the data table.
 	 */
 	public showSpinner(): void {
-		/**
-		 * Show the loading spinner of the data table.
-		 */
-		this._showSpinner();
+		this._spinner.show(this._element, this._config, this._tableElement);
 	}
 
 	/**
 	 * Hide the loading spinner of the data table.
 	 */
 	public hideSpinner(): void {
-		/**
-		 * Hide the loading spinner of the data table.
-		 */
-		this._hideSpinner();
+		this._spinner.hide(this._element, this._config);
 	}
 
 	/**
@@ -1035,36 +900,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	/**
-	 * Static variables
-	 */
-	private static _instances = new Map<
-		HTMLElement,
-		KTDataTable<KTDataTableDataInterface>
-	>();
-
-	/**
 	 * Create KTDataTable instances for all elements with a data-kt-datatable="true" attribute.
 	 * This function is now browser-guarded and must be called explicitly.
 	 */
 	public static createInstances(): void {
-		if (typeof document === 'undefined') return;
-		const elements = document.querySelectorAll<HTMLElement>(
-			'[data-kt-datatable="true"]',
-		);
-
-		elements.forEach((element) => {
-			if (
-				element.hasAttribute('data-kt-datatable') &&
-				!element.classList.contains('datatable-initialized')
-			) {
-				/**
-				 * Create an instance of KTDataTable for the given element
-				 * @param element The element to create an instance for
-				 */
-				const instance = new KTDataTable(element);
-				this._instances.set(element, instance);
-			}
-		});
+		datatableRegistry.createAll((el) => new KTDataTable(el));
 	}
 
 	/**
@@ -1076,14 +916,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	public static getInstance(
 		element: HTMLElement,
 	): KTDataTable<KTDataTableDataInterface> | undefined {
-		// First check the static Map (for instances created via createInstances)
-		const instanceFromMap = this._instances.get(element);
-		if (instanceFromMap) {
-			return instanceFromMap;
-		}
-
-		// Fallback to element's instance property (for manually created instances)
-		return KTDataTable.asElementWithInstance(element).instance;
+		return datatableRegistry.get(element);
 	}
 
 	/**
@@ -1091,7 +924,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * This function is now browser-guarded and must be called explicitly.
 	 */
 	public static init(): void {
-		if (typeof document === 'undefined') return;
 		KTDataTable.createInstances();
 	}
 
@@ -1100,25 +932,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * Useful for Livewire wire:navigate where the DOM is replaced and new tables need to be initialized.
 	 */
 	public static reinit(): void {
-		if (typeof document === 'undefined') return;
-		const elements = document.querySelectorAll<HTMLElement>(
-			'[data-kt-datatable="true"]',
-		);
-		elements.forEach((element) => {
-			try {
-				const instance = KTDataTable.getInstance(element);
-				if (instance && typeof instance.dispose === 'function') {
-					instance.dispose();
-				}
-				KTData.remove(element, 'datatable');
-				element.removeAttribute('data-kt-datatable-initialized');
-				element.classList.remove('datatable-initialized');
-			} catch {
-				// ignore per-element errors
-			}
-		});
-		KTDataTable._instances.clear();
-		KTDataTable.createInstances();
+		datatableRegistry.reinit((el) => new KTDataTable(el));
 	}
 
 	/**
