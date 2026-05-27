@@ -18,10 +18,10 @@ import { KTOptionType } from '../../types';
 import KTComponents from '../../index';
 import KTData from '../../helpers/data';
 import {
-	createCheckboxHandler,
+	KTDataTableCheckboxHandler,
 	KTDataTableCheckboxAPI,
 } from './datatable-checkbox';
-import { createSortHandler, KTDataTableSortAPI } from './datatable-sort';
+import { KTDataTableSortHandler, KTDataTableSortAPI } from './datatable-sort';
 import { createStickyLayoutPlugin } from './datatable-layout-plugin';
 import { DATATABLE_DEFAULTS } from './datatable-defaults';
 import { getLogicalColumnCount } from './datatable-column-utils';
@@ -32,7 +32,6 @@ import {
 	KTDataTableStateStore,
 	KTDataTableTableRenderer,
 } from './datatable-contracts';
-import { createDataTableEventAdapter } from './datatable-event-adapter';
 import { KTDataTableLocalDataProvider } from './datatable-local-provider';
 import { KTDataTableRemoteDataProvider } from './datatable-remote-provider';
 import { KTDataTableConfigStateStore } from './datatable-state-store';
@@ -123,10 +122,12 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._buildConfig();
 		this._normalizePageSizeConfig();
 		this._stateStore = new KTDataTableConfigStateStore(this._config);
-		this._eventAdapter = createDataTableEventAdapter(
-			this._fireEvent.bind(this),
-			this._dispatchEvent.bind(this),
-		);
+		this._eventAdapter = {
+			emit: (eventName: string, eventData?: object) => {
+				this._fireEvent(eventName, eventData);
+				this._dispatchEvent(eventName, eventData);
+			},
+		};
 
 		// Store the instance directly on the element
 		datatableRegistry.register(element, this);
@@ -138,14 +139,14 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._initDataProviders();
 
 		// Initialize checkbox handler
-		this._checkbox = createCheckboxHandler(
+		this._checkbox = new KTDataTableCheckboxHandler(
 			this._element,
 			this._config,
 			this._emit.bind(this),
 		);
 
 		// Initialize sort handler
-		this._sortHandler = createSortHandler(
+		this._sortHandler = new KTDataTableSortHandler(
 			this._config,
 			this._theadElement,
 			() => ({
@@ -456,6 +457,19 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		 * Hide spinner
 		 */
 		this._spinner.hide(this._element, this._config);
+
+		// Update content checksum AFTER all DOM modifications (checkbox init
+		// adds checked-class to <tr> elements which changes tbody innerHTML).
+		// If we save the checksum earlier (in _draw), the next fetchSync()
+		// sees a mismatch, re-extracts from the DOM, and loses rows that
+		// were on other pages — making pagination show empty.
+		if (!this._config.apiEndpoint) {
+			this._stateStore.patchState({
+				_contentChecksum: KTUtils.checksum(
+					JSON.stringify(this._tbodyElement.innerHTML),
+				),
+			});
+		}
 	}
 
 	/**
@@ -572,13 +586,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		this._layoutPlugin?.afterDraw?.(this._getLayoutPluginContext());
-		if (!this._config.apiEndpoint) {
-			this._stateStore.patchState({
-				_contentChecksum: KTUtils.checksum(
-					JSON.stringify(this._tbodyElement.innerHTML),
-				),
-			});
-		}
 
 		this._emit('drew');
 

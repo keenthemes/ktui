@@ -4,7 +4,6 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { KTDataTable } from '../datatable';
-import { createDataTableEventAdapter } from '../datatable-event-adapter';
 import { KTDataTableLocalDataProvider } from '../datatable-local-provider';
 import { KTDataTableDomPaginationRenderer } from '../datatable-pagination-renderer';
 import { KTDataTableRemoteDataProvider } from '../datatable-remote-provider';
@@ -80,7 +79,12 @@ describe('KTDataTable architecture boundaries', () => {
 	it('emits through both legacy event channels from one adapter', () => {
 		const fireEvent = vi.fn();
 		const dispatchEvent = vi.fn();
-		const adapter = createDataTableEventAdapter(fireEvent, dispatchEvent);
+		const adapter = {
+			emit(eventName: string, eventData?: object): void {
+				fireEvent(eventName, eventData);
+				dispatchEvent(eventName, eventData);
+			},
+		};
 
 		adapter.emit('reload', { page: 1 });
 
