@@ -275,6 +275,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	): KTDataTableConfigInterface {
 		return {
 			...DATATABLE_DEFAULTS,
+			// Per-instance state; DATATABLE_DEFAULTS._state is a shared singleton.
+			_state: {} as KTDataTableStateInterface,
 			sort: {
 				...DATATABLE_DEFAULTS.sort,
 				callback: (

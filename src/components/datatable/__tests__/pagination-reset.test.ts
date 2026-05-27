@@ -98,6 +98,10 @@ describe('KTDataTable - Pagination Reset', () => {
 	};
 
 	beforeEach(() => {
+		// Dispose previous test's datatable to cancel in-flight async operations
+		if (datatable) {
+			try { datatable.dispose(); } catch { /* already disposed */ }
+		}
 		// Clear any existing elements
 		document.body.innerHTML = '';
 		vi.clearAllMocks();
