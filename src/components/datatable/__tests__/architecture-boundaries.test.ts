@@ -154,9 +154,7 @@ describe('KTDataTable architecture boundaries', () => {
 
 		expect(result.data).toEqual([{ id: 1, name: 'Ada' }]);
 		expect(result.totalItems).toBe(1);
-		expect(emit).toHaveBeenCalledWith('fetched', {
-			response: { data: [{ id: 1, name: 'Ada' }], totalCount: 1 },
-		});
+
 	});
 
 	it('renders table body output through the table renderer', () => {

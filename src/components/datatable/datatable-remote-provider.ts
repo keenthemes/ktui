@@ -61,7 +61,7 @@ export class KTDataTableRemoteDataProvider<
 		try {
 			responseData = await response.json();
 		} catch (error) {
-			this.options.eventAdapter.emit('parseError', {
+			this.options.eventAdapter.emit('fetchError', {
 				response,
 				error: String(error),
 				status: response.status,
@@ -73,8 +73,6 @@ export class KTDataTableRemoteDataProvider<
 		if (currentRequestId !== this.requestId) {
 			return { data: [], totalItems: 0, skipped: true };
 		}
-
-		this.options.eventAdapter.emit('fetched', { response: responseData });
 
 		if (typeof this.options.config.mapResponse === 'function') {
 			responseData = this.options.config.mapResponse.call(this, responseData);

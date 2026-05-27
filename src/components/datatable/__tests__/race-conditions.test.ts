@@ -412,7 +412,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
 			) as HTMLElement;
-			element.addEventListener('fetch', (e) => {
+			element.addEventListener('kt.datatable.fetch', (e) => {
 				fetchEvents.push(e);
 			});
 
@@ -435,7 +435,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
 			) as HTMLElement;
-			element.addEventListener('fetched', (e) => {
+			element.addEventListener('kt.datatable.fetched', (e) => {
 				fetchedEvents.push(e);
 			});
 
@@ -455,7 +455,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
 			) as HTMLElement;
-			element.addEventListener('error.kt.datatable', (e) => {
+			element.addEventListener('kt.datatable.error', (e) => {
 				errorEvents.push(e);
 			});
 

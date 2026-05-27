@@ -124,8 +124,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._stateStore = new KTDataTableConfigStateStore(this._config);
 		this._eventAdapter = {
 			emit: (eventName: string, eventData?: object) => {
-				this._fireEvent(eventName, eventData);
-				this._dispatchEvent(eventName, eventData);
+				this._emit(eventName, eventData);
 			},
 		};
 
@@ -156,8 +155,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			(field, order) => {
 				this._stateStore.setSort(field as never, order);
 			},
-			this._fireEvent.bind(this),
-			this._dispatchEvent.bind(this),
+			this._emit.bind(this),
 			this._updateData.bind(this),
 		);
 
@@ -178,7 +176,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	private _emit(eventName: string, eventData?: object): void {
-		this._eventAdapter.emit(eventName, eventData);
+		this._fireEvent(eventName, eventData);
+		this._dispatchEvent(`kt.datatable.${eventName}`, eventData);
 	}
 
 	private _initDataProviders(): void {

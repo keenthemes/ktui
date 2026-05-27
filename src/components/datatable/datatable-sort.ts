@@ -43,8 +43,7 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 		field: keyof T | number,
 		order: KTDataTableSortOrderInterface,
 	) => void;
-	private _fireEvent: (eventName: string, eventData?: object) => void;
-	private _dispatchEvent: (eventName: string, eventData?: object) => void;
+	private _emit: (eventName: string, eventData?: object) => void;
 	private _updateData: () => void;
 	private _sortAbortController: AbortController | null = null;
 
@@ -59,16 +58,14 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 			field: keyof T | number,
 			order: KTDataTableSortOrderInterface,
 		) => void,
-		fireEvent: (eventName: string, eventData?: object) => void,
-		dispatchEvent: (eventName: string, eventData?: object) => void,
+		emit: (eventName: string, eventData?: object) => void,
 		updateData: () => void,
 	) {
 		this._config = config;
 		this._theadElement = theadElement;
 		this._getState = getState;
 		this._setState = setState;
-		this._fireEvent = fireEvent;
-		this._dispatchEvent = dispatchEvent;
+		this._emit = emit;
 		this._updateData = updateData;
 	}
 
@@ -292,8 +289,7 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 				);
 				this.setSortIcon(sortField, sortOrder);
 				this._setState(sortField, sortOrder);
-				this._fireEvent('sort', { field: sortField, order: sortOrder });
-				this._dispatchEvent('sort', { field: sortField, order: sortOrder });
+				this._emit('sort', { field: sortField, order: sortOrder });
 				this._updateData();
 			}, { signal });
 		});
@@ -307,7 +303,7 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 	}
 }
 
-/** @deprecated Use `new KTDataTableSortHandler(config, theadElement, getState, setState, fireEvent, dispatchEvent, updateData)` instead */
+/** @deprecated Use `new KTDataTableSortHandler(config, theadElement, getState, setState, emit, updateData)` instead */
 export function createSortHandler<T = KTDataTableDataInterface>(
 	config: KTDataTableConfigInterface,
 	theadElement: HTMLTableSectionElement,
@@ -319,8 +315,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		field: keyof T | number,
 		order: KTDataTableSortOrderInterface,
 	) => void,
-	fireEvent: (eventName: string, eventData?: object) => void,
-	dispatchEvent: (eventName: string, eventData?: object) => void,
+	emit: (eventName: string, eventData?: object) => void,
 	updateData: () => void,
 ): KTDataTableSortAPI<T> {
 	return new KTDataTableSortHandler(
@@ -328,8 +323,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		theadElement,
 		getState,
 		setState,
-		fireEvent,
-		dispatchEvent,
+		emit,
 		updateData,
 	);
 }

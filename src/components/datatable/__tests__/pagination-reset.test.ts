@@ -682,8 +682,8 @@ describe('KTDataTable - Pagination Reset', () => {
 			});
 
 			const reloadSpy = vi.fn();
-			// Listen for 'reload' event directly (CustomEvent)
-			container.addEventListener('reload', reloadSpy);
+			// Listen for 'kt.datatable.reload' event directly (CustomEvent)
+			container.addEventListener('kt.datatable.reload', reloadSpy);
 
 			datatable.goPage(2);
 			datatable.search('test');

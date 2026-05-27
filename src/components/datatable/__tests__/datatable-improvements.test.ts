@@ -125,7 +125,6 @@ describe('Sort handler improvements', () => {
 			() => ({ sortField: '' as string | number, sortOrder: '' }),
 			vi.fn(),
 			vi.fn(),
-			vi.fn(),
 			updateData,
 		);
 
