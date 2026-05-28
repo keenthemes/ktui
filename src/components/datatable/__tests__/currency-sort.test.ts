@@ -29,15 +29,14 @@ describe('KTDataTable - Currency/numeric sort', () => {
 				price: { sortType: 'numeric' as const },
 			},
 		};
-		const handler = new KTDataTableSortHandler(
-			config as KTDataTableConfigInterface,
-			thead,
-			() => ({ sortField: null, sortOrder: '' }),
-			noop,
-			noop,
-			noop,
-			noop,
-		);
+		const handler = new KTDataTableSortHandler({
+			config: config as KTDataTableConfigInterface,
+			theadElement: thead,
+			getState: () => ({ sortField: null, sortOrder: '' }),
+			setState: noop,
+			emit: noop,
+			updateData: noop,
+		});
 
 		const data = [
 			{ price: '£123' },
@@ -58,15 +57,14 @@ describe('KTDataTable - Currency/numeric sort', () => {
 				price: { sortType: 'numeric' as const },
 			},
 		};
-		const handler = new KTDataTableSortHandler(
-			config as KTDataTableConfigInterface,
-			thead,
-			() => ({ sortField: null, sortOrder: '' }),
-			noop,
-			noop,
-			noop,
-			noop,
-		);
+		const handler = new KTDataTableSortHandler({
+			config: config as KTDataTableConfigInterface,
+			theadElement: thead,
+			getState: () => ({ sortField: null, sortOrder: '' }),
+			setState: noop,
+			emit: noop,
+			updateData: noop,
+		});
 
 		const data = [{ price: '£5' }, { price: '£20' }, { price: '£123' }];
 		const sorted = handler.sortData(data, 'price', 'desc');
@@ -79,15 +77,14 @@ describe('KTDataTable - Currency/numeric sort', () => {
 
 	it('without sortType numeric, sorts lexicographically (e.g. £123 before £20)', () => {
 		const config = { columns: {} };
-		const handler = new KTDataTableSortHandler(
-			config as KTDataTableConfigInterface,
-			thead,
-			() => ({ sortField: null, sortOrder: '' }),
-			noop,
-			noop,
-			noop,
-			noop,
-		);
+		const handler = new KTDataTableSortHandler({
+			config: config as KTDataTableConfigInterface,
+			theadElement: thead,
+			getState: () => ({ sortField: null, sortOrder: '' }),
+			setState: noop,
+			emit: noop,
+			updateData: noop,
+		});
 
 		const data = [{ price: '£123' }, { price: '£20' }, { price: '£5' }];
 		const sorted = handler.sortData(data, 'price', 'asc');

@@ -8,10 +8,14 @@
 import {
 	KTDataTableConfigInterface,
 	KTDataTableCheckChangePayloadInterface,
-	KTDataTableStateInterface,
 } from './types';
 import KTEventHandler from '../../helpers/event-handler';
 import { KTCallableType } from '../../types';
+
+export interface KTDataTableCheckboxDeps {
+	getState: () => { selectedRows?: string[] };
+	setSelectedRows: (rows: string[]) => void;
+}
 
 export interface KTDataTableCheckboxAPI {
 	init(): void;
@@ -28,6 +32,7 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 	private _element: HTMLElement;
 	private _config: KTDataTableConfigInterface;
 	private _fireEvent: (eventName: string, eventData?: object) => void;
+	private _deps: KTDataTableCheckboxDeps;
 	private _headerChecked = false;
 	private _headerCheckElement: HTMLInputElement | null = null;
 	private _targetElements: NodeListOf<HTMLInputElement> | null = null;
@@ -38,10 +43,12 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 		element: HTMLElement,
 		config: KTDataTableConfigInterface,
 		fireEvent: (eventName: string, eventData?: object) => void,
+		deps: KTDataTableCheckboxDeps,
 	) {
 		this._element = element;
 		this._config = config;
 		this._fireEvent = fireEvent;
+		this._deps = deps;
 		this._preserveSelection = config.checkbox?.preserveSelection !== false;
 	}
 
@@ -49,24 +56,13 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 		this._checkboxToggle(event);
 	};
 
-	private _ensureState(): KTDataTableStateInterface {
-		let state = this._config._state;
-		if (!state) {
-			state = {} as KTDataTableStateInterface;
-			this._config._state = state;
-		}
-		return state;
-	}
-
 	private _getSelectedRows(): string[] {
-		const state = this._ensureState();
-		if (!Array.isArray(state.selectedRows)) state.selectedRows = [];
-		return state.selectedRows.map(String);
+		const rows = this._deps.getState().selectedRows;
+		return Array.isArray(rows) ? rows.map(String) : [];
 	}
 
 	private _setSelectedRows(rows: string[]) {
-		const state = this._ensureState();
-		state.selectedRows = Array.from(new Set(rows.map(String)));
+		this._deps.setSelectedRows(Array.from(new Set(rows.map(String))));
 	}
 
 	private _getVisibleRowIds(): string[] {

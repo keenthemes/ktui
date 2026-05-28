@@ -146,22 +146,28 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._element,
 			this._config,
 			this._emit.bind(this),
+			{
+				getState: () => this._stateStore.getState(),
+				setSelectedRows: (rows) => {
+					this._stateStore.patchState({ selectedRows: rows });
+				},
+			},
 		);
 
 		// Initialize sort handler
-		this._sortHandler = new KTDataTableSortHandler(
-			this._config,
-			this._theadElement,
-			() => ({
+		this._sortHandler = new KTDataTableSortHandler({
+			config: this._config,
+			theadElement: this._theadElement,
+			getState: () => ({
 				sortField: this.getState().sortField,
 				sortOrder: this.getState().sortOrder,
 			}),
-			(field, order) => {
+			setState: (field, order) => {
 				this._stateStore.setSort(field as never, order);
 			},
-			this._emit.bind(this),
-			this._updateData.bind(this),
-		);
+			emit: this._emit.bind(this),
+			updateData: this._updateData.bind(this),
+		});
 
 		this._sortHandler.initSort();
 
@@ -272,6 +278,34 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @param config User-provided configuration options
 	 * @returns Default configuration merged with user-provided options
 	 */
+	private _createDefaultSearchCallback(): (
+		data: KTDataTableDataInterface[],
+		search: string,
+	) => KTDataTableDataInterface[] {
+		return ((data: T[], search: string): T[] => {
+			if (!data || !search) {
+				return [];
+			}
+			const searchLower = search.toLowerCase();
+			return data.filter((item: T) => {
+				if (!item) {
+					return false;
+				}
+				return Object.values(item).some((value: KTOptionType) => {
+					if (
+						typeof value !== 'string' &&
+						typeof value !== 'number' &&
+						typeof value !== 'boolean'
+					) {
+						return false;
+					}
+					const valueText = stripHtml(value).toLowerCase();
+					return valueText.includes(searchLower);
+				});
+			});
+		}) as unknown as (data: KTDataTableDataInterface[], search: string) => KTDataTableDataInterface[];
+	}
+
 	private _initDefaultConfig(
 		config?: KTDataTableConfigInterface,
 	): KTDataTableConfigInterface {
@@ -293,28 +327,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			},
 			search: {
 				...DATATABLE_DEFAULTS.search,
-				callback: (data: T[], search: string): T[] => {
-					if (!data || !search) {
-						return [];
-					}
-					const searchLower = search.toLowerCase();
-					return data.filter((item: T) => {
-						if (!item) {
-							return false;
-						}
-						return Object.values(item).some((value: KTOptionType) => {
-							if (
-								typeof value !== 'string' &&
-								typeof value !== 'number' &&
-								typeof value !== 'boolean'
-							) {
-								return false;
-							}
-							const valueText = stripHtml(value).toLowerCase();
-							return valueText.includes(searchLower);
-						});
-					});
-				},
+				callback: this._createDefaultSearchCallback(),
 			},
 			...config,
 		} as KTDataTableConfigInterface;

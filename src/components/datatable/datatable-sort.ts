@@ -12,6 +12,18 @@ import {
 } from './types';
 import { stripHtml } from './datatable-utils';
 
+export interface KTDataTableSortHandlerDeps<T> {
+	config: KTDataTableConfigInterface;
+	theadElement: HTMLTableSectionElement;
+	getState: () => {
+		sortField: keyof T | number;
+		sortOrder: KTDataTableSortOrderInterface;
+	};
+	setState: (field: keyof T | number, order: KTDataTableSortOrderInterface) => void;
+	emit: (eventName: string, eventData?: object) => void;
+	updateData: () => void;
+}
+
 export interface KTDataTableSortAPI<T = KTDataTableDataInterface> {
 	initSort(): void;
 	sortData(
@@ -48,26 +60,13 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 	private _updateData: () => void;
 	private _sortAbortController: AbortController | null = null;
 
-	constructor(
-		config: KTDataTableConfigInterface,
-		theadElement: HTMLTableSectionElement,
-		getState: () => {
-			sortField: keyof T | number;
-			sortOrder: KTDataTableSortOrderInterface;
-		},
-		setState: (
-			field: keyof T | number,
-			order: KTDataTableSortOrderInterface,
-		) => void,
-		emit: (eventName: string, eventData?: object) => void,
-		updateData: () => void,
-	) {
-		this._config = config;
-		this._theadElement = theadElement;
-		this._getState = getState;
-		this._setState = setState;
-		this._emit = emit;
-		this._updateData = updateData;
+	constructor(deps: KTDataTableSortHandlerDeps<T>) {
+		this._config = deps.config;
+		this._theadElement = deps.theadElement;
+		this._getState = deps.getState;
+		this._setState = deps.setState;
+		this._emit = deps.emit;
+		this._updateData = deps.updateData;
 	}
 
 	private static _compareValues(

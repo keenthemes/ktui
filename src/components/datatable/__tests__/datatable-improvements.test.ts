@@ -119,14 +119,14 @@ describe('Sort handler improvements', () => {
 
 	it('uses AbortController to clean up sort listeners on re-init', () => {
 		const updateData = vi.fn();
-		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>(
-			{ sort: { classes: { base: 'sort-icon' } } } as never,
-			thead,
-			() => ({ sortField: '' as string | number, sortOrder: '' }),
-			vi.fn(),
-			vi.fn(),
+		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>({
+			config: { sort: { classes: { base: 'sort-icon' } } } as never,
+			theadElement: thead,
+			getState: () => ({ sortField: '' as string | number, sortOrder: '' }),
+			setState: vi.fn(),
+			emit: vi.fn(),
 			updateData,
-		);
+		});
 
 		handler.initSort();
 
@@ -145,15 +145,14 @@ describe('Sort handler improvements', () => {
 	});
 
 	it('dispose() aborts listeners without destroying th elements', () => {
-		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>(
-			{ sort: { classes: { base: 'sort-icon' } } } as never,
-			thead,
-			() => ({ sortField: '' as string | number, sortOrder: '' }),
-			vi.fn(),
-			vi.fn(),
-			vi.fn(),
-			vi.fn(),
-		);
+		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>({
+			config: { sort: { classes: { base: 'sort-icon' } } } as never,
+			theadElement: thead,
+			getState: () => ({ sortField: '' as string | number, sortOrder: '' }),
+			setState: vi.fn(),
+			emit: vi.fn(),
+			updateData: vi.fn(),
+		});
 
 		handler.initSort();
 		const thBefore = thead.querySelector('th')!;
@@ -167,15 +166,14 @@ describe('Sort handler improvements', () => {
 	});
 
 	it('sortData pre-strips HTML for string comparison', () => {
-		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>(
-			{} as never,
-			thead,
-			() => ({ sortField: '' as string | number, sortOrder: '' }),
-			vi.fn(),
-			vi.fn(),
-			vi.fn(),
-			vi.fn(),
-		);
+		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>({
+			config: {} as never,
+			theadElement: thead,
+			getState: () => ({ sortField: '' as string | number, sortOrder: '' }),
+			setState: vi.fn(),
+			emit: vi.fn(),
+			updateData: vi.fn(),
+		});
 
 		const data = [
 			{ name: '<b>Zoe</b>' },
@@ -194,15 +192,14 @@ describe('Sort handler improvements', () => {
 	});
 
 	it('sortData pre-strips HTML for numeric comparison', () => {
-		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>(
-			{ columns: { price: { sortType: 'numeric' } } } as never,
-			thead,
-			() => ({ sortField: '' as string | number, sortOrder: '' }),
-			vi.fn(),
-			vi.fn(),
-			vi.fn(),
-			vi.fn(),
-		);
+		const handler = new KTDataTableSortHandler<KTDataTableDataInterface>({
+			config: { columns: { price: { sortType: 'numeric' } } } as never,
+			theadElement: thead,
+			getState: () => ({ sortField: '' as string | number, sortOrder: '' }),
+			setState: vi.fn(),
+			emit: vi.fn(),
+			updateData: vi.fn(),
+		});
 
 		const data = [
 			{ price: '<b>$123</b>' },
@@ -362,6 +359,10 @@ describe('Checkbox handler event scope', () => {
 			root,
 			config,
 			fireEvent,
+			{
+				getState: () => ({ selectedRows: [] }),
+				setSelectedRows: vi.fn(),
+			},
 		);
 		handler.init();
 

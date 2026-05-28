@@ -18,6 +18,32 @@ import {
 import { resolveColumns } from './datatable-column-utils';
 import { stripHtml } from './datatable-utils';
 
+type FilterMatcher = (cellValue: unknown, filterValue: unknown) => boolean;
+
+const FILTER_MATCHERS: Record<string, FilterMatcher> = {
+	text: (cellValue, filterValue) => {
+		if (!filterValue) return true;
+		return stripHtml(cellValue)
+			.toLowerCase()
+			.includes(String(filterValue).toLowerCase());
+	},
+	numeric: (cellValue, filterValue) => {
+		const num = parseFloat(
+			String(cellValue ?? '').replace(/[^0-9.-]/g, ''),
+		);
+		return !Number.isNaN(num) && num === filterValue;
+	},
+	dateRange: (cellValue, filterValue) => {
+		const range = filterValue as { from?: string; to?: string };
+		if (!range?.from && !range?.to) return true;
+		const cellDate = new Date(String(cellValue ?? ''));
+		if (Number.isNaN(cellDate.getTime())) return false;
+		if (range.from && cellDate < new Date(range.from)) return false;
+		if (range.to && cellDate > new Date(range.to)) return false;
+		return true;
+	},
+};
+
 interface KTDataTableLocalProviderOptions {
 	config: KTDataTableConfigInterface;
 	elements: () => KTDataTableLocalProviderElements;
@@ -84,37 +110,8 @@ export class KTDataTableLocalDataProvider<
 			filteredData = data = data.filter((item: T) => {
 				return filters.every((filter) => {
 					const cellValue = item[filter.column as keyof T];
-					switch (filter.type) {
-						case 'text': {
-							if (!filter.value) return true;
-							const text = stripHtml(cellValue).toLowerCase();
-							return text.includes(filter.value.toLowerCase());
-						}
-						case 'numeric': {
-							const num = parseFloat(
-								String(cellValue ?? '').replace(/[^0-9.-]/g, ''),
-							);
-							return !Number.isNaN(num) && num === filter.value;
-						}
-						case 'dateRange': {
-							if (!filter.value?.from && !filter.value?.to) return true;
-							const cellDate = new Date(String(cellValue ?? ''));
-							if (Number.isNaN(cellDate.getTime())) return false;
-							if (
-								filter.value.from &&
-								cellDate < new Date(filter.value.from)
-							)
-								return false;
-							if (
-								filter.value.to &&
-								cellDate > new Date(filter.value.to)
-							)
-								return false;
-							return true;
-						}
-						default:
-							return true;
-					}
+					const matcher = FILTER_MATCHERS[filter.type];
+					return matcher ? matcher(cellValue, filter.value) : true;
 				});
 			}) as T[];
 		}
