@@ -193,6 +193,10 @@ export const DATATABLE_DEFAULTS: Readonly<KTDataTableConfigInterface> = {
 		checkedClass: 'checked',
 	},
 	/**
+	 * Table layout algorithm: 'auto' (default) or 'fixed' for consistent column widths
+	 */
+	tableLayout: 'auto',
+	/**
 	 * Private properties
 	 */
 	_state: {} as KTDataTableStateInterface,

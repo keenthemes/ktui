@@ -31,6 +31,8 @@ export class KTDataTableDomTableRenderer<
 			tbodyElement.className = input.originalClasses.tbody;
 		}
 
+		this.applyTableLayout(input);
+
 		this.renderContent(input, tbodyElement);
 
 		return tbodyElement;
@@ -46,6 +48,67 @@ export class KTDataTableDomTableRenderer<
 		const logicalCount = getLogicalColumnCount();
 		cell.colSpan = logicalCount > 0 ? logicalCount : 1;
 		cell.innerHTML = message;
+	}
+
+	private applyTableLayout(
+		input: KTDataTableTableRendererInput<T>,
+	): void {
+		const tableLayout = input.config.tableLayout || 'auto';
+		const tableElement = input.tableElement;
+
+		tableElement.style.tableLayout = tableLayout;
+
+		if (tableLayout === 'fixed') {
+			if (!tableElement.style.width) {
+				tableElement.style.width = '100%';
+			}
+			this.updateColgroup(input);
+		} else {
+			const existingColgroup = tableElement.querySelector('colgroup');
+			if (existingColgroup) {
+				tableElement.removeChild(existingColgroup);
+			}
+		}
+	}
+
+	private updateColgroup(
+		input: KTDataTableTableRendererInput<T>,
+	): void {
+		const tableElement = input.tableElement;
+		const existingColgroup = tableElement.querySelector('colgroup');
+		if (existingColgroup) {
+			tableElement.removeChild(existingColgroup);
+		}
+
+		const colgroup = document.createElement('colgroup');
+
+		if (input.config.columns) {
+			const columns = input.config.columns;
+			for (const key of Object.keys(columns)) {
+				const col = document.createElement('col');
+				if (columns[key].width) {
+					col.style.width = columns[key].width;
+				}
+				colgroup.appendChild(col);
+			}
+		} else {
+			const { columnsByIndex } = resolveColumns(input.theadElement);
+			for (const th of columnsByIndex) {
+				const col = document.createElement('col');
+				const width = th.getAttribute('data-kt-datatable-column-width');
+				if (width) {
+					col.style.width = width;
+				}
+				colgroup.appendChild(col);
+			}
+		}
+
+		const thead = tableElement.querySelector('thead');
+		if (thead) {
+			tableElement.insertBefore(colgroup, thead);
+		} else {
+			tableElement.appendChild(colgroup);
+		}
 	}
 
 	private renderContent(
