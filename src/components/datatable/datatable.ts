@@ -679,12 +679,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 */
 	private _saveState(): void {
 		this._statePersistence.save(
-			resolveTableNamespace(
-				this._config,
-				this._tableElement,
-				this._element,
-				this._name,
-			),
+			this._tableNamespace(),
 			this.getState() as KTDataTableStateInterface,
 		);
 	}
@@ -694,12 +689,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {Object} The saved state of the table, or null if no saved state exists.
 	 */
 	private _loadState(): KTDataTableStateInterface | null {
-		const ns = resolveTableNamespace(
-			this._config,
-			this._tableElement,
-			this._element,
-			this._name,
-		);
+		const ns = this._tableNamespace();
 		const saved = this._statePersistence.load(ns);
 		if (saved) this._stateStore.replaceState(saved);
 		return saved;
@@ -707,12 +697,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	private _deleteState(): void {
 		this._statePersistence.remove(
-			resolveTableNamespace(
-				this._config,
-				this._tableElement,
-				this._element,
-				this._name,
-			),
+			this._tableNamespace(),
 		);
 	}
 
@@ -979,11 +964,18 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	/**
-	 * Reapply checked state to visible checkboxes (after redraw/pagination)
+	 * Re-apply checkbox checked states to visible rows after a redraw or pagination change.
 	 * @returns {void}
 	 */
-	public update(): void {
+	public refreshCheckboxes(): void {
 		this._checkbox.updateState();
+	}
+
+	/**
+	 * @deprecated Use {@link refreshCheckboxes} instead.
+	 */
+	public update(): void {
+		this.refreshCheckboxes();
 	}
 
 	// Other plugin methods can be added here

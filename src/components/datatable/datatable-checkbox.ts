@@ -262,11 +262,3 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 	}
 }
 
-/** @deprecated Use `new KTDataTableCheckboxHandler(element, config, fireEvent)` instead */
-export function createCheckboxHandler(
-	element: HTMLElement,
-	config: KTDataTableConfigInterface,
-	fireEvent: (eventName: string, eventData?: object) => void,
-): KTDataTableCheckboxAPI {
-	return new KTDataTableCheckboxHandler(element, config, fireEvent);
-}

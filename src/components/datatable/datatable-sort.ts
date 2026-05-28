@@ -303,27 +303,3 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 	}
 }
 
-/** @deprecated Use `new KTDataTableSortHandler(config, theadElement, getState, setState, emit, updateData)` instead */
-export function createSortHandler<T = KTDataTableDataInterface>(
-	config: KTDataTableConfigInterface,
-	theadElement: HTMLTableSectionElement,
-	getState: () => {
-		sortField: keyof T | number;
-		sortOrder: KTDataTableSortOrderInterface;
-	},
-	setState: (
-		field: keyof T | number,
-		order: KTDataTableSortOrderInterface,
-	) => void,
-	emit: (eventName: string, eventData?: object) => void,
-	updateData: () => void,
-): KTDataTableSortAPI<T> {
-	return new KTDataTableSortHandler(
-		config,
-		theadElement,
-		getState,
-		setState,
-		emit,
-		updateData,
-	);
-}

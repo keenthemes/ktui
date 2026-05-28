@@ -117,7 +117,12 @@ export interface KTDataTableInterface {
 	getChecked(): string[];
 
 	/**
-	 * Reapply checked state to visible checkboxes after redraw/pagination.
+	 * Re-apply checkbox checked states to visible rows after a redraw or pagination change.
+	 */
+	refreshCheckboxes(): void;
+
+	/**
+	 * @deprecated Use {@link refreshCheckboxes} instead.
 	 */
 	update(): void;
 }
