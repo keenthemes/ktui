@@ -210,6 +210,11 @@ export interface KTDataTableConfigInterface<
 				cellValue: T[keyof T] | string,
 				rowData: T,
 			) => number | string;
+			/**
+			 * Fixed width for this column when tableLayout is 'fixed'.
+			 * Accepts any CSS length value (e.g. '120px', '20%', '10rem').
+			 */
+			width?: string;
 		};
 	};
 
@@ -274,6 +279,15 @@ export interface KTDataTableConfigInterface<
 		checkedClass?: string;
 		preserveSelection?: boolean;
 	};
+
+	/**
+	 * Table layout algorithm. When 'fixed', the table uses `table-layout: fixed`
+	 * and generates a `<colgroup>` to keep column widths consistent across pagination.
+	 * Column widths are read from `columns[key].width` (configured mode) or from
+	 * `data-kt-datatable-column-width` attribute on `<th>` elements (implicit mode).
+	 * @default 'auto'
+	 */
+	tableLayout?: 'auto' | 'fixed';
 
 	lockedLayout?: KTDataTableLockedLayoutConfigInterface;
 	layoutPlugin?: KTDataTableLayoutPluginInterface;
