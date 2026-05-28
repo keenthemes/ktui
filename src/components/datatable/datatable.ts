@@ -849,8 +849,8 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	/**
-	 * Reloads the data from the server and updates the table.
-	 * Triggers the 'reload' event and the 'kt.datatable.reload' custom event.
+	 * Reloads the data from the source (API or DOM) and redraws the table.
+	 * @returns {Promise<void>}
 	 */
 	public reload(): void {
 		// Fetch the data from the server using the current sort and filter settings

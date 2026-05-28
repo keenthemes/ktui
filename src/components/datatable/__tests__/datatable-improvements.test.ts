@@ -16,6 +16,7 @@ import {
 	KTDataTableDataInterface,
 } from '../types';
 import { createStickyLayoutPlugin } from '../datatable-layout-plugin';
+import { KTDataTable } from '../datatable';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -385,6 +386,23 @@ describe('Checkbox handler event scope', () => {
 		expect(fireEvent).not.toHaveBeenCalled();
 
 		handler.dispose();
+	});
+});
+
+// ── update() → refreshCheckboxes() Alias Tests ──────────────────────
+
+describe('update() alias', () => {
+	it('both methods exist on the prototype', () => {
+		expect(typeof KTDataTable.prototype.update).toBe('function');
+		expect(typeof KTDataTable.prototype.refreshCheckboxes).toBe('function');
+	});
+
+	it('update() delegates to refreshCheckboxes()', () => {
+		const spy = vi.spyOn(KTDataTable.prototype, 'refreshCheckboxes').mockImplementation(() => {});
+		const instance = Object.create(KTDataTable.prototype);
+		instance.update();
+		expect(spy).toHaveBeenCalledTimes(1);
+		spy.mockRestore();
 	});
 });
 

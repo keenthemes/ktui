@@ -8,7 +8,7 @@ import {
 	KTDataTablePaginationRenderer,
 	KTDataTablePaginationRendererInput,
 } from './datatable-contracts';
-import { DEFAULT_PAGE_MORE_LIMIT } from './datatable-defaults';
+import { DEFAULT_PAGE_MORE_LIMIT, DEFAULT_PAGE_SIZES } from './datatable-defaults';
 
 export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRenderer {
 	public render(
@@ -52,7 +52,7 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 			return;
 		}
 
-		const pageSizes = input.config.pageSizes ?? [5, 10, 20, 30, 50];
+		const pageSizes = input.config.pageSizes ?? DEFAULT_PAGE_SIZES;
 		const options = pageSizes.map((size: number) => {
 			const option = document.createElement('option') as HTMLOptionElement;
 			option.value = String(size);

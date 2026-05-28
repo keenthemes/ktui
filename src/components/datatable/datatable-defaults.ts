@@ -43,7 +43,7 @@ export const DATATABLE_DEFAULTS: Readonly<KTDataTableConfigInterface> = {
 	/**
 	 * Available page sizes
 	 */
-	pageSizes: [5, 10, 20, 30, 50],
+	pageSizes: [...DEFAULT_PAGE_SIZES],
 	/**
 	 * Default page size
 	 */
