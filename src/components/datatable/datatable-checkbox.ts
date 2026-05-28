@@ -124,9 +124,9 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 		this._updateHeaderCheckboxState();
 
 		if (isNowChecked && !wasChecked) {
-			this._fireEvent('checked');
+			this._fireEvent('checked', { value });
 		} else if (!isNowChecked && wasChecked) {
-			this._fireEvent('unchecked');
+			this._fireEvent('unchecked', { value });
 		}
 
 		this._fireEvent('changed');

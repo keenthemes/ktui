@@ -171,8 +171,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		this._updateData();
-
-		this._emit('init');
 	}
 
 	private _emit(eventName: string, eventData?: object): void {
@@ -410,7 +408,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		try {
 			this._spinner.show(this._element, this._config, this._tableElement); // Show spinner before fetching data
 
-			this._emit('fetch');
 			const result =
 				typeof this._config.apiEndpoint === 'undefined'
 					? this._localProvider.fetchSync()
@@ -420,10 +417,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 				this._data = result.data;
 				this._stateStore.patchState({ totalItems: result.totalItems });
 				await this._draw();
-				this._emit('fetched');
 			}
 
 			await this._finalize();
+
+			this._emit('update');
 		} finally {
 			// Finally block now correctly executes after promises resolve, not immediately
 			this._isFetching = false;
@@ -575,7 +573,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._stateStore.patchState({ totalPages, page });
 
 		this._layoutPlugin?.beforeDraw?.(this._getLayoutPluginContext());
-		this._emit('draw');
 
 		this._cleanupForRedraw();
 
@@ -589,8 +586,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		}
 
 		this._layoutPlugin?.afterDraw?.(this._getLayoutPluginContext());
-
-		this._emit('drew');
 
 		// Spinner is hidden in _finalize() to ensure it stays visible until the entire request completes
 		// Removed duplicate _hideSpinner() call here to prevent premature hiding
@@ -672,8 +667,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			return;
 		}
 
-		this._emit('pagination', { page: page });
-
 		if (page >= 1 && page <= this.getState().totalPages) {
 			this._stateStore.setPage(page);
 			this._updateData();
@@ -685,7 +678,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * @returns {void}
 	 */
 	private _saveState(): void {
-		this._emit('stateSave');
 		this._statePersistence.save(
 			resolveTableNamespace(
 				this._config,
@@ -864,15 +856,11 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	 * Triggers the 'reload' event and the 'kt.datatable.reload' custom event.
 	 */
 	public reload(): void {
-		this._emit('reload');
-
 		// Fetch the data from the server using the current sort and filter settings
 		this._updateData();
 	}
 
 	public redraw(page: number = 1): void {
-		this._emit('redraw');
-
 		this._paginateData(page);
 	}
 

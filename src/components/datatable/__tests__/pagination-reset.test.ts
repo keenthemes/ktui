@@ -685,9 +685,9 @@ describe('KTDataTable - Pagination Reset', () => {
 				stateSave: false,
 			});
 
-			const reloadSpy = vi.fn();
-			// Listen for 'kt.datatable.reload' event directly (CustomEvent)
-			container.addEventListener('kt.datatable.reload', reloadSpy);
+			const updateSpy = vi.fn();
+			// Listen for 'kt.datatable.update' event directly (CustomEvent)
+			container.addEventListener('kt.datatable.update', updateSpy);
 
 			datatable.goPage(2);
 			datatable.search('test');
@@ -695,8 +695,8 @@ describe('KTDataTable - Pagination Reset', () => {
 			// Wait for async reload to complete
 			await new Promise((resolve) => setTimeout(resolve, 50));
 
-			// reload event should still fire
-			expect(reloadSpy).toHaveBeenCalled();
+			// update event should still fire
+			expect(updateSpy).toHaveBeenCalled();
 		});
 	});
 });
