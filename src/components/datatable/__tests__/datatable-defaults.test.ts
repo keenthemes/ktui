@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DATATABLE_DEFAULTS } from '../datatable-defaults';
+import { DATATABLE_DEFAULTS, DEFAULT_PAGE_SIZES, DEFAULT_SEARCH_DELAY } from '../datatable-defaults';
 
 describe('DATATABLE_DEFAULTS', () => {
 	it('should have all required properties', () => {
@@ -19,7 +19,7 @@ describe('DATATABLE_DEFAULTS', () => {
 	});
 
 	it('should have correct default pageSizes array', () => {
-		expect(DATATABLE_DEFAULTS.pageSizes).toEqual([5, 10, 20, 30, 50]);
+		expect(DATATABLE_DEFAULTS.pageSizes).toEqual(DEFAULT_PAGE_SIZES);
 	});
 
 	it('should have stateSave enabled by default', () => {
@@ -37,7 +37,7 @@ describe('DATATABLE_DEFAULTS', () => {
 	});
 
 	it('should have search delay defined', () => {
-		expect(DATATABLE_DEFAULTS.search?.delay).toBe(500);
+		expect(DATATABLE_DEFAULTS.search?.delay).toBe(DEFAULT_SEARCH_DELAY);
 	});
 
 	it('should have pagination templates', () => {

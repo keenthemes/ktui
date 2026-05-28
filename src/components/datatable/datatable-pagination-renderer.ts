@@ -8,6 +8,7 @@ import {
 	KTDataTablePaginationRenderer,
 	KTDataTablePaginationRendererInput,
 } from './datatable-contracts';
+import { DEFAULT_PAGE_MORE_LIMIT } from './datatable-defaults';
 
 export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRenderer {
 	public render(
@@ -117,7 +118,7 @@ export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRe
 
 		const { page: currentPage, totalPages } = input.state;
 		const { previous, next, number, more } = pagination;
-		const pageMoreLimit = input.config.pageMoreLimit ?? 3;
+		const pageMoreLimit = input.config.pageMoreLimit ?? DEFAULT_PAGE_MORE_LIMIT;
 
 		const createButton = (
 			text: string,

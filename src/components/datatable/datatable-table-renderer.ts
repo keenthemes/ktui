@@ -27,8 +27,8 @@ export class KTDataTableDomTableRenderer<
 		const tbodyElement =
 			input.tableElement.createTBody() as HTMLTableSectionElement;
 
-		if (input.originalTbodyClass) {
-			tbodyElement.className = input.originalTbodyClass;
+		if (input.originalClasses.tbody) {
+			tbodyElement.className = input.originalClasses.tbody;
 		}
 
 		this.renderContent(input, tbodyElement);
@@ -74,8 +74,8 @@ export class KTDataTableDomTableRenderer<
 		input.data.forEach((item: T, rowIndex: number) => {
 			const row = document.createElement('tr');
 
-			if (input.originalTrClasses && input.originalTrClasses[rowIndex]) {
-				row.className = input.originalTrClasses[rowIndex];
+			if (input.originalClasses.tr && input.originalClasses.tr[rowIndex]) {
+				row.className = input.originalClasses.tr[rowIndex];
 			}
 
 			if (!input.config.columns) {
@@ -185,11 +185,11 @@ export class KTDataTableDomTableRenderer<
 		colIndex: number,
 	): void {
 		if (
-			input.originalTdClasses &&
-			input.originalTdClasses[rowIndex] &&
-			input.originalTdClasses[rowIndex][colIndex]
+			input.originalClasses.td &&
+			input.originalClasses.td[rowIndex] &&
+			input.originalClasses.td[rowIndex][colIndex]
 		) {
-			td.className = input.originalTdClasses[rowIndex][colIndex];
+			td.className = input.originalClasses.td[rowIndex][colIndex];
 		}
 	}
 

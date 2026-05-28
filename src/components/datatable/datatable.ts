@@ -13,6 +13,7 @@ import {
 	KTDataTableColumnFilterInterface,
 	KTDataTableLayoutPluginContextInterface,
 	KTDataTableLayoutPluginInterface,
+	OriginalTableClasses,
 } from './types';
 import { KTOptionType } from '../../types';
 import KTComponents from '../../index';
@@ -23,7 +24,7 @@ import {
 } from './datatable-checkbox';
 import { KTDataTableSortHandler, KTDataTableSortAPI } from './datatable-sort';
 import { createStickyLayoutPlugin } from './datatable-layout-plugin';
-import { DATATABLE_DEFAULTS } from './datatable-defaults';
+import { DATATABLE_DEFAULTS, DEFAULT_PAGE_SIZES, DEFAULT_SEARCH_DELAY } from './datatable-defaults';
 import { getLogicalColumnCount } from './datatable-column-utils';
 import {
 	KTDataTableCleanup,
@@ -45,6 +46,7 @@ import {
 } from './datatable-state-persistence';
 import { createSpinner } from './datatable-spinner';
 import { createDataTableRegistry } from './datatable-registry';
+import { stripHtml } from './datatable-utils';
 
 /**
  * Custom DataTable plugin class with server-side API, pagination, and sorting
@@ -70,11 +72,13 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _tableElement: HTMLTableElement;
 	private _tbodyElement: HTMLTableSectionElement;
 	private _theadElement: HTMLTableSectionElement;
-	private _originalTbodyClass: string = ''; // Store original tbody class
-	private _originalTrClasses: string[] = []; // Store original tr classes
-	private _originalTheadClass: string = ''; // Store original thead class
-	private _originalTdClasses: string[][] = []; // Store original td classes as a 2D array [row][col]
-	private _originalThClasses: string[] = []; // Store original th classes
+	private _originalClasses: OriginalTableClasses = {
+		tbody: '',
+		thead: '',
+		tr: [],
+		td: [],
+		th: [],
+	};
 
 	private _infoElement: HTMLElement | null = null;
 	private _sizeElement: HTMLSelectElement | null = null;
@@ -230,7 +234,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			.map((size) => Number(size))
 			.filter((size) => Number.isFinite(size) && size > 0)
 			.map((size) => Math.floor(size));
-		const fallbackPageSizes = [5, 10, 20, 30, 50];
+		const fallbackPageSizes: number[] = [...DEFAULT_PAGE_SIZES];
 		this._config.pageSizes =
 			pageSizes.length > 0 ? Array.from(new Set(pageSizes)) : fallbackPageSizes;
 
@@ -294,7 +298,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 						return [];
 					}
 					const searchLower = search.toLowerCase();
-					const stripHtml = /<[^>]*>|&nbsp;/g;
 					return data.filter((item: T) => {
 						if (!item) {
 							return false;
@@ -307,9 +310,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 							) {
 								return false;
 							}
-							const valueText = String(value)
-								.replace(stripHtml, '')
-								.toLowerCase();
+							const valueText = stripHtml(value).toLowerCase();
 							return valueText.includes(searchLower);
 						});
 					});
@@ -364,17 +365,17 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	private _storeOriginalClasses(): void {
 		// Store tbody class
 		if (this._tbodyElement) {
-			this._originalTbodyClass = this._tbodyElement.className || '';
+			this._originalClasses.tbody = this._tbodyElement.className || '';
 		}
 
 		// Store thead class and th classes
 		if (this._theadElement) {
-			this._originalTheadClass = this._theadElement.className || '';
+			this._originalClasses.thead = this._theadElement.className || '';
 
 			// Store th classes
 			const thElements =
 				this._theadElement.querySelectorAll<HTMLTableCellElement>('th');
-			this._originalThClasses = Array.from(thElements).map(
+			this._originalClasses.th = Array.from(thElements).map(
 				(th) => th.className || '',
 			);
 		}
@@ -383,15 +384,15 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		if (this._tbodyElement) {
 			const originalRows =
 				this._tbodyElement.querySelectorAll<HTMLTableRowElement>('tr');
-			this._originalTrClasses = Array.from(originalRows).map(
+			this._originalClasses.tr = Array.from(originalRows).map(
 				(row) => row.className || '',
 			);
 
 			// Store td classes as a 2D array
-			this._originalTdClasses = [];
+			this._originalClasses.td = [];
 			Array.from(originalRows).forEach((row, rowIndex) => {
 				const tdElements = row.querySelectorAll<HTMLTableCellElement>('td');
-				this._originalTdClasses[rowIndex] = Array.from(tdElements).map(
+				this._originalClasses.td[rowIndex] = Array.from(tdElements).map(
 					(td) => td.className || '',
 				);
 			});
@@ -446,7 +447,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		this._searchHandler.attach(
 			this._tableId(),
 			this.getState().search,
-			this._config.search?.delay ?? 500,
+			this._config.search?.delay ?? DEFAULT_SEARCH_DELAY,
 			(query) => this.search(query),
 		);
 
@@ -606,9 +607,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			data: this._data,
 			getLogicalColumnCount: this._getLogicalColumnCount.bind(this),
 			getState: this.getState.bind(this),
-			originalTbodyClass: this._originalTbodyClass,
-			originalTrClasses: this._originalTrClasses,
-			originalTdClasses: this._originalTdClasses,
+			originalClasses: this._originalClasses,
 			tableElement: this._tableElement,
 			theadElement: this._theadElement,
 		});

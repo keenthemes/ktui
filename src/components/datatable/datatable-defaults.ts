@@ -5,6 +5,15 @@
 
 import { KTDataTableConfigInterface, KTDataTableStateInterface } from './types';
 
+/** Default page size options shown in the size selector */
+export const DEFAULT_PAGE_SIZES = [5, 10, 20, 30, 50] as const;
+
+/** Default debounce delay (ms) for search input */
+export const DEFAULT_SEARCH_DELAY = 500;
+
+/** Default maximum visible page buttons before showing '...' */
+export const DEFAULT_PAGE_MORE_LIMIT = 3;
+
 /**
  * Default configuration for KTDataTable.
  * Extracted from _initDefaultConfig() for separation of concerns.

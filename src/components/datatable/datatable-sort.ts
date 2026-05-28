@@ -10,6 +10,7 @@ import {
 	KTDataTableSortOrderInterface,
 	KTDataTableDataInterface,
 } from './types';
+import { stripHtml } from './datatable-utils';
 
 export interface KTDataTableSortAPI<T = KTDataTableDataInterface> {
 	initSort(): void;
@@ -74,8 +75,8 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 		b: unknown,
 		sortOrder: KTDataTableSortOrderInterface,
 	): number {
-		const aText = String(a).replace(/<[^>]*>|&nbsp;/g, '');
-		const bText = String(b).replace(/<[^>]*>|&nbsp;/g, '');
+		const aText = stripHtml(a);
+		const bText = stripHtml(b);
 		return aText > bText
 			? sortOrder === 'asc'
 				? 1
@@ -143,8 +144,6 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 		// Pre-strip HTML from cell values once (instead of on every comparison).
 		// For N rows this runs N regex replacements instead of N*log(N).
 		const strippedCache = new Map<T, string>();
-		const stripHtml = (value: unknown): string =>
-			String(value).replace(/<[^>]*>|&nbsp;/g, '');
 
 		if (!sortValueFn) {
 			for (const item of data) {

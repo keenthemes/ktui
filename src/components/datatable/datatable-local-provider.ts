@@ -16,6 +16,7 @@ import {
 	KTDataTableStateStore,
 } from './datatable-contracts';
 import { resolveColumns } from './datatable-column-utils';
+import { stripHtml } from './datatable-utils';
 
 interface KTDataTableLocalProviderOptions {
 	config: KTDataTableConfigInterface;
@@ -86,9 +87,7 @@ export class KTDataTableLocalDataProvider<
 					switch (filter.type) {
 						case 'text': {
 							if (!filter.value) return true;
-							const text = String(cellValue ?? '')
-								.replace(/<[^>]*>|&nbsp;/g, '')
-								.toLowerCase();
+							const text = stripHtml(cellValue).toLowerCase();
 							return text.includes(filter.value.toLowerCase());
 						}
 						case 'numeric': {

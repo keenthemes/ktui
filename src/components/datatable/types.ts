@@ -332,3 +332,15 @@ export interface KTDataTableCheckInterface {
 export interface KTDataTableCheckChangePayloadInterface {
 	cancel?: boolean;
 }
+
+/**
+ * Stores original CSS classes from the server-rendered table,
+ * used to preserve styling after datatable redraws.
+ */
+export interface OriginalTableClasses {
+	tbody: string;
+	thead: string;
+	tr: string[];
+	td: string[][];
+	th: string[];
+}

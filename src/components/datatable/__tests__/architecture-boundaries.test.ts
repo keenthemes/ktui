@@ -177,9 +177,13 @@ describe('KTDataTable architecture boundaries', () => {
 			data: [{ id: '1', name: 'Ada' }],
 			getLogicalColumnCount: () => 2,
 			getState: () => stateStore.getState(),
-			originalTbodyClass: 'body-class',
-			originalTrClasses: ['row-class'],
-			originalTdClasses: [['id-cell', 'name-cell']],
+			originalClasses: {
+				tbody: 'body-class',
+				thead: '',
+				tr: ['row-class'],
+				td: [['id-cell', 'name-cell']],
+				th: [],
+			},
 			tableElement: table,
 			theadElement: thead,
 		});
