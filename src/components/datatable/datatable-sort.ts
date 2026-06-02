@@ -10,6 +10,19 @@ import {
 	KTDataTableSortOrderInterface,
 	KTDataTableDataInterface,
 } from './types';
+import { stripHtml } from './datatable-utils';
+
+export interface KTDataTableSortHandlerDeps<T> {
+	config: KTDataTableConfigInterface;
+	theadElement: HTMLTableSectionElement;
+	getState: () => {
+		sortField: keyof T | number;
+		sortOrder: KTDataTableSortOrderInterface;
+	};
+	setState: (field: keyof T | number, order: KTDataTableSortOrderInterface) => void;
+	emit: (eventName: string, eventData?: object) => void;
+	updateData: () => void;
+}
 
 export interface KTDataTableSortAPI<T = KTDataTableDataInterface> {
 	initSort(): void;
@@ -27,31 +40,42 @@ export interface KTDataTableSortAPI<T = KTDataTableDataInterface> {
 		sortField: keyof T,
 		sortOrder: KTDataTableSortOrderInterface,
 	): void;
+	dispose(): void;
 }
 
-export function createSortHandler<T = KTDataTableDataInterface>(
-	config: KTDataTableConfigInterface,
-	theadElement: HTMLTableSectionElement,
-	getState: () => {
+export class KTDataTableSortHandler<T = KTDataTableDataInterface>
+	implements KTDataTableSortAPI<T>
+{
+	private _config: KTDataTableConfigInterface;
+	private _theadElement: HTMLTableSectionElement;
+	private _getState: () => {
 		sortField: keyof T | number;
 		sortOrder: KTDataTableSortOrderInterface;
-	},
-	setState: (
+	};
+	private _setState: (
 		field: keyof T | number,
 		order: KTDataTableSortOrderInterface,
-	) => void,
-	fireEvent: (eventName: string, eventData?: object) => void,
-	dispatchEvent: (eventName: string, eventData?: object) => void,
-	updateData: () => void,
-): KTDataTableSortAPI<T> {
-	// Helper to compare values for sorting (string)
-	function compareValues(
+	) => void;
+	private _emit: (eventName: string, eventData?: object) => void;
+	private _updateData: () => void;
+	private _sortAbortController: AbortController | null = null;
+
+	constructor(deps: KTDataTableSortHandlerDeps<T>) {
+		this._config = deps.config;
+		this._theadElement = deps.theadElement;
+		this._getState = deps.getState;
+		this._setState = deps.setState;
+		this._emit = deps.emit;
+		this._updateData = deps.updateData;
+	}
+
+	private static _compareValues(
 		a: unknown,
 		b: unknown,
 		sortOrder: KTDataTableSortOrderInterface,
 	): number {
-		const aText = String(a).replace(/<[^>]*>|&nbsp;/g, '');
-		const bText = String(b).replace(/<[^>]*>|&nbsp;/g, '');
+		const aText = stripHtml(a);
+		const bText = stripHtml(b);
 		return aText > bText
 			? sortOrder === 'asc'
 				? 1
@@ -63,8 +87,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 				: 0;
 	}
 
-	// Parse value for numeric sort: strip currency/commas, then parseFloat
-	function parseNumeric(value: unknown): number {
+	private static _parseNumeric(value: unknown): number {
 		if (value === null || value === undefined || value === '') {
 			return Number.NaN;
 		}
@@ -73,8 +96,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		return Number.isNaN(n) ? Number.NaN : n;
 	}
 
-	// Compare two numbers; NaN sorts to the end for both asc and desc
-	function compareNumeric(
+	private static _compareNumeric(
 		aNum: number,
 		bNum: number,
 		sortOrder: KTDataTableSortOrderInterface,
@@ -89,7 +111,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		return 0;
 	}
 
-	function getColumnDef(sortField: keyof T | number):
+	private _getColumnDef(sortField: keyof T | number):
 		| {
 				sortType?: 'string' | 'numeric';
 				sortValue?: (
@@ -100,7 +122,7 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 				) => number | string;
 		  }
 		| undefined {
-		const columns = config.columns;
+		const columns = this._config.columns;
 		if (!columns) return undefined;
 		const key =
 			typeof sortField === 'number'
@@ -109,14 +131,24 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		return key !== undefined ? columns[key as string] : undefined;
 	}
 
-	function sortData(
+	public sortData(
 		data: T[],
 		sortField: keyof T | number,
 		sortOrder: KTDataTableSortOrderInterface,
 	): T[] {
-		const columnDef = getColumnDef(sortField);
+		const columnDef = this._getColumnDef(sortField);
 		const sortValueFn = columnDef?.sortValue;
 		const useNumeric = !sortValueFn && columnDef?.sortType === 'numeric';
+
+		// Pre-strip HTML from cell values once (instead of on every comparison).
+		// For N rows this runs N regex replacements instead of N*log(N).
+		const strippedCache = new Map<T, string>();
+
+		if (!sortValueFn) {
+			for (const item of data) {
+				strippedCache.set(item, stripHtml(item[sortField as keyof T]));
+			}
+		}
 
 		return data.sort((a, b) => {
 			const aRaw = a[sortField as keyof T] as unknown;
@@ -135,31 +167,33 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 						| string,
 					b as KTDataTableDataInterface,
 				);
-				const aNum = typeof aVal === 'number' ? aVal : parseNumeric(aVal);
-				const bNum = typeof bVal === 'number' ? bVal : parseNumeric(bVal);
+				const aNum =
+					typeof aVal === 'number'
+						? aVal
+						: KTDataTableSortHandler._parseNumeric(aVal);
+				const bNum =
+					typeof bVal === 'number'
+						? bVal
+						: KTDataTableSortHandler._parseNumeric(bVal);
 				if (typeof aVal === 'number' && typeof bVal === 'number') {
-					return compareNumeric(aNum, bNum, sortOrder);
+					return KTDataTableSortHandler._compareNumeric(aNum, bNum, sortOrder);
 				}
-				return compareValues(aVal, bVal, sortOrder);
+				return KTDataTableSortHandler._compareValues(aVal, bVal, sortOrder);
 			}
 			if (useNumeric) {
-				const aNum = parseNumeric(
-					aRaw as
-						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
-						| string,
-				);
-				const bNum = parseNumeric(
-					bRaw as
-						| KTDataTableDataInterface[keyof KTDataTableDataInterface]
-						| string,
-				);
-				return compareNumeric(aNum, bNum, sortOrder);
+				const aNum = KTDataTableSortHandler._parseNumeric(strippedCache.get(a) ?? aRaw);
+				const bNum = KTDataTableSortHandler._parseNumeric(strippedCache.get(b) ?? bRaw);
+				return KTDataTableSortHandler._compareNumeric(aNum, bNum, sortOrder);
 			}
-			return compareValues(aRaw, bRaw, sortOrder);
+			return KTDataTableSortHandler._compareValues(
+				strippedCache.get(a) ?? aRaw,
+				strippedCache.get(b) ?? bRaw,
+				sortOrder,
+			);
 		});
 	}
 
-	function toggleSortOrder(
+	public toggleSortOrder(
 		currentField: keyof T | number,
 		currentOrder: KTDataTableSortOrderInterface,
 		newField: keyof T | number,
@@ -177,18 +211,17 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		return 'asc';
 	}
 
-	function setSortIcon(
+	public setSortIcon(
 		sortField: keyof T,
 		sortOrder: KTDataTableSortOrderInterface,
 	): void {
-		const baseClass = config.sort?.classes?.base || '';
+		const baseClass = this._config.sort?.classes?.base || '';
 		const sortClass = sortOrder
 			? sortOrder === 'asc'
-				? config.sort?.classes?.asc || ''
-				: config.sort?.classes?.desc || ''
+				? this._config.sort?.classes?.asc || ''
+				: this._config.sort?.classes?.desc || ''
 			: '';
-		// Clear all headers: remove sort state so only the active column shows highlighted arrow
-		const allTh = theadElement.querySelectorAll('th');
+		const allTh = this._theadElement.querySelectorAll('th');
 		allTh.forEach((header) => {
 			const el = header as HTMLElement;
 			el.setAttribute('aria-sort', 'none');
@@ -197,11 +230,10 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 				sortElement.className = baseClass;
 			}
 		});
-		// Apply sort state to the active column so table.css [aria-sort='asc'] / [aria-sort='desc'] can highlight the arrow
 		const th =
 			typeof sortField === 'number'
 				? allTh[sortField]
-				: (theadElement.querySelector(
+				: (this._theadElement.querySelector(
 						`th[data-kt-datatable-column="${String(sortField)}"], th[data-kt-datatable-column-sort="${String(sortField)}"]`,
 					) as HTMLElement);
 		if (th) {
@@ -217,17 +249,25 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 		}
 	}
 
-	function initSort(): void {
-		if (!theadElement) return;
-		// Set the initial sort icon
-		setSortIcon(getState().sortField as keyof T, getState().sortOrder);
-		// Get all the table headers
-		const headers = Array.from(theadElement.querySelectorAll('th'));
-		headers.forEach((header) => {
-			// If the sort class is not found, it's not a sortable column
-			if (!header.querySelector(`.${config.sort?.classes?.base}`)) return;
+	public initSort(): void {
+		if (!this._theadElement) return;
 
-			// Check if sorting is disabled for this column
+		// Abort previous sort listeners before attaching new ones
+		if (this._sortAbortController) {
+			this._sortAbortController.abort();
+		}
+		this._sortAbortController = new AbortController();
+		const signal = this._sortAbortController.signal;
+
+		this.setSortIcon(
+			this._getState().sortField as keyof T,
+			this._getState().sortOrder,
+		);
+		const headers = Array.from(this._theadElement.querySelectorAll('th'));
+		headers.forEach((header) => {
+			if (!header.querySelector(`.${this._config.sort?.classes?.base}`))
+				return;
+
 			const sortDisabled =
 				header.getAttribute('data-kt-datatable-column-sort') === 'false';
 			if (sortDisabled) return;
@@ -239,20 +279,25 @@ export function createSortHandler<T = KTDataTableDataInterface>(
 				? (sortAttribute as keyof T)
 				: (header.cellIndex as keyof T);
 			header.addEventListener('click', () => {
-				const state = getState();
-				const sortOrder = toggleSortOrder(
+				const state = this._getState();
+				const sortOrder = this.toggleSortOrder(
 					state.sortField,
 					state.sortOrder,
 					sortField,
 				);
-				setSortIcon(sortField, sortOrder);
-				setState(sortField, sortOrder);
-				fireEvent('sort', { field: sortField, order: sortOrder });
-				dispatchEvent('sort', { field: sortField, order: sortOrder });
-				updateData();
-			});
+				this.setSortIcon(sortField, sortOrder);
+				this._setState(sortField, sortOrder);
+				this._emit('sort', { field: sortField, order: sortOrder });
+				this._updateData();
+			}, { signal });
 		});
 	}
 
-	return { initSort, sortData, toggleSortOrder, setSortIcon };
+	public dispose(): void {
+		if (this._sortAbortController) {
+			this._sortAbortController.abort();
+			this._sortAbortController = null;
+		}
+	}
 }
+

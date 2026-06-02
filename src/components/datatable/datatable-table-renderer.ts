@@ -12,6 +12,7 @@ import {
 	KTDataTableTableRenderer,
 	KTDataTableTableRendererInput,
 } from './datatable-contracts';
+import { resolveColumns } from './datatable-column-utils';
 
 export class KTDataTableDomTableRenderer<
 	T extends KTDataTableDataInterface,
@@ -26,9 +27,11 @@ export class KTDataTableDomTableRenderer<
 		const tbodyElement =
 			input.tableElement.createTBody() as HTMLTableSectionElement;
 
-		if (input.originalTbodyClass) {
-			tbodyElement.className = input.originalTbodyClass;
+		if (input.originalClasses.tbody) {
+			tbodyElement.className = input.originalClasses.tbody;
 		}
+
+		this.applyTableLayout(input);
 
 		this.renderContent(input, tbodyElement);
 
@@ -44,7 +47,69 @@ export class KTDataTableDomTableRenderer<
 		const cell = row.insertCell();
 		const logicalCount = getLogicalColumnCount();
 		cell.colSpan = logicalCount > 0 ? logicalCount : 1;
+		cell.style.textAlign = 'center';
 		cell.innerHTML = message;
+	}
+
+	private applyTableLayout(
+		input: KTDataTableTableRendererInput<T>,
+	): void {
+		const tableLayout = input.config.tableLayout || 'auto';
+		const tableElement = input.tableElement;
+
+		tableElement.style.tableLayout = tableLayout;
+
+		if (tableLayout === 'fixed') {
+			if (!tableElement.style.width) {
+				tableElement.style.width = '100%';
+			}
+			this.updateColgroup(input);
+		} else {
+			const existingColgroup = tableElement.querySelector('colgroup');
+			if (existingColgroup) {
+				tableElement.removeChild(existingColgroup);
+			}
+		}
+	}
+
+	private updateColgroup(
+		input: KTDataTableTableRendererInput<T>,
+	): void {
+		const tableElement = input.tableElement;
+		const existingColgroup = tableElement.querySelector('colgroup');
+		if (existingColgroup) {
+			tableElement.removeChild(existingColgroup);
+		}
+
+		const colgroup = document.createElement('colgroup');
+
+		if (input.config.columns) {
+			const columns = input.config.columns;
+			for (const key of Object.keys(columns)) {
+				const col = document.createElement('col');
+				if (columns[key].width) {
+					col.style.width = columns[key].width;
+				}
+				colgroup.appendChild(col);
+			}
+		} else {
+			const { columnsByIndex } = resolveColumns(input.theadElement);
+			for (const th of columnsByIndex) {
+				const col = document.createElement('col');
+				const width = th.getAttribute('data-kt-datatable-column-width');
+				if (width) {
+					col.style.width = width;
+				}
+				colgroup.appendChild(col);
+			}
+		}
+
+		const thead = tableElement.querySelector('thead');
+		if (thead) {
+			tableElement.insertBefore(colgroup, thead);
+		} else {
+			tableElement.appendChild(colgroup);
+		}
 	}
 
 	private renderContent(
@@ -64,15 +129,7 @@ export class KTDataTableDomTableRenderer<
 			return tbodyElement;
 		}
 
-		const allThs: NodeListOf<HTMLTableCellElement> = input.theadElement
-			? input.theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-
-		const ths: HTMLTableCellElement[] = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		);
-		const columnsToRender: HTMLTableCellElement[] =
-			ths.length > 0 && ths.length !== allThs.length ? Array.from(allThs) : ths;
+		const { columnsByIndex: columnsToRender } = resolveColumns(input.theadElement);
 		const logicalColumnCount =
 			columnsToRender.length > 0
 				? columnsToRender.length
@@ -81,8 +138,8 @@ export class KTDataTableDomTableRenderer<
 		input.data.forEach((item: T, rowIndex: number) => {
 			const row = document.createElement('tr');
 
-			if (input.originalTrClasses && input.originalTrClasses[rowIndex]) {
-				row.className = input.originalTrClasses[rowIndex];
+			if (input.originalClasses.tr && input.originalClasses.tr[rowIndex]) {
+				row.className = input.originalClasses.tr[rowIndex];
 			}
 
 			if (!input.config.columns) {
@@ -174,7 +231,13 @@ export class KTDataTableDomTableRenderer<
 					td.innerHTML = result as string;
 				}
 			} else {
-				td.textContent = item[colKey] as string;
+				const cellValue = item[colKey];
+				if (cellValue === null || cellValue === undefined) {
+					td.textContent = '';
+				} else {
+					// Match implicit column rendering: preserve HTML from DOM extraction.
+					td.innerHTML = String(cellValue);
+				}
 			}
 
 			if (typeof columnDef.createdCell === 'function') {
@@ -192,11 +255,11 @@ export class KTDataTableDomTableRenderer<
 		colIndex: number,
 	): void {
 		if (
-			input.originalTdClasses &&
-			input.originalTdClasses[rowIndex] &&
-			input.originalTdClasses[rowIndex][colIndex]
+			input.originalClasses.td &&
+			input.originalClasses.td[rowIndex] &&
+			input.originalClasses.td[rowIndex][colIndex]
 		) {
-			td.className = input.originalTdClasses[rowIndex][colIndex];
+			td.className = input.originalClasses.td[rowIndex][colIndex];
 		}
 	}
 

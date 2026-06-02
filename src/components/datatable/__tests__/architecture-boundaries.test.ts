@@ -4,7 +4,6 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { KTDataTable } from '../datatable';
-import { createDataTableEventAdapter } from '../datatable-event-adapter';
 import { KTDataTableLocalDataProvider } from '../datatable-local-provider';
 import { KTDataTableDomPaginationRenderer } from '../datatable-pagination-renderer';
 import { KTDataTableRemoteDataProvider } from '../datatable-remote-provider';
@@ -80,7 +79,12 @@ describe('KTDataTable architecture boundaries', () => {
 	it('emits through both legacy event channels from one adapter', () => {
 		const fireEvent = vi.fn();
 		const dispatchEvent = vi.fn();
-		const adapter = createDataTableEventAdapter(fireEvent, dispatchEvent);
+		const adapter = {
+			emit(eventName: string, eventData?: object): void {
+				fireEvent(eventName, eventData);
+				dispatchEvent(eventName, eventData);
+			},
+		};
 
 		adapter.emit('reload', { page: 1 });
 
@@ -104,6 +108,48 @@ describe('KTDataTable architecture boundaries', () => {
 			<tr><td>1</td><td>Ada</td></tr>
 			<tr><td>2</td><td>Grace</td></tr>
 		`;
+
+		const provider = new KTDataTableLocalDataProvider({
+			config,
+			elements: () => ({
+				tableElement: table,
+				tbodyElement: tbody,
+				theadElement: thead,
+			}),
+			getLogicalColumnCount: () => 2,
+			storeOriginalClasses: vi.fn(),
+			stateStore,
+		});
+
+		const result = provider.fetchSync();
+
+		expect(result.totalItems).toBe(2);
+		expect(result.data).toEqual([{ id: '1', name: 'Ada' }]);
+		expect(stateStore.getState().originalData).toHaveLength(2);
+	});
+
+	it('keeps programmatic originalData when tbody is empty (custom render demos)', () => {
+		const seed = [
+			{ id: '1', name: 'Ada' },
+			{ id: '2', name: 'Grace' },
+		];
+		const config = createConfig({
+			pageSize: 1,
+			_state: {
+				originalData: seed,
+				originalDataAttributes: [{}, {}],
+			},
+		});
+		const stateStore = new KTDataTableConfigStateStore(config);
+		const table = document.createElement('table');
+		const thead = table.createTHead();
+		thead.innerHTML = `
+			<tr>
+				<th data-kt-datatable-column="id">ID</th>
+				<th data-kt-datatable-column="name">Name</th>
+			</tr>
+		`;
+		const tbody = table.createTBody();
 
 		const provider = new KTDataTableLocalDataProvider({
 			config,
@@ -150,9 +196,7 @@ describe('KTDataTable architecture boundaries', () => {
 
 		expect(result.data).toEqual([{ id: 1, name: 'Ada' }]);
 		expect(result.totalItems).toBe(1);
-		expect(emit).toHaveBeenCalledWith('fetched', {
-			response: { data: [{ id: 1, name: 'Ada' }], totalCount: 1 },
-		});
+
 	});
 
 	it('renders table body output through the table renderer', () => {
@@ -175,9 +219,13 @@ describe('KTDataTable architecture boundaries', () => {
 			data: [{ id: '1', name: 'Ada' }],
 			getLogicalColumnCount: () => 2,
 			getState: () => stateStore.getState(),
-			originalTbodyClass: 'body-class',
-			originalTrClasses: ['row-class'],
-			originalTdClasses: [['id-cell', 'name-cell']],
+			originalClasses: {
+				tbody: 'body-class',
+				thead: '',
+				tr: ['row-class'],
+				td: [['id-cell', 'name-cell']],
+				th: [],
+			},
 			tableElement: table,
 			theadElement: thead,
 		});

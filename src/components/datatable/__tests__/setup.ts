@@ -17,8 +17,12 @@ vi.mock('../../../index', () => ({
 
 // Setup DOM environment before each test
 beforeEach(() => {
-	// Clear localStorage
-	localStorage.clear();
+	// Clear localStorage (may be unavailable in Node.js without --localstorage-file)
+	try {
+		localStorage.clear();
+	} catch {
+		// localStorage not available
+	}
 
 	// Reset document body
 	document.body.innerHTML = '';
@@ -29,8 +33,12 @@ beforeEach(() => {
 
 // Cleanup after each test
 afterEach(() => {
-	// Clear localStorage
-	localStorage.clear();
+	// Clear localStorage (may be unavailable in Node.js without --localstorage-file)
+	try {
+		localStorage.clear();
+	} catch {
+		// localStorage not available
+	}
 
 	// Reset document body
 	document.body.innerHTML = '';

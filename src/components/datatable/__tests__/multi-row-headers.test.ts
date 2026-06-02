@@ -30,23 +30,23 @@ describe('KTDataTable - Multi-row header column count', () => {
 		const thead = document.createElement('thead');
 		const row1 = document.createElement('tr');
 		row1.innerHTML = `
-			<th rowspan="2">Person</th>
+			<th rowspan="2" data-kt-datatable-column="person">Person</th>
 			<th colspan="3">Backlog</th>
 			<th colspan="3">Floater (2) 2025</th>
 			<th colspan="3">Floater (1) 2025</th>
 			<th colspan="3">CL2025</th>
 			<th colspan="3">LWP</th>
-			<th rowspan="2">Action</th>
+			<th rowspan="2" data-kt-datatable-column="action">Action</th>
 		`;
 		thead.appendChild(row1);
 
 		const row2 = document.createElement('tr');
 		row2.innerHTML = `
-			<th>Assigned</th><th>Used</th><th>Balance</th>
-			<th>Assigned</th><th>Used</th><th>Balance</th>
-			<th>Assigned</th><th>Used</th><th>Balance</th>
-			<th>Assigned</th><th>Used</th><th>Balance</th>
-			<th>Assigned</th><th>Used</th><th>Balance</th>
+			<th data-kt-datatable-column="assigned1">Assigned</th><th data-kt-datatable-column="used1">Used</th><th data-kt-datatable-column="balance1">Balance</th>
+			<th data-kt-datatable-column="assigned2">Assigned</th><th data-kt-datatable-column="used2">Used</th><th data-kt-datatable-column="balance2">Balance</th>
+			<th data-kt-datatable-column="assigned3">Assigned</th><th data-kt-datatable-column="used3">Used</th><th data-kt-datatable-column="balance3">Balance</th>
+			<th data-kt-datatable-column="assigned4">Assigned</th><th data-kt-datatable-column="used4">Used</th><th data-kt-datatable-column="balance4">Balance</th>
+			<th data-kt-datatable-column="assigned5">Assigned</th><th data-kt-datatable-column="used5">Used</th><th data-kt-datatable-column="balance5">Balance</th>
 		`;
 		thead.appendChild(row2);
 		tableElement.appendChild(thead);

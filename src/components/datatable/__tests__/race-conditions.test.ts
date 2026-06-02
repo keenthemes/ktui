@@ -407,13 +407,13 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 	describe('Event Handling During Race Conditions', () => {
 		it('should fire fetch event for successful requests', async () => {
-			const fetchEvents: Event[] = [];
+			const updateEvents: Event[] = [];
 
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
 			) as HTMLElement;
-			element.addEventListener('fetch', (e) => {
-				fetchEvents.push(e);
+			element.addEventListener('kt.datatable.update', (e) => {
+				updateEvents.push(e);
 			});
 
 			const datatable = new KTDataTable(element, {
@@ -425,18 +425,18 @@ describe('KTDataTable Race Condition Fixes', () => {
 			datatable.search('test');
 			await waitFor(150); // Complete search
 
-			// Should fire fetch for initial and search
-			expect(fetchEvents.length).toBeGreaterThanOrEqual(2);
+			// Should fire update for initial and search
+			expect(updateEvents.length).toBeGreaterThanOrEqual(2);
 		});
 
 		it('should fire fetched event after successful data load', async () => {
-			const fetchedEvents: Event[] = [];
+			const updateEvents: Event[] = [];
 
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
 			) as HTMLElement;
-			element.addEventListener('fetched', (e) => {
-				fetchedEvents.push(e);
+			element.addEventListener('kt.datatable.update', (e) => {
+				updateEvents.push(e);
 			});
 
 			new KTDataTable(element, {
@@ -445,8 +445,8 @@ describe('KTDataTable Race Condition Fixes', () => {
 
 			await waitFor(150);
 
-			// Should fire fetched for initial request
-			expect(fetchedEvents.length).toBeGreaterThanOrEqual(1);
+			// Should fire update for initial request
+			expect(updateEvents.length).toBeGreaterThanOrEqual(1);
 		});
 
 		it('should not fire error events for AbortError', async () => {
@@ -455,7 +455,7 @@ describe('KTDataTable Race Condition Fixes', () => {
 			const element = container.querySelector(
 				'[data-kt-datatable="true"]',
 			) as HTMLElement;
-			element.addEventListener('error.kt.datatable', (e) => {
+			element.addEventListener('kt.datatable.error', (e) => {
 				errorEvents.push(e);
 			});
 

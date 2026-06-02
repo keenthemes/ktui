@@ -11,6 +11,7 @@ import {
 	KTDataTableInterface,
 	KTDataTableSortOrderInterface,
 	KTDataTableStateInterface,
+	OriginalTableClasses,
 } from './types';
 
 export type KTDataTableEmit = (eventName: string, eventData?: object) => void;
@@ -64,9 +65,7 @@ export interface KTDataTableTableRendererInput<
 	data: T[];
 	getLogicalColumnCount: () => number;
 	getState: () => KTDataTableStateInterface;
-	originalTbodyClass: string;
-	originalTrClasses: string[];
-	originalTdClasses: string[][];
+	originalClasses: OriginalTableClasses;
 	tableElement: HTMLTableElement;
 	theadElement: HTMLTableSectionElement;
 }

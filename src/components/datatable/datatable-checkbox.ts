@@ -8,10 +8,14 @@
 import {
 	KTDataTableConfigInterface,
 	KTDataTableCheckChangePayloadInterface,
-	KTDataTableStateInterface,
 } from './types';
 import KTEventHandler from '../../helpers/event-handler';
 import { KTCallableType } from '../../types';
+
+export interface KTDataTableCheckboxDeps {
+	getState: () => { selectedRows?: string[] };
+	setSelectedRows: (rows: string[]) => void;
+}
 
 export interface KTDataTableCheckboxAPI {
 	init(): void;
@@ -21,241 +25,236 @@ export interface KTDataTableCheckboxAPI {
 	isChecked(): boolean;
 	getChecked(): string[];
 	updateState(): void;
+	dispose(): void;
 }
 
-// Main function to create checkbox logic for a datatable instance
-export function createCheckboxHandler(
-	element: HTMLElement,
-	config: KTDataTableConfigInterface,
-	fireEvent: (eventName: string, eventData?: object) => void,
-): KTDataTableCheckboxAPI {
-	let headerChecked = false;
-	let headerCheckElement: HTMLInputElement | null = null;
-	let targetElements: NodeListOf<HTMLInputElement> | null = null;
+export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
+	private _element: HTMLElement;
+	private _config: KTDataTableConfigInterface;
+	private _fireEvent: (eventName: string, eventData?: object) => void;
+	private _deps: KTDataTableCheckboxDeps;
+	private _headerChecked = false;
+	private _headerCheckElement: HTMLInputElement | null = null;
+	private _targetElements: NodeListOf<HTMLInputElement> | null = null;
+	private _delegatedEventId: string | null = null;
+	private readonly _preserveSelection: boolean;
 
-	// Default: preserve selection across all pages
-	const preserveSelection = config.checkbox?.preserveSelection !== false;
-
-	function ensureState(): KTDataTableStateInterface {
-		let state = config._state;
-		if (!state) {
-			state = {} as KTDataTableStateInterface;
-			config._state = state;
-		}
-		return state;
+	constructor(
+		element: HTMLElement,
+		config: KTDataTableConfigInterface,
+		fireEvent: (eventName: string, eventData?: object) => void,
+		deps: KTDataTableCheckboxDeps,
+	) {
+		this._element = element;
+		this._config = config;
+		this._fireEvent = fireEvent;
+		this._deps = deps;
+		this._preserveSelection = config.checkbox?.preserveSelection !== false;
 	}
 
-	// Helper: get selectedRows from state, always as string[]
-	function getSelectedRows(): string[] {
-		const state = ensureState();
-		if (!Array.isArray(state.selectedRows)) state.selectedRows = [];
-		return state.selectedRows.map(String);
+	private _checkboxListener = (event: MouseEvent) => {
+		this._checkboxToggle(event);
+	};
+
+	private _getSelectedRows(): string[] {
+		const rows = this._deps.getState().selectedRows;
+		return Array.isArray(rows) ? rows.map(String) : [];
 	}
 
-	// Helper: set selectedRows in state
-	function setSelectedRows(rows: string[]) {
-		const state = ensureState();
-		state.selectedRows = Array.from(new Set(rows.map(String)));
+	private _setSelectedRows(rows: string[]) {
+		this._deps.setSelectedRows(Array.from(new Set(rows.map(String))));
 	}
 
-	// Helper: get all visible row IDs (values)
-	function getVisibleRowIds(): string[] {
-		if (!targetElements) return [];
-		return Array.from(targetElements)
+	private _getVisibleRowIds(): string[] {
+		if (!this._targetElements) return [];
+		return Array.from(this._targetElements)
 			.map((el) => el.value)
 			.filter((v) => v != null && v !== '');
 	}
 
-	// Listener for header checkbox
-	const checkboxListener = (event: MouseEvent) => {
-		checkboxToggle(event);
-	};
-
-	function init() {
-		const attrs = config.attributes;
+	public init() {
+		const attrs = this._config.attributes;
 		if (!attrs?.check || !attrs.checkbox) {
 			return;
 		}
-		headerCheckElement = element.querySelector<HTMLInputElement>(attrs.check);
-		if (!headerCheckElement) return;
-		headerChecked = headerCheckElement.checked;
-		targetElements = element.querySelectorAll<HTMLInputElement>(attrs.checkbox);
-		checkboxHandler();
-		reapplyCheckedStates();
-		updateHeaderCheckboxState();
+		this._headerCheckElement =
+			this._element.querySelector<HTMLInputElement>(attrs.check);
+		if (!this._headerCheckElement) return;
+		this._headerChecked = this._headerCheckElement.checked;
+		this._targetElements =
+			this._element.querySelectorAll<HTMLInputElement>(attrs.checkbox);
+		this._checkboxHandler();
+		this._reapplyCheckedStates();
+		this._updateHeaderCheckboxState();
 	}
 
-	function checkboxHandler() {
-		if (!headerCheckElement) return;
-		const rowCheckboxSelector = config.attributes?.checkbox;
+	private _checkboxHandler() {
+		if (!this._headerCheckElement) return;
+		const rowCheckboxSelector = this._config.attributes?.checkbox;
 		if (!rowCheckboxSelector) return;
-		headerCheckElement.addEventListener('click', checkboxListener);
-		KTEventHandler.on(document.body, rowCheckboxSelector, 'input', ((
-			event?: Event,
-		) => {
-			if (event) handleRowCheckboxChange(event);
-		}) as KTCallableType);
+		this._headerCheckElement.addEventListener('click', this._checkboxListener);
+		this._delegatedEventId = KTEventHandler.on(
+			this._element,
+			rowCheckboxSelector,
+			'input',
+			((event?: Event) => {
+				if (event) this._handleRowCheckboxChange(event);
+			}) as KTCallableType,
+		);
 	}
 
-	// When a row checkbox is changed
-	function handleRowCheckboxChange(event: Event) {
+	private _handleRowCheckboxChange(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (!input) return;
 		const value = input.value;
-		let selectedRows = getSelectedRows();
+		let selectedRows = this._getSelectedRows();
 		const wasChecked = selectedRows.includes(value);
 		const isNowChecked = input.checked;
 
-		// Update state first
 		if (isNowChecked) {
 			if (!wasChecked) selectedRows.push(value);
 		} else {
 			selectedRows = selectedRows.filter((v) => v !== value);
 		}
-		setSelectedRows(selectedRows);
-		updateHeaderCheckboxState();
+		this._setSelectedRows(selectedRows);
+		this._updateHeaderCheckboxState();
 
-		// Fire specific checked/unchecked events after state is updated
 		if (isNowChecked && !wasChecked) {
-			fireEvent('checked');
+			this._fireEvent('checked', { value });
 		} else if (!isNowChecked && wasChecked) {
-			fireEvent('unchecked');
+			this._fireEvent('unchecked', { value });
 		}
 
-		// Always fire changed event for backward compatibility
-		fireEvent('changed');
+		this._fireEvent('changed');
 	}
 
-	// When the header checkbox is toggled
-	function checkboxToggle(_event?: Event) {
-		const checked = !isChecked();
-		// Update state first, then fire events
-		change(checked);
-		// Fire checked/unchecked events after state is updated
+	private _checkboxToggle(_event?: Event) {
+		const checked = !this.isChecked();
+		this._change(checked);
 		const eventType = checked ? 'checked' : 'unchecked';
-		fireEvent(eventType);
+		this._fireEvent(eventType);
 	}
 
-	// Change all visible checkboxes and update selectedRows
-	function change(checked: boolean) {
+	private _change(checked: boolean) {
 		const payload: KTDataTableCheckChangePayloadInterface = { cancel: false };
-		fireEvent('change', payload);
+		this._fireEvent('change', payload);
 		if (payload.cancel === true) return;
-		headerChecked = checked;
-		if (headerCheckElement) headerCheckElement.checked = checked;
-		if (targetElements) {
-			const visibleIds = getVisibleRowIds();
-			let selectedRows = getSelectedRows();
+		this._headerChecked = checked;
+		if (this._headerCheckElement) this._headerCheckElement.checked = checked;
+		if (this._targetElements) {
+			const visibleIds = this._getVisibleRowIds();
+			let selectedRows = this._getSelectedRows();
 			if (checked) {
-				// Add all visible IDs to selectedRows
-				selectedRows = preserveSelection
+				selectedRows = this._preserveSelection
 					? Array.from(new Set([...selectedRows, ...visibleIds]))
 					: visibleIds;
 			} else {
-				// Remove all visible IDs from selectedRows
-				selectedRows = preserveSelection
+				selectedRows = this._preserveSelection
 					? selectedRows.filter((v) => !visibleIds.includes(v))
 					: [];
 			}
-			setSelectedRows(selectedRows);
-			// Update visible checkboxes
-			targetElements.forEach((element: HTMLInputElement) => {
+			this._setSelectedRows(selectedRows);
+			this._targetElements.forEach((element: HTMLInputElement) => {
 				if (element) {
 					element.checked = checked;
 				}
 			});
 		}
-		updateHeaderCheckboxState();
-		fireEvent('changed');
+		this._updateHeaderCheckboxState();
+		this._fireEvent('changed');
 	}
 
-	// Reapply checked state to visible checkboxes based on selectedRows
-	function reapplyCheckedStates() {
-		const selectedRows = getSelectedRows();
-		if (!targetElements) return;
-		targetElements.forEach((element: HTMLInputElement) => {
+	private _reapplyCheckedStates() {
+		const selectedRows = this._getSelectedRows();
+		if (!this._targetElements) return;
+		this._targetElements.forEach((element: HTMLInputElement) => {
 			if (!element) return;
 			const value = element.value;
 			element.checked = selectedRows.includes(value);
-			// Update row class
 			const row = element.closest('tr');
-			if (row && config.checkbox?.checkedClass) {
+			if (row && this._config.checkbox?.checkedClass) {
 				if (element.checked) {
-					row.classList.add(config.checkbox.checkedClass);
+					row.classList.add(this._config.checkbox.checkedClass);
 				} else {
-					row.classList.remove(config.checkbox.checkedClass);
+					row.classList.remove(this._config.checkbox.checkedClass);
 				}
 			}
 		});
 	}
 
-	// Update header checkbox state (checked/indeterminate/unchecked)
-	function updateHeaderCheckboxState() {
-		if (!headerCheckElement || !targetElements) return;
-		const total = targetElements.length;
+	private _updateHeaderCheckboxState() {
+		if (!this._headerCheckElement || !this._targetElements) return;
+		const total = this._targetElements.length;
 		let checked = 0;
 		for (let i = 0; i < total; i++) {
-			if (targetElements[i].checked) checked++;
+			if (this._targetElements[i].checked) checked++;
 		}
 		if (checked === 0) {
-			headerCheckElement.indeterminate = false;
-			headerCheckElement.checked = false;
-			headerChecked = false;
+			this._headerCheckElement.indeterminate = false;
+			this._headerCheckElement.checked = false;
+			this._headerChecked = false;
 		} else if (checked > 0 && checked < total) {
-			headerCheckElement.indeterminate = true;
-			headerCheckElement.checked = false;
-			headerChecked = false;
+			this._headerCheckElement.indeterminate = true;
+			this._headerCheckElement.checked = false;
+			this._headerChecked = false;
 		} else if (checked === total) {
-			headerCheckElement.indeterminate = false;
-			headerCheckElement.checked = true;
-			headerChecked = true;
+			this._headerCheckElement.indeterminate = false;
+			this._headerCheckElement.checked = true;
+			this._headerChecked = true;
 		}
 	}
 
-	// Fix: isChecked() implementation
-	function isChecked(): boolean {
-		return headerChecked;
+	public isChecked(): boolean {
+		return this._headerChecked;
 	}
 
-	function getChecked(): string[] {
-		return getSelectedRows();
+	public getChecked(): string[] {
+		return this._getSelectedRows();
 	}
 
-	function check() {
-		change(true);
-		reapplyCheckedStates();
-		updateHeaderCheckboxState();
+	public check() {
+		this._change(true);
+		this._reapplyCheckedStates();
+		this._updateHeaderCheckboxState();
 	}
 
-	function uncheck() {
-		change(false);
-		reapplyCheckedStates();
-		updateHeaderCheckboxState();
+	public uncheck() {
+		this._change(false);
+		this._reapplyCheckedStates();
+		this._updateHeaderCheckboxState();
 	}
 
-	function toggle() {
-		checkboxToggle();
-		reapplyCheckedStates();
-		updateHeaderCheckboxState();
+	public toggle() {
+		this._checkboxToggle();
+		this._reapplyCheckedStates();
+		this._updateHeaderCheckboxState();
 	}
 
-	function updateState() {
-		const rowCheckSel = config.attributes?.checkbox;
+	public updateState() {
+		const rowCheckSel = this._config.attributes?.checkbox;
 		if (!rowCheckSel) {
 			return;
 		}
-		targetElements = element.querySelectorAll<HTMLInputElement>(rowCheckSel);
-		reapplyCheckedStates();
-		updateHeaderCheckboxState();
+		this._targetElements =
+			this._element.querySelectorAll<HTMLInputElement>(rowCheckSel);
+		this._reapplyCheckedStates();
+		this._updateHeaderCheckboxState();
 	}
 
-	return {
-		init,
-		check,
-		uncheck,
-		toggle,
-		isChecked,
-		getChecked,
-		updateState,
-	};
+	public dispose() {
+		if (this._headerCheckElement) {
+			this._headerCheckElement.removeEventListener(
+				'click',
+				this._checkboxListener,
+			);
+		}
+		const rowCheckboxSelector = this._config.attributes?.checkbox;
+		if (this._delegatedEventId && rowCheckboxSelector) {
+			KTEventHandler.off(this._element, 'input', this._delegatedEventId);
+			this._delegatedEventId = null;
+		}
+		this._headerCheckElement = null;
+		this._targetElements = null;
+	}
 }
+
