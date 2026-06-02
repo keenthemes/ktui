@@ -46,6 +46,10 @@ import { KTModal } from '@keenthemes/ktui';
 KTModal.init();
 ```
 
+### Livewire SPA support
+
+KtUI automatically re-initializes components on `livewire:navigate` events for seamless Laravel Livewire SPA navigation. No manual setup required.
+
 ---
 
 ## 3. Data-Attribute API (Declarative)
@@ -403,135 +407,21 @@ KTToast.show({
 
 ### 6.8 DataTable (`KTDataTable`)
 
-Supports **local data** and **remote API** modes.
+> **Full reference: see the `ktui-datatable` skill** for architecture, lifecycle, events, filters, fixed layouts, pitfalls, and build/testing.
 
-```html
-<div data-kt-datatable="true">
-  <table>
-    <thead>
-      <tr>
-        <th data-kt-datatable-column="name">Name</th>
-        <th data-kt-datatable-column="email">Email</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-```
+Supports **local data** and **remote API** modes. Config: `apiEndpoint`, `pageSize`, `stateSave`, `columns` (render, checkbox, sortType, sortValue, createdCell), `sort`, `search`, `pagination`, `checkbox`, `lockedLayout`, `tableLayout`, `filter`.
 
-**Config options (key ones):**
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `apiEndpoint` | string | Remote data URL |
-| `requestMethod` | string | HTTP method (default `'POST'`) |
-| `requestHeaders` | object | Custom headers |
-| `mapResponse` | function | Transform API response |
-| `mapRequest` | function | Transform request params |
-| `pageSize` | number | Rows per page |
-| `pageSizes` | number[] | Page size options |
-| `stateSave` | boolean | Persist state in localStorage |
-| `columns` | object | Column config (render, checkbox, sortType, sortValue, createdCell) |
-| `sort` | object | Sort config with classes and callback |
-| `search` | object | Search config with delay and callback |
-| `pagination` | object | Pagination markup config |
-| `loading` | object | Spinner template |
-| `checkbox` | object | Row checkbox config (checkedClass, preserveSelection) |
-| `lockedLayout` | object | Sticky headers/columns |
-
-**Programmatic:**
-
-```ts
-const dt = KTDataTable.getInstance(tableEl);
-dt.sort('name');
-dt.goPage(2);
-dt.setPageSize(25);
-dt.search('query');
-dt.setFilter({ column: 'status', type: 'text', value: 'active' });
-dt.reload();        // re-fetch from API
-dt.redraw();        // re-render current data
-dt.getState();      // { page, sortField, sortOrder, pageSize, ... }
-dt.dispose();
-```
-
-**Column config:**
-
-```ts
-columns: {
-  name: {
-    title: 'Full Name',
-    render: (item, data, ctx) => `<strong>${item}</strong>`,
-    sortType: 'string', // or 'numeric'
-    sortValue: (cellValue, rowData) => rowData.firstName + ' ' + rowData.lastName,
-    createdCell: (cell, cellData, rowData, row) => {
-      cell.classList.add('text-primary');
-    },
-  },
-  actions: {
-    checkbox: true,
-  },
-}
-```
-
-**Remote provider response shape:**
-
-```ts
-interface KTDataTableResponseDataInterface {
-  data: KTDataTableDataInterface[];
-  totalCount: number;
-}
-```
+Methods: `sort()`, `goPage()`, `setPageSize()`, `search()`, `setFilter()`, `reload()`, `redraw()`, `getState()`, `check()`, `uncheck()`, `getChecked()`.
 
 ### 6.9 Select (`KTSelect`)
 
-Replaces native `<select>` with a rich, searchable, multi-select dropdown.
+> **Full reference: see the `ktui-select` skill** for features, remote data, tags, combobox, events, keyboard navigation, and pitfalls.
 
-```html
-<select data-kt-select="true" data-kt-select-enable-search="true">
-  <option value="">Select...</option>
-  <option value="1">Option 1</option>
-  <option value="2">Option 2</option>
-</select>
-```
+Replaces native `<select>` with rich, searchable dropdown. Key features: `enable-search`, `tags`, `combobox`, `remote` (with URL), `pagination`, `select-all`, `placeholder`.
 
-**Key features:**
-- **Search:** `data-kt-select-enable-search="true"`
-- **Multi-select:** `multiple` attribute on `<select>`
-- **Tags mode:** `data-kt-select-tags="true"` — shows selected items as removable tags
-- **Combobox mode:** `data-kt-select-combobox="true"` — allows free text input
-- **Remote data:** `data-kt-select-remote="true"` with `data-kt-select-remote-url`
-- **Pagination:** `data-kt-select-pagination="true"` — adds "Load More" button
-- **Placeholder:** `data-kt-select-placeholder="Choose..."`
-- **Select all:** `data-kt-select-select-all="true"` — adds "Select All" button in multi-mode
+Events dispatched on both element AND document: `show`, `close`, `change`, `enabled`, `disabled`, `updated`, `reloadStart`, `reloadComplete`, `reloadError`. Also namespaced: `kt-select:change`, `kt-select:show`, etc.
 
-**Global config:**
-
-```ts
-KTSelect.config({
-  enableSearch: true,
-  searchPlaceholder: 'Type to search...',
-  dropdownZindex: 9999,
-  height: 300,
-});
-```
-
-**Events** (dispatched on both element and document):
-
-| Event | When |
-|-------|------|
-| `show` | Dropdown opening |
-| `shown` | Dropdown opened |
-| `hide` | Dropdown closing |
-| `hidden` | Dropdown closed |
-| `change` | Selection changed |
-
-Events are also dispatched with `kt-select:` namespace on document:
-
-```ts
-document.addEventListener('kt-select:change', (e) => {
-  console.log(e.detail.instance.getSelectedOptions());
-});
-```
+Global config: `KTSelect.config({ enableSearch: true, searchPlaceholder: '...' })`
 
 ### 6.10 Input Number (`KTInputNumber`)
 

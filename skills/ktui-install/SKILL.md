@@ -54,6 +54,7 @@ KTComponents.init();
 | Vue 3 | `onMounted(() => { KTComponents.init(); })` |
 | Next.js | Inside a client component's `useEffect` (never during SSR) |
 | Nuxt | Inside `onMounted` or a client-only plugin |
+| Laravel Livewire | Automatic — `livewire:navigate` triggers re-init |
 
 ### SSR safety
 
