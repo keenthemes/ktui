@@ -138,7 +138,7 @@ To enable automated dark mode support add below Tailwind variant in your Tailwin
 Include KTUI styles in your Tailwind entry file `style.css`:
 
 ```css
-@import "./node_modules/ktui/styles.css";
+@import "./node_modules/@keenthemes/ktui/dist/styles.css";
 ```
 
 ---
@@ -162,7 +162,7 @@ Include the font file:
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         ...
     </head>
-    <body className="antialiased">
+    <body class="antialiased">
         ....
     </body>
 </html>
@@ -182,7 +182,7 @@ Include KTUI JavaScript, Tailwind CSS, and fonts:
         <link href="my_project_root/css/styles.css" rel="stylesheet"/>
         ...
     </head>
-    <body className="antialiased">
+    <body class="antialiased">
         ....
     </body>
     <script src="./node_modules/@keenthemes/ktui/dist/ktui.min.js">
@@ -227,13 +227,22 @@ For specific cases, you can use the `rtl:*` Tailwind modifier to easily control 
 
 KTUI ships [Agent Skills](https://agentskills.io) so that agentic coding tools (e.g. Cursor, Claude Code) can use KtUI correctly—imports, init pattern, and docs. You can install skills in two ways; both use the same content from this package.
 
+### Available skills
+
+| Skill | Description |
+|-------|-------------|
+| `ktui` | Core components, theming, data-attribute API, event system, helpers |
+| `ktui-install` | Installation, Tailwind config, framework integration, SSR, dark mode |
+| `ktui-datatable` | DataTable — local/remote data, sorting, filtering, pagination, events, architecture |
+| `ktui-select` | Select — search, tags, combobox, remote data, events, keyboard navigation |
+
 ### Install from npm (recommended)
 
-After installing the package, copy or symlink the skills you need from the package into your project or your agent’s skills directory:
+After installing the package, copy or symlink the skills you need from the package into your project or your agent's skills directory:
 
 - **Location:** `node_modules/@keenthemes/ktui/skills/`
 - **Example (Cursor):** Copy or symlink a skill into `.cursor/skills/`, e.g.  
-  `cp -r node_modules/@keenthemes/ktui/skills/ktui-components .cursor/skills/`
+  `cp -r node_modules/@keenthemes/ktui/skills/ktui .cursor/skills/`
 
 ### Install via CLI (skills CLI)
 
