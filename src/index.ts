@@ -237,6 +237,13 @@ export const KTComponents = {
 	},
 };
 
+// Livewire wire:navigate support: re-init all components after SPA navigation
+if (typeof window !== 'undefined') {
+	document.addEventListener('livewire:navigate', () => {
+		KTComponents.init();
+	});
+}
+
 declare global {
 	interface Window {
 		KTUtils: typeof KTUtils;

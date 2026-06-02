@@ -16,7 +16,6 @@ import {
 	OriginalTableClasses,
 } from './types';
 import { KTOptionType } from '../../types';
-import KTComponents from '../../index';
 import KTData from '../../helpers/data';
 import {
 	KTDataTableCheckboxHandler,
@@ -463,10 +462,6 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 			this._config.search?.delay ?? DEFAULT_SEARCH_DELAY,
 			(query) => this.search(query),
 		);
-
-		if (typeof KTComponents !== 'undefined') {
-			KTComponents.init();
-		}
 
 		/**
 		 * Hide spinner
