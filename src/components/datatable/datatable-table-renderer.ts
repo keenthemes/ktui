@@ -47,6 +47,7 @@ export class KTDataTableDomTableRenderer<
 		const cell = row.insertCell();
 		const logicalCount = getLogicalColumnCount();
 		cell.colSpan = logicalCount > 0 ? logicalCount : 1;
+		cell.style.textAlign = 'center';
 		cell.innerHTML = message;
 	}
 

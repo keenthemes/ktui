@@ -150,15 +150,31 @@ export class KTDataTableLocalDataProvider<
 		);
 
 		if (this.options.stateStore.getState()._contentChecksum !== checksum) {
-			this.options.stateStore.patchState({ _contentChecksum: checksum });
 			const domRowCount =
 				tbodyElement.querySelectorAll<HTMLTableRowElement>('tr').length;
 			const storedRowCount =
 				this.options.stateStore.getState().originalData?.length ?? 0;
+
 			// Programmatic dataset with an empty tbody must not re-import from the DOM.
 			if (domRowCount === 0 && storedRowCount > 0) {
 				return false;
 			}
+
+			// After pagination redraw the tbody only holds the current page. A checksum
+			// mismatch there must not shrink originalData to pageSize rows.
+			if (
+				storedRowCount > 0 &&
+				domRowCount > 0 &&
+				domRowCount < storedRowCount
+			) {
+				const { pageSize } = this.options.stateStore.getState();
+				if (domRowCount <= pageSize) {
+					this.options.stateStore.patchState({ _contentChecksum: checksum });
+					return false;
+				}
+			}
+
+			this.options.stateStore.patchState({ _contentChecksum: checksum });
 			return true;
 		}
 
@@ -221,25 +237,28 @@ export class KTDataTableLocalDataProvider<
 
 	private localTableHeaderInvalidate(): boolean {
 		const { originalData } = this.options.stateStore.getState();
+		if (!originalData?.length) {
+			return false;
+		}
+
 		const { theadElement } = this.options.elements();
+		const { typedThs } = resolveColumns(theadElement);
 
-		const totalColumns = originalData.length
-			? Object.keys(originalData[0]).length
-			: 0;
+		if (typedThs.length === 0) {
+			return (
+				this.options.getLogicalColumnCount() !==
+				Object.keys(originalData[0]).length
+			);
+		}
 
-		const allThs: NodeListOf<HTMLTableCellElement> = theadElement
-			? theadElement.querySelectorAll('th')
-			: ([] as unknown as NodeListOf<HTMLTableCellElement>);
-		const thsWithColumn = Array.from(allThs).filter((th) =>
-			th.hasAttribute('data-kt-datatable-column'),
-		);
-		const currentTableHeaders =
-			thsWithColumn.length > 0
-				? thsWithColumn.length !== allThs.length
-					? allThs.length
-					: thsWithColumn.length
-				: this.options.getLogicalColumnCount();
+		const typedColumnNames = typedThs
+			.map((th) => th.getAttribute('data-kt-datatable-column'))
+			.filter((name): name is string => Boolean(name));
+		const dataColumnKeys = Object.keys(originalData[0]);
+		const matchingTypedColumns = typedColumnNames.filter((name) =>
+			dataColumnKeys.includes(name),
+		).length;
 
-		return currentTableHeaders !== totalColumns;
+		return typedColumnNames.length !== matchingTypedColumns;
 	}
 }

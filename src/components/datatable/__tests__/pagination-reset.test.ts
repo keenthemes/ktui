@@ -586,6 +586,87 @@ describe('KTDataTable - Pagination Reset', () => {
 			expect(datatable.getState().totalPages).toBe(2);
 		});
 
+		it('does not shrink originalData when tbody checksum mismatches after pagination', async () => {
+			const { container } = createMockDataTable(18);
+			datatable = new KTDataTable(container, {
+				pageSize: 5,
+				stateSave: false,
+			});
+
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			expect(datatable.getState().totalPages).toBe(4);
+
+			// Simulate a fetch before _contentChecksum was aligned with the paginated tbody.
+			datatable.getState()._contentChecksum = 'stale-checksum';
+			datatable.reload();
+
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			expect(datatable.getState().totalPages).toBe(4);
+		});
+
+		it('keeps 4 pages when thead has checkbox and actions columns (bulk-actions demo)', async () => {
+			const container = document.createElement('div');
+			container.id = 'test-bulk-actions-datatable';
+
+			const table = document.createElement('table');
+			table.setAttribute('data-kt-datatable-table', 'true');
+
+			const thead = document.createElement('thead');
+			thead.innerHTML = `
+				<tr>
+					<th><input type="checkbox" data-kt-datatable-check="true" /></th>
+					<th data-kt-datatable-column="label">Label</th>
+					<th data-kt-datatable-column="method">Method</th>
+					<th data-kt-datatable-column="status">Status</th>
+					<th data-kt-datatable-column="lastSession">Last Session</th>
+					<th data-kt-datatable-column="actions"></th>
+				</tr>
+			`;
+
+			const tbody = document.createElement('tbody');
+			for (let i = 1; i <= 18; i++) {
+				const row = document.createElement('tr');
+				row.innerHTML = `
+					<td><input type="checkbox" data-kt-datatable-row-check="true" value="${i - 1}" /></td>
+					<td>User ${i}</td>
+					<td>Web</td>
+					<td>active</td>
+					<td>22 Jul 2024</td>
+					<td><button type="button">Edit</button></td>
+				`;
+				tbody.appendChild(row);
+			}
+
+			table.appendChild(thead);
+			table.appendChild(tbody);
+
+			const infoElement = document.createElement('div');
+			infoElement.setAttribute('data-kt-datatable-info', 'true');
+			const sizeElement = document.createElement('select');
+			sizeElement.setAttribute('data-kt-datatable-size', 'true');
+			const paginationElement = document.createElement('div');
+			paginationElement.setAttribute('data-kt-datatable-pagination', 'true');
+
+			container.appendChild(table);
+			container.appendChild(infoElement);
+			container.appendChild(sizeElement);
+			container.appendChild(paginationElement);
+			document.body.appendChild(container);
+
+			datatable = new KTDataTable(container, {
+				pageSize: 5,
+				stateSave: false,
+			});
+
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			expect(datatable.getState().totalPages).toBe(4);
+			datatable.goPage(2);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			expect(datatable.getState().page).toBe(2);
+			expect(datatable.getState().totalPages).toBe(4);
+		});
+
 		it('shows page 2 rows with tableLayout fixed and columns config (docs column-widths demo)', async () => {
 			const { container } = createMockDataTable(18);
 			datatable = new KTDataTable(container, {
