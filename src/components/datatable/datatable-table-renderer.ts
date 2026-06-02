@@ -230,7 +230,13 @@ export class KTDataTableDomTableRenderer<
 					td.innerHTML = result as string;
 				}
 			} else {
-				td.textContent = item[colKey] as string;
+				const cellValue = item[colKey];
+				if (cellValue === null || cellValue === undefined) {
+					td.textContent = '';
+				} else {
+					// Match implicit column rendering: preserve HTML from DOM extraction.
+					td.innerHTML = String(cellValue);
+				}
 			}
 
 			if (typeof columnDef.createdCell === 'function') {

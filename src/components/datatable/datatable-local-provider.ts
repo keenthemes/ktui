@@ -151,6 +151,14 @@ export class KTDataTableLocalDataProvider<
 
 		if (this.options.stateStore.getState()._contentChecksum !== checksum) {
 			this.options.stateStore.patchState({ _contentChecksum: checksum });
+			const domRowCount =
+				tbodyElement.querySelectorAll<HTMLTableRowElement>('tr').length;
+			const storedRowCount =
+				this.options.stateStore.getState().originalData?.length ?? 0;
+			// Programmatic dataset with an empty tbody must not re-import from the DOM.
+			if (domRowCount === 0 && storedRowCount > 0) {
+				return false;
+			}
 			return true;
 		}
 
@@ -160,10 +168,14 @@ export class KTDataTableLocalDataProvider<
 	private tableConfigInvalidate(): boolean {
 		const { _state, ...restConfig } = this.options.config;
 		const checksum: string = KTUtils.checksum(JSON.stringify(restConfig));
+		const previousChecksum = _state?._configChecksum ?? '';
 
-		if ((_state?._configChecksum ?? '') !== checksum) {
+		if (previousChecksum !== checksum) {
 			this.options.stateStore.patchState({ _configChecksum: checksum });
-			return true;
+			// First load skips this check (originalData === undefined). On the first
+			// pagination fetch, previousChecksum is still empty — record it but do
+			// not re-extract from the paginated DOM (that would shrink originalData).
+			return previousChecksum !== '';
 		}
 
 		return false;

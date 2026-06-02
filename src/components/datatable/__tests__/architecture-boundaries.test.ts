@@ -128,6 +128,48 @@ describe('KTDataTable architecture boundaries', () => {
 		expect(stateStore.getState().originalData).toHaveLength(2);
 	});
 
+	it('keeps programmatic originalData when tbody is empty (custom render demos)', () => {
+		const seed = [
+			{ id: '1', name: 'Ada' },
+			{ id: '2', name: 'Grace' },
+		];
+		const config = createConfig({
+			pageSize: 1,
+			_state: {
+				originalData: seed,
+				originalDataAttributes: [{}, {}],
+			},
+		});
+		const stateStore = new KTDataTableConfigStateStore(config);
+		const table = document.createElement('table');
+		const thead = table.createTHead();
+		thead.innerHTML = `
+			<tr>
+				<th data-kt-datatable-column="id">ID</th>
+				<th data-kt-datatable-column="name">Name</th>
+			</tr>
+		`;
+		const tbody = table.createTBody();
+
+		const provider = new KTDataTableLocalDataProvider({
+			config,
+			elements: () => ({
+				tableElement: table,
+				tbodyElement: tbody,
+				theadElement: thead,
+			}),
+			getLogicalColumnCount: () => 2,
+			storeOriginalClasses: vi.fn(),
+			stateStore,
+		});
+
+		const result = provider.fetchSync();
+
+		expect(result.totalItems).toBe(2);
+		expect(result.data).toEqual([{ id: '1', name: 'Ada' }]);
+		expect(stateStore.getState().originalData).toHaveLength(2);
+	});
+
 	it('normalizes remote provider fetch results and emits response event', async () => {
 		const config = createConfig({ apiEndpoint: '/api/users' });
 		const stateStore = new KTDataTableConfigStateStore(config);

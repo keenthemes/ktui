@@ -586,6 +586,32 @@ describe('KTDataTable - Pagination Reset', () => {
 			expect(datatable.getState().totalPages).toBe(2);
 		});
 
+		it('shows page 2 rows with tableLayout fixed and columns config (docs column-widths demo)', async () => {
+			const { container } = createMockDataTable(18);
+			datatable = new KTDataTable(container, {
+				pageSize: 5,
+				stateSave: false,
+				tableLayout: 'fixed',
+				columns: {
+					id: { width: '60px' },
+					name: { width: '140px' },
+					status: { width: '100px' },
+				},
+			});
+
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			datatable.goPage(2);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			expect(datatable.getState().page).toBe(2);
+
+			const rows = container.querySelectorAll('tbody tr');
+			expect(rows.length).toBe(5);
+			expect(rows[0].cells[0].textContent).toBe('6');
+			expect(datatable.getState().totalPages).toBe(4);
+		});
+
 		it('should handle search reset on page 1 (no-op)', () => {
 			const { container } = createMockDataTable(25);
 			datatable = new KTDataTable(container, {

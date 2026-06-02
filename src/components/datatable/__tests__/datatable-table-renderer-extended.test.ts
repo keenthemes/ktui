@@ -189,7 +189,7 @@ describe('KTDataTableDomTableRenderer', () => {
 			);
 		});
 
-		it('sets textContent when no render function', () => {
+		it('renders innerHTML when no render function', () => {
 			const input = createRendererInput({
 				data: [{ name: 'Alice', age: '30' }],
 				config: {
@@ -201,7 +201,30 @@ describe('KTDataTableDomTableRenderer', () => {
 			});
 
 			const tbody = renderer.render(input as never);
+			expect(tbody.rows[0].cells[0].innerHTML).toBe('Alice');
 			expect(tbody.rows[0].cells[0].textContent).toBe('Alice');
+		});
+
+		it('preserves HTML markup when no render function', () => {
+			const input = createRendererInput({
+				data: [
+					{
+						status:
+							'<span class="kt-badge kt-badge-success">Approved</span>',
+					},
+				],
+				config: {
+					infoEmpty: 'No records found',
+					columns: {
+						status: {},
+					},
+				},
+			});
+
+			const tbody = renderer.render(input as never);
+			const badge = tbody.rows[0].cells[0].querySelector('.kt-badge');
+			expect(badge).toBeTruthy();
+			expect(badge!.textContent).toBe('Approved');
 		});
 	});
 
