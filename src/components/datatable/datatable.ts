@@ -803,16 +803,22 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 
 	/**
 	 * Sorts the data in the table by the specified field.
+	 * When `order` is provided, applies that sort direction instead of toggling.
 	 * @param field The field to sort by.
+	 * @param order Optional sort direction (`asc`, `desc`, or `''` to clear).
 	 */
-	public sort(field: keyof T | number): void {
-		// Use the sort handler to update state and trigger sorting
-		const state = this.getState();
-		const sortOrder = this._sortHandler.toggleSortOrder(
-			state.sortField,
-			state.sortOrder,
-			field,
-		);
+	public sort(
+		field: keyof T | number,
+		order?: KTDataTableSortOrderInterface,
+	): void {
+		const sortOrder =
+			order !== undefined
+				? order
+				: this._sortHandler.toggleSortOrder(
+						this.getState().sortField,
+						this.getState().sortOrder,
+						field,
+					);
 		this._sortHandler.setSortIcon(field as keyof T, sortOrder);
 		this._stateStore.setSort(field as never, sortOrder);
 		this._emit('sort', { field, order: sortOrder });

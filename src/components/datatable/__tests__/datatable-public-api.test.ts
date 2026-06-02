@@ -224,6 +224,25 @@ describe('KTDataTable public API', () => {
 		});
 	});
 
+	describe('sort', () => {
+		it('sort(field, order) applies explicit direction without toggling', () => {
+			const { table } = createLocalDatatable();
+			const dt = new KTDataTable(table);
+
+			dt.sort(1, 'desc');
+			expect(dt.getState().sortField).toBe(1);
+			expect(dt.getState().sortOrder).toBe('desc');
+
+			dt.sort(1, 'asc');
+			expect(dt.getState().sortOrder).toBe('asc');
+
+			dt.sort(1, '');
+			expect(dt.getState().sortOrder).toBe('');
+
+			dt.dispose();
+		});
+	});
+
 	describe('initAllDataTables', () => {
 		it('initAllDataTables creates instances and assigns to window', () => {
 			const container = document.createElement('div');
