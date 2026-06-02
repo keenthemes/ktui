@@ -34,10 +34,7 @@ export function resolveColumns(
 		th.hasAttribute('data-kt-datatable-column'),
 	);
 
-	const columnsByIndex =
-		typedThs.length > 0 && typedThs.length !== allThs.length
-			? allThs
-			: typedThs;
+	const columnsByIndex = typedThs.length > 0 ? typedThs : allThs;
 
 	return { allThs, typedThs, columnsByIndex };
 }

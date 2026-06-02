@@ -33,32 +33,32 @@ describe('datatable-column-utils', () => {
 			expect(result.columnsByIndex).toHaveLength(0);
 		});
 
-		it('should fall back to allThs when only some have attributes', () => {
+		it('should prefer typedThs when only some have attributes', () => {
 			const tr = document.createElement('tr');
 			const th1 = document.createElement('th');
 			th1.setAttribute('data-kt-datatable-column', 'id');
 			tr.appendChild(th1);
-			tr.appendChild(document.createElement('th')); // no attribute
+			tr.appendChild(document.createElement('th')); // no attribute (e.g. group header in multi-row)
 			thead.appendChild(tr);
 
 			const result = resolveColumns(thead);
-			// When not ALL have attributes, falls back to all ths
+			// Prefer typed ths — untyped ths are group headers in multi-row layouts
 			expect(result.allThs).toHaveLength(2);
 			expect(result.typedThs).toHaveLength(1);
-			expect(result.columnsByIndex).toHaveLength(2);
+			expect(result.columnsByIndex).toHaveLength(1);
 		});
 
-		it('should return empty columnsByIndex when no ths have attributes', () => {
+		it('should fall back to allThs when no ths have attributes', () => {
 			const tr = document.createElement('tr');
 			tr.appendChild(document.createElement('th'));
 			tr.appendChild(document.createElement('th'));
 			thead.appendChild(tr);
 
 			const result = resolveColumns(thead);
-			// When typedThs is empty, columnsByIndex = typedThs (empty)
+			// When no typed ths exist, fall back to all ths by index
 			expect(result.allThs).toHaveLength(2);
 			expect(result.typedThs).toHaveLength(0);
-			expect(result.columnsByIndex).toHaveLength(0);
+			expect(result.columnsByIndex).toHaveLength(2);
 		});
 
 		it('should handle null thead', () => {
