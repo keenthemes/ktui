@@ -358,15 +358,15 @@ describe('DataTable Fixed Layout', () => {
 			const colgroup2 = input.tableElement.querySelector('colgroup');
 			expect(colgroup2).toBeTruthy();
 			expect(colgroup2!.children.length).toBe(3);
-			expect(
-				(colgroup2!.children[0] as HTMLTableColElement).style.width,
-			).toBe('200px');
-			expect(
-				(colgroup2!.children[1] as HTMLTableColElement).style.width,
-			).toBe('100px');
-			expect(
-				(colgroup2!.children[2] as HTMLTableColElement).style.width,
-			).toBe('300px');
+			expect((colgroup2!.children[0] as HTMLTableColElement).style.width).toBe(
+				'200px',
+			);
+			expect((colgroup2!.children[1] as HTMLTableColElement).style.width).toBe(
+				'100px',
+			);
+			expect((colgroup2!.children[2] as HTMLTableColElement).style.width).toBe(
+				'300px',
+			);
 		});
 
 		it('table-layout style persists across re-renders', () => {
@@ -378,9 +378,7 @@ describe('DataTable Fixed Layout', () => {
 			renderer.render(input as never);
 			expect(input.tableElement.style.tableLayout).toBe('fixed');
 
-			input.data = [
-				{ name: 'Dave', age: '40', email: 'dave@example.com' },
-			];
+			input.data = [{ name: 'Dave', age: '40', email: 'dave@example.com' }];
 			renderer.render(input as never);
 			expect(input.tableElement.style.tableLayout).toBe('fixed');
 		});

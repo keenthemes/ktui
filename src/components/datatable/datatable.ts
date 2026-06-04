@@ -23,7 +23,11 @@ import {
 } from './datatable-checkbox';
 import { KTDataTableSortHandler, KTDataTableSortAPI } from './datatable-sort';
 import { createStickyLayoutPlugin } from './datatable-layout-plugin';
-import { DATATABLE_DEFAULTS, DEFAULT_PAGE_SIZES, DEFAULT_SEARCH_DELAY } from './datatable-defaults';
+import {
+	DATATABLE_DEFAULTS,
+	DEFAULT_PAGE_SIZES,
+	DEFAULT_SEARCH_DELAY,
+} from './datatable-defaults';
 import { getLogicalColumnCount } from './datatable-column-utils';
 import {
 	KTDataTableCleanup,
@@ -56,9 +60,8 @@ import { stripHtml } from './datatable-utils';
  * @param {HTMLElement} element The table element
  * @param {KTDataTableConfigInterface} [config] Additional configuration options
  */
-const datatableRegistry = createDataTableRegistry<
-	KTDataTable<KTDataTableDataInterface>
->();
+const datatableRegistry =
+	createDataTableRegistry<KTDataTable<KTDataTableDataInterface>>();
 
 export class KTDataTable<T extends KTDataTableDataInterface>
 	extends KTComponent
@@ -302,7 +305,10 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 					return valueText.includes(searchLower);
 				});
 			});
-		}) as unknown as (data: KTDataTableDataInterface[], search: string) => KTDataTableDataInterface[];
+		}) as unknown as (
+			data: KTDataTableDataInterface[],
+			search: string,
+		) => KTDataTableDataInterface[];
 	}
 
 	private _initDefaultConfig(
@@ -491,7 +497,9 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 		return getLogicalColumnCount(
 			this._theadElement,
 			this._tbodyElement,
-			this.getState().originalData as Array<Record<string, unknown>> | undefined,
+			this.getState().originalData as
+				| Array<Record<string, unknown>>
+				| undefined,
 		);
 	}
 
@@ -703,9 +711,7 @@ export class KTDataTable<T extends KTDataTableDataInterface>
 	}
 
 	private _deleteState(): void {
-		this._statePersistence.remove(
-			this._tableNamespace(),
-		);
+		this._statePersistence.remove(this._tableNamespace());
 	}
 
 	/**

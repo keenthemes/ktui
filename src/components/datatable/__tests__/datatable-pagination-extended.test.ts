@@ -297,9 +297,7 @@ describe('KTDataTableDomPaginationRenderer', () => {
 			} as never);
 
 			const buttons = Array.from(paginationEl.querySelectorAll('button'));
-			const prevBtn = buttons.find((b) =>
-				b.className.includes('prev-btn'),
-			);
+			const prevBtn = buttons.find((b) => b.className.includes('prev-btn'));
 			expect(prevBtn).toBeDefined();
 			expect(prevBtn!.disabled).toBe(true);
 		});
@@ -320,9 +318,7 @@ describe('KTDataTableDomPaginationRenderer', () => {
 			} as never);
 
 			const buttons = Array.from(paginationEl.querySelectorAll('button'));
-			const nextBtn = buttons.find((b) =>
-				b.className.includes('next-btn'),
-			);
+			const nextBtn = buttons.find((b) => b.className.includes('next-btn'));
 			expect(nextBtn).toBeDefined();
 			expect(nextBtn!.disabled).toBe(true);
 		});

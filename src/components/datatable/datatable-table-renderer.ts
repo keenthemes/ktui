@@ -51,9 +51,7 @@ export class KTDataTableDomTableRenderer<
 		cell.innerHTML = message;
 	}
 
-	private applyTableLayout(
-		input: KTDataTableTableRendererInput<T>,
-	): void {
+	private applyTableLayout(input: KTDataTableTableRendererInput<T>): void {
 		const tableLayout = input.config.tableLayout || 'auto';
 		const tableElement = input.tableElement;
 
@@ -72,9 +70,7 @@ export class KTDataTableDomTableRenderer<
 		}
 	}
 
-	private updateColgroup(
-		input: KTDataTableTableRendererInput<T>,
-	): void {
+	private updateColgroup(input: KTDataTableTableRendererInput<T>): void {
 		const tableElement = input.tableElement;
 		const existingColgroup = tableElement.querySelector('colgroup');
 		if (existingColgroup) {
@@ -129,7 +125,9 @@ export class KTDataTableDomTableRenderer<
 			return tbodyElement;
 		}
 
-		const { columnsByIndex: columnsToRender } = resolveColumns(input.theadElement);
+		const { columnsByIndex: columnsToRender } = resolveColumns(
+			input.theadElement,
+		);
 		const logicalColumnCount =
 			columnsToRender.length > 0
 				? columnsToRender.length

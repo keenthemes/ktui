@@ -158,8 +158,7 @@ describe('KTDom', () => {
 			const el = document.createElement('div');
 			document.body.appendChild(el);
 			vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-				getPropertyValue: (prop: string) =>
-					prop === 'color' ? 'red' : '',
+				getPropertyValue: (prop: string) => (prop === 'color' ? 'red' : ''),
 			} as unknown as CSSStyleDeclaration);
 
 			expect(KTDom.getCssProp(el, 'color')).toBe('red');
@@ -167,7 +166,9 @@ describe('KTDom', () => {
 		});
 
 		it('returns empty string for null element', () => {
-			expect(KTDom.getCssProp(null as unknown as HTMLElement, 'color')).toBe('');
+			expect(KTDom.getCssProp(null as unknown as HTMLElement, 'color')).toBe(
+				'',
+			);
 		});
 	});
 
@@ -202,8 +203,14 @@ describe('KTDom', () => {
 				width: 80,
 				height: 40,
 			} as DOMRect);
-			Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
-			Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
+			Object.defineProperty(window, 'innerWidth', {
+				value: 1024,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerHeight', {
+				value: 768,
+				configurable: true,
+			});
 
 			const result = KTDom.offset(el);
 			expect(result).toEqual({
@@ -322,9 +329,9 @@ describe('KTDom', () => {
 		});
 
 		it('returns empty array for null element', () => {
-			expect(
-				KTDom.children(null as unknown as HTMLElement, '.any'),
-			).toEqual([]);
+			expect(KTDom.children(null as unknown as HTMLElement, '.any')).toEqual(
+				[],
+			);
 		});
 	});
 
@@ -576,8 +583,14 @@ describe('KTDom', () => {
 
 	describe('getViewPort', () => {
 		it('returns width and height', () => {
-			Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
-			Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
+			Object.defineProperty(window, 'innerWidth', {
+				value: 1024,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerHeight', {
+				value: 768,
+				configurable: true,
+			});
 			const result = KTDom.getViewPort();
 			expect(result).toEqual({ width: 1024, height: 768 });
 		});
@@ -599,8 +612,14 @@ describe('KTDom', () => {
 				bottom: 100,
 				right: 100,
 			} as DOMRect);
-			Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
-			Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+			Object.defineProperty(window, 'innerHeight', {
+				value: 768,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerWidth', {
+				value: 1024,
+				configurable: true,
+			});
 
 			expect(KTDom.isInViewport(el)).toBe(true);
 		});
@@ -613,8 +632,14 @@ describe('KTDom', () => {
 				bottom: 900,
 				right: 100,
 			} as DOMRect);
-			Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
-			Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+			Object.defineProperty(window, 'innerHeight', {
+				value: 768,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerWidth', {
+				value: 1024,
+				configurable: true,
+			});
 
 			expect(KTDom.isInViewport(el)).toBe(false);
 		});
@@ -627,10 +652,22 @@ describe('KTDom', () => {
 				top: 700,
 				left: 0,
 			} as DOMRect);
-			Object.defineProperty(el, 'clientWidth', { value: 100, configurable: true });
-			Object.defineProperty(el, 'clientHeight', { value: 100, configurable: true });
-			Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
-			Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+			Object.defineProperty(el, 'clientWidth', {
+				value: 100,
+				configurable: true,
+			});
+			Object.defineProperty(el, 'clientHeight', {
+				value: 100,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerHeight', {
+				value: 768,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerWidth', {
+				value: 1024,
+				configurable: true,
+			});
 
 			expect(KTDom.isPartiallyInViewport(el)).toBe(true);
 		});
@@ -641,10 +678,22 @@ describe('KTDom', () => {
 				top: -200,
 				left: -200,
 			} as DOMRect);
-			Object.defineProperty(el, 'clientWidth', { value: 50, configurable: true });
-			Object.defineProperty(el, 'clientHeight', { value: 50, configurable: true });
-			Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
-			Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+			Object.defineProperty(el, 'clientWidth', {
+				value: 50,
+				configurable: true,
+			});
+			Object.defineProperty(el, 'clientHeight', {
+				value: 50,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerHeight', {
+				value: 768,
+				configurable: true,
+			});
+			Object.defineProperty(window, 'innerWidth', {
+				value: 1024,
+				configurable: true,
+			});
 
 			expect(KTDom.isPartiallyInViewport(el)).toBe(false);
 		});
@@ -669,7 +718,10 @@ describe('KTDom', () => {
 				bottom: 100,
 				right: 100,
 			} as DOMRect);
-			Object.defineProperty(child, 'offsetParent', { value: parent, configurable: true });
+			Object.defineProperty(child, 'offsetParent', {
+				value: parent,
+				configurable: true,
+			});
 			vi.spyOn(window, 'getComputedStyle').mockReturnValue({
 				visibility: 'visible',
 				display: 'block',
@@ -684,7 +736,10 @@ describe('KTDom', () => {
 			const child = document.createElement('div');
 			parent.appendChild(child);
 
-			Object.defineProperty(child, 'offsetParent', { value: null, configurable: true });
+			Object.defineProperty(child, 'offsetParent', {
+				value: null,
+				configurable: true,
+			});
 			vi.spyOn(window, 'getComputedStyle').mockReturnValue({
 				visibility: 'visible',
 				display: 'none',

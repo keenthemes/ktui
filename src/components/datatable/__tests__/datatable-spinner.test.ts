@@ -55,7 +55,11 @@ describe('createSpinner', () => {
 		root.appendChild(existingSpinner);
 
 		const spinner = createSpinner();
-		spinner.show(root, { attributes: { spinner: '[data-kt-datatable-spinner]' } }, table);
+		spinner.show(
+			root,
+			{ attributes: { spinner: '[data-kt-datatable-spinner]' } },
+			table,
+		);
 		expect(existingSpinner.style.display).toBe('block');
 	});
 
@@ -66,7 +70,9 @@ describe('createSpinner', () => {
 		root.appendChild(existingSpinner);
 
 		const spinner = createSpinner();
-		spinner.hide(root, { attributes: { spinner: '[data-kt-datatable-spinner]' } });
+		spinner.hide(root, {
+			attributes: { spinner: '[data-kt-datatable-spinner]' },
+		});
 		expect(existingSpinner.style.display).toBe('none');
 	});
 
@@ -76,7 +82,9 @@ describe('createSpinner', () => {
 		table.appendChild(spinnerEl);
 
 		const spinner = createSpinner();
-		spinner.remove(root, { attributes: { spinner: '[data-kt-datatable-spinner]' } });
+		spinner.remove(root, {
+			attributes: { spinner: '[data-kt-datatable-spinner]' },
+		});
 		expect(table.querySelector('[data-kt-datatable-spinner]')).toBeNull();
 	});
 

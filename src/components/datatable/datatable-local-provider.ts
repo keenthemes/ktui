@@ -28,9 +28,7 @@ const FILTER_MATCHERS: Record<string, FilterMatcher> = {
 			.includes(String(filterValue).toLowerCase());
 	},
 	numeric: (cellValue, filterValue) => {
-		const num = parseFloat(
-			String(cellValue ?? '').replace(/[^0-9.-]/g, ''),
-		);
+		const num = parseFloat(String(cellValue ?? '').replace(/[^0-9.-]/g, ''));
 		return !Number.isNaN(num) && num === filterValue;
 	},
 	dateRange: (cellValue, filterValue) => {

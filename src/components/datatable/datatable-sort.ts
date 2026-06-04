@@ -19,7 +19,10 @@ export interface KTDataTableSortHandlerDeps<T> {
 		sortField: keyof T | number;
 		sortOrder: KTDataTableSortOrderInterface;
 	};
-	setState: (field: keyof T | number, order: KTDataTableSortOrderInterface) => void;
+	setState: (
+		field: keyof T | number,
+		order: KTDataTableSortOrderInterface,
+	) => void;
 	emit: (eventName: string, eventData?: object) => void;
 	updateData: () => void;
 }
@@ -43,9 +46,9 @@ export interface KTDataTableSortAPI<T = KTDataTableDataInterface> {
 	dispose(): void;
 }
 
-export class KTDataTableSortHandler<T = KTDataTableDataInterface>
-	implements KTDataTableSortAPI<T>
-{
+export class KTDataTableSortHandler<
+	T = KTDataTableDataInterface,
+> implements KTDataTableSortAPI<T> {
 	private _config: KTDataTableConfigInterface;
 	private _theadElement: HTMLTableSectionElement;
 	private _getState: () => {
@@ -181,8 +184,12 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 				return KTDataTableSortHandler._compareValues(aVal, bVal, sortOrder);
 			}
 			if (useNumeric) {
-				const aNum = KTDataTableSortHandler._parseNumeric(strippedCache.get(a) ?? aRaw);
-				const bNum = KTDataTableSortHandler._parseNumeric(strippedCache.get(b) ?? bRaw);
+				const aNum = KTDataTableSortHandler._parseNumeric(
+					strippedCache.get(a) ?? aRaw,
+				);
+				const bNum = KTDataTableSortHandler._parseNumeric(
+					strippedCache.get(b) ?? bRaw,
+				);
 				return KTDataTableSortHandler._compareNumeric(aNum, bNum, sortOrder);
 			}
 			return KTDataTableSortHandler._compareValues(
@@ -265,8 +272,7 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 		);
 		const headers = Array.from(this._theadElement.querySelectorAll('th'));
 		headers.forEach((header) => {
-			if (!header.querySelector(`.${this._config.sort?.classes?.base}`))
-				return;
+			if (!header.querySelector(`.${this._config.sort?.classes?.base}`)) return;
 
 			const sortDisabled =
 				header.getAttribute('data-kt-datatable-column-sort') === 'false';
@@ -278,18 +284,22 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 			const sortField = sortAttribute
 				? (sortAttribute as keyof T)
 				: (header.cellIndex as keyof T);
-			header.addEventListener('click', () => {
-				const state = this._getState();
-				const sortOrder = this.toggleSortOrder(
-					state.sortField,
-					state.sortOrder,
-					sortField,
-				);
-				this.setSortIcon(sortField, sortOrder);
-				this._setState(sortField, sortOrder);
-				this._emit('sort', { field: sortField, order: sortOrder });
-				this._updateData();
-			}, { signal });
+			header.addEventListener(
+				'click',
+				() => {
+					const state = this._getState();
+					const sortOrder = this.toggleSortOrder(
+						state.sortField,
+						state.sortOrder,
+						sortField,
+					);
+					this.setSortIcon(sortField, sortOrder);
+					this._setState(sortField, sortOrder);
+					this._emit('sort', { field: sortField, order: sortOrder });
+					this._updateData();
+				},
+				{ signal },
+			);
 		});
 	}
 
@@ -300,4 +310,3 @@ export class KTDataTableSortHandler<T = KTDataTableDataInterface>
 		}
 	}
 }
-

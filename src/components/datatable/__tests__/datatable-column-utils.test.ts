@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { resolveColumns, getLogicalColumnCount } from '../datatable-column-utils';
+import {
+	resolveColumns,
+	getLogicalColumnCount,
+} from '../datatable-column-utils';
 
 describe('datatable-column-utils', () => {
 	let thead: HTMLTableSectionElement;
@@ -12,7 +15,7 @@ describe('datatable-column-utils', () => {
 	describe('resolveColumns', () => {
 		it('should resolve columns with data-kt-datatable-column attributes', () => {
 			const tr = document.createElement('tr');
-			['id', 'name', 'status'].forEach(name => {
+			['id', 'name', 'status'].forEach((name) => {
 				const th = document.createElement('th');
 				th.setAttribute('data-kt-datatable-column', name);
 				tr.appendChild(th);
@@ -23,7 +26,9 @@ describe('datatable-column-utils', () => {
 			expect(result.allThs).toHaveLength(3);
 			expect(result.typedThs).toHaveLength(3);
 			expect(result.columnsByIndex).toHaveLength(3);
-			expect(result.columnsByIndex[0]?.getAttribute('data-kt-datatable-column')).toBe('id');
+			expect(
+				result.columnsByIndex[0]?.getAttribute('data-kt-datatable-column'),
+			).toBe('id');
 		});
 
 		it('should handle empty thead', () => {
@@ -72,7 +77,7 @@ describe('datatable-column-utils', () => {
 	describe('getLogicalColumnCount', () => {
 		it('should count columns with data-kt-datatable-column', () => {
 			const tr = document.createElement('tr');
-			['id', 'name'].forEach(name => {
+			['id', 'name'].forEach((name) => {
 				const th = document.createElement('th');
 				th.setAttribute('data-kt-datatable-column', name);
 				tr.appendChild(th);
@@ -104,7 +109,7 @@ describe('datatable-column-utils', () => {
 
 		it('should fall back to thead columns when no data or tbody', () => {
 			const tr = document.createElement('tr');
-			['id', 'name', 'status', 'email'].forEach(name => {
+			['id', 'name', 'status', 'email'].forEach((name) => {
 				const th = document.createElement('th');
 				th.setAttribute('data-kt-datatable-column', name);
 				tr.appendChild(th);

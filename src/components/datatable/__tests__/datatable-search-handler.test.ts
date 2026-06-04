@@ -96,7 +96,9 @@ describe('createSearchHandler', () => {
 
 	it('should handle missing search element gracefully', () => {
 		const handler = createSearchHandler();
-		expect(() => handler.attach('nonexistent', undefined, 300, vi.fn())).not.toThrow();
+		expect(() =>
+			handler.attach('nonexistent', undefined, 300, vi.fn()),
+		).not.toThrow();
 		expect(() => handler.detach('nonexistent')).not.toThrow();
 	});
 

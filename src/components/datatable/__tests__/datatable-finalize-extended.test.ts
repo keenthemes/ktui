@@ -13,7 +13,7 @@ vi.mock('../../helpers/data', () => {
 				map.get(el).set(key, val);
 			}),
 			get: vi.fn((el: HTMLElement, key: string) => {
-				return map.has(el) ? map.get(el).get(key) ?? null : null;
+				return map.has(el) ? (map.get(el).get(key) ?? null) : null;
 			}),
 			has: vi.fn((el: HTMLElement, key: string) => {
 				return map.has(el) && map.get(el).has(key);
@@ -204,11 +204,14 @@ describe('KTDataTable _finalize and config edge cases', () => {
 	describe('dispose with layout plugin', () => {
 		it('disposes layout plugin when present', () => {
 			const disposeSpy = vi.fn();
-			const { table, dt } = createLocalDatatable({}, {
-				layoutPlugin: {
-					dispose: disposeSpy,
+			const { table, dt } = createLocalDatatable(
+				{},
+				{
+					layoutPlugin: {
+						dispose: disposeSpy,
+					},
 				},
-			});
+			);
 			dt.dispose();
 			expect(disposeSpy).toHaveBeenCalled();
 		});
@@ -230,9 +233,12 @@ describe('KTDataTable _finalize and config edge cases', () => {
 
 	describe('stateNamespace', () => {
 		it('uses stateNamespace from config when provided', () => {
-			const { table, dt } = createLocalDatatable({}, {
-				stateNamespace: 'custom-namespace',
-			});
+			const { table, dt } = createLocalDatatable(
+				{},
+				{
+					stateNamespace: 'custom-namespace',
+				},
+			);
 			expect(dt).toBeDefined();
 			dt.dispose();
 		});
@@ -288,9 +294,12 @@ describe('KTDataTable _finalize and config edge cases', () => {
 		});
 
 		it('filters out invalid pageSizes entries', () => {
-			const { table, dt } = createLocalDatatable({}, {
-				pageSizes: [5, -1, 0, 20, NaN],
-			});
+			const { table, dt } = createLocalDatatable(
+				{},
+				{
+					pageSizes: [5, -1, 0, 20, NaN],
+				},
+			);
 			const config = (dt as any)._config;
 			expect(config.pageSizes).toContain(5);
 			expect(config.pageSizes).toContain(20);
@@ -301,9 +310,12 @@ describe('KTDataTable _finalize and config edge cases', () => {
 		});
 
 		it('uses default pageSizes when all entries are invalid', () => {
-			const { table, dt } = createLocalDatatable({}, {
-				pageSizes: [-1, 0],
-			});
+			const { table, dt } = createLocalDatatable(
+				{},
+				{
+					pageSizes: [-1, 0],
+				},
+			);
 			const config = (dt as any)._config;
 			expect(config.pageSizes.length).toBeGreaterThan(0);
 			dt.dispose();

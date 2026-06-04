@@ -117,7 +117,7 @@ describe('createDataTableRegistry', () => {
 
 		it('createAll() does nothing when document is undefined (guard)', () => {
 			const originalDoc = globalThis.document;
-			// @ts-ignore
+			// @ts-expect-error — intentionally deleting document to test guard
 			delete globalThis.document;
 			const factory = vi.fn(() => createMockInstance());
 			registry.createAll(factory);
@@ -161,7 +161,7 @@ describe('createDataTableRegistry', () => {
 
 		it('reinit() does nothing when document is undefined', () => {
 			const originalDoc = globalThis.document;
-			// @ts-ignore
+			// @ts-expect-error — intentionally deleting document to test guard
 			delete globalThis.document;
 			const factory = vi.fn(() => createMockInstance());
 			registry.reinit(factory);

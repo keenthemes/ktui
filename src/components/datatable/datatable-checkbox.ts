@@ -77,12 +77,14 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 		if (!attrs?.check || !attrs.checkbox) {
 			return;
 		}
-		this._headerCheckElement =
-			this._element.querySelector<HTMLInputElement>(attrs.check);
+		this._headerCheckElement = this._element.querySelector<HTMLInputElement>(
+			attrs.check,
+		);
 		if (!this._headerCheckElement) return;
 		this._headerChecked = this._headerCheckElement.checked;
-		this._targetElements =
-			this._element.querySelectorAll<HTMLInputElement>(attrs.checkbox);
+		this._targetElements = this._element.querySelectorAll<HTMLInputElement>(
+			attrs.checkbox,
+		);
 		this._checkboxHandler();
 		this._reapplyCheckedStates();
 		this._updateHeaderCheckboxState();
@@ -257,4 +259,3 @@ export class KTDataTableCheckboxHandler implements KTDataTableCheckboxAPI {
 		this._targetElements = null;
 	}
 }
-

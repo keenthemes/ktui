@@ -196,7 +196,6 @@ describe('KTDataTable architecture boundaries', () => {
 
 		expect(result.data).toEqual([{ id: 1, name: 'Ada' }]);
 		expect(result.totalItems).toBe(1);
-
 	});
 
 	it('renders table body output through the table renderer', () => {

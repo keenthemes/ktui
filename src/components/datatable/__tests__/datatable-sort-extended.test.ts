@@ -154,11 +154,7 @@ describe('Sort handler extended coverage', () => {
 				updateData: vi.fn(),
 			});
 
-			const data = [
-				{ name: 'Bob' },
-				{ name: 'Alice' },
-				{ name: 'Charlie' },
-			];
+			const data = [{ name: 'Bob' }, { name: 'Alice' }, { name: 'Charlie' }];
 
 			const sorted = handler.sortData(data, 'name', 'asc');
 			expect(sortValueFn).toHaveBeenCalled();

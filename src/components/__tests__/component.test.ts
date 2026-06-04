@@ -190,9 +190,7 @@ describe('KTComponent', () => {
 
 		it('does not throw when element is null', () => {
 			const comp = new TestComponent(null);
-			expect(() =>
-				comp.testDispatchEvent('kt.test.evt'),
-			).not.toThrow();
+			expect(() => comp.testDispatchEvent('kt.test.evt')).not.toThrow();
 		});
 
 		it('dispatches with null payload when not provided', () => {

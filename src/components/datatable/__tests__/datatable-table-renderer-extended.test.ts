@@ -27,20 +27,23 @@ function createRendererInput(overrides: Record<string, unknown> = {}) {
 		},
 		context: {} as never,
 		data: (overrides.data as never[]) || [],
-		getLogicalColumnCount: (overrides.getLogicalColumnCount as () => number) || (() => 2),
-		getState: (overrides.getState as () => never) || (() => ({
-			page: 1,
-			pageSize: 10,
-			totalItems: 0,
-			totalPages: 0,
-			sortField: null,
-			sortOrder: '',
-			selectedRows: [],
-			filters: [],
-			search: '',
-			originalData: [],
-			originalDataAttributes: [],
-		})),
+		getLogicalColumnCount:
+			(overrides.getLogicalColumnCount as () => number) || (() => 2),
+		getState:
+			(overrides.getState as () => never) ||
+			(() => ({
+				page: 1,
+				pageSize: 10,
+				totalItems: 0,
+				totalPages: 0,
+				sortField: null,
+				sortOrder: '',
+				selectedRows: [],
+				filters: [],
+				search: '',
+				originalData: [],
+				originalDataAttributes: [],
+			})),
 		originalClasses: (overrides.originalClasses as never) || {
 			tbody: '',
 			thead: '',
@@ -209,8 +212,7 @@ describe('KTDataTableDomTableRenderer', () => {
 			const input = createRendererInput({
 				data: [
 					{
-						status:
-							'<span class="kt-badge kt-badge-success">Approved</span>',
+						status: '<span class="kt-badge kt-badge-success">Approved</span>',
 					},
 				],
 				config: {
@@ -308,9 +310,7 @@ describe('KTDataTableDomTableRenderer', () => {
 			thead.appendChild(theadRow);
 
 			const input = createRendererInput({
-				data: [
-					{ '0': 'Alice', '1': '30' },
-				],
+				data: [{ '0': 'Alice', '1': '30' }],
 				tableElement: table,
 				theadElement: thead,
 			});

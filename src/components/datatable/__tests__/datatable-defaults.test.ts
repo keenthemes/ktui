@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { DATATABLE_DEFAULTS, DEFAULT_PAGE_SIZES, DEFAULT_SEARCH_DELAY } from '../datatable-defaults';
+import {
+	DATATABLE_DEFAULTS,
+	DEFAULT_PAGE_SIZES,
+	DEFAULT_SEARCH_DELAY,
+} from '../datatable-defaults';
 
 describe('DATATABLE_DEFAULTS', () => {
 	it('should have all required properties', () => {
@@ -27,7 +31,9 @@ describe('DATATABLE_DEFAULTS', () => {
 	});
 
 	it('should have table selector in attributes', () => {
-		expect(DATATABLE_DEFAULTS.attributes?.table).toContain('data-kt-datatable-table');
+		expect(DATATABLE_DEFAULTS.attributes?.table).toContain(
+			'data-kt-datatable-table',
+		);
 	});
 
 	it('should have sort classes defined', () => {

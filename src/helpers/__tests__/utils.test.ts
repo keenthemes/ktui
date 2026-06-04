@@ -23,10 +23,7 @@ describe('KTUtils', () => {
 
 	describe('getCssVar', () => {
 		it('reads computed style from document.documentElement', () => {
-			const spy = vi.spyOn(
-				window,
-				'getComputedStyle',
-			).mockReturnValue({
+			const spy = vi.spyOn(window, 'getComputedStyle').mockReturnValue({
 				getPropertyValue: (prop: string) =>
 					prop === '--my-var' ? ' red ' : '',
 			} as unknown as CSSStyleDeclaration);
@@ -37,10 +34,7 @@ describe('KTUtils', () => {
 		});
 
 		it('returns empty string when property is empty', () => {
-			const spy = vi.spyOn(
-				window,
-				'getComputedStyle',
-			).mockReturnValue({
+			const spy = vi.spyOn(window, 'getComputedStyle').mockReturnValue({
 				getPropertyValue: () => '',
 			} as unknown as CSSStyleDeclaration);
 
@@ -115,7 +109,7 @@ describe('KTUtils', () => {
 
 		it('returns selector as-is when CSS.escape is unavailable', () => {
 			const orig = window.CSS;
-			// @ts-ignore
+			// @ts-expect-error — intentionally deleting CSS to test fallback
 			delete window.CSS;
 			expect(KTUtils.parseSelector('#my-id')).toBe('#my-id');
 			window.CSS = orig;
@@ -154,9 +148,7 @@ describe('KTUtils', () => {
 
 	describe('camelReverseCase', () => {
 		it('converts camelCase to hyphenated', () => {
-			expect(KTUtils.camelReverseCase('myClassName')).toBe(
-				'my-class-name',
-			);
+			expect(KTUtils.camelReverseCase('myClassName')).toBe('my-class-name');
 		});
 
 		it('returns unchanged when no uppercase', () => {
@@ -199,9 +191,7 @@ describe('KTUtils', () => {
 		});
 
 		it('different inputs produce different hashes', () => {
-			expect(KTUtils.checksum('hello')).not.toBe(
-				KTUtils.checksum('world'),
-			);
+			expect(KTUtils.checksum('hello')).not.toBe(KTUtils.checksum('world'));
 		});
 	});
 

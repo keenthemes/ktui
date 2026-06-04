@@ -11,10 +11,7 @@ import { KTDataTableSortHandler } from '../datatable-sort';
 import { KTDataTableLocalDataProvider } from '../datatable-local-provider';
 import { KTDataTableCheckboxHandler } from '../datatable-checkbox';
 import { KTDataTableConfigStateStore } from '../datatable-state-store';
-import {
-	KTDataTableConfigInterface,
-	KTDataTableDataInterface,
-} from '../types';
+import { KTDataTableConfigInterface, KTDataTableDataInterface } from '../types';
 import { createStickyLayoutPlugin } from '../datatable-layout-plugin';
 import { KTDataTable } from '../datatable';
 
@@ -211,11 +208,7 @@ describe('Sort handler improvements', () => {
 		const sorted = handler.sortData(data, 'price', 'asc');
 		const prices = sorted.map((r) => (r as Record<string, unknown>)['price']);
 
-		expect(prices).toEqual([
-			'<span>$5</span>',
-			'<i>$20</i>',
-			'<b>$123</b>',
-		]);
+		expect(prices).toEqual(['<span>$5</span>', '<i>$20</i>', '<b>$123</b>']);
 	});
 });
 
@@ -231,7 +224,11 @@ describe('Local provider filter pipeline', () => {
 
 	it('applies text filter (case-insensitive)', () => {
 		const config = createConfig({ pageSize: 100 });
-		const { provider, store } = createProviderWithDomData(config, columns, rows);
+		const { provider, store } = createProviderWithDomData(
+			config,
+			columns,
+			rows,
+		);
 		store.setFilter({ column: 'name', type: 'text', value: 'bo' });
 
 		const result = provider.fetchSync();
@@ -242,7 +239,11 @@ describe('Local provider filter pipeline', () => {
 
 	it('applies numeric filter (exact match)', () => {
 		const config = createConfig({ pageSize: 100 });
-		const { provider, store } = createProviderWithDomData(config, columns, rows);
+		const { provider, store } = createProviderWithDomData(
+			config,
+			columns,
+			rows,
+		);
 		store.setFilter({ column: 'id', type: 'numeric', value: 2 });
 
 		const result = provider.fetchSync();
@@ -259,7 +260,11 @@ describe('Local provider filter pipeline', () => {
 			['2025-01-01', 'Charlie'],
 		];
 		const config = createConfig({ pageSize: 100 });
-		const { provider, store } = createProviderWithDomData(config, dateColumns, dateRows);
+		const { provider, store } = createProviderWithDomData(
+			config,
+			dateColumns,
+			dateRows,
+		);
 		store.setFilter({
 			column: 'date',
 			type: 'dateRange',
@@ -281,7 +286,11 @@ describe('Local provider filter pipeline', () => {
 			['30', 'Alice'],
 		];
 		const config = createConfig({ pageSize: 100 });
-		const { provider, store } = createProviderWithDomData(config, multiColumns, multiRows);
+		const { provider, store } = createProviderWithDomData(
+			config,
+			multiColumns,
+			multiRows,
+		);
 		store.setFilter({ column: 'name', type: 'text', value: 'alice' });
 		store.setFilter({ column: 'score', type: 'numeric', value: 30 });
 
@@ -293,7 +302,11 @@ describe('Local provider filter pipeline', () => {
 
 	it('empty text filter value matches all rows', () => {
 		const config = createConfig({ pageSize: 100 });
-		const { provider, store } = createProviderWithDomData(config, columns, rows);
+		const { provider, store } = createProviderWithDomData(
+			config,
+			columns,
+			rows,
+		);
 		store.setFilter({ column: 'name', type: 'text', value: '' });
 
 		const result = provider.fetchSync();
@@ -311,7 +324,11 @@ describe('Local provider filter pipeline', () => {
 			['5', 'no'],
 		];
 		const config = createConfig({ pageSize: 2 });
-		const { provider, store } = createProviderWithDomData(config, paginateColumns, paginateRows);
+		const { provider, store } = createProviderWithDomData(
+			config,
+			paginateColumns,
+			paginateRows,
+		);
 		store.setFilter({ column: 'status', type: 'text', value: 'yes' });
 
 		const result = provider.fetchSync();
@@ -356,15 +373,10 @@ describe('Checkbox handler event scope', () => {
 		const fireEvent = vi.fn();
 		const config = createConfig();
 
-		const handler = new KTDataTableCheckboxHandler(
-			root,
-			config,
-			fireEvent,
-			{
-				getState: () => ({ selectedRows: [] }),
-				setSelectedRows: vi.fn(),
-			},
-		);
+		const handler = new KTDataTableCheckboxHandler(root, config, fireEvent, {
+			getState: () => ({ selectedRows: [] }),
+			setSelectedRows: vi.fn(),
+		});
 		handler.init();
 
 		rowCheck.checked = true;
@@ -398,7 +410,9 @@ describe('update() alias', () => {
 	});
 
 	it('update() delegates to refreshCheckboxes()', () => {
-		const spy = vi.spyOn(KTDataTable.prototype, 'refreshCheckboxes').mockImplementation(() => {});
+		const spy = vi
+			.spyOn(KTDataTable.prototype, 'refreshCheckboxes')
+			.mockImplementation(() => {});
 		const instance = Object.create(KTDataTable.prototype);
 		instance.update();
 		expect(spy).toHaveBeenCalledTimes(1);

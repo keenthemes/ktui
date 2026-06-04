@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { KTDataTableRemoteDataProvider } from '../datatable-remote-provider';
-import type { KTDataTableEventAdapter, KTDataTableStateStore } from '../datatable-contracts';
+import type {
+	KTDataTableEventAdapter,
+	KTDataTableStateStore,
+} from '../datatable-contracts';
 import type { KTDataTableConfigInterface } from '../types';
 
 function createMockStateStore(overrides = {}) {
@@ -42,10 +45,12 @@ function createMockConfig(
 	} as KTDataTableConfigInterface;
 }
 
-function createProvider(options: {
-	config?: Partial<KTDataTableConfigInterface>;
-	stateOverrides?: Record<string, unknown>;
-} = {}) {
+function createProvider(
+	options: {
+		config?: Partial<KTDataTableConfigInterface>;
+		stateOverrides?: Record<string, unknown>;
+	} = {},
+) {
 	const stateStore = createMockStateStore(options.stateOverrides);
 	const eventAdapter = createMockEventAdapter();
 	const noticeOnTable = vi.fn();
@@ -82,7 +87,10 @@ describe('KTDataTableRemoteDataProvider', () => {
 			});
 
 			const { provider } = createProvider({
-				config: { requestMethod: 'GET', apiEndpoint: 'https://api.example.com/data' },
+				config: {
+					requestMethod: 'GET',
+					apiEndpoint: 'https://api.example.com/data',
+				},
 			});
 
 			await provider.fetch();
@@ -143,7 +151,10 @@ describe('KTDataTableRemoteDataProvider', () => {
 			});
 
 			const { provider } = createProvider({
-				config: { requestMethod: 'POST', apiEndpoint: 'https://api.example.com/data' },
+				config: {
+					requestMethod: 'POST',
+					apiEndpoint: 'https://api.example.com/data',
+				},
 			});
 
 			await provider.fetch();
@@ -257,9 +268,7 @@ describe('KTDataTableRemoteDataProvider', () => {
 
 			const calledUrl = fetchMock.mock.calls[0][0] as string;
 			const url = new URL(calledUrl);
-			expect(url.searchParams.get('search')).toEqual(
-				JSON.stringify(searchObj),
-			);
+			expect(url.searchParams.get('search')).toEqual(JSON.stringify(searchObj));
 		});
 
 		it('getQueryParams applies mapRequest when provided', async () => {
@@ -326,7 +335,10 @@ describe('KTDataTableRemoteDataProvider', () => {
 		});
 
 		it('fetch() AbortError returns { data: [], totalItems: 0, skipped: true }', async () => {
-			const abortError = new DOMException('The operation was aborted', 'AbortError');
+			const abortError = new DOMException(
+				'The operation was aborted',
+				'AbortError',
+			);
 			fetchMock.mockRejectedValue(abortError);
 
 			const { provider } = createProvider();

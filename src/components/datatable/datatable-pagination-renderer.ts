@@ -8,7 +8,10 @@ import {
 	KTDataTablePaginationRenderer,
 	KTDataTablePaginationRendererInput,
 } from './datatable-contracts';
-import { DEFAULT_PAGE_MORE_LIMIT, DEFAULT_PAGE_SIZES } from './datatable-defaults';
+import {
+	DEFAULT_PAGE_MORE_LIMIT,
+	DEFAULT_PAGE_SIZES,
+} from './datatable-defaults';
 
 export class KTDataTableDomPaginationRenderer implements KTDataTablePaginationRenderer {
 	public render(

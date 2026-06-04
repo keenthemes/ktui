@@ -18,8 +18,9 @@ function createCheckboxTable() {
     </table>
   `;
 	document.body.appendChild(container);
-	const headerCheck =
-		container.querySelector<HTMLInputElement>('[data-kt-datatable-check]')!;
+	const headerCheck = container.querySelector<HTMLInputElement>(
+		'[data-kt-datatable-check]',
+	)!;
 	const rowChecks = container.querySelectorAll<HTMLInputElement>(
 		'[data-kt-datatable-row-check]',
 	);
@@ -76,10 +77,15 @@ describe('KTDataTableCheckboxHandler', () => {
 			const cfg = {
 				attributes: { checkbox: '[data-kt-datatable-row-check="true"]' },
 			} as unknown as KTDataTableConfigInterface;
-			const handler = new KTDataTableCheckboxHandler(container, cfg, fireEvent, {
-				getState: () => ({ selectedRows: [] }),
-				setSelectedRows: vi.fn(),
-			});
+			const handler = new KTDataTableCheckboxHandler(
+				container,
+				cfg,
+				fireEvent,
+				{
+					getState: () => ({ selectedRows: [] }),
+					setSelectedRows: vi.fn(),
+				},
+			);
 			// Should not throw
 			handler.init();
 			handler.dispose();
@@ -91,10 +97,15 @@ describe('KTDataTableCheckboxHandler', () => {
 			document.body.appendChild(container);
 			const fireEvent = vi.fn();
 			const cfg = createConfig();
-			const handler = new KTDataTableCheckboxHandler(container, cfg, fireEvent, {
-				getState: () => ({ selectedRows: [] }),
-				setSelectedRows: vi.fn(),
-			});
+			const handler = new KTDataTableCheckboxHandler(
+				container,
+				cfg,
+				fireEvent,
+				{
+					getState: () => ({ selectedRows: [] }),
+					setSelectedRows: vi.fn(),
+				},
+			);
 			handler.init();
 			// fireEvent should not have been called since header is missing
 			expect(fireEvent).not.toHaveBeenCalled();
@@ -102,7 +113,10 @@ describe('KTDataTableCheckboxHandler', () => {
 		});
 
 		it('init() calls _reapplyCheckedStates and _updateHeaderCheckboxState', () => {
-			const { handler, container, getSelectedRows } = createHandler({}, ['1', '3']);
+			const { handler, container, getSelectedRows } = createHandler({}, [
+				'1',
+				'3',
+			]);
 			handler.init();
 			// After reapply, row 1 and 3 should be checked
 			const rows = container.querySelectorAll<HTMLInputElement>(
@@ -211,7 +225,11 @@ describe('KTDataTableCheckboxHandler', () => {
 		});
 
 		it('clicking header when all checked → unchecks all, fires change + unchecked + changed', () => {
-			const { handler, fireEvent, getSelectedRows } = createHandler({}, ['1', '2', '3']);
+			const { handler, fireEvent, getSelectedRows } = createHandler({}, [
+				'1',
+				'2',
+				'3',
+			]);
 			handler.init();
 			// Make sure header shows checked
 			const header = document.querySelector<HTMLInputElement>(
@@ -448,10 +466,15 @@ describe('KTDataTableCheckboxHandler', () => {
 			document.body.appendChild(container);
 			const cfg = createConfig();
 			const fireEvent = vi.fn();
-			const handler = new KTDataTableCheckboxHandler(container, cfg, fireEvent, {
-				getState: () => ({ selectedRows: undefined } as any),
-				setSelectedRows: vi.fn(),
-			});
+			const handler = new KTDataTableCheckboxHandler(
+				container,
+				cfg,
+				fireEvent,
+				{
+					getState: () => ({ selectedRows: undefined }) as any,
+					setSelectedRows: vi.fn(),
+				},
+			);
 			handler.init();
 			fireEvent.mockClear();
 			// check() triggers _change which calls _getSelectedRows

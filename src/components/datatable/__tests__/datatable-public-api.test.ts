@@ -13,7 +13,7 @@ vi.mock('../../helpers/data', () => {
 				map.get(el).set(key, val);
 			}),
 			get: vi.fn((el: HTMLElement, key: string) => {
-				return map.has(el) ? map.get(el).get(key) ?? null : null;
+				return map.has(el) ? (map.get(el).get(key) ?? null) : null;
 			}),
 			has: vi.fn((el: HTMLElement, key: string) => {
 				return map.has(el) && map.get(el).has(key);
@@ -54,9 +54,7 @@ function createLocalDatatable() {
 	const container = document.createElement('div');
 	container.innerHTML = createLocalTableHtml();
 	document.body.appendChild(container);
-	const table = container.querySelector(
-		'[data-kt-datatable]',
-	) as HTMLElement;
+	const table = container.querySelector('[data-kt-datatable]') as HTMLElement;
 	return { container, table };
 }
 
