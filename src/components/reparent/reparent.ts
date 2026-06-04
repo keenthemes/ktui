@@ -66,7 +66,6 @@ export class KTReparent extends KTComponent implements KTReparentInterface {
 						.querySelectorAll('[data-kt-reparent-initialized]')
 						.forEach((element) => {
 							const reparent = KTReparent.getInstance(element as HTMLElement);
-							console.log('reparent update');
 							reparent?.update();
 						});
 				},
